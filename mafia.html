@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بازی مافیا</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap');
+
+  :root {
+    --dark: #0a0a0f;
+    --dark2: #12121a;
+    --dark3: #1a1a2e;
+    --accent: #e94560;
+    --accent2: #f5a623;
+    --blue: #0f3460;
+    --text: #e0e0e0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(15,52,96,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(233,69,96,0.15) 0%, transparent 40%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+  .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--dur) ease-in-out infinite; opacity: 0; }
+  @keyframes twinkle { 0%,100%{opacity:0;transform:scale(.5)} 50%{opacity:.8;transform:scale(1)} }
+
+  .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+  /* ── Header ── */
+  header { text-align: center; padding: 30px 20px 20px; position: relative; }
+
+  .logo {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #e94560, #f5a623, #e94560);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shine 3s linear infinite;
+    filter: drop-shadow(0 0 30px rgba(233,69,96,0.5));
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+  .logo-sub { font-size: 1rem; color: rgba(255,255,255,0.4); letter-spacing: 4px; margin-top: 8px; }
+
+  /* ── Auth bar ── */
+  .auth-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-left;
+    gap: 10px;
+    background: var(--dark2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 10px 18px;
+    margin-bottom: 18px;
+  }
+
+  .auth-bar .user-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .auth-bar .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700;
+  }
+  .auth-bar .username { font-weight: 700; font-size: 0.95rem; }
+  .auth-bar .games-count { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+
+  .auth-bar .guest-msg { flex: 1; font-size: 0.85rem; color: rgba(255,255,255,0.4); }
+
+  .auth-bar-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-login { background: var(--accent); color: white; }
+  .btn-login:hover { background: #c0392b; }
+  .btn-register { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.12); }
+  .btn-register:hover { background: rgba(255,255,255,0.14); }
+  .btn-logout { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.08); }
+  .btn-logout:hover { background: rgba(233,69,96,0.15); color: var(--accent); }
+
+  /* ── Nav ── */
+  .nav { display: flex; justify-content: center; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+  .nav-btn {
+    padding: 10px 24px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.6);
+    border-radius: 50px; cursor: pointer;
+    font-family: inherit; font-size: 0.9rem; transition: all 0.3s;
+  }
+  .nav-btn:hover, .nav-btn.active { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 0 20px rgba(233,69,96,0.4); }
+
+  /* ── Screens ── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Setup ── */
+  .setup-card {
+    background: var(--dark2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px; padding: 32px; margin-bottom: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .section-title {
+    font-size: 1.05rem; font-weight: 700; color: var(--accent2);
+    margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.08); }
+
+  .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .group-btn {
+    padding: 18px 14px;
+    border: 2px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px; cursor: pointer;
+    text-align: center; transition: all 0.3s;
+    font-family: inherit; color: var(--text);
+  }
+  .group-btn .icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+  .group-btn .name { font-size: 1rem; font-weight: 700; display: block; }
+  .group-btn .desc { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 4px; display: block; }
+  .group-btn:hover { border-color: var(--accent); background: rgba(233,69,96,0.08); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(233,69,96,0.2); }
+  .group-btn.selected { border-color: var(--accent); background: rgba(233,69,96,0.15); box-shadow: 0 0 30px rgba(233,69,96,0.3); }
+
+  .count-grid { display: flex; gap: 14px; flex-wrap: wrap; }
+  .count-btn {
+    flex: 1; min-width: 90px;
+    padding: 18px; border: 2px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px; cursor: pointer;
+    text-align: center; transition: all 0.3s;
+    font-family: inherit; color: var(--text);
+  }
+  .count-btn .number { font-size: 2.4rem; font-weight: 900; display: block; line-height: 1; }
+  .count-btn .label { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 6px; display: block; }
+  .count-btn .breakdown { font-size: 0.68rem; margin-top: 8px; display: block; }
+  .count-btn .breakdown .m { color: var(--accent); }
+  .count-btn .breakdown .c { color: #4ade80; }
+  .count-btn:hover, .count-btn.selected { border-color: var(--accent2); background: rgba(245,166,35,0.1); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(245,166,35,0.2); }
+
+  .custom-form { display: none; margin-top: 18px; padding: 22px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; animation: fadeIn 0.3s ease; }
+  .custom-form.show { display: block; }
+  .form-row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+  .form-group { flex: 1; min-width: 110px; }
+  .form-group label { display: block; font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 7px; }
+  .form-group input {
+    width: 100%; padding: 11px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; color: white;
+    font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.3s;
+  }
+  .form-group input:focus { border-color: var(--accent2); }
+
+  .start-btn {
+    width: 100%; padding: 18px;
+    background: linear-gradient(135deg, var(--accent), #c0392b);
+    border: none; border-radius: 16px;
+    color: white; font-family: inherit;
+    font-size: 1.2rem; font-weight: 900;
+    cursor: pointer; transition: all 0.3s;
+    letter-spacing: 2px; position: relative; overflow: hidden; margin-top: 10px;
+  }
+  .start-btn::before { content:''; position:absolute; top:-50%; left:-60%; width:50%; height:200%; background:rgba(255,255,255,0.1); transform:skewX(-20deg); transition:left 0.5s; }
+  .start-btn:hover::before { left: 120%; }
+  .start-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(233,69,96,0.5); }
+  .start-btn:active { transform: translateY(0); }
+
+  /* ── Game ── */
+  .game-info {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--dark2); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 14px 22px; margin-bottom: 20px;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .info-badge { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+  .info-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 8px var(--accent)} 50%{box-shadow:0 0 16px var(--accent),0 0 24px var(--accent)} }
+  .stats { display: flex; gap: 18px; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.4rem; font-weight: 900; display: block; }
+  .stat-label { font-size: 0.68rem; color: rgba(255,255,255,0.4); }
+  .stat.mafia .stat-num { color: var(--accent); }
+  .stat.citizen .stat-num { color: #4ade80; }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 18px; margin-bottom: 28px; }
+
+  .card-wrapper { aspect-ratio: 2/3; perspective: 1000px; cursor: pointer; }
+  .card { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.7s cubic-bezier(0.4,0,0.2,1); border-radius:20px; }
+  .card.flipped { transform: rotateY(180deg); }
+  .card-face { position:absolute; width:100%; height:100%; border-radius:20px; backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; }
+
+  .card-back { background:linear-gradient(145deg,#1a1f3a,#0d1117); border:2px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05); }
+  .card-back::before { content:''; position:absolute; top:8px;left:8px;right:8px;bottom:8px; border:1px solid rgba(255,255,255,0.06); border-radius:14px; background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,0.01) 10px,rgba(255,255,255,0.01) 11px); }
+  .card-number { font-size:2.8rem; font-weight:900; color:var(--accent); text-shadow:0 0 20px var(--accent); position:relative; z-index:1; filter:drop-shadow(0 0 10px var(--accent)); }
+  .card-back .tap-hint { font-size:0.68rem; color:rgba(255,255,255,0.25); margin-top:10px; position:relative; z-index:1; }
+
+  .card-front { transform: rotateY(180deg); }
+  .card-front.mafia { background:linear-gradient(145deg,#1a0000,#2d0000,#1a0000); border:2px solid rgba(200,0,0,0.5); box-shadow:0 0 30px rgba(180,0,0,0.4),inset 0 0 40px rgba(0,0,0,0.6); }
+  .card-front.mafia::before { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background:radial-gradient(ellipse at 50% 0%,rgba(200,0,0,0.2) 0%,transparent 60%),radial-gradient(ellipse at 50% 100%,rgba(100,0,0,0.3) 0%,transparent 60%); }
+  .card-front.citizen { background:linear-gradient(145deg,#0a1f0a,#0d280d,#0a1f0a); border:2px solid rgba(0,180,0,0.4); box-shadow:0 0 30px rgba(0,160,0,0.3),inset 0 0 40px rgba(0,0,0,0.4); }
+  .card-front.citizen::before { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background:radial-gradient(ellipse at 50% 0%,rgba(0,200,0,0.15) 0%,transparent 60%),radial-gradient(ellipse at 50% 100%,rgba(0,100,50,0.2) 0%,transparent 60%); }
+
+  .card-role-icon { font-size:3.2rem; position:relative; z-index:1; filter:drop-shadow(0 0 10px currentColor); animation:iconFloat 3s ease-in-out infinite; }
+  @keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .card-role-name { font-size:0.85rem; font-weight:700; position:relative; z-index:1; margin-top:8px; letter-spacing:1px; }
+  .mafia .card-role-name { color:#ff4444; text-shadow:0 0 10px #ff0000; }
+  .citizen .card-role-name { color:#44ff88; text-shadow:0 0 10px #00cc44; }
+  .card-role-num { font-size:1.4rem; font-weight:900; position:relative; z-index:1; margin-top:5px; }
+  .mafia .card-role-num { color:rgba(255,100,100,0.7); }
+  .citizen .card-role-num { color:rgba(100,255,150,0.7); }
+
+  .mafia-deco { position:absolute; width:100%; height:100%; overflow:hidden; border-radius:18px; }
+  .mafia-deco::before { content:'☠'; position:absolute; font-size:5rem; opacity:0.04; bottom:-10px; right:-10px; transform:rotate(-15deg); }
+  .mafia-deco::after { content:'⚡'; position:absolute; font-size:3rem; opacity:0.06; top:5px; left:5px; }
+  .citizen-deco { position:absolute; width:100%; height:100%; overflow:hidden; border-radius:18px; }
+  .citizen-deco::before { content:'⭐'; position:absolute; font-size:4rem; opacity:0.05; bottom:-5px; right:-5px; }
+  .citizen-deco::after { content:'✨'; position:absolute; font-size:2.5rem; opacity:0.07; top:5px; left:5px; }
+
+  .game-actions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .action-btn { flex:1; min-width:120px; padding:13px 16px; border:none; border-radius:12px; cursor:pointer; font-family:inherit; font-size:0.9rem; font-weight:600; transition:all 0.3s; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-reveal-all { background:linear-gradient(135deg,#8b0000,#c0392b); color:white; }
+  .btn-reveal-all:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(139,0,0,0.5); }
+  .btn-flip-back { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.1); }
+  .btn-flip-back:hover { background:rgba(255,255,255,0.12); transform:translateY(-2px); }
+  .btn-reset { background:linear-gradient(135deg,#1a3a6b,#0f3460); color:white; }
+  .btn-reset:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(15,52,96,0.5); }
+  .btn-new-game { background:linear-gradient(135deg,#2d7a2d,#1a4a1a); color:white; }
+  .btn-new-game:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(45,122,45,0.5); }
+
+  /* ── History ── */
+  .history-list { display:flex; flex-direction:column; gap:14px; }
+  .history-item { background:var(--dark2); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:18px 22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .history-meta { flex:1; }
+  .history-group { font-weight:700; font-size:1rem; color:var(--accent2); }
+  .history-date { font-size:0.72rem; color:rgba(255,255,255,0.3); margin-top:3px; }
+  .history-counts { display:flex; gap:14px; align-items:center; }
+  .h-count { text-align:center; }
+  .h-count span { display:block; }
+  .h-count .n { font-size:1.3rem; font-weight:900; }
+  .h-count .l { font-size:0.62rem; color:rgba(255,255,255,0.4); }
+  .h-count.total .n { color:white; }
+  .h-count.mafia .n { color:var(--accent); }
+  .h-count.citizen .n { color:#4ade80; }
+  .empty-state { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.3); }
+  .empty-state .icon { font-size:4rem; margin-bottom:16px; opacity:0.3; }
+
+  /* ── Auth Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; top:0;left:0;right:0;bottom:0;
+    background: rgba(0,0,0,0.85); z-index: 800;
+    align-items: center; justify-content: center; backdrop-filter: blur(10px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--dark2);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 28px; padding: 40px;
+    max-width: 420px; width: 90%;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+  .modal-box h3 { text-align:center; font-size:1.5rem; margin-bottom:28px; }
+  .modal-box h3 span { color: var(--accent2); }
+
+  .modal-field { margin-bottom:16px; }
+  .modal-field label { display:block; font-size:0.8rem; color:rgba(255,255,255,0.5); margin-bottom:7px; }
+  .modal-field input {
+    width:100%; padding:13px 16px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px; color:white;
+    font-family:inherit; font-size:1rem; outline:none;
+    transition: border-color 0.3s;
+  }
+  .modal-field input:focus { border-color: var(--accent); }
+
+  .modal-submit {
+    width:100%; padding:14px;
+    background:linear-gradient(135deg,var(--accent),#c0392b);
+    border:none; border-radius:12px;
+    color:white; font-family:inherit; font-size:1rem; font-weight:700;
+    cursor:pointer; transition:all 0.3s; margin-top:8px;
+  }
+  .modal-submit:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(233,69,96,0.5); }
+  .modal-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+  .modal-switch { text-align:center; margin-top:18px; font-size:0.85rem; color:rgba(255,255,255,0.4); }
+  .modal-switch a { color:var(--accent2); cursor:pointer; text-decoration:underline; }
+
+  .modal-close-btn {
+    position:absolute; top:16px; left:16px;
+    background:rgba(255,255,255,0.07); border:none;
+    border-radius:50%; width:34px; height:34px;
+    color:rgba(255,255,255,0.5); cursor:pointer;
+    font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s;
+  }
+  .modal-close-btn:hover { background:rgba(255,255,255,0.12); color:white; }
+
+  .modal-error { color:#ff6b6b; font-size:0.82rem; text-align:center; margin-top:10px; min-height:18px; }
+
+  /* ── Reveal overlay ── */
+  .reveal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.85); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
+  .reveal-overlay.show { display:flex; }
+  .reveal-box { background:var(--dark2); border:1px solid rgba(255,255,255,0.1); border-radius:28px; padding:36px; max-width:480px; width:90%; max-height:85vh; overflow-y:auto; animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .reveal-box h3 { text-align:center; font-size:1.3rem; margin-bottom:22px; color:var(--accent2); }
+  .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .summary-col h4 { font-size:0.88rem; margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:7px; }
+  .summary-col.mafia-col h4 { color:var(--accent); }
+  .summary-col.citizen-col h4 { color:#4ade80; }
+  .summary-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .summary-list li { padding:7px 11px; border-radius:8px; font-size:0.82rem; display:flex; align-items:center; gap:7px; }
+  .summary-list.mafia-list li { background:rgba(233,69,96,0.1); border:1px solid rgba(233,69,96,0.2); color:#ff9999; }
+  .summary-list.citizen-list li { background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.15); color:#86efac; }
+  .close-overlay { display:block; width:100%; padding:13px; margin-top:18px; background:var(--accent); border:none; border-radius:12px; color:white; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.3s; }
+  .close-overlay:hover { background:#c0392b; transform:translateY(-2px); }
+
+  /* ── Toast / Particle ── */
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--dark3); border:1px solid rgba(255,255,255,0.1); border-radius:50px; padding:11px 26px; font-size:0.88rem; z-index:9999; transition:transform 0.3s ease; white-space:nowrap; box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .particle { position:fixed; pointer-events:none; z-index:1000; font-size:1.2rem; animation:particleAnim 1s forwards; }
+  @keyframes particleAnim { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-80px) scale(0.5)} }
+
+  /* ── Responsive ── */
+  @media(max-width:600px) {
+    .cards-grid { grid-template-columns: repeat(3,1fr); gap:10px; }
+    .summary-grid { grid-template-columns:1fr; }
+    .setup-card { padding:18px; }
+    .count-grid { gap:8px; }
+    .count-btn .number { font-size:2rem; }
+    header { padding:16px 10px; }
+    .game-info { padding:10px 14px; }
+    .modal-box { padding:28px 22px; }
+  }
+  @media(max-width:400px) { .cards-grid { grid-template-columns:repeat(2,1fr); } }
+
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:var(--dark); }
+  ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box" style="position:relative">
+    <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
+    <h3 id="authTitle">ورود به <span>مافیا</span></h3>
+
+    <!-- Login fields -->
+    <div id="loginFields">
+      <div class="modal-field">
+        <label>نام کاربری یا ایمیل</label>
+        <input type="text" id="loginIdentifier" placeholder="username یا email" autocomplete="username">
+      </div>
+      <div class="modal-field">
+        <label>رمز عبور</label>
+        <input type="password" id="loginPassword" placeholder="••••••" autocomplete="current-password">
+      </div>
+    </div>
+
+    <!-- Register fields -->
+    <div id="registerFields" style="display:none">
+      <div class="modal-field">
+        <label>نام کاربری</label>
+        <input type="text" id="regUsername" placeholder="حداقل ۳ کاراکتر" autocomplete="username">
+      </div>
+      <div class="modal-field">
+        <label>ایمیل</label>
+        <input type="email" id="regEmail" placeholder="example@email.com" autocomplete="email">
+      </div>
+      <div class="modal-field">
+        <label>رمز عبور</label>
+        <input type="password" id="regPassword" placeholder="حداقل ۶ کاراکتر" autocomplete="new-password">
+      </div>
+    </div>
+
+    <div class="modal-error" id="authError"></div>
+    <button class="modal-submit" id="authSubmitBtn" onclick="submitAuth()">ورود</button>
+    <div class="modal-switch" id="authSwitch">
+      حساب ندارید؟ <a onclick="switchAuthMode()">ثبت‌نام کنید</a>
+    </div>
+  </div>
+</div>
+
+<!-- Reveal Overlay -->
+<div class="reveal-overlay" id="revealOverlay">
+  <div class="reveal-box">
+    <h3>🎭 همه نقش‌ها</h3>
+    <div id="revealContent"></div>
+    <button class="close-overlay" onclick="closeOverlay()">بستن</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<div class="container">
+  <header>
+    <div class="logo">مافیا</div>
+    <div class="logo-sub">MAFIA GAME</div>
+  </header>
+
+  <!-- Auth Bar -->
+  <div class="auth-bar" id="authBar">
+    <div class="user-info" id="loggedInInfo" style="display:none">
+      <div class="avatar" id="userAvatar">م</div>
+      <div>
+        <div class="username" id="usernameDisplay">کاربر</div>
+        <div class="games-count" id="gamesCountDisplay">۰ بازی ثبت‌شده</div>
+      </div>
+    </div>
+    <div class="guest-msg" id="guestMsg">برای ذخیره تاریخچه وارد شوید</div>
+    <button class="auth-bar-btn btn-login" id="loginBtn" onclick="openAuthModal('login')">ورود</button>
+    <button class="auth-bar-btn btn-register" id="registerBtn" onclick="openAuthModal('register')">ثبت‌نام</button>
+    <button class="auth-bar-btn btn-logout" id="logoutBtn" style="display:none" onclick="logout()">خروج</button>
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('setup')">بازی جدید</button>
+    <button class="nav-btn" onclick="showScreen('game')" id="gameNavBtn" style="display:none">بازی جاری</button>
+    <button class="nav-btn" onclick="showScreen('history')">تاریخچه</button>
+  </nav>
+
+  <!-- ── Setup Screen ── -->
+  <div class="screen active" id="setupScreen">
+    <div class="setup-card">
+      <div class="section-title">🎯 انتخاب گروه</div>
+      <div class="group-grid">
+        <button class="group-btn" onclick="selectGroup('تکاور')" data-group="تکاور">
+          <span class="icon">⚔️</span><span class="name">تکاور</span><span class="desc">سبک تاکتیکی</span>
+        </button>
+        <button class="group-btn" onclick="selectGroup('بازپرس')" data-group="بازپرس">
+          <span class="icon">🔍</span><span class="name">بازپرس</span><span class="desc">سبک تحقیقاتی</span>
+        </button>
+        <button class="group-btn" onclick="selectGroup('نماینده')" data-group="نماینده">
+          <span class="icon">🏛️</span><span class="name">نماینده</span><span class="desc">سبک سیاسی</span>
+        </button>
+        <button class="group-btn" onclick="selectGroup('دلخواه')" data-group="دلخواه">
+          <span class="icon">✏️</span><span class="name">دلخواه</span><span class="desc">سفارشی‌سازی</span>
+        </button>
+      </div>
+      <div class="custom-form" id="customForm">
+        <div class="section-title">⚙️ تنظیم گروه دلخواه</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>نام گروه</label>
+            <input type="text" id="customName" placeholder="مثال: دوستان" value="گروه من">
+          </div>
+          <div class="form-group">
+            <label>تعداد کل</label>
+            <input type="number" id="customTotal" placeholder="۱۰" min="4" max="25" value="10" oninput="updateCustom()">
+          </div>
+          <div class="form-group">
+            <label>تعداد مافیا</label>
+            <input type="number" id="customMafia" placeholder="۳" min="1" max="10" value="3" oninput="updateCustom()">
+          </div>
+        </div>
+        <div id="customPreview" style="margin-top:14px;font-size:0.82rem;color:rgba(255,255,255,0.5);text-align:center;"></div>
+      </div>
+    </div>
+
+    <div class="setup-card" id="countCard" style="display:none">
+      <div class="section-title">👥 تعداد بازیکنان</div>
+      <div class="count-grid">
+        <button class="count-btn" onclick="selectCount(10)" data-count="10">
+          <span class="number">۱۰</span><span class="label">نفر</span>
+          <span class="breakdown"><span class="m">۳ مافیا</span> · <span class="c">۷ شهروند</span></span>
+        </button>
+        <button class="count-btn" onclick="selectCount(12)" data-count="12">
+          <span class="number">۱۲</span><span class="label">نفر</span>
+          <span class="breakdown"><span class="m">۴ مافیا</span> · <span class="c">۸ شهروند</span></span>
+        </button>
+        <button class="count-btn" onclick="selectCount(13)" data-count="13">
+          <span class="number">۱۳</span><span class="label">نفر</span>
+          <span class="breakdown"><span class="m">۴ مافیا</span> · <span class="c">۹ شهروند</span></span>
+        </button>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startGame()" id="startBtn" style="display:none">🎮 شروع بازی</button>
+  </div>
+
+  <!-- ── Game Screen ── -->
+  <div class="screen" id="gameScreen">
+    <div class="game-info">
+      <div class="info-badge"><div class="dot"></div><span id="gameGroupLabel">—</span></div>
+      <div class="stats">
+        <div class="stat"><span class="stat-num" id="statTotal">—</span><span class="stat-label">نفر</span></div>
+        <div class="stat mafia"><span class="stat-num" id="statMafia">—</span><span class="stat-label">مافیا</span></div>
+        <div class="stat citizen"><span class="stat-num" id="statCitizen">—</span><span class="stat-label">شهروند</span></div>
+      </div>
+    </div>
+    <div class="game-actions">
+      <button class="action-btn btn-reveal-all" onclick="revealAll()">👁️ مشاهده همه</button>
+      <button class="action-btn btn-flip-back" onclick="flipAllBack()">🔄 بستن کارت‌ها</button>
+      <button class="action-btn btn-reset" onclick="shuffleCards()">🎲 بازنشانی</button>
+      <button class="action-btn btn-new-game" onclick="newGame()">🆕 بازی جدید</button>
+    </div>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <!-- ── History Screen ── -->
+  <div class="screen" id="historyScreen">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <h2 style="font-size:1.15rem;color:var(--accent2);">📚 تاریخچه بازی‌ها</h2>
+      <button onclick="clearHistory()" style="padding:7px 14px;background:rgba(233,69,96,0.15);border:1px solid rgba(233,69,96,0.3);border-radius:8px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:0.78rem;">پاک کردن</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+const API = "";  // same origin — Flask serves both
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let currentUser = null;
+let authToken = localStorage.getItem("mafiaToken") || null;
+let authMode = "login";  // or "register"
+
+let state = {
+  group: null, count: null, mafiaCount: null, citizenCount: null,
+  cards: [], flipped: new Set(), isCustom: false
+};
+
+const ROLE_MAP = { 10:{mafia:3,citizen:7}, 12:{mafia:4,citizen:8}, 13:{mafia:4,citizen:9} };
+
+// ─── Stars ─────────────────────────────────────────────────────────────────
+(function createStars() {
+  const c = document.getElementById("stars");
+  for (let i=0;i<80;i++){
+    const s=document.createElement("div"); s.className="star";
+    const sz=Math.random()*2+1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${Math.random()*3+2}s;animation-delay:${Math.random()*5}s;`;
+    c.appendChild(s);
+  }
+})();
+
+// ─── API helpers ───────────────────────────────────────────────────────────
+async function apiFetch(path, opts={}) {
+  const headers = { "Content-Type": "application/json" };
+  if (authToken) headers["Authorization"] = "Bearer " + authToken;
+  try {
+    const res = await fetch(API + path, { ...opts, headers });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch {
+    return { ok: false, data: { error: "خطای شبکه" } };
+  }
+}
+
+// ─── Auth ──────────────────────────────────────────────────────────────────
+async function initAuth() {
+  if (!authToken) return;
+  const r = await apiFetch("/api/auth/me");
+  if (r.ok) {
+    currentUser = r.data;
+    renderAuthBar();
+  } else {
+    authToken = null;
+    localStorage.removeItem("mafiaToken");
+  }
+}
+
+function openAuthModal(mode) {
+  authMode = mode;
+  updateAuthModalUI();
+  document.getElementById("authModal").classList.add("show");
+  document.getElementById("authError").textContent = "";
+  setTimeout(() => {
+    const f = mode === "login"
+      ? document.getElementById("loginIdentifier")
+      : document.getElementById("regUsername");
+    if (f) f.focus();
+  }, 100);
+}
+
+function closeAuthModal() {
+  document.getElementById("authModal").classList.remove("show");
+}
+
+function switchAuthMode() {
+  authMode = authMode === "login" ? "register" : "login";
+  updateAuthModalUI();
+  document.getElementById("authError").textContent = "";
+}
+
+function updateAuthModalUI() {
+  const isLogin = authMode === "login";
+  document.getElementById("authTitle").innerHTML = isLogin
+    ? 'ورود به <span>مافیا</span>'
+    : 'ثبت‌نام در <span>مافیا</span>';
+  document.getElementById("loginFields").style.display = isLogin ? "block" : "none";
+  document.getElementById("registerFields").style.display = isLogin ? "none" : "block";
+  document.getElementById("authSubmitBtn").textContent = isLogin ? "ورود" : "ثبت‌نام";
+  document.getElementById("authSwitch").innerHTML = isLogin
+    ? 'حساب ندارید؟ <a onclick="switchAuthMode()">ثبت‌نام کنید</a>'
+    : 'حساب دارید؟ <a onclick="switchAuthMode()">وارد شوید</a>';
+}
+
+async function submitAuth() {
+  const btn = document.getElementById("authSubmitBtn");
+  const errEl = document.getElementById("authError");
+  errEl.textContent = "";
+  btn.disabled = true;
+  btn.textContent = "...";
+
+  let body, path;
+  if (authMode === "login") {
+    body = {
+      identifier: document.getElementById("loginIdentifier").value.trim(),
+      password: document.getElementById("loginPassword").value
+    };
+    path = "/api/auth/login";
+  } else {
+    body = {
+      username: document.getElementById("regUsername").value.trim(),
+      email: document.getElementById("regEmail").value.trim(),
+      password: document.getElementById("regPassword").value
+    };
+    path = "/api/auth/register";
+  }
+
+  const r = await apiFetch(path, { method: "POST", body: JSON.stringify(body) });
+  btn.disabled = false;
+  btn.textContent = authMode === "login" ? "ورود" : "ثبت‌نام";
+
+  if (r.ok) {
+    authToken = r.data.token;
+    currentUser = r.data.user;
+    localStorage.setItem("mafiaToken", authToken);
+    closeAuthModal();
+    renderAuthBar();
+    showToast("👋 خوش آمدید " + currentUser.username);
+    if (document.getElementById("historyScreen").classList.contains("active")) renderHistory();
+  } else {
+    errEl.textContent = r.data.error || "خطا رخ داد";
+  }
+}
+
+function logout() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem("mafiaToken");
+  renderAuthBar();
+  showToast("👋 خداحافظ!");
+  if (document.getElementById("historyScreen").classList.contains("active")) renderHistory();
+}
+
+function renderAuthBar() {
+  const loggedIn = !!currentUser;
+  document.getElementById("loggedInInfo").style.display = loggedIn ? "flex" : "none";
+  document.getElementById("guestMsg").style.display = loggedIn ? "none" : "block";
+  document.getElementById("loginBtn").style.display = loggedIn ? "none" : "inline-block";
+  document.getElementById("registerBtn").style.display = loggedIn ? "none" : "inline-block";
+  document.getElementById("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
+  if (loggedIn) {
+    document.getElementById("userAvatar").textContent = currentUser.username[0].toUpperCase();
+    document.getElementById("usernameDisplay").textContent = currentUser.username;
+    document.getElementById("gamesCountDisplay").textContent =
+      toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+  }
+}
+
+// Enter on inputs
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.getElementById("authModal").classList.contains("show")) submitAuth();
+  if (e.key === "Escape") { closeAuthModal(); closeOverlay(); }
+});
+
+// ─── Navigation ─────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(name+"Screen").classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    if ((name==="setup"&&b.textContent.includes("جدید"))||(name==="game"&&b.textContent.includes("جاری"))||(name==="history"&&b.textContent.includes("تاریخچه")))
+      b.classList.add("active");
+  });
+  if (name === "history") renderHistory();
+}
+
+// ─── Setup ──────────────────────────────────────────────────────────────────
+function selectGroup(group) {
+  state.group = group;
+  state.isCustom = group === "دلخواه";
+  document.querySelectorAll(".group-btn").forEach(b => b.classList.remove("selected"));
+  document.querySelector(`[data-group="${group}"]`).classList.add("selected");
+  const customForm = document.getElementById("customForm");
+  const countCard = document.getElementById("countCard");
+  const startBtn = document.getElementById("startBtn");
+  if (state.isCustom) {
+    customForm.classList.add("show"); countCard.style.display="none";
+    updateCustom(); startBtn.style.display="block";
+  } else {
+    customForm.classList.remove("show"); countCard.style.display="block";
+    state.count=null; startBtn.style.display="none";
+    document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("selected"));
+  }
+}
+
+function selectCount(count) {
+  state.count=count; state.mafiaCount=ROLE_MAP[count].mafia; state.citizenCount=ROLE_MAP[count].citizen;
+  document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("selected"));
+  document.querySelector(`[data-count="${count}"]`).classList.add("selected");
+  document.getElementById("startBtn").style.display="block";
+}
+
+function updateCustom() {
+  const total=parseInt(document.getElementById("customTotal").value)||10;
+  const mafia=parseInt(document.getElementById("customMafia").value)||3;
+  const citizen=total-mafia;
+  const preview=document.getElementById("customPreview");
+  if(citizen<=0){preview.innerHTML="⚠️ تعداد مافیا بیشتر از کل بازیکنان است";preview.style.color="#ff6b6b";}
+  else{preview.innerHTML=`<span style="color:#ff6b6b">🔴 ${mafia} مافیا</span> &nbsp;+&nbsp; <span style="color:#4ade80">🟢 ${citizen} شهروند</span> &nbsp;=&nbsp; ${total} نفر`;preview.style.color="";}
+}
+
+async function startGame() {
+  if(state.isCustom){
+    const name=document.getElementById("customName").value||"گروه دلخواه";
+    const total=parseInt(document.getElementById("customTotal").value)||10;
+    const mafia=parseInt(document.getElementById("customMafia").value)||3;
+    if(mafia>=total){showToast("⚠️ تعداد مافیا نمی‌تواند بیشتر از کل باشد");return;}
+    state.group=name; state.count=total; state.mafiaCount=mafia; state.citizenCount=total-mafia;
+  }
+  if(!state.group||!state.count){showToast("⚠️ لطفاً گروه و تعداد را انتخاب کنید");return;}
+  generateCards();
+  renderGame();
+  await saveGame();
+  document.getElementById("gameNavBtn").style.display="block";
+  showScreen("game");
+}
+
+// ─── Game Logic ─────────────────────────────────────────────────────────────
+function generateCards() {
+  const{count,mafiaCount,citizenCount}=state;
+  const roles=[...Array(mafiaCount).fill("mafia"),...Array(citizenCount).fill("citizen")];
+  for(let i=roles.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[roles[i],roles[j]]=[roles[j],roles[i]];}
+  const nums=Array.from({length:count},(_,i)=>i+1);
+  for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]];}
+  state.cards=roles.map((role,i)=>({role,number:nums[i]}));
+  state.flipped=new Set();
+}
+
+function shuffleCards(){generateCards();renderCardGrid();showToast("🎲 کارت‌ها بازنشانی شدند");}
+
+function renderGame(){
+  document.getElementById("gameGroupLabel").textContent=state.group;
+  document.getElementById("statTotal").textContent=toFarsiNum(state.count);
+  document.getElementById("statMafia").textContent=toFarsiNum(state.mafiaCount);
+  document.getElementById("statCitizen").textContent=toFarsiNum(state.citizenCount);
+  renderCardGrid();
+}
+
+function renderCardGrid(){
+  const grid=document.getElementById("cardsGrid"); grid.innerHTML="";
+  const sorted=[...state.cards].sort((a,b)=>a.number-b.number);
+  sorted.forEach(card=>{
+    const wrapper=document.createElement("div"); wrapper.className="card-wrapper";
+    wrapper.innerHTML=buildCard(card);
+    wrapper.querySelector(".card").addEventListener("click",e=>flipCard(e,card));
+    grid.appendChild(wrapper);
+  });
+}
+
+function buildCard(card){
+  const flipped=state.flipped.has(card.number)?"flipped":"";
+  const deco=card.role==="mafia"?'<div class="mafia-deco"></div>':'<div class="citizen-deco"></div>';
+  return `
+    <div class="card ${flipped}" data-num="${card.number}">
+      <div class="card-face card-back">
+        <div class="card-number">${toFarsiNum(card.number)}</div>
+        <div class="tap-hint">لمس کنید</div>
+      </div>
+      <div class="card-face card-front ${card.role}">
+        ${deco}
+        <div class="card-role-icon">${card.role==="mafia"?"😈":"😇"}</div>
+        <div class="card-role-name">${card.role==="mafia"?"مافیا":"شهروند"}</div>
+        <div class="card-role-num">${toFarsiNum(card.number)}</div>
+      </div>
+    </div>`;
+}
+
+function flipCard(e, card){
+  const num=card.number;
+  if(state.flipped.has(num)){state.flipped.delete(num);}
+  else{state.flipped.add(num);spawnParticle(e,card.role==="mafia"?"😈":"⭐");}
+  const cardEl=document.querySelector(`[data-num="${num}"]`);
+  if(cardEl){if(state.flipped.has(num))cardEl.classList.add("flipped");else cardEl.classList.remove("flipped");}
+}
+
+function revealAll(){
+  const mafias=state.cards.filter(c=>c.role==="mafia").sort((a,b)=>a.number-b.number);
+  const citizens=state.cards.filter(c=>c.role==="citizen").sort((a,b)=>a.number-b.number);
+  document.getElementById("revealContent").innerHTML=`
+    <div class="summary-grid">
+      <div class="summary-col mafia-col">
+        <h4>😈 مافیا (${toFarsiNum(mafias.length)} نفر)</h4>
+        <ul class="summary-list mafia-list">
+          ${mafias.map(c=>`<li>🔴 شماره ${toFarsiNum(c.number)}</li>`).join("")}
+        </ul>
+      </div>
+      <div class="summary-col citizen-col">
+        <h4>😇 شهروند (${toFarsiNum(citizens.length)} نفر)</h4>
+        <ul class="summary-list citizen-list">
+          ${citizens.map(c=>`<li>🟢 شماره ${toFarsiNum(c.number)}</li>`).join("")}
+        </ul>
+      </div>
+    </div>`;
+  document.getElementById("revealOverlay").classList.add("show");
+}
+
+function closeOverlay(){document.getElementById("revealOverlay").classList.remove("show");}
+function flipAllBack(){state.flipped.clear();document.querySelectorAll(".card").forEach(c=>c.classList.remove("flipped"));showToast("🔄 همه کارت‌ها بسته شدند");}
+
+function newGame(){
+  state={group:null,count:null,mafiaCount:null,citizenCount:null,cards:[],flipped:new Set(),isCustom:false};
+  document.getElementById("gameNavBtn").style.display="none";
+  document.getElementById("startBtn").style.display="none";
+  document.getElementById("countCard").style.display="none";
+  document.getElementById("customForm").classList.remove("show");
+  document.querySelectorAll(".group-btn,.count-btn").forEach(b=>b.classList.remove("selected"));
+  showScreen("setup");
+}
+
+// ─── History ────────────────────────────────────────────────────────────────
+async function saveGame() {
+  if (!authToken) {
+    // fallback to localStorage
+    const h=getLocalHistory();
+    h.unshift({group:state.group,count:state.count,mafia:state.mafiaCount,citizen:state.citizenCount,date:new Date().toLocaleDateString("fa-IR",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"})});
+    localStorage.setItem("mafiaHistory",JSON.stringify(h.slice(0,30)));
+    return;
+  }
+  const r = await apiFetch("/api/games", {
+    method: "POST",
+    body: JSON.stringify({ group: state.group, count: state.count, mafia: state.mafiaCount, citizen: state.citizenCount })
+  });
+  if (r.ok && currentUser) {
+    currentUser.total_games = (currentUser.total_games || 0) + 1;
+    document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+  }
+}
+
+function getLocalHistory(){try{return JSON.parse(localStorage.getItem("mafiaHistory"))||[];}catch{return[];}}
+
+async function renderHistory() {
+  const list = document.getElementById("historyList");
+  if (authToken) {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">در حال بارگذاری...</div>';
+    const r = await apiFetch("/api/games");
+    if (r.ok) {
+      if (!r.data.length) {
+        list.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>هنوز بازی‌ای ثبت نشده</p></div>';
+        return;
+      }
+      list.innerHTML = r.data.map(h => `
+        <div class="history-item">
+          <div class="history-meta">
+            <div class="history-group">${h.group}</div>
+            <div class="history-date">${h.date}</div>
+          </div>
+          <div class="history-counts">
+            <div class="h-count total"><span class="n">${toFarsiNum(h.count)}</span><span class="l">نفر</span></div>
+            <div class="h-count mafia"><span class="n">${toFarsiNum(h.mafia)}</span><span class="l">مافیا</span></div>
+            <div class="h-count citizen"><span class="n">${toFarsiNum(h.citizen)}</span><span class="l">شهروند</span></div>
+          </div>
+        </div>`).join("");
+      return;
+    }
+  }
+  // Local fallback
+  const history = getLocalHistory();
+  if (!history.length) {
+    list.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>هنوز بازی‌ای ثبت نشده</p></div>';
+    return;
+  }
+  list.innerHTML = history.map(h=>`
+    <div class="history-item">
+      <div class="history-meta">
+        <div class="history-group">${h.group}</div>
+        <div class="history-date">${h.date}</div>
+      </div>
+      <div class="history-counts">
+        <div class="h-count total"><span class="n">${toFarsiNum(h.count)}</span><span class="l">نفر</span></div>
+        <div class="h-count mafia"><span class="n">${toFarsiNum(h.mafia)}</span><span class="l">مافیا</span></div>
+        <div class="h-count citizen"><span class="n">${toFarsiNum(h.citizen)}</span><span class="l">شهروند</span></div>
+      </div>
+    </div>`).join("");
+}
+
+async function clearHistory() {
+  if (!confirm("تاریخچه پاک شود؟")) return;
+  if (authToken) {
+    await apiFetch("/api/games", { method: "DELETE" });
+    if (currentUser) { currentUser.total_games=0; document.getElementById("gamesCountDisplay").textContent="۰ بازی ثبت‌شده"; }
+  } else {
+    localStorage.removeItem("mafiaHistory");
+  }
+  renderHistory();
+  showToast("🗑️ تاریخچه پاک شد");
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+function toFarsiNum(n){return String(n).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);}
+
+function showToast(msg){
+  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+function spawnParticle(e, icon){
+  if(!e||!e.clientX) return;
+  const p=document.createElement("div"); p.className="particle"; p.textContent=icon;
+  p.style.left=e.clientX+"px"; p.style.top=e.clientY+"px";
+  document.body.appendChild(p); setTimeout(()=>p.remove(),1000);
+}
+
+document.getElementById("revealOverlay").addEventListener("click",function(e){if(e.target===this)closeOverlay();});
+document.getElementById("authModal").addEventListener("click",function(e){if(e.target===this)closeAuthModal();});
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+initAuth();
+</script>
+</body>
+</html>

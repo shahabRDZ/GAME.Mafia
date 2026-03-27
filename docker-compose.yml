@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mafia_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mafia
+      POSTGRES_PASSWORD: mafia123
+      POSTGRES_DB: mafiadb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mafia -d mafiadb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    container_name: mafia_web
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mafia:mafia123@db:5432/mafiadb
+      JWT_SECRET: change-this-in-production-please
+    ports:
+      - "5001:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
