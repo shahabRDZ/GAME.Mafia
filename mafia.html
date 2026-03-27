@@ -221,28 +221,28 @@ header{text-align:center;padding:32px 0 18px}
 .big-card-wrapper .char-shadow{width:72px;height:12px}
 .big-card-wrapper .card-face{border-radius:28px}
 
+/* tap hint on flipped card */
+.tap-hint-next{position:absolute;bottom:12px;left:0;right:0;text-align:center;
+  font-size:.68rem;color:rgba(255,255,255,.3);letter-spacing:2px;z-index:5;
+  animation:fadeIn .5s ease}
+
 /* card enter/exit animations */
 @keyframes cardEnter{from{opacity:0;transform:translateY(50px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes cardExit{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-50px) scale(.85)}}
 .card-entering{animation:cardEnter .4s cubic-bezier(.34,1.56,.64,1) forwards}
 .card-exiting{animation:cardExit .3s ease-in forwards;pointer-events:none}
 
-/* next button */
-.next-btn-wrap{margin-top:28px;display:flex;gap:10px;justify-content:center;flex-shrink:0;padding-bottom:30px}
-.next-btn{padding:16px 50px;background:linear-gradient(135deg,var(--accent),#c0392b);border:none;
-  border-radius:50px;color:#fff;font-family:inherit;font-size:1.1rem;font-weight:900;cursor:pointer;
-  transition:all .3s;display:none;letter-spacing:1px;
-  box-shadow:0 6px 24px rgba(233,69,96,.4)}
-.next-btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(233,69,96,.5)}
-.next-btn.show{display:block;animation:fadeIn .3s ease}
 
 /* ── Card 3D flip ── */
 .card-wrapper{aspect-ratio:2/3;perspective:1000px;cursor:pointer}
-.card{width:100%;height:100%;position:relative;transform-style:preserve-3d;
+.card{width:100%;height:100%;position:relative;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;
   transition:transform .72s cubic-bezier(.4,0,.2,1);border-radius:20px}
+.card-back{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.card-front{-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .card.flipped{transform:rotateY(180deg)}
 .card-face{position:absolute;width:100%;height:100%;border-radius:20px;
-  backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
 
 /* ── Card back ── */
 .card-back{
@@ -588,9 +588,6 @@ header{text-align:center;padding:32px 0 18px}
     <!-- Single card stage -->
     <div class="card-stage" id="cardStage">
       <div id="cardSlot"></div>
-      <div class="next-btn-wrap">
-        <button class="next-btn" id="nextBtn" onclick="nextCard()">نفر بعدی ←</button>
-      </div>
     </div>
 
     <!-- Completion banner -->
@@ -1596,7 +1593,6 @@ function showCurrentCard(){
   document.getElementById("fsProgLabel").textContent=`کارت ${toFarsiNum(done+1)} از ${toFarsiNum(total)}`;
   document.getElementById("fsProgNums").textContent=`${toFarsiNum(total-done)} باقی‌مانده`;
   document.getElementById("fsProgressFill").style.width=`${(done/total)*100}%`;
-  document.getElementById("nextBtn").classList.remove("show");
   // render card
   const slot=document.getElementById("cardSlot");
   slot.innerHTML=`<div class="big-card-wrapper card-entering">${buildCard(card,false)}</div>`;
@@ -1605,15 +1601,30 @@ function showCurrentCard(){
 
 function flipCurrentCard(e,card){
   const cardEl=document.querySelector("#cardSlot .card");
-  if(!cardEl||cardEl.classList.contains("flipped"))return;
+  if(!cardEl)return;
+  // already flipped → go to next card
+  if(cardEl.classList.contains("flipped")){
+    if(state.queueIdx+1>=state.cards.length){
+      showCompletion();
+    } else {
+      nextCard();
+    }
+    return;
+  }
+  // first tap → flip to reveal
   cardEl.classList.add("flipped");
   state.seen.add(card.number);
   spawnParticle(e,card.role==="mafia"?"💀":"⭐");
-  if(state.queueIdx+1>=state.cards.length){
-    setTimeout(()=>showCompletion(),900);
-  } else {
-    setTimeout(()=>document.getElementById("nextBtn").classList.add("show"),500);
-  }
+  // add tap hint on front
+  setTimeout(()=>{
+    const front=cardEl.querySelector(".card-front");
+    if(front){
+      const hint=document.createElement("div");
+      hint.className="tap-hint-next";
+      hint.textContent="لمس کنید — نفر بعدی";
+      front.appendChild(hint);
+    }
+  },600);
 }
 
 function nextCard(){
