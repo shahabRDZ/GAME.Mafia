@@ -179,6 +179,67 @@
   }
   .form-group input:focus { border-color: var(--accent2); }
 
+  /* ── Card Builder ── */
+  .card-builder-row {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px;
+  }
+  .card-builder-row input {
+    flex: 1; min-width: 140px; padding: 11px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; color: white;
+    font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.3s;
+  }
+  .card-builder-row input:focus { border-color: var(--accent2); }
+
+  .team-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+  .team-toggle button {
+    padding: 10px 16px; border: none; cursor: pointer;
+    font-family: inherit; font-size: 0.82rem; font-weight: 700;
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);
+    transition: all 0.2s;
+  }
+  .team-toggle button.active-mafia  { background: rgba(233,69,96,0.3); color: #ff7777; }
+  .team-toggle button.active-citizen { background: rgba(74,222,128,0.2); color: #4ade80; }
+
+  .add-card-btn {
+    padding: 11px 18px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent2), #e67e22);
+    color: #1a0a00; font-family: inherit; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+  }
+  .add-card-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(245,166,35,0.4); }
+
+  .custom-cards-list { margin-top: 16px; display: flex; flex-direction: column; gap: 7px; max-height: 260px; overflow-y: auto; }
+  .custom-card-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; border-radius: 10px; animation: fadeIn 0.25s ease;
+  }
+  .custom-card-item.mafia-item  { background: rgba(233,69,96,0.1); border: 1px solid rgba(233,69,96,0.2); }
+  .custom-card-item.citizen-item { background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.15); }
+  .custom-card-item .item-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .custom-card-item .item-name { flex: 1; font-size: 0.88rem; font-weight: 600; }
+  .custom-card-item.mafia-item  .item-name { color: #ff9999; }
+  .custom-card-item.citizen-item .item-name { color: #86efac; }
+  .custom-card-item .item-team { font-size: 0.72rem; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+  .custom-card-item .item-del {
+    background: none; border: none; color: rgba(255,255,255,0.25);
+    cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 6px;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .custom-card-item .item-del:hover { background: rgba(233,69,96,0.2); color: var(--accent); }
+
+  .custom-summary {
+    display: flex; gap: 14px; align-items: center; justify-content: center;
+    margin-top: 14px; padding: 12px; background: rgba(255,255,255,0.03);
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.85rem; flex-wrap: wrap;
+  }
+  .custom-summary .cs-total { color: rgba(255,255,255,0.6); font-weight: 700; }
+  .custom-summary .cs-mafia { color: #ff7777; font-weight: 700; }
+  .custom-summary .cs-citizen { color: #4ade80; font-weight: 700; }
+  .custom-empty { text-align: center; color: rgba(255,255,255,0.25); font-size: 0.82rem; padding: 18px 0; }
+
   .start-btn {
     width: 100%; padding: 18px;
     background: linear-gradient(135deg, var(--accent), #c0392b);
@@ -475,22 +536,38 @@
         </button>
       </div>
       <div class="custom-form" id="customForm">
-        <div class="section-title">⚙️ تنظیم گروه دلخواه</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>نام گروه</label>
-            <input type="text" id="customName" placeholder="مثال: دوستان" value="گروه من">
-          </div>
-          <div class="form-group">
-            <label>تعداد کل</label>
-            <input type="number" id="customTotal" placeholder="۱۰" min="4" max="25" value="10" oninput="updateCustom()">
-          </div>
-          <div class="form-group">
-            <label>تعداد مافیا</label>
-            <input type="number" id="customMafia" placeholder="۳" min="1" max="10" value="3" oninput="updateCustom()">
-          </div>
+        <div class="section-title">✏️ ساخت گروه دلخواه</div>
+
+        <!-- نام گروه -->
+        <div class="form-group" style="margin-bottom:0">
+          <label>نام گروه</label>
+          <input type="text" id="customName" placeholder="مثال: دوستان" value="گروه من">
         </div>
-        <div id="customPreview" style="margin-top:14px;font-size:0.82rem;color:rgba(255,255,255,0.5);text-align:center;"></div>
+
+        <!-- اضافه کردن کارت -->
+        <div class="card-builder-row">
+          <input type="text" id="newCardName" placeholder="اسم کارت (مثلاً: دکتر)" maxlength="20"
+            onkeydown="if(event.key==='Enter') addCustomCard()">
+          <div class="team-toggle">
+            <button id="btnMafia"  class="active-mafia"   onclick="setTeam('mafia')">😈 مافیا</button>
+            <button id="btnCitizen"                        onclick="setTeam('citizen')">😇 شهروند</button>
+          </div>
+          <button class="add-card-btn" onclick="addCustomCard()">+ افزودن</button>
+        </div>
+
+        <!-- لیست کارت‌های اضافه‌شده -->
+        <div class="custom-cards-list" id="customCardsList">
+          <div class="custom-empty">هنوز کارتی اضافه نشده — کارت‌های بازیکنان را وارد کنید</div>
+        </div>
+
+        <!-- خلاصه -->
+        <div class="custom-summary" id="customSummary" style="display:none">
+          <span class="cs-total" id="csTotalCount">۰ کارت</span>
+          <span>·</span>
+          <span class="cs-mafia" id="csMafiaCount">۰ مافیا</span>
+          <span>·</span>
+          <span class="cs-citizen" id="csCitizenCount">۰ شهروند</span>
+        </div>
       </div>
     </div>
 
@@ -558,6 +635,9 @@ let state = {
   group: null, count: null, mafiaCount: null, citizenCount: null,
   cards: [], flipped: new Set(), isCustom: false
 };
+
+let customCardsList = [];   // [{name, team}]  برای گروه دلخواه
+let selectedTeam = "mafia"; // تیم فعلی انتخاب‌شده
 
 const ROLE_MAP = { 10:{mafia:3,citizen:7}, 12:{mafia:4,citizen:8}, 13:{mafia:4,citizen:9} };
 
@@ -782,7 +862,9 @@ function selectGroup(group) {
   const startBtn = document.getElementById("startBtn");
   if (state.isCustom) {
     customForm.classList.add("show"); countCard.style.display="none";
-    updateCustom(); startBtn.style.display="block";
+    customCardsList = [];
+    renderCustomCardsList();
+    startBtn.style.display="none";   // تا وقتی کارت کافی نداره نشون نده
   } else {
     customForm.classList.remove("show"); countCard.style.display="block";
     state.count=null; startBtn.style.display="none";
@@ -797,22 +879,73 @@ function selectCount(count) {
   document.getElementById("startBtn").style.display="block";
 }
 
-function updateCustom() {
-  const total=parseInt(document.getElementById("customTotal").value)||10;
-  const mafia=parseInt(document.getElementById("customMafia").value)||3;
-  const citizen=total-mafia;
-  const preview=document.getElementById("customPreview");
-  if(citizen<=0){preview.innerHTML="⚠️ تعداد مافیا بیشتر از کل بازیکنان است";preview.style.color="#ff6b6b";}
-  else{preview.innerHTML=`<span style="color:#ff6b6b">🔴 ${mafia} مافیا</span> &nbsp;+&nbsp; <span style="color:#4ade80">🟢 ${citizen} شهروند</span> &nbsp;=&nbsp; ${total} نفر`;preview.style.color="";}
+function setTeam(team) {
+  selectedTeam = team;
+  document.getElementById("btnMafia").className   = team==="mafia"   ? "active-mafia"   : "";
+  document.getElementById("btnCitizen").className = team==="citizen" ? "active-citizen" : "";
 }
+
+function addCustomCard() {
+  const input = document.getElementById("newCardName");
+  const name = input.value.trim();
+  if (!name) { input.focus(); showToast("⚠️ اسم کارت را بنویسید"); return; }
+  customCardsList.push({ name, team: selectedTeam });
+  input.value = "";
+  input.focus();
+  renderCustomCardsList();
+  updateStartBtn();
+}
+
+function removeCustomCard(idx) {
+  customCardsList.splice(idx, 1);
+  renderCustomCardsList();
+  updateStartBtn();
+}
+
+function renderCustomCardsList() {
+  const container = document.getElementById("customCardsList");
+  const summary   = document.getElementById("customSummary");
+  if (!customCardsList.length) {
+    container.innerHTML = '<div class="custom-empty">هنوز کارتی اضافه نشده — کارت‌های بازیکنان را وارد کنید</div>';
+    summary.style.display = "none";
+    return;
+  }
+  container.innerHTML = customCardsList.map((c,i) => `
+    <div class="custom-card-item ${c.team}-item">
+      <span class="item-icon">${c.team==="mafia"?"😈":"😇"}</span>
+      <span class="item-name">${c.name}</span>
+      <span class="item-team">${c.team==="mafia"?"مافیا":"شهروند"}</span>
+      <button class="item-del" onclick="removeCustomCard(${i})" title="حذف">✕</button>
+    </div>`).join("");
+  const mCount = customCardsList.filter(c=>c.team==="mafia").length;
+  const cCount = customCardsList.filter(c=>c.team==="citizen").length;
+  document.getElementById("csTotalCount").textContent   = toFarsiNum(customCardsList.length) + " کارت";
+  document.getElementById("csMafiaCount").textContent   = toFarsiNum(mCount) + " مافیا";
+  document.getElementById("csCitizenCount").textContent = toFarsiNum(cCount) + " شهروند";
+  summary.style.display = "flex";
+}
+
+function updateStartBtn() {
+  const mCount = customCardsList.filter(c=>c.team==="mafia").length;
+  const cCount = customCardsList.filter(c=>c.team==="citizen").length;
+  const valid  = customCardsList.length >= 3 && mCount >= 1 && cCount >= 1;
+  document.getElementById("startBtn").style.display = valid ? "block" : "none";
+}
+
+// نگه‌داشتن updateCustom برای سازگاری (دیگه استفاده نمی‌شه اما خطا نده)
+function updateCustom() {}
 
 async function startGame() {
   if(state.isCustom){
-    const name=document.getElementById("customName").value||"گروه دلخواه";
-    const total=parseInt(document.getElementById("customTotal").value)||10;
-    const mafia=parseInt(document.getElementById("customMafia").value)||3;
-    if(mafia>=total){showToast("⚠️ تعداد مافیا نمی‌تواند بیشتر از کل باشد");return;}
-    state.group=name; state.count=total; state.mafiaCount=mafia; state.citizenCount=total-mafia;
+    const name=document.getElementById("customName").value.trim()||"گروه دلخواه";
+    const mCount=customCardsList.filter(c=>c.team==="mafia").length;
+    const cCount=customCardsList.filter(c=>c.team==="citizen").length;
+    if(customCardsList.length<3){showToast("⚠️ حداقل ۳ کارت اضافه کنید");return;}
+    if(mCount<1){showToast("⚠️ حداقل یک کارت مافیا لازم است");return;}
+    if(cCount<1){showToast("⚠️ حداقل یک کارت شهروند لازم است");return;}
+    state.group=name; state.count=customCardsList.length;
+    state.mafiaCount=mCount; state.citizenCount=cCount;
+    state.customCards=[...customCardsList];
   }
   if(!state.group||!state.count){showToast("⚠️ لطفاً گروه و تعداد را انتخاب کنید");return;}
   generateCards();
@@ -837,8 +970,11 @@ function generateCards() {
     for(let i=citizenNames.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[citizenNames[i],citizenNames[j]]=[citizenNames[j],citizenNames[i]];}
     mafiaNames.forEach(n=>cards.push({role:"mafia",roleName:n}));
     citizenNames.forEach(n=>cards.push({role:"citizen",roleName:n}));
+  } else if (state.customCards && state.customCards.length) {
+    // گروه دلخواه — از کارت‌های ساخته‌شده توسط کاربر
+    state.customCards.forEach(c => cards.push({role: c.team, roleName: c.name}));
   } else {
-    // گروه دلخواه
+    // fallback
     for(let i=0;i<mafiaCount;i++) cards.push({role:"mafia",roleName:"مافیا ساده"});
     for(let i=0;i<citizenCount;i++) cards.push({role:"citizen",roleName:"شهروند ساده"});
   }
@@ -930,7 +1066,8 @@ function goBack(){
 }
 
 function newGame(){
-  state={group:null,count:null,mafiaCount:null,citizenCount:null,cards:[],flipped:new Set(),isCustom:false};
+  state={group:null,count:null,mafiaCount:null,citizenCount:null,cards:[],flipped:new Set(),isCustom:false,customCards:[]};
+  customCardsList=[];
   document.getElementById("gameNavBtn").style.display="none";
   document.getElementById("startBtn").style.display="none";
   document.getElementById("countCard").style.display="none";
