@@ -167,8 +167,18 @@ def clear_games():
 
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
-with app.app_context():
-    db.create_all()
+import time
+for attempt in range(10):
+    try:
+        with app.app_context():
+            db.create_all()
+        break
+    except Exception as e:
+        if attempt < 9:
+            print(f"DB not ready ({e}), retrying in 3s...")
+            time.sleep(3)
+        else:
+            raise
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
