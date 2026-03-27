@@ -254,6 +254,8 @@
   .btn-reset:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(15,52,96,0.5); }
   .btn-new-game { background:linear-gradient(135deg,#2d7a2d,#1a4a1a); color:white; }
   .btn-new-game:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(45,122,45,0.5); }
+  .btn-back { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.65); border:1px solid rgba(255,255,255,0.12); flex:0 0 auto; min-width:unset; padding:13px 18px; }
+  .btn-back:hover { background:rgba(255,255,255,0.13); transform:translateY(-2px); }
 
   /* ── History ── */
   .history-list { display:flex; flex-direction:column; gap:14px; }
@@ -524,6 +526,7 @@
       </div>
     </div>
     <div class="game-actions">
+      <button class="action-btn btn-back" onclick="goBack()">◀ بازگشت</button>
       <button class="action-btn btn-reveal-all" onclick="revealAll()">👁️ مشاهده همه</button>
       <button class="action-btn btn-flip-back" onclick="flipAllBack()">🔄 بستن کارت‌ها</button>
       <button class="action-btn btn-reset" onclick="shuffleCards()">🎲 بازنشانی</button>
@@ -557,6 +560,61 @@ let state = {
 };
 
 const ROLE_MAP = { 10:{mafia:3,citizen:7}, 12:{mafia:4,citizen:8}, 13:{mafia:4,citizen:9} };
+
+// نقش‌های خاص هر گروه
+const ROLES_DATA = {
+  "بازپرس": {
+    10: {
+      mafia:   ["رئیس مافیا","ناتو","شیاد"],
+      citizen: ["شهروند ساده","شهروند ساده","بازپرس","کارآگاه","هانتر","دکتر","رویین‌تن"]
+    },
+    12: {
+      mafia:   ["رئیس مافیا","ناتو","شیاد","مافیا ساده"],
+      citizen: ["شهروند ساده","شهروند ساده","بازپرس","کارآگاه","هانتر","دکتر","رویین‌تن","شهروند ساده"]
+    },
+    13: {
+      mafia:   ["رئیس مافیا","ناتو","شیاد","مافیا ساده"],
+      citizen: ["شهروند ساده","شهروند ساده","بازپرس","کارآگاه","هانتر","دکتر","رویین‌تن","شهروند ساده","شهروند ساده"]
+    }
+  },
+  "نماینده": {
+    10: {
+      mafia:   ["رئیس مافیا","هکر","یاغی"],
+      citizen: ["شهروند ساده","شهروند ساده","راهنما","مین‌گذار","وکیل","محافظ","دکتر"]
+    },
+    12: {
+      mafia:   ["رئیس مافیا","هکر","یاغی","مافیا ساده"],
+      citizen: ["شهروند ساده","شهروند ساده","راهنما","مین‌گذار","وکیل","محافظ","دکتر","شهروند ساده"]
+    },
+    13: {
+      mafia:   ["رئیس مافیا","هکر","یاغی","مافیا ساده"],
+      citizen: ["شهروند ساده","شهروند ساده","راهنما","مین‌گذار","وکیل","محافظ","دکتر","شهروند ساده","شهروند ساده"]
+    }
+  },
+  "تکاور": {
+    10: {
+      mafia:   ["رئیس مافیا","ناتو","گروگان‌گیر"],
+      citizen: ["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز"]
+    },
+    12: {
+      mafia:   ["رئیس مافیا","ناتو","گروگان‌گیر","مافیا ساده"],
+      citizen: ["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز","شهروند ساده"]
+    },
+    13: {
+      mafia:   ["رئیس مافیا","ناتو","گروگان‌گیر","مافیا ساده"],
+      citizen: ["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز","شهروند ساده","شهروند ساده"]
+    }
+  }
+};
+
+// آیکون هر نقش
+const ROLE_ICONS = {
+  "رئیس مافیا":"👑","ناتو":"🔫","شیاد":"🃏","گروگان‌گیر":"💣",
+  "هکر":"💻","یاغی":"🗡️","مافیا ساده":"😈",
+  "شهروند ساده":"😇","بازپرس":"🔍","کارآگاه":"🕵️","هانتر":"🏹",
+  "دکتر":"⚕️","رویین‌تن":"🛡️","راهنما":"🧭","مین‌گذار":"💥",
+  "وکیل":"⚖️","محافظ":"🛡️","تفنگدار":"🎯","نگهبان":"👮","تک‌تیرانداز":"🎯"
+};
 
 // ─── Stars ─────────────────────────────────────────────────────────────────
 (function createStars() {
@@ -766,12 +824,30 @@ async function startGame() {
 
 // ─── Game Logic ─────────────────────────────────────────────────────────────
 function generateCards() {
-  const{count,mafiaCount,citizenCount}=state;
-  const roles=[...Array(mafiaCount).fill("mafia"),...Array(citizenCount).fill("citizen")];
-  for(let i=roles.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[roles[i],roles[j]]=[roles[j],roles[i]];}
+  const{count,mafiaCount,citizenCount,group}=state;
+
+  // نقش‌های نامدار اگه گروه تعریف‌شده داشته باشه
+  const groupData = ROLES_DATA[group] && ROLES_DATA[group][count];
+  let cards = [];
+  if (groupData) {
+    const mafiaNames = [...groupData.mafia];
+    const citizenNames = [...groupData.citizen];
+    // shuffle هر لیست
+    for(let i=mafiaNames.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[mafiaNames[i],mafiaNames[j]]=[mafiaNames[j],mafiaNames[i]];}
+    for(let i=citizenNames.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[citizenNames[i],citizenNames[j]]=[citizenNames[j],citizenNames[i]];}
+    mafiaNames.forEach(n=>cards.push({role:"mafia",roleName:n}));
+    citizenNames.forEach(n=>cards.push({role:"citizen",roleName:n}));
+  } else {
+    // گروه دلخواه
+    for(let i=0;i<mafiaCount;i++) cards.push({role:"mafia",roleName:"مافیا ساده"});
+    for(let i=0;i<citizenCount;i++) cards.push({role:"citizen",roleName:"شهروند ساده"});
+  }
+
+  // shuffle کل لیست و assign شماره
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
   const nums=Array.from({length:count},(_,i)=>i+1);
   for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]];}
-  state.cards=roles.map((role,i)=>({role,number:nums[i]}));
+  state.cards=cards.map((c,i)=>({...c,number:nums[i]}));
   state.flipped=new Set();
 }
 
@@ -799,6 +875,7 @@ function renderCardGrid(){
 function buildCard(card){
   const flipped=state.flipped.has(card.number)?"flipped":"";
   const deco=card.role==="mafia"?'<div class="mafia-deco"></div>':'<div class="citizen-deco"></div>';
+  const icon=ROLE_ICONS[card.roleName]||(card.role==="mafia"?"😈":"😇");
   return `
     <div class="card ${flipped}" data-num="${card.number}">
       <div class="card-face card-back">
@@ -807,8 +884,8 @@ function buildCard(card){
       </div>
       <div class="card-face card-front ${card.role}">
         ${deco}
-        <div class="card-role-icon">${card.role==="mafia"?"😈":"😇"}</div>
-        <div class="card-role-name">${card.role==="mafia"?"مافیا":"شهروند"}</div>
+        <div class="card-role-icon">${icon}</div>
+        <div class="card-role-name">${card.roleName}</div>
         <div class="card-role-num">${toFarsiNum(card.number)}</div>
       </div>
     </div>`;
@@ -830,13 +907,13 @@ function revealAll(){
       <div class="summary-col mafia-col">
         <h4>😈 مافیا (${toFarsiNum(mafias.length)} نفر)</h4>
         <ul class="summary-list mafia-list">
-          ${mafias.map(c=>`<li>🔴 شماره ${toFarsiNum(c.number)}</li>`).join("")}
+          ${mafias.map(c=>`<li>${ROLE_ICONS[c.roleName]||"🔴"} ${c.roleName} — شماره ${toFarsiNum(c.number)}</li>`).join("")}
         </ul>
       </div>
       <div class="summary-col citizen-col">
         <h4>😇 شهروند (${toFarsiNum(citizens.length)} نفر)</h4>
         <ul class="summary-list citizen-list">
-          ${citizens.map(c=>`<li>🟢 شماره ${toFarsiNum(c.number)}</li>`).join("")}
+          ${citizens.map(c=>`<li>${ROLE_ICONS[c.roleName]||"🟢"} ${c.roleName} — شماره ${toFarsiNum(c.number)}</li>`).join("")}
         </ul>
       </div>
     </div>`;
@@ -845,6 +922,12 @@ function revealAll(){
 
 function closeOverlay(){document.getElementById("revealOverlay").classList.remove("show");}
 function flipAllBack(){state.flipped.clear();document.querySelectorAll(".card").forEach(c=>c.classList.remove("flipped"));showToast("🔄 همه کارت‌ها بسته شدند");}
+
+function goBack(){
+  // برگشت به setup بدون reset کردن انتخاب‌ها
+  showScreen("setup");
+  document.getElementById("gameNavBtn").style.display="block";
+}
 
 function newGame(){
   state={group:null,count:null,mafiaCount:null,citizenCount:null,cards:[],flipped:new Set(),isCustom:false};
