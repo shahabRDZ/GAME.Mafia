@@ -188,34 +188,52 @@ header{text-align:center;padding:32px 0 18px}
 .btn-new-game{background:linear-gradient(135deg,#1a4a2a,#0e2e18);color:#fff}
 .btn-new-game:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,74,42,.5)}
 
+/* ── Fullscreen game ── */
+.game-fullscreen{position:fixed;inset:0;z-index:100;background:var(--dark);display:flex;flex-direction:column;overflow:hidden}
+.game-fullscreen .game-info,.game-fullscreen .game-actions{display:none}
+.game-fullscreen .card-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px}
+.game-fullscreen .completion-banner{margin:auto 20px}
+
+/* ── top bar in fullscreen ── */
+.fs-topbar{display:none;padding:14px 20px 0;flex-shrink:0}
+.game-fullscreen .fs-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fs-back{background:none;border:1px solid rgba(255,255,255,.12);border-radius:50px;color:var(--dim);
+  padding:7px 16px;font-family:inherit;font-size:.78rem;cursor:pointer;transition:all .2s}
+.fs-back:hover{border-color:rgba(255,255,255,.25);color:#fff}
+.fs-progress-wrap{flex:1;max-width:280px}
+.fs-progress-text{display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:5px;color:var(--dim)}
+.fs-progress-text .fp-nums{color:var(--accent2);font-weight:700}
+.fs-progress-track{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.fs-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
+
 /* ── Single card stage ── */
 .card-stage{display:flex;flex-direction:column;align-items:center;padding:8px 0 24px;min-height:420px;justify-content:center}
-.card-progress{width:100%;max-width:320px;margin-bottom:22px}
-.progress-text{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:8px}
-.progress-text .prog-label{color:var(--dim)}
-.progress-text .prog-nums{font-weight:700;color:var(--accent2)}
-.progress-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
-.big-card-wrapper{perspective:1000px;cursor:pointer;width:220px;height:330px}
-@media(max-width:400px){.big-card-wrapper{width:180px;height:270px}}
-.big-card-wrapper .card{width:100%;height:100%;border-radius:24px}
-.big-card-wrapper .card-back .card-number{font-size:4.5rem}
-.big-card-wrapper .char-wrap{width:100px;height:122px}
-.big-card-wrapper .card-role-name{font-size:.95rem;margin-top:8px}
-.big-card-wrapper .char-shadow{width:64px;height:11px}
+
+/* card wrapper — large, centered */
+.big-card-wrapper{perspective:1200px;cursor:pointer;width:280px;height:420px}
+@media(max-width:400px){.big-card-wrapper{width:240px;height:360px}}
+@media(min-width:601px){.big-card-wrapper{width:300px;height:450px}}
+.big-card-wrapper .card{width:100%;height:100%;border-radius:28px}
+.big-card-wrapper .card-back .card-number{font-size:5.5rem}
+.big-card-wrapper .card-back .tap-hint{font-size:.8rem;margin-top:14px;letter-spacing:3px}
+.big-card-wrapper .char-wrap{width:120px;height:148px}
+.big-card-wrapper .card-role-name{font-size:1.15rem;margin-top:10px;letter-spacing:1px}
+.big-card-wrapper .char-shadow{width:72px;height:12px}
+.big-card-wrapper .card-face{border-radius:28px}
 
 /* card enter/exit animations */
-@keyframes cardEnter{from{opacity:0;transform:translateY(40px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes cardExit{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-40px) scale(.88)}}
-.card-entering{animation:cardEnter .38s cubic-bezier(.34,1.56,.64,1) forwards}
-.card-exiting{animation:cardExit .28s ease-in forwards;pointer-events:none}
+@keyframes cardEnter{from{opacity:0;transform:translateY(50px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes cardExit{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-50px) scale(.85)}}
+.card-entering{animation:cardEnter .4s cubic-bezier(.34,1.56,.64,1) forwards}
+.card-exiting{animation:cardExit .3s ease-in forwards;pointer-events:none}
 
 /* next button */
-.next-btn-wrap{margin-top:24px;display:flex;gap:10px;justify-content:center}
-.next-btn{padding:14px 38px;background:linear-gradient(135deg,#1a4a2a,#0e2e18);border:1px solid rgba(0,200,100,.3);
-  border-radius:16px;color:#44ff99;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
-  transition:all .3s;display:none}
-.next-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,200,100,.3)}
+.next-btn-wrap{margin-top:28px;display:flex;gap:10px;justify-content:center;flex-shrink:0;padding-bottom:30px}
+.next-btn{padding:16px 50px;background:linear-gradient(135deg,var(--accent),#c0392b);border:none;
+  border-radius:50px;color:#fff;font-family:inherit;font-size:1.1rem;font-weight:900;cursor:pointer;
+  transition:all .3s;display:none;letter-spacing:1px;
+  box-shadow:0 6px 24px rgba(233,69,96,.4)}
+.next-btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(233,69,96,.5)}
 .next-btn.show{display:block;animation:fadeIn .3s ease}
 
 /* ── Card 3D flip ── */
@@ -540,6 +558,18 @@ header{text-align:center;padding:32px 0 18px}
 
   <!-- ── Game ── -->
   <div class="screen" id="gameScreen">
+    <!-- fullscreen top bar -->
+    <div class="fs-topbar">
+      <button class="fs-back" onclick="exitGameFullscreen()">✕ خروج</button>
+      <div class="fs-progress-wrap">
+        <div class="fs-progress-text">
+          <span id="fsProgLabel">کارت ۱</span>
+          <span class="fp-nums" id="fsProgNums"></span>
+        </div>
+        <div class="fs-progress-track"><div class="fs-progress-fill" id="fsProgressFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
     <div class="game-info gc">
       <div class="info-badge"><div class="dot"></div><span id="gameGroupLabel">—</span></div>
       <div class="stats">
@@ -549,7 +579,7 @@ header{text-align:center;padding:32px 0 18px}
       </div>
     </div>
     <div class="game-actions">
-      <button class="action-btn btn-back" id="btnBack" onclick="goBack()">◀ بازگشت</button>
+      <button class="action-btn btn-back" id="btnBack" onclick="exitGameFullscreen()">◀ بازگشت</button>
       <button class="action-btn btn-reveal-all" id="btnRevealAll" onclick="revealAll()">👁️ مشاهده همه</button>
       <button class="action-btn btn-flip-back" id="btnFlipBack" onclick="flipAllBack()">🔄 بستن کارت‌ها</button>
       <button class="action-btn btn-reset" id="btnShuffle" onclick="shuffleCards()">🎲 بازنشانی</button>
@@ -557,19 +587,9 @@ header{text-align:center;padding:32px 0 18px}
     </div>
     <!-- Single card stage -->
     <div class="card-stage" id="cardStage">
-      <!-- progress bar -->
-      <div class="card-progress">
-        <div class="progress-text">
-          <span class="prog-label" id="progLabel">در انتظار...</span>
-          <span class="prog-nums" id="progNums"></span>
-        </div>
-        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      </div>
-      <!-- card slot -->
       <div id="cardSlot"></div>
-      <!-- next button -->
       <div class="next-btn-wrap">
-        <button class="next-btn" id="nextBtn" onclick="nextCard()">بعدی ←</button>
+        <button class="next-btn" id="nextBtn" onclick="nextCard()">نفر بعدی ←</button>
       </div>
     </div>
 
@@ -1541,7 +1561,6 @@ function shuffleCards(){
   document.getElementById("cardStage").style.display="flex";
   state.queueIdx=0;
   showCurrentCard();
-  showToast("🎲 کارت‌ها بازنشانی شدند");
 }
 
 function renderGame(){
@@ -1551,18 +1570,32 @@ function renderGame(){
   document.getElementById("statCitizen").textContent=toFarsiNum(state.citizenCount);
   document.getElementById("completionBanner").classList.remove("show");
   document.getElementById("cardStage").style.display="flex";
+  // enter fullscreen
+  document.getElementById("gameScreen").classList.add("game-fullscreen");
+  document.querySelector(".container").style.display="none";
+  document.body.appendChild(document.getElementById("gameScreen"));
+  document.getElementById("gameScreen").classList.add("active");
   state.queueIdx=0;
   showCurrentCard();
+}
+
+function exitGameFullscreen(){
+  const gs=document.getElementById("gameScreen");
+  gs.classList.remove("game-fullscreen","active");
+  document.querySelector(".container").style.display="block";
+  document.querySelector(".container").appendChild(gs);
+  showScreen("setup");
+  document.getElementById("gameNavBtn").style.display="block";
 }
 
 function showCurrentCard(){
   const card=state.cards[state.queueIdx];
   const total=state.cards.length;
   const done=state.queueIdx;
-  // progress
-  document.getElementById("progLabel").textContent=`کارت ${toFarsiNum(done+1)} از ${toFarsiNum(total)}`;
-  document.getElementById("progNums").textContent=`${toFarsiNum(total-done)} باقی‌مانده`;
-  document.getElementById("progressFill").style.width=`${(done/total)*100}%`;
+  // progress in topbar
+  document.getElementById("fsProgLabel").textContent=`کارت ${toFarsiNum(done+1)} از ${toFarsiNum(total)}`;
+  document.getElementById("fsProgNums").textContent=`${toFarsiNum(total-done)} باقی‌مانده`;
+  document.getElementById("fsProgressFill").style.width=`${(done/total)*100}%`;
   document.getElementById("nextBtn").classList.remove("show");
   // render card
   const slot=document.getElementById("cardSlot");
@@ -1576,11 +1609,10 @@ function flipCurrentCard(e,card){
   cardEl.classList.add("flipped");
   state.seen.add(card.number);
   spawnParticle(e,card.role==="mafia"?"💀":"⭐");
-  // show next or complete
   if(state.queueIdx+1>=state.cards.length){
-    setTimeout(()=>showCompletion(),700);
+    setTimeout(()=>showCompletion(),900);
   } else {
-    document.getElementById("nextBtn").classList.add("show");
+    setTimeout(()=>document.getElementById("nextBtn").classList.add("show"),500);
   }
 }
 
@@ -1594,13 +1626,13 @@ function nextCard(){
   setTimeout(()=>{
     state.queueIdx++;
     showCurrentCard();
-  },280);
+  },300);
 }
 
 function showCompletion(){
   document.getElementById("cardStage").style.display="none";
   document.getElementById("completionBanner").classList.add("show");
-  document.getElementById("progressFill").style.width="100%";
+  document.getElementById("fsProgressFill").style.width="100%";
 }
 
 function buildCard(card,flipped=false){
@@ -1620,7 +1652,6 @@ function buildCard(card,flipped=false){
         <div class="char-wrap" style="animation-delay:${delay}s">${charSVG}</div>
         <div class="char-shadow"></div>
         <div class="card-role-name">${displayName}</div>
-        <div class="card-role-num">${toFarsiNum(card.number)}</div>
       </div>
     </div>`;
 }
@@ -1650,7 +1681,7 @@ function revealAll(){
 function closeOverlay(){document.getElementById("revealOverlay").classList.remove("show");}
 function flipAllBack(){shuffleCards();}
 
-function goBack(){showScreen("setup");document.getElementById("gameNavBtn").style.display="block";}
+function goBack(){exitGameFullscreen();}
 
 function newGame(){
   state={group:null,count:null,mafiaCount:null,citizenCount:null,cards:[],flipped:new Set(),seen:new Set(),isCustom:false,customCards:[]};
@@ -1660,7 +1691,7 @@ function newGame(){
   document.getElementById("countCard").style.display="none";
   document.getElementById("customForm").classList.remove("show");
   document.querySelectorAll(".group-btn,.count-btn").forEach(b=>b.classList.remove("selected"));
-  showScreen("setup");
+  exitGameFullscreen();
 }
 
 // ─── History ─────────────────────────────────────────────────────────────────
