@@ -188,8 +188,35 @@ header{text-align:center;padding:32px 0 18px}
 .btn-new-game{background:linear-gradient(135deg,#1a4a2a,#0e2e18);color:#fff}
 .btn-new-game:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,74,42,.5)}
 
-/* ── Cards grid ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px;margin-bottom:26px}
+/* ── Single card stage ── */
+.card-stage{display:flex;flex-direction:column;align-items:center;padding:8px 0 24px;min-height:420px;justify-content:center}
+.card-progress{width:100%;max-width:320px;margin-bottom:22px}
+.progress-text{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:8px}
+.progress-text .prog-label{color:var(--dim)}
+.progress-text .prog-nums{font-weight:700;color:var(--accent2)}
+.progress-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
+.big-card-wrapper{perspective:1000px;cursor:pointer;width:220px;height:330px}
+@media(max-width:400px){.big-card-wrapper{width:180px;height:270px}}
+.big-card-wrapper .card{width:100%;height:100%;border-radius:24px}
+.big-card-wrapper .card-back .card-number{font-size:4.5rem}
+.big-card-wrapper .char-wrap{width:100px;height:122px}
+.big-card-wrapper .card-role-name{font-size:.95rem;margin-top:8px}
+.big-card-wrapper .char-shadow{width:64px;height:11px}
+
+/* card enter/exit animations */
+@keyframes cardEnter{from{opacity:0;transform:translateY(40px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes cardExit{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-40px) scale(.88)}}
+.card-entering{animation:cardEnter .38s cubic-bezier(.34,1.56,.64,1) forwards}
+.card-exiting{animation:cardExit .28s ease-in forwards;pointer-events:none}
+
+/* next button */
+.next-btn-wrap{margin-top:24px;display:flex;gap:10px;justify-content:center}
+.next-btn{padding:14px 38px;background:linear-gradient(135deg,#1a4a2a,#0e2e18);border:1px solid rgba(0,200,100,.3);
+  border-radius:16px;color:#44ff99;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+  transition:all .3s;display:none}
+.next-btn:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,200,100,.3)}
+.next-btn.show{display:block;animation:fadeIn .3s ease}
 
 /* ── Card 3D flip ── */
 .card-wrapper{aspect-ratio:2/3;perspective:1000px;cursor:pointer}
@@ -336,30 +363,18 @@ header{text-align:center;padding:32px 0 18px}
 
 /* ── Responsive ── */
 @media(max-width:600px){
-  .cards-grid{grid-template-columns:repeat(3,1fr);gap:10px}
   .summary-grid{grid-template-columns:1fr}
   .setup-card{padding:18px 16px}
   .count-grid{gap:8px}
   .count-btn .number{font-size:1.9rem}
   .modal-box{padding:26px 20px}
-  .char-wrap{width:60px;height:74px}
 }
-@media(max-width:400px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
 
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:var(--dark)}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.09);border-radius:3px}
 
-/* ── Remaining numbers bar ── */
-.remaining-bar{margin-bottom:14px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
-.remaining-label{font-size:.74rem;color:var(--dim);margin-bottom:9px;display:flex;align-items:center;gap:7px}
-.remaining-label .rem-count{background:var(--accent);color:#fff;border-radius:50px;padding:1px 9px;font-size:.7rem;font-weight:700}
-.num-chips{display:flex;flex-wrap:wrap;gap:7px}
-.num-chip{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);
-  display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;
-  transition:all .35s cubic-bezier(.4,0,.2,1);cursor:default}
-.num-chip.seen{border-color:rgba(255,255,255,.05);background:rgba(255,255,255,.02);color:rgba(255,255,255,.15);
-  text-decoration:line-through;transform:scale(.85)}
+/* removed: remaining-bar replaced by single-card progress */
 
 /* ── Completion banner ── */
 .completion-banner{display:none;margin-bottom:18px;padding:22px 20px;border-radius:20px;text-align:center;
@@ -540,24 +555,34 @@ header{text-align:center;padding:32px 0 18px}
       <button class="action-btn btn-reset" id="btnShuffle" onclick="shuffleCards()">🎲 بازنشانی</button>
       <button class="action-btn btn-new-game" id="btnNewGame" onclick="newGame()">🆕 بازی جدید</button>
     </div>
-    <!-- Remaining numbers bar -->
-    <div class="remaining-bar" id="remainingBar">
-      <div class="remaining-label">شماره‌های باقی‌مانده <span class="rem-count" id="remCount">0</span></div>
-      <div class="num-chips" id="numChips"></div>
+    <!-- Single card stage -->
+    <div class="card-stage" id="cardStage">
+      <!-- progress bar -->
+      <div class="card-progress">
+        <div class="progress-text">
+          <span class="prog-label" id="progLabel">در انتظار...</span>
+          <span class="prog-nums" id="progNums"></span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <!-- card slot -->
+      <div id="cardSlot"></div>
+      <!-- next button -->
+      <div class="next-btn-wrap">
+        <button class="next-btn" id="nextBtn" onclick="nextCard()">بعدی ←</button>
+      </div>
     </div>
 
     <!-- Completion banner -->
     <div class="completion-banner" id="completionBanner">
       <div class="completion-icon">🎉</div>
       <div class="completion-title">همه نقش‌ها تقسیم شد!</div>
-      <div class="completion-sub" id="completionSub">بزن بریم — بازی شروع میشه</div>
+      <div class="completion-sub">بزن بریم — بازی شروع میشه</div>
       <div class="completion-actions">
         <button class="comp-btn comp-btn-review" onclick="revealAll()">👁️ بازبینی نقش‌ها</button>
         <button class="comp-btn comp-btn-reshuffle" onclick="shuffleCards()">🎲 بازنشانی کارت‌ها</button>
       </div>
     </div>
-
-    <div class="cards-grid" id="cardsGrid"></div>
   </div>
 
   <!-- ── History ── -->
@@ -1268,7 +1293,7 @@ function applyLang() {
   document.querySelector(".add-card-btn")&&(document.querySelector(".add-card-btn").textContent=t("addCard"));
   document.getElementById("btnMafia")&&(document.getElementById("btnMafia").textContent=t("mafiaTeam"));
   document.getElementById("btnCitizen")&&(document.getElementById("btnCitizen").textContent=t("citizenTeam"));
-  if(state.cards.length) renderCardGrid();
+  if(state.cards.length) showCurrentCard();
   if(document.getElementById("historyScreen").classList.contains("active")) renderHistory();
 }
 
@@ -1513,9 +1538,9 @@ function generateCards(){
 function shuffleCards(){
   generateCards();
   document.getElementById("completionBanner").classList.remove("show");
-  document.getElementById("remainingBar").style.display="block";
-  renderCardGrid();
-  renderRemainingBar();
+  document.getElementById("cardStage").style.display="flex";
+  state.queueIdx=0;
+  showCurrentCard();
   showToast("🎲 کارت‌ها بازنشانی شدند");
 }
 
@@ -1525,30 +1550,67 @@ function renderGame(){
   document.getElementById("statMafia").textContent=toFarsiNum(state.mafiaCount);
   document.getElementById("statCitizen").textContent=toFarsiNum(state.citizenCount);
   document.getElementById("completionBanner").classList.remove("show");
-  document.getElementById("remainingBar").style.display="block";
-  renderCardGrid();
-  renderRemainingBar();
+  document.getElementById("cardStage").style.display="flex";
+  state.queueIdx=0;
+  showCurrentCard();
 }
 
-function renderCardGrid(){
-  const grid=document.getElementById("cardsGrid");grid.innerHTML="";
-  const sorted=[...state.cards].sort((a,b)=>a.number-b.number);
-  sorted.forEach(card=>{
-    const wrapper=document.createElement("div");wrapper.className="card-wrapper";
-    wrapper.innerHTML=buildCard(card);
-    wrapper.querySelector(".card").addEventListener("click",e=>flipCard(e,card));
-    grid.appendChild(wrapper);
-  });
+function showCurrentCard(){
+  const card=state.cards[state.queueIdx];
+  const total=state.cards.length;
+  const done=state.queueIdx;
+  // progress
+  document.getElementById("progLabel").textContent=`کارت ${toFarsiNum(done+1)} از ${toFarsiNum(total)}`;
+  document.getElementById("progNums").textContent=`${toFarsiNum(total-done)} باقی‌مانده`;
+  document.getElementById("progressFill").style.width=`${(done/total)*100}%`;
+  document.getElementById("nextBtn").classList.remove("show");
+  // render card
+  const slot=document.getElementById("cardSlot");
+  slot.innerHTML=`<div class="big-card-wrapper card-entering">${buildCard(card,false)}</div>`;
+  slot.querySelector(".card").addEventListener("click",e=>flipCurrentCard(e,card));
 }
 
-function buildCard(card){
-  const flipped=state.flipped.has(card.number)?"flipped":"";
+function flipCurrentCard(e,card){
+  const cardEl=document.querySelector("#cardSlot .card");
+  if(!cardEl||cardEl.classList.contains("flipped"))return;
+  cardEl.classList.add("flipped");
+  state.seen.add(card.number);
+  spawnParticle(e,card.role==="mafia"?"💀":"⭐");
+  // show next or complete
+  if(state.queueIdx+1>=state.cards.length){
+    setTimeout(()=>showCompletion(),700);
+  } else {
+    document.getElementById("nextBtn").classList.add("show");
+  }
+}
+
+function nextCard(){
+  const slot=document.getElementById("cardSlot");
+  const wrapper=slot.querySelector(".big-card-wrapper");
+  if(wrapper){
+    wrapper.classList.remove("card-entering");
+    wrapper.classList.add("card-exiting");
+  }
+  setTimeout(()=>{
+    state.queueIdx++;
+    showCurrentCard();
+  },280);
+}
+
+function showCompletion(){
+  document.getElementById("cardStage").style.display="none";
+  document.getElementById("completionBanner").classList.add("show");
+  document.getElementById("progressFill").style.width="100%";
+}
+
+function buildCard(card,flipped=false){
+  const flippedClass=flipped?"flipped":"";
   const charSVG=getCharSVG(card.roleName,card.role,card.charVariant||0);
   const displayName=translateRole(card.roleName);
   const sparks=card.role==="mafia"?'<div class="mafia-sparks"></div>':'<div class="citizen-sparks"></div>';
   const delay=(card.charVariant||0)*0.4;
   return `
-    <div class="card ${flipped}" data-num="${card.number}">
+    <div class="card ${flippedClass}" data-num="${card.number}">
       <div class="card-face card-back">
         <div class="card-number">${toFarsiNum(card.number)}</div>
         <div class="tap-hint">لمس کنید</div>
@@ -1563,39 +1625,6 @@ function buildCard(card){
     </div>`;
 }
 
-function flipCard(e,card){
-  const num=card.number;
-  if(state.flipped.has(num)){state.flipped.delete(num);}
-  else{
-    state.flipped.add(num);
-    state.seen.add(num);
-    spawnParticle(e,card.role==="mafia"?"💀":"⭐");
-  }
-  const cardEl=document.querySelector(`[data-num="${num}"]`);
-  if(cardEl){if(state.flipped.has(num))cardEl.classList.add("flipped");else cardEl.classList.remove("flipped");}
-  renderRemainingBar();
-  checkCompletion();
-}
-
-function renderRemainingBar(){
-  const total=state.cards.length;
-  const remaining=total-state.seen.size;
-  document.getElementById("remCount").textContent=toFarsiNum(remaining);
-  const sorted=[...state.cards].sort((a,b)=>a.number-b.number);
-  document.getElementById("numChips").innerHTML=sorted.map(c=>{
-    const seen=state.seen.has(c.number);
-    return `<div class="num-chip${seen?" seen":""}">${toFarsiNum(c.number)}</div>`;
-  }).join("");
-  // hide bar when all done
-  document.getElementById("remainingBar").style.display=remaining===0?"none":"block";
-}
-
-function checkCompletion(){
-  if(state.seen.size>0&&state.seen.size===state.cards.length){
-    document.getElementById("completionBanner").classList.add("show");
-    document.getElementById("remainingBar").style.display="none";
-  }
-}
 
 function revealAll(){
   const mafias=state.cards.filter(c=>c.role==="mafia").sort((a,b)=>a.number-b.number);
@@ -1619,7 +1648,7 @@ function revealAll(){
 }
 
 function closeOverlay(){document.getElementById("revealOverlay").classList.remove("show");}
-function flipAllBack(){state.flipped.clear();document.querySelectorAll(".card").forEach(c=>c.classList.remove("flipped"));showToast("🔄 همه کارت‌ها بسته شدند");}
+function flipAllBack(){shuffleCards();}
 
 function goBack(){showScreen("setup");document.getElementById("gameNavBtn").style.display="block";}
 
