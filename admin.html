@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پنل مدیریت — شوشانگ</title>
+<link rel="stylesheet" href="css/variables.css">
+<style>
+body { background: #000; font-family: 'Vazirmatn', sans-serif; color: #eaeaf5; padding: 20px; }
+.admin-container { max-width: 900px; margin: 0 auto; }
+.admin-header { text-align: center; padding: 20px 0 30px; }
+.admin-header h1 { font-size: 1.5rem; color: #e94560; margin-bottom: 4px; }
+.admin-header p { font-size: .78rem; color: rgba(255,255,255,.38); }
+
+/* Login */
+.admin-login { max-width: 360px; margin: 60px auto; padding: 30px; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08); border-radius: 20px; }
+.admin-login h2 { text-align: center; font-size: 1.1rem; color: #f5a623; margin-bottom: 20px; }
+.admin-field { margin-bottom: 14px; }
+.admin-field label { display: block; font-size: .76rem; color: rgba(255,255,255,.38); margin-bottom: 6px; }
+.admin-field input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: #fff;
+  font-family: inherit; font-size: .9rem; outline: none; }
+.admin-field input:focus { border-color: #e94560; }
+.admin-submit { width: 100%; padding: 13px; background: linear-gradient(135deg, #e94560, #c0392b);
+  border: none; border-radius: 12px; color: #fff; font-family: inherit; font-size: .95rem;
+  font-weight: 700; cursor: pointer; margin-top: 6px; }
+.admin-error { color: #ff6b6b; font-size: .78rem; text-align: center; margin-top: 8px; }
+
+/* Dashboard */
+.stats-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+.stat-card { flex: 1; min-width: 100px; padding: 18px 12px; border-radius: 16px; text-align: center;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+.stat-card .num { font-size: 1.8rem; font-weight: 900; display: block; color: #f5a623; }
+.stat-card .lbl { font-size: .68rem; color: rgba(255,255,255,.38); }
+
+/* Users table */
+.users-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.users-header h2 { font-size: 1rem; color: #f5a623; }
+.search-input { padding: 8px 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px; color: #fff; font-family: inherit; font-size: .85rem; outline: none; width: 200px; }
+.user-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05); margin-bottom: 6px; }
+.user-avatar { font-size: 1.6rem; flex-shrink: 0; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-weight: 700; font-size: .9rem; }
+.user-email { font-size: .72rem; color: rgba(255,255,255,.38); }
+.user-meta { font-size: .68rem; color: rgba(255,255,255,.3); margin-top: 3px; }
+.user-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-sm { padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer;
+  font-family: inherit; font-size: .72rem; font-weight: 700; transition: all .2s; }
+.btn-warn { background: rgba(245,166,35,.15); color: #f5a623; }
+.btn-warn:hover { background: rgba(245,166,35,.25); }
+.btn-danger { background: rgba(233,69,96,.15); color: #e94560; }
+.btn-danger:hover { background: rgba(233,69,96,.25); }
+.btn-back { padding: 8px 18px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px; color: rgba(255,255,255,.6); cursor: pointer; font-family: inherit;
+  font-size: .82rem; text-decoration: none; display: inline-block; margin-bottom: 16px; }
+.btn-back:hover { background: rgba(255,255,255,.1); color: #fff; }
+.online-dot { color: #44ff99; }
+.offline-dot { color: rgba(255,255,255,.2); }
+.refresh-btn { padding: 6px 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px; color: rgba(255,255,255,.5); cursor: pointer; font-family: inherit; font-size: .75rem; }
+</style>
+</head>
+<body>
+
+<div class="admin-container">
+  <!-- Login Form -->
+  <div id="adminLoginBox" class="admin-login">
+    <h2>⚙️ ورود پنل مدیریت</h2>
+    <div class="admin-field"><label>نام کاربری یا ایمیل</label>
+      <input type="text" id="adminUser" placeholder="username"></div>
+    <div class="admin-field"><label>رمز عبور</label>
+      <input type="password" id="adminPass" placeholder="••••••"></div>
+    <button class="admin-submit" onclick="adminLogin()">ورود</button>
+    <div class="admin-error" id="adminLoginError"></div>
+  </div>
+
+  <!-- Dashboard (hidden until login) -->
+  <div id="adminDashboard" style="display:none">
+    <a href="/" class="btn-back">◀ بازگشت به سایت</a>
+    <div class="admin-header">
+      <h1>⚙️ پنل مدیریت شوشانگ</h1>
+      <p>مدیریت کاربران و آمار سایت</p>
+    </div>
+
+    <div class="stats-grid" id="adminStats"></div>
+
+    <div class="users-header">
+      <h2>👥 کاربران</h2>
+      <div style="display:flex;gap:6px">
+        <input type="text" class="search-input" id="adminSearchInput" placeholder="جستجوی نام..." oninput="filterAdminUsers()">
+        <button class="refresh-btn" onclick="loadAdminData()">🔄</button>
+      </div>
+    </div>
+    <div id="adminUsersList"></div>
+  </div>
+</div>
+
+<script>
+const API = "";
+let adminToken = null;
+
+async function adminLogin() {
+  const identifier = document.getElementById("adminUser").value.trim();
+  const password = document.getElementById("adminPass").value;
+  const errEl = document.getElementById("adminLoginError");
+  errEl.textContent = "";
+
+  try {
+    const r = await fetch(API + "/api/auth/login", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifier, password })
+    });
+    const data = await r.json();
+    if (!r.ok) { errEl.textContent = data.error || "خطا"; return; }
+
+    adminToken = data.token;
+    // Check admin access
+    const check = await fetch(API + "/api/admin/stats", {
+      headers: { "Authorization": "Bearer " + adminToken }
+    });
+    if (check.status === 403) { errEl.textContent = "⛔ شما دسترسی ادمین ندارید"; adminToken = null; return; }
+
+    document.getElementById("adminLoginBox").style.display = "none";
+    document.getElementById("adminDashboard").style.display = "block";
+    loadAdminData();
+  } catch { errEl.textContent = "خطای شبکه"; }
+}
+
+let allUsers = [];
+
+async function loadAdminData() {
+  const headers = { "Authorization": "Bearer " + adminToken };
+
+  // Stats
+  const statsR = await fetch(API + "/api/admin/stats", { headers });
+  const stats = await statsR.json();
+  document.getElementById("adminStats").innerHTML = `
+    <div class="stat-card"><span class="num">${stats.total_users}</span><span class="lbl">کاربران</span></div>
+    <div class="stat-card"><span class="num">${stats.online_now}</span><span class="lbl">آنلاین</span></div>
+    <div class="stat-card"><span class="num">${stats.total_visits}</span><span class="lbl">بازدید</span></div>
+    <div class="stat-card"><span class="num">${stats.total_games}</span><span class="lbl">بازی آفلاین</span></div>
+    <div class="stat-card"><span class="num">${stats.total_chaos_rooms}</span><span class="lbl">اتاق کی‌اس</span></div>
+  `;
+
+  // Users
+  const usersR = await fetch(API + "/api/admin/users", { headers });
+  allUsers = await usersR.json();
+  renderAdminUsersList(allUsers);
+}
+
+function renderAdminUsersList(users) {
+  document.getElementById("adminUsersList").innerHTML = users.map(u => `
+    <div class="user-row" data-name="${u.username.toLowerCase()}">
+      <span class="user-avatar">${u.avatar || '🎭'}</span>
+      <div class="user-info">
+        <div class="user-name">${u.username} <span style="font-size:.62rem;color:rgba(255,255,255,.25)">#${u.id}</span>
+          ${u.online ? '<span class="online-dot"> ●</span>' : '<span class="offline-dot"> ○</span>'}</div>
+        <div class="user-email">${u.email}</div>
+        <div class="user-meta">ثبت‌نام: ${u.created_at} · بازی: ${u.total_games} · کی‌اس: ${u.chaos_wins}W/${u.chaos_losses}L</div>
+      </div>
+      <div class="user-actions">
+        <button class="btn-sm btn-warn" onclick="resetPw(${u.id})">ریست رمز</button>
+        <button class="btn-sm btn-danger" onclick="deleteUser(${u.id},'${u.username}')">حذف</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function filterAdminUsers() {
+  const q = document.getElementById("adminSearchInput").value.trim().toLowerCase();
+  const filtered = q ? allUsers.filter(u => u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) : allUsers;
+  renderAdminUsersList(filtered);
+}
+
+async function resetPw(uid) {
+  const pw = prompt("رمز جدید:", "123456");
+  if (!pw) return;
+  await fetch(API + `/api/admin/users/${uid}/reset-password`, {
+    method: "PUT", headers: { "Authorization": "Bearer " + adminToken, "Content-Type": "application/json" },
+    body: JSON.stringify({ password: pw })
+  });
+  alert("✅ رمز تغییر کرد");
+}
+
+async function deleteUser(uid, username) {
+  if (!confirm(`کاربر "${username}" حذف شود؟ این عمل غیرقابل بازگشت است.`)) return;
+  await fetch(API + `/api/admin/users/${uid}`, {
+    method: "DELETE", headers: { "Authorization": "Bearer " + adminToken }
+  });
+  alert("✅ حذف شد");
+  loadAdminData();
+}
+
+// Enter to login
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !adminToken) adminLogin();
+});
+</script>
+</body>
+</html>

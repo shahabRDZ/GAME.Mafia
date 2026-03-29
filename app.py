@@ -131,6 +131,10 @@ class ChaosPlayer(db.Model):
 def index():
     return app.send_static_file("mafia.html")
 
+@app.route("/panel")
+def admin_panel():
+    return app.send_static_file("admin.html")
+
 
 # ── Visit Counter ────────────────────────────────────────────────────────────
 @app.route("/api/visit", methods=["POST"])

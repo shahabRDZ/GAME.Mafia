@@ -6,6 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY mafia.html .
+COPY admin.html .
 COPY app.py .
 COPY css/ css/
 COPY js/ js/
