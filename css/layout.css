@@ -1,5 +1,5 @@
 /* ── Cinematic Background ── */
-#creatureCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+#creatureCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 .atmo-glow {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background: radial-gradient(ellipse at 50% 55%, rgba(140,15,25,.18) 0%, rgba(60,5,10,.08) 35%, transparent 70%);
