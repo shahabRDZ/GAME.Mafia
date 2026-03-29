@@ -9,7 +9,8 @@ from flask_jwt_extended import (
 )
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder=".")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, static_folder=BASE_DIR)
 CORS(app)
 
 # ── Config ──────────────────────────────────────────────────────────────────
@@ -75,17 +76,17 @@ class Game(db.Model):
 # ── Routes: Static ────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    return send_from_directory(".", "mafia.html")
+    return send_from_directory(BASE_DIR, "mafia.html")
 
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
-    return send_from_directory(os.path.join(app.root_path, "css"), filename)
+    return send_from_directory(os.path.join(BASE_DIR, "css"), filename)
 
 
 @app.route("/js/<path:filename>")
 def serve_js(filename):
-    return send_from_directory(os.path.join(app.root_path, "js"), filename)
+    return send_from_directory(os.path.join(BASE_DIR, "js"), filename)
 
 
 # ── Routes: Auth ─────────────────────────────────────────────────────────────
