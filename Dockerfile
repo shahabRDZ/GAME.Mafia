@@ -9,6 +9,10 @@ COPY mafia.html .
 COPY app.py .
 COPY css/ css/
 COPY js/ js/
+COPY manifest.json .
+COPY icon-192.png .
+COPY icon-512.png .
+COPY icon.svg .
 
 EXPOSE 5000
 
