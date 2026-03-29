@@ -14,7 +14,7 @@
   for (let i = 0; i < 60; i++) particles.push({
     x: Math.random() * 2000, y: Math.random() * 2000,
     vx: (Math.random() - .5) * .15, vy: (Math.random() - .5) * .12,
-    r: Math.random() * 1.5 + .3, a: Math.random() * .15 + .03,
+    r: Math.random() * 2 + .5, a: Math.random() * .25 + .08,
     pulse: Math.random() * Math.PI * 2, pulseSpd: Math.random() * .008 + .003
   });
 
@@ -62,17 +62,20 @@
     ctx.moveTo(s * .15, -s * .2);
     ctx.quadraticCurveTo(0, -s * .55, -s * .15, -s * .2);
 
-    const alphas = [.08, .22, .45];
-    const blurs = [3, 1, 0];
-    const a = alphas[layer] || .22;
-    ctx.fillStyle = `rgba(15,5,8,${a})`;
-    ctx.shadowColor = `rgba(0,0,0,${a * .5})`;
-    ctx.shadowBlur = blurs[layer] || 1;
+    const alphas = [.25, .5, .8];
+    const blurs = [4, 2, 0];
+    const a = alphas[layer] || .5;
+    ctx.fillStyle = `rgba(30,10,15,${a})`;
+    ctx.shadowColor = `rgba(80,10,10,${a * .4})`;
+    ctx.shadowBlur = blurs[layer] || 2;
     ctx.fill();
 
-    if (layer === 2) {
-      ctx.beginPath(); ctx.arc(-s * .04, -s * .28, s * .06, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(200,30,30,.35)"; ctx.shadowColor = "rgba(255,0,0,.3)"; ctx.shadowBlur = 4; ctx.fill();
+    // Red eye glow for mid and foreground creatures
+    if (layer >= 1) {
+      const eyeAlpha = layer === 2 ? .7 : .35;
+      const eyeSize = layer === 2 ? s * .08 : s * .05;
+      ctx.beginPath(); ctx.arc(-s * .04, -s * .28, eyeSize, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,30,30,${eyeAlpha})`; ctx.shadowColor = `rgba(255,0,0,${eyeAlpha})`; ctx.shadowBlur = 6; ctx.fill();
     }
     ctx.restore();
   }
