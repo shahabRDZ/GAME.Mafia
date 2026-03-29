@@ -1,0 +1,109 @@
+/* ── Single card stage ── */
+.card-stage { display: flex; flex-direction: column; align-items: center; padding: 40px 0 24px; min-height: 480px; justify-content: center; }
+
+/* ── Card wrapper — large, centered ── */
+.big-card-wrapper { perspective: 1200px; cursor: pointer; width: 300px; height: 450px; }
+@media(max-width:400px) { .big-card-wrapper { width: 270px; height: 405px; } }
+@media(min-width:601px) { .big-card-wrapper { width: 330px; height: 495px; } }
+.big-card-wrapper .card { width: 100%; height: 100%; border-radius: 28px; }
+.big-card-wrapper .card-back .card-number { font-size: 5.5rem; }
+.big-card-wrapper .card-back .tap-hint { font-size: .8rem; margin-top: 14px; letter-spacing: 3px; }
+.big-card-wrapper .char-wrap { width: 120px; height: 148px; }
+.big-card-wrapper .card-role-name { font-size: 1.15rem; margin-top: 10px; letter-spacing: 1px; }
+.big-card-wrapper .char-shadow { width: 72px; height: 12px; }
+.big-card-wrapper .card-face { border-radius: 28px; }
+
+/* ── Tap hint on flipped card ── */
+.tap-hint-next {
+  position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
+  font-size: .68rem; color: rgba(255,255,255,.3); letter-spacing: 2px; z-index: 5;
+  animation: fadeIn .5s ease;
+}
+
+/* ── Card 3D flip ── */
+.card-wrapper { aspect-ratio: 2/3; perspective: 1000px; cursor: pointer; }
+.card {
+  width: 100%; height: 100%; position: relative;
+  -webkit-transform-style: preserve-3d; transform-style: preserve-3d;
+  transition: transform .72s cubic-bezier(.4,0,.2,1); border-radius: 20px;
+}
+.card-back { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.card-front { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.card.flipped { transform: rotateY(180deg); }
+.card.flipped .card-back .card-number { display: none; }
+.card-face {
+  position: absolute; width: 100%; height: 100%; border-radius: 20px;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+}
+
+/* ── Card back ── */
+.card-back {
+  background: linear-gradient(145deg, #111628, #0a0e1f);
+  border: 1.5px solid rgba(100,120,255,.18);
+  box-shadow: 0 12px 36px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.card-back::before {
+  content: ''; position: absolute; inset: 8px; border: 1px solid rgba(255,255,255,.04);
+  border-radius: 14px;
+  background: repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(255,255,255,.012) 12px, rgba(255,255,255,.012) 13px);
+}
+.card-number {
+  font-size: 2.8rem; font-weight: 900; color: var(--accent);
+  text-shadow: 0 0 22px var(--accent); position: relative; z-index: 1;
+  filter: drop-shadow(0 0 12px var(--accent)); animation: numPulse 3s ease-in-out infinite;
+}
+.card-back .tap-hint { font-size: .66rem; color: rgba(255,255,255,.2); margin-top: 10px; position: relative; z-index: 1; letter-spacing: 2px; }
+
+/* ── Card front shared ── */
+.card-front { transform: rotateY(180deg); }
+
+/* ── Mafia card ── */
+.card-front.mafia {
+  background: radial-gradient(ellipse at 50% 0%, #2a0000 0%, #110000 50%, #0a0000 100%);
+  border: 1.5px solid rgba(200,0,0,.45);
+  box-shadow: 0 0 40px rgba(180,0,0,.35), inset 0 0 50px rgba(0,0,0,.5);
+}
+.card-front.mafia::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(140,0,0,.3) 0%, transparent 65%); pointer-events: none;
+}
+
+/* ── Citizen card ── */
+.card-front.citizen {
+  background: radial-gradient(ellipse at 50% 0%, #001f1a 0%, #000e14 50%, #000810 100%);
+  border: 1.5px solid rgba(0,200,120,.35);
+  box-shadow: 0 0 40px rgba(0,180,100,.25), inset 0 0 50px rgba(0,0,0,.5);
+}
+.card-front.citizen::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(0,120,80,.25) 0%, transparent 65%); pointer-events: none;
+}
+
+/* ── Character SVG wrapper ── */
+.char-wrap { position: relative; z-index: 2; width: 72px; height: 88px; animation: charFloat 3.2s ease-in-out infinite; }
+.char-wrap svg { width: 100%; height: 100%; overflow: visible; }
+
+/* ── Eye glow pulse ── */
+.eg { animation: eyeGlow 2s ease-in-out infinite; }
+
+/* ── Shadow under character ── */
+.char-shadow {
+  width: 48px; height: 8px; background: rgba(0,0,0,.5); border-radius: 50%;
+  margin-top: -4px; z-index: 2; position: relative; animation: shadowPulse 3.2s ease-in-out infinite; filter: blur(4px);
+}
+
+/* ── Role label ── */
+.card-role-name { font-size: .8rem; font-weight: 700; position: relative; z-index: 3; margin-top: 6px; letter-spacing: .5px; text-align: center; padding: 0 6px; }
+.mafia .card-role-name { color: #ff5555; text-shadow: 0 0 10px #ff0000; }
+.citizen .card-role-name { color: #44ff99; text-shadow: 0 0 10px #00cc55; }
+.card-role-num { font-size: 1.2rem; font-weight: 900; position: relative; z-index: 3; margin-top: 3px; }
+.mafia .card-role-num { color: rgba(255,100,100,.65); }
+.citizen .card-role-num { color: rgba(80,255,160,.65); }
+
+/* ── Mafia/citizen ambient particles on card ── */
+.mafia-sparks, .citizen-sparks { position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: 18px; overflow: hidden; }
+.mafia-sparks::before { content: '\2620'; position: absolute; font-size: 4.5rem; opacity: .04; bottom: -8px; right: -8px; transform: rotate(-15deg); }
+.mafia-sparks::after { content: '\26A1'; position: absolute; font-size: 2.8rem; opacity: .05; top: 4px; left: 4px; }
+.citizen-sparks::before { content: '\2B50'; position: absolute; font-size: 3.5rem; opacity: .05; bottom: -5px; right: -5px; }
+.citizen-sparks::after { content: '\2728'; position: absolute; font-size: 2.2rem; opacity: .06; top: 4px; left: 4px; }
