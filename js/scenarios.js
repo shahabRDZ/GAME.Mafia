@@ -39,7 +39,7 @@ const SCENARIO_INFO = {
         {name:"مافیا ساده", fa:"عضو تیم مافیا · هماهنگی در شب", en:"Mafia member · Night coordination", tr:"Mafya üyesi · Gece koordinasyonu", icon:"😈"}
       ],
       citizen: [
-        {name:"تفنگدار", fa:"شلیک مستقیم در شب · قدرت حذف", en:"Direct night shot · Elimination power", tr:"Gece doğrudan ateş · Eleme gücü", icon:"🎯"},
+        {name:"تفنگدار", fa:"پخش تفنگ در شب", en:"Distribute guns at night", tr:"Gece silah dağıtımı", icon:"🎯"},
         {name:"دکتر", fa:"نجات بازیکنان در شب · کنترل حذف‌ها", en:"Save players at night · Control eliminations", tr:"Gece oyuncuları kurtarma", icon:"⚕️"},
         {name:"کارآگاه", fa:"استعلام مستقیم مافیا بودن افراد", en:"Direct inquiry if someone is mafia", tr:"Birinin mafya olup olmadığını sorgulama", icon:"🕵️"},
         {name:"نگهبان", fa:"محافظت از بازیکنان · جلوگیری از حمله", en:"Protect players · Prevent attacks", tr:"Oyuncuları koruma · Saldırıları önleme", icon:"👮"},
@@ -190,7 +190,7 @@ function openScenarioOverlay(group) {
       </div>
     </div>
 
-    <div class="scn-section open">
+    <div class="scn-section">
       <button class="scn-toggle" onclick="this.parentElement.classList.toggle('open')">
         <span class="scn-toggle-icon">▶</span> ${L.mafiaTitle}
       </button>
@@ -208,7 +208,7 @@ function openScenarioOverlay(group) {
       </div>
     </div>
 
-    <div class="scn-section open">
+    <div class="scn-section">
       <button class="scn-toggle" onclick="this.parentElement.classList.toggle('open')">
         <span class="scn-toggle-icon">▶</span> ${L.citizenTitle}
       </button>
@@ -226,9 +226,14 @@ function openScenarioOverlay(group) {
       </div>
     </div>
 
-    <button class="scn-proceed-btn" onclick="closeScenarioOverlay()">
-      ${L.proceed}
-    </button>
+    <div class="scn-btn-row">
+      <button class="scn-back-btn" onclick="goBackFromScenario()">
+        ◀ ${currentLang==='en'?'Back':currentLang==='tr'?'Geri':'بازگشت'}
+      </button>
+      <button class="scn-proceed-btn" onclick="closeScenarioOverlay()">
+        ${L.proceed}
+      </button>
+    </div>
   `;
 
   overlay.classList.add("show");
@@ -236,4 +241,13 @@ function openScenarioOverlay(group) {
 
 function closeScenarioOverlay() {
   document.getElementById("scenarioOverlay").classList.remove("show");
+}
+
+function goBackFromScenario() {
+  closeScenarioOverlay();
+  state.group = null;
+  state.count = null;
+  document.querySelectorAll(".group-btn").forEach(b => b.classList.remove("selected"));
+  document.getElementById("countCard").style.display = "none";
+  document.getElementById("startBtn").style.display = "none";
 }

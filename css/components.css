@@ -70,8 +70,15 @@
 .mafia-rc .scn-role-name { color: #ff7777; }
 .citizen-rc .scn-role-name { color: #86efac; }
 .scn-role-desc { font-size: .72rem; color: var(--dim); margin-top: 2px; }
+.scn-btn-row { display: flex; gap: 10px; padding: 20px 24px 24px; }
+.scn-back-btn {
+  padding: 15px 20px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px; color: var(--dim); font-family: inherit; font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: all .3s; flex-shrink: 0;
+}
+.scn-back-btn:hover { background: rgba(255,255,255,.12); color: #fff; transform: translateY(-2px); }
 .scn-proceed-btn {
-  display: block; width: calc(100% - 48px); margin: 20px 24px 24px; padding: 15px;
+  flex: 1; padding: 15px;
   background: linear-gradient(135deg, #e94560, #c0392b); border: none; border-radius: 14px;
   color: #fff; font-family: inherit; font-size: 1rem; font-weight: 900; cursor: pointer;
   letter-spacing: 1px; transition: all .3s; position: relative; overflow: hidden;
