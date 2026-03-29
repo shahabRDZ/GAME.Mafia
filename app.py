@@ -26,7 +26,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ── In-memory state for WebSocket ────────────────────────────────────────────
 sid_to_user = {}        # sid -> {user_id, username}
