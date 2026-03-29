@@ -588,6 +588,8 @@ const ROLE_CHARS = {
 </svg>`
 };
 
+ROLE_CHARS["اسنایپر"] = ROLE_CHARS["تک‌تیرانداز"];
+
 function getCharSVG(roleName, role, variant) {
   if(ROLE_CHARS[roleName]) return ROLE_CHARS[roleName];
   const arr = role === "mafia" ? MAFIA_CHARS : CITIZEN_CHARS;

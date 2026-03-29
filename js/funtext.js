@@ -39,7 +39,7 @@ const MAFIA_TEXTS = [
   { text: "سر دست نشی", icon: "skull", color: "#fbbf24" },
   { text: "تیم لا در نده", icon: "mask", color: "#fb7185" },
   { text: "فکر کن شهروند کشیدی", icon: "brain", color: "#f97316" },
-  { text: "بزن زیر بازپرس", icon: "knife", color: "#ef4444" },
+  { text: "بزن زیر نقشدار", icon: "knife", color: "#ef4444" },
   { text: "ببینم روز یک میتونی شهروند پوش کنی", icon: "star", color: "#fbbf24" },
   { text: "یارات تپانن", icon: "fire", color: "#ff4757" },
   { text: "مثل روز روشنی", icon: "lightning", color: "#ffa502" },
