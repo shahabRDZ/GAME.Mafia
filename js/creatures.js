@@ -180,17 +180,19 @@
 
   // ── Draw hanging spider with web thread ──
   function drawHangingSpider(x, anchorY, spiderY, size, wingPhase, layer) {
-    const alphas = [.15, .35, .6];
-    const a = alphas[layer] || .35;
+    const alphas = [.3, .55, .85];
+    const a = alphas[layer] || .55;
     // Web thread from anchor to spider
+    ctx.save();
     ctx.beginPath();
     ctx.moveTo(x, anchorY);
-    ctx.lineTo(x, spiderY - size * .5);
-    ctx.strokeStyle = `rgba(200,200,210,${a * .5})`;
-    ctx.lineWidth = size * .04;
-    ctx.setLineDash([size * .15, size * .1]);
+    ctx.lineTo(x, spiderY - size * .4);
+    ctx.strokeStyle = `rgba(220,220,230,${a * .7})`;
+    ctx.lineWidth = Math.max(1, size * .06);
+    ctx.shadowColor = `rgba(255,255,255,${a * .2})`;
+    ctx.shadowBlur = 2;
     ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.restore();
     // Draw spider at end
     drawSpider(x, spiderY, size, 0, wingPhase, layer, false);
   }
@@ -218,13 +220,12 @@
     }
 
     initHanging() {
-      // Spider hangs from top of screen or random high point
-      this.hangX = Math.random() * W;
-      this.hangAnchorY = -5;
-      this.hangMaxY = 80 + Math.random() * (H * .5);
-      this.hangY = this.hangAnchorY;
-      this.hangDir = 1; // 1 = going down, -1 = going up
-      this.hangSpeed = Math.random() * .4 + .15;
+      this.hangX = 50 + Math.random() * (W - 100);
+      this.hangAnchorY = 0;
+      this.hangMaxY = 100 + Math.random() * (H * .4);
+      this.hangY = 30 + Math.random() * 60; // Start already visible
+      this.hangDir = 1;
+      this.hangSpeed = Math.random() * .8 + .4; // Faster descent
       this.hangPause = 0;
       this.hangSwing = Math.random() * Math.PI * 2;
     }
