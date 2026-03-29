@@ -210,22 +210,10 @@ function setupVoiceSocketEvents() {
 
   socket.on("voice_offer", async (data) => {
     console.log("[Voice] Received offer from", data.from_user_id);
-    // If voice not enabled, auto-enable mic first
+    // If voice not enabled, show toast to user instead of auto-enabling
     if (!voiceEnabled || !localStream) {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        voiceEnabled = true;
-        voiceMuted = false;
-        if (!voiceAudioCtx || voiceAudioCtx.state === "closed") {
-          voiceAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        setupLocalSpeakingDetection();
-        updateVoiceUI();
-        showToast("🎙️ ویس خودکار فعال شد");
-      } catch(e) {
-        console.error("[Voice] Auto-enable mic failed:", e);
-        return;
-      }
+      showToast("🎙️ بازیکن دیگر ویس فعال کرد — دکمه 🎙️ را بزنید");
+      return;
     }
     try {
       const pc = createPeerConnection(data.from_user_id, false);

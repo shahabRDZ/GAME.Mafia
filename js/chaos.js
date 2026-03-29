@@ -124,7 +124,7 @@ function voteEndDiscussion() {
 
 function resetChaosState() {
   chaosState = { roomCode: null, players: [], myRole: null, phase: null,
-                 phaseEndAt: null, messages: [], isHost: false, myVote: null };
+                 phaseEndAt: null, messages: [], isHost: false, myVote: null, selectedVote: null, votedEnd: false };
   if (chaosTimerInterval) { clearInterval(chaosTimerInterval); chaosTimerInterval = null; }
 }
 
@@ -270,7 +270,7 @@ function renderGameResult(data) {
 }
 
 function appendChatMessage(data) {
-  // Try game chat area first, then lobby chat area
+  if (!data || !data.content) return;
   const area = document.getElementById("chatArea") || document.getElementById("lobbyChatArea");
   if (!area) return;
   const isSelf = currentUser && data.user_id === currentUser.id;
@@ -326,8 +326,8 @@ function showRoomInviteNotification(fromUsername, roomCode) {
   notif.className = "invite-notification";
   notif.innerHTML = `
     <div class="invite-notif-content">
-      <div class="invite-notif-text">⚡ <strong>${fromUsername}</strong> شما را به بازی کی‌اس دعوت کرد</div>
-      <div class="invite-notif-code">کد اتاق: ${roomCode}</div>
+      <div class="invite-notif-text">⚡ <strong>${escapeHtml(fromUsername)}</strong> شما را به بازی کی‌اس دعوت کرد</div>
+      <div class="invite-notif-code">کد اتاق: ${escapeHtml(roomCode)}</div>
       <div class="invite-notif-actions">
         <button class="chaos-btn" onclick="acceptRoomInvite('${roomCode}')" style="padding:8px 20px;font-size:.85rem">✅ قبول</button>
         <button class="chaos-btn secondary" onclick="this.closest('.invite-notification').remove()" style="padding:8px 20px;font-size:.85rem">❌ رد</button>
@@ -354,8 +354,4 @@ function acceptRoomInvite(code) {
   }, 500);
 }
 
-function escapeHtml(text) {
-  const d = document.createElement("div");
-  d.textContent = text;
-  return d.innerHTML;
-}
+// escapeHtml is defined in helpers.js

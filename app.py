@@ -619,13 +619,17 @@ def handle_vote(data):
     # Check if all voted
     voted = sum(1 for p in room.players if p.vote_target_id is not None)
     emit("vote_update", {"voted": voted, "total": len(room.players)}, to=code)
-    if voted >= len(room.players):
+    # Count only connected players for vote threshold
+    connected = sum(1 for p in room.players if p.user_id in online_users)
+    needed = max(connected, 2)  # At least 2 votes needed
+    if voted >= needed:
         resolve_votes(code)
 
 
 # ── End Discussion Vote ──────────────────────────────────────────────────────
 
 end_discussion_votes = {}  # room_code -> set of user_ids
+disconnected_players = {}  # room_code -> set of user_ids (grace period)
 
 @socketio.on("vote_end_discussion")
 def handle_vote_end(data):
@@ -787,6 +791,9 @@ def end_game(code, winner, eliminated_id=None, eliminated_role=None):
         if not room:
             return
         room.status = "finished"
+        # Cleanup global state
+        end_discussion_votes.pop(code, None)
+        disconnected_players.pop(code, None)
         room.phase = "result"
         room.winner = winner
         # Update player stats
