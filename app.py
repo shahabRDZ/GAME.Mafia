@@ -624,6 +624,18 @@ def handle_vote(data):
 
 # ── WebRTC Voice Signaling ────────────────────────────────────────────────────
 
+@socketio.on("voice_join")
+def handle_voice_join(data):
+    code = (data.get("code") or "").upper()
+    info = sid_to_user.get(request.sid)
+    if not info:
+        return
+    # Notify others in the room that this user joined voice
+    emit("voice_peer_joined", {"user_id": info["user_id"], "username": info["username"]}, to=code, include_self=False)
+
+
+# ── WebRTC Voice Signaling (relay) ────────────────────────────────────────────────────
+
 @socketio.on("voice_offer")
 def handle_voice_offer(data):
     target_sid = user_to_sid.get(data.get("target_user_id"))
