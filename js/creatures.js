@@ -178,9 +178,26 @@
     ctx.restore();
   }
 
-  // ── Creature class with Bezier flight paths ──
+  // ── Draw hanging spider with web thread ──
+  function drawHangingSpider(x, anchorY, spiderY, size, wingPhase, layer) {
+    const alphas = [.15, .35, .6];
+    const a = alphas[layer] || .35;
+    // Web thread from anchor to spider
+    ctx.beginPath();
+    ctx.moveTo(x, anchorY);
+    ctx.lineTo(x, spiderY - size * .5);
+    ctx.strokeStyle = `rgba(200,200,210,${a * .5})`;
+    ctx.lineWidth = size * .04;
+    ctx.setLineDash([size * .15, size * .1]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Draw spider at end
+    drawSpider(x, spiderY, size, 0, wingPhase, layer, false);
+  }
+
+  // ── Creature class ──
   class Creature {
-    constructor(layer) {
+    constructor(layer, forceType) {
       this.layer = layer;
       const scales = [.5, .9, 1.5];
       this.baseSize = (Math.random() * 4 + 4) * scales[layer];
@@ -188,8 +205,28 @@
       this.wingPhase = Math.random() * Math.PI * 2;
       this.flip = Math.random() > .5;
       this.speed = (Math.random() * .4 + .2) * (layer === 0 ? .4 : layer === 2 ? 1.1 : .7);
-      this.type = Math.random() > 0.5 ? "bat" : "spider";
-      this.newPath();
+      // Type: bat, spider-walk, spider-hang
+      if (forceType) this.type = forceType;
+      else {
+        const r = Math.random();
+        if (r < 0.4) this.type = "bat";
+        else if (r < 0.75) this.type = "spider-walk";
+        else this.type = "spider-hang";
+      }
+      if (this.type === "spider-hang") this.initHanging();
+      else this.newPath();
+    }
+
+    initHanging() {
+      // Spider hangs from top of screen or random high point
+      this.hangX = Math.random() * W;
+      this.hangAnchorY = -5;
+      this.hangMaxY = 80 + Math.random() * (H * .5);
+      this.hangY = this.hangAnchorY;
+      this.hangDir = 1; // 1 = going down, -1 = going up
+      this.hangSpeed = Math.random() * .4 + .15;
+      this.hangPause = 0;
+      this.hangSwing = Math.random() * Math.PI * 2;
     }
 
     newPath() {
@@ -240,25 +277,46 @@
     }
 
     update() {
-      this.t += this.speed / this.totalDist;
       this.wingPhase += this.wingSpeed;
-      if (this.t >= 1) this.newPath();
+      if (this.type === "spider-hang") {
+        this.hangSwing += .015;
+        if (this.hangPause > 0) { this.hangPause--; return; }
+        this.hangY += this.hangDir * this.hangSpeed;
+        if (this.hangY >= this.hangMaxY) { this.hangDir = -1; this.hangPause = 120 + Math.random() * 200; }
+        if (this.hangY <= this.hangAnchorY + 10) { this.hangDir = 1; this.hangPause = 60 + Math.random() * 100; this.hangX = Math.random() * W; this.hangMaxY = 80 + Math.random() * (H * .5); }
+      } else {
+        this.t += this.speed / this.totalDist;
+        if (this.t >= 1) this.newPath();
+      }
     }
 
     draw() {
-      const pos = this.getPos(this.t);
-      const tan = this.getTangent(this.t);
-      const angle = Math.atan2(tan.y, tan.x) + (this.flip ? Math.PI : 0);
-      if (this.type === "bat") drawBat(pos.x, pos.y, this.baseSize, angle, this.wingPhase, this.layer, this.flip);
-      else drawSpider(pos.x, pos.y, this.baseSize, 0, this.wingPhase, this.layer, this.flip);
+      if (this.type === "spider-hang") {
+        const swingOffset = Math.sin(this.hangSwing) * 8;
+        drawHangingSpider(this.hangX + swingOffset, this.hangAnchorY, this.hangY, this.baseSize, this.wingPhase, this.layer);
+      } else {
+        const pos = this.getPos(this.t);
+        const tan = this.getTangent(this.t);
+        const angle = Math.atan2(tan.y, tan.x) + (this.flip ? Math.PI : 0);
+        if (this.type === "bat") drawBat(pos.x, pos.y, this.baseSize, angle, this.wingPhase, this.layer, this.flip);
+        else drawSpider(pos.x, pos.y, this.baseSize, 0, this.wingPhase, this.layer, this.flip);
+      }
     }
   }
 
   // ── Spawn creatures in 3 layers ──
   const creatures = [];
-  for (let i = 0; i < 10; i++) creatures.push(new Creature(0));
-  for (let i = 0; i < 8; i++) creatures.push(new Creature(1));
-  for (let i = 0; i < 5; i++) creatures.push(new Creature(2));
+  // Background
+  for (let i = 0; i < 5; i++) creatures.push(new Creature(0, "bat"));
+  for (let i = 0; i < 4; i++) creatures.push(new Creature(0, "spider-walk"));
+  // Mid
+  for (let i = 0; i < 4; i++) creatures.push(new Creature(1, "bat"));
+  for (let i = 0; i < 3; i++) creatures.push(new Creature(1, "spider-walk"));
+  for (let i = 0; i < 3; i++) creatures.push(new Creature(1, "spider-hang"));
+  // Foreground
+  for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "bat"));
+  for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "spider-walk"));
+  for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "spider-hang"));
 
   // ── Render loop ──
   let lastTime = 0;
