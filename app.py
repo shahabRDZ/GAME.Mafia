@@ -487,7 +487,7 @@ def handle_start_chaos(data):
     players[2].role = "citizen"
     room.status = "playing"
     room.phase = "discussion"
-    room.phase_end_at = datetime.now(timezone.utc) + timedelta(minutes=3)
+    room.phase_end_at = datetime.now(timezone.utc) + timedelta(minutes=5)
     db.session.commit()
     # Send role to each player individually
     for p in players:
@@ -588,13 +588,13 @@ def emit_room_update(code):
 def run_phase_timer(code):
     import time as _time
     with app.app_context():
-        # Discussion: 3 minutes
-        _time.sleep(180)
+        # Discussion: 5 minutes
+        _time.sleep(300)
         room = ChaosRoom.query.filter_by(code=code, status="playing").first()
         if not room or room.phase != "discussion":
             return
         room.phase = "voting"
-        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=60)
+        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=90)
         # Reset votes
         for p in room.players:
             p.vote_target_id = None
@@ -603,8 +603,8 @@ def run_phase_timer(code):
             "phase": "voting",
             "phase_end_at": room.phase_end_at.isoformat()
         }, to=code)
-        # Voting: 60 seconds
-        _time.sleep(60)
+        # Voting: 90 seconds
+        _time.sleep(90)
         room = ChaosRoom.query.filter_by(code=code, status="playing").first()
         if not room or room.phase != "voting":
             return

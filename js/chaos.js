@@ -64,13 +64,24 @@ function sendLobbyChatMessage() {
   input.focus();
 }
 
-function castChaosVote(targetUserId) {
-  if (chaosState.myVote) return;
-  chaosState.myVote = targetUserId;
-  socket.emit("cast_vote", { code: chaosState.roomCode, target_user_id: targetUserId });
+function selectChaosVote(targetUserId) {
+  chaosState.selectedVote = targetUserId;
   document.querySelectorAll(".vote-card").forEach(c => {
     c.classList.toggle("voted", parseInt(c.dataset.uid) === targetUserId);
   });
+  // Show confirm button
+  const confirmBtn = document.getElementById("voteConfirmBtn");
+  if (confirmBtn) confirmBtn.style.display = "block";
+}
+
+function confirmChaosVote() {
+  if (!chaosState.selectedVote || chaosState.myVote) return;
+  chaosState.myVote = chaosState.selectedVote;
+  socket.emit("cast_vote", { code: chaosState.roomCode, target_user_id: chaosState.myVote });
+  const confirmBtn = document.getElementById("voteConfirmBtn");
+  if (confirmBtn) { confirmBtn.textContent = "✅ رأی ثبت شد"; confirmBtn.disabled = true; confirmBtn.style.opacity = ".5"; }
+  // Disable vote cards
+  document.querySelectorAll(".vote-card").forEach(c => { c.style.pointerEvents = "none"; });
 }
 
 function resetChaosState() {
@@ -105,15 +116,13 @@ function renderChaosLobby(data) {
              </div>`;
       }).join("")}
     </div>
-    <div class="voice-controls" style="justify-content:center;margin:10px 0">
-      <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️ ویس</button>
-      ${voiceEnabled ? '<button class="voice-btn voice-muted" onclick="stopVoiceChat()">🔴 قطع ویس</button>' : ''}
-    </div>
     <div class="chat-area" id="lobbyChatArea" style="max-height:180px;min-height:100px">${oldMessages}</div>
     <div class="chat-input-bar">
       <input type="text" id="lobbyChatInput" placeholder="پیام..." maxlength="500"
         onkeydown="if(event.key==='Enter')sendLobbyChatMessage()">
       <button onclick="sendLobbyChatMessage()">ارسال</button>
+      <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️</button>
+      ${voiceEnabled ? '<button class="voice-btn voice-muted" onclick="stopVoiceChat()" style="padding:8px 10px">🔴</button>' : ''}
     </div>
     ${isHost && data.players.length === 3
       ? '<button class="chaos-btn" onclick="startChaosGame()" style="margin-top:12px">🎮 شروع کی‌اس</button>'
@@ -135,18 +144,16 @@ function renderChaosGame() {
     <div class="phase-bar">
       <span class="phase-label" id="phaseLabel">بحث آزاد</span>
       <div class="phase-timer-bar"><div class="phase-timer-fill" id="phaseTimerFill" style="width:100%"></div></div>
-      <span class="phase-timer-text" id="phaseTimerText">3:00</span>
+      <span class="phase-timer-text" id="phaseTimerText">5:00</span>
     </div>
     <div class="your-role-badge ${roleClass}">${roleLabel}</div>
-    <div class="voice-controls">
-      <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️ ویس</button>
-      ${voiceEnabled ? '<button class="voice-btn voice-off" onclick="stopVoiceChat()">🔴 قطع</button>' : ''}
-    </div>
     <div class="chat-area" id="chatArea"></div>
     <div class="chat-input-bar" id="chatInputBar">
       <input type="text" id="chatInput" placeholder="پیام بنویسید..." maxlength="500"
         onkeydown="if(event.key==='Enter')sendChaosMessage()">
       <button onclick="sendChaosMessage()">ارسال</button>
+      <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️</button>
+      ${voiceEnabled ? '<button class="voice-btn voice-muted" onclick="stopVoiceChat()" style="padding:8px 10px">🔴</button>' : ''}
     </div>
     <div class="vote-area" id="voteArea" style="display:none"></div>
     <div class="result-area" id="resultArea" style="display:none"></div>
@@ -160,14 +167,19 @@ function renderPhaseChange(phase) {
     document.getElementById("chatInputBar").style.display = "none";
     const myId = currentUser ? currentUser.id : 0;
     document.getElementById("voteArea").style.display = "flex";
-    document.getElementById("voteArea").innerHTML = chaosState.players
-      .filter(p => p.user_id !== myId)
-      .map(p => `
-        <div class="vote-card" data-uid="${p.user_id}" onclick="castChaosVote(${p.user_id})">
-          <div class="vote-avatar">${p.avatar || '🎭'}</div>
-          <div class="vote-name">${p.username}</div>
-        </div>
-      `).join("") + '<div class="vote-status" id="voteStatus">رأی خود را انتخاب کنید</div>';
+    chaosState.selectedVote = null;
+    document.getElementById("voteArea").innerHTML = `
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        ${chaosState.players.filter(p => p.user_id !== myId).map(p => `
+          <div class="vote-card" data-uid="${p.user_id}" onclick="selectChaosVote(${p.user_id})">
+            <div class="vote-avatar">${p.avatar || '🎭'}</div>
+            <div class="vote-name">${p.username}</div>
+          </div>
+        `).join("")}
+      </div>
+      <div class="vote-status" id="voteStatus">بازیکن مورد نظر را انتخاب کنید</div>
+      <button class="chaos-btn" id="voteConfirmBtn" onclick="confirmChaosVote()" style="display:none;margin-top:12px;width:100%">✅ ثبت نهایی رأی</button>
+    `;
     startPhaseTimer();
   }
 }
@@ -229,7 +241,7 @@ function startPhaseTimer() {
     const el = document.getElementById("phaseTimerText");
     const fill = document.getElementById("phaseTimerFill");
     if (el) el.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
-    const totalDuration = chaosState.phase === "discussion" ? 180 : 60;
+    const totalDuration = chaosState.phase === "discussion" ? 300 : 90;
     if (fill) fill.style.width = `${(remaining / totalDuration) * 100}%`;
     if (remaining <= 0 && chaosTimerInterval) { clearInterval(chaosTimerInterval); chaosTimerInterval = null; }
   }, 1000);
