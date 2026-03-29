@@ -22,11 +22,10 @@ function selectGroup(group) {
     state.count = null;
     sb.style.display = "none";
     const counts = Object.keys(ROLES_DATA[group]).map(Number);
-    const toFa = n => n.toString().replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
     document.getElementById("countGrid").innerHTML = counts.map(c => `
       <button class="count-btn" onclick="selectCount(${c})" data-count="${c}">
-        <span class="number">${toFa(c)}</span><span class="label">نفر</span>
-        <span class="breakdown"><span class="m">${toFa(ROLE_MAP[c].mafia)} مافیا</span> · <span class="c">${toFa(ROLE_MAP[c].citizen)} شهروند</span></span>
+        <span class="number">${toFarsiNum(c)}</span><span class="label">${t("persons")}</span>
+        <span class="breakdown"><span class="m">${toFarsiNum(ROLE_MAP[c].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[c].citizen)} ${t("citizen")}</span></span>
       </button>`).join("");
     cc.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }

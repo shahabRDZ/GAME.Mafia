@@ -1,6 +1,7 @@
 /* ── Helper Functions ── */
 
 function toFarsiNum(n) {
+  if (currentLang !== "fa") return String(n);
   return String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
 }
 
