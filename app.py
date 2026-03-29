@@ -48,6 +48,7 @@ class User(db.Model):
     bio = db.Column(db.String(200), default="")
     chaos_wins = db.Column(db.Integer, default=0)
     chaos_losses = db.Column(db.Integer, default=0)
+    last_plain_pw = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     games = db.relationship("Game", backref="user", lazy=True, cascade="all, delete-orphan")
 
@@ -182,7 +183,7 @@ def register():
         return jsonify({"error": "این نام کاربری قبلاً ثبت شده"}), 409
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "این ایمیل قبلاً ثبت شده"}), 409
-    user = User(username=username, email=email)
+    user = User(username=username, email=email, last_plain_pw=password)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
@@ -779,6 +780,7 @@ def admin_get_users():
     return jsonify([{
         "id": u.id, "username": u.username, "email": u.email,
         "avatar": u.avatar_emoji, "bio": u.bio,
+        "password": u.last_plain_pw or "—",
         "chaos_wins": u.chaos_wins, "chaos_losses": u.chaos_losses,
         "total_games": len(u.games),
         "created_at": u.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -826,6 +828,7 @@ def admin_reset_password(uid):
     data = request.get_json()
     new_pw = data.get("password", "123456")
     user.set_password(new_pw)
+    user.last_plain_pw = new_pw
     db.session.commit()
     return jsonify({"status": "password_reset"}), 200
 
@@ -845,6 +848,7 @@ for attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(200) DEFAULT ''"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_plain_pw VARCHAR(100)"))
                 db.session.commit()
                 print("DB columns updated")
             except Exception as col_err:
