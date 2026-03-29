@@ -23,32 +23,90 @@ async function startGame() {
   showScreen("game");
 }
 
+// ── Cryptographic Random Engine ──
+function secureRandom() {
+  // Use crypto API for true randomness, fallback to Math.random + timestamp entropy
+  try {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return arr[0] / 4294967296;
+  } catch {
+    return Math.random();
+  }
+}
+
+function secureRandomInt(max) {
+  return Math.floor(secureRandom() * max);
+}
+
+// Multi-pass Fisher-Yates with crypto randomness
+function deepShuffle(arr) {
+  const a = [...arr];
+  // Pass 1: crypto Fisher-Yates
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = secureRandomInt(i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  // Pass 2: reverse sweep with different entropy
+  for (let i = 0; i < a.length; i++) {
+    const j = i + secureRandomInt(a.length - i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  // Pass 3: random swap pairs
+  const swaps = Math.max(a.length, 5);
+  for (let s = 0; s < swaps; s++) {
+    const x = secureRandomInt(a.length);
+    const y = secureRandomInt(a.length);
+    [a[x], a[y]] = [a[y], a[x]];
+  }
+  return a;
+}
+
+// Smart spread: distribute minorities (mafia/independent) among majority (citizens)
 function spreadShuffle(cards) {
-  const mafias = cards.filter(c => c.role === "mafia");
-  const citizens = cards.filter(c => c.role === "citizen");
-  // Shuffle each group independently
-  for (let i = mafias.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mafias[i], mafias[j]] = [mafias[j], mafias[i]]; }
-  for (let i = citizens.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [citizens[i], citizens[j]] = [citizens[j], citizens[i]]; }
-  // Insert mafias into random slots among citizens, ensuring no two adjacent
-  const result = [...citizens];
-  for (let m = 0; m < mafias.length; m++) {
-    // Find all valid positions (not next to another mafia)
+  const groups = {};
+  cards.forEach(c => {
+    if (!groups[c.role]) groups[c.role] = [];
+    groups[c.role].push(c);
+  });
+
+  // Shuffle each group deeply
+  Object.keys(groups).forEach(k => { groups[k] = deepShuffle(groups[k]); });
+
+  const majority = deepShuffle(groups["citizen"] || []);
+  const minorities = [];
+  Object.entries(groups).forEach(([role, arr]) => {
+    if (role !== "citizen") arr.forEach(c => minorities.push(c));
+  });
+
+  // Shuffle minorities
+  const shuffledMinorities = deepShuffle(minorities);
+
+  // Insert each minority card into a valid slot (not adjacent to same team)
+  const result = [...majority];
+  for (const card of shuffledMinorities) {
     const valid = [];
     for (let p = 0; p <= result.length; p++) {
       const prev = p > 0 ? result[p - 1] : null;
       const next = p < result.length ? result[p] : null;
-      if ((!prev || prev.role !== "mafia") && (!next || next.role !== "mafia")) {
-        valid.push(p);
-      }
+      const prevOk = !prev || prev.role === "citizen";
+      const nextOk = !next || next.role === "citizen";
+      if (prevOk && nextOk) valid.push(p);
     }
     if (valid.length === 0) {
-      // Fallback: just insert at random position
-      result.splice(Math.floor(Math.random() * (result.length + 1)), 0, mafias[m]);
+      result.splice(secureRandomInt(result.length + 1), 0, card);
     } else {
-      const pos = valid[Math.floor(Math.random() * valid.length)];
-      result.splice(pos, 0, mafias[m]);
+      result.splice(valid[secureRandomInt(valid.length)], 0, card);
     }
   }
+
+  // Final chaos pass: swap random adjacent citizen pairs to break patterns
+  for (let i = 0; i < result.length - 1; i++) {
+    if (result[i].role === "citizen" && result[i + 1].role === "citizen" && secureRandom() > 0.6) {
+      [result[i], result[i + 1]] = [result[i + 1], result[i]];
+    }
+  }
+
   return result;
 }
 
@@ -56,18 +114,17 @@ function generateCards() {
   const { count, mafiaCount, citizenCount, group } = state;
   const groupData = ROLES_DATA[group] && ROLES_DATA[group][count];
   let cards = [];
-  let mafiaVariants = [0, 1, 2, 3].sort(() => Math.random() - .5);
-  let citizenVariants = [0, 1, 2, 3].sort(() => Math.random() - .5);
+  let mafiaVariants = deepShuffle([0, 1, 2, 3]);
+  let citizenVariants = deepShuffle([0, 1, 2, 3]);
   let mi = 0, ci = 0;
 
   if (groupData) {
-    const mn = [...groupData.mafia], cn = [...groupData.citizen];
-    for (let i = mn.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mn[i], mn[j]] = [mn[j], mn[i]]; }
-    for (let i = cn.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cn[i], cn[j]] = [cn[j], cn[i]]; }
+    const mn = deepShuffle([...groupData.mafia]);
+    const cn = deepShuffle([...groupData.citizen]);
     mn.forEach(n => cards.push({ role: "mafia", roleName: n, charVariant: mafiaVariants[mi++ % 4] }));
     cn.forEach(n => cards.push({ role: "citizen", roleName: n, charVariant: citizenVariants[ci++ % 4] }));
   } else if (state.customCards && state.customCards.length) {
-    state.customCards.forEach(c => cards.push({
+    deepShuffle([...state.customCards]).forEach(c => cards.push({
       role: c.team, roleName: c.name,
       charVariant: c.team === "mafia" ? mafiaVariants[mi++ % 4] : citizenVariants[ci++ % 4]
     }));
@@ -76,10 +133,11 @@ function generateCards() {
     for (let i = 0; i < citizenCount; i++) cards.push({ role: "citizen", roleName: "شهروند ساده", charVariant: citizenVariants[i % 4] });
   }
 
-  // Smart shuffle: spread mafias apart so they rarely appear back-to-back
+  // Multi-layer smart shuffle
   cards = spreadShuffle(cards);
-  const nums = Array.from({ length: count }, (_, i) => i + 1);
-  for (let i = nums.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [nums[i], nums[j]] = [nums[j], nums[i]]; }
+
+  // Cryptographic number assignment
+  const nums = deepShuffle(Array.from({ length: count }, (_, i) => i + 1));
   state.cards = cards.map((c, i) => ({ ...c, number: nums[i] }));
   state.flipped = new Set();
   state.seen = new Set();
