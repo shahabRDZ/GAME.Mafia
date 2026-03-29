@@ -159,6 +159,10 @@ def track_visit():
     db.session.commit()
     return jsonify({"visits": stat.value}), 200
 
+@app.route("/api/version", methods=["GET"])
+def get_version():
+    return jsonify({"v": "2.0"}), 200
+
 @app.route("/api/visit", methods=["GET"])
 def get_visits():
     stat = SiteStats.query.filter_by(key="visits").first()

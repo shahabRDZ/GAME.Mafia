@@ -14,6 +14,7 @@ COPY manifest.json .
 COPY icon-192.png .
 COPY icon-512.png .
 COPY icon.svg .
+COPY sw.js .
 
 EXPOSE 5000
 
