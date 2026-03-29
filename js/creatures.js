@@ -29,8 +29,61 @@
     });
   }
 
+  // ── Bat drawing ──
+  function drawBat(x, y, size, angle, wingPhase, layer, flip) {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(angle);
+    if (flip) ctx.scale(-1, 1);
+    const s = size;
+    const alphas = [.2, .45, .75];
+    const a = alphas[layer] || .45;
+
+    ctx.beginPath();
+    // Body
+    ctx.ellipse(0, 0, s * .8, s * .3, 0, 0, Math.PI * 2);
+    // Wings
+    const wUp = Math.sin(wingPhase) * s * 1.4;
+    const wMid = Math.sin(wingPhase + .4) * s * .8;
+    // Left wing
+    ctx.moveTo(-s * .2, 0);
+    ctx.bezierCurveTo(-s * .6, -wMid * .5, -s * 1.4, -wUp * .8, -s * 2, -wUp);
+    ctx.bezierCurveTo(-s * 2.2, -wUp * .5, -s * 1.8, -wUp * .1, -s * 1.5, s * .1);
+    ctx.bezierCurveTo(-s * 1, s * .15, -s * .5, s * .08, -s * .2, 0);
+    // Right wing
+    ctx.moveTo(s * .2, 0);
+    ctx.bezierCurveTo(s * .6, -wMid * .5, s * 1.4, -wUp * .8, s * 2, -wUp);
+    ctx.bezierCurveTo(s * 2.2, -wUp * .5, s * 1.8, -wUp * .1, s * 1.5, s * .1);
+    ctx.bezierCurveTo(s * 1, s * .15, s * .5, s * .08, s * .2, 0);
+    // Wing fingers (jagged edges)
+    ctx.moveTo(-s * 1.2, -wUp * .6); ctx.lineTo(-s * 1.5, -wUp * .9);
+    ctx.moveTo(-s * .8, -wUp * .4); ctx.lineTo(-s * 1, -wUp * .7);
+    ctx.moveTo(s * 1.2, -wUp * .6); ctx.lineTo(s * 1.5, -wUp * .9);
+    ctx.moveTo(s * .8, -wUp * .4); ctx.lineTo(s * 1, -wUp * .7);
+    // Ears
+    ctx.moveTo(-s * .15, -s * .25); ctx.lineTo(-s * .2, -s * .5); ctx.lineTo(-s * .05, -s * .3);
+    ctx.moveTo(s * .15, -s * .25); ctx.lineTo(s * .2, -s * .5); ctx.lineTo(s * .05, -s * .3);
+
+    ctx.fillStyle = `rgba(180,170,185,${a})`;
+    ctx.strokeStyle = `rgba(200,190,205,${a * .6})`;
+    ctx.shadowColor = `rgba(200,50,80,${a * .3})`;
+    ctx.shadowBlur = layer === 0 ? 4 : 1;
+    ctx.lineWidth = s * .06;
+    ctx.fill(); ctx.stroke();
+
+    // Eyes
+    if (layer >= 1) {
+      const eyeA = layer === 2 ? .9 : .5;
+      ctx.fillStyle = `rgba(255,50,50,${eyeA})`;
+      ctx.shadowColor = `rgba(255,0,0,${eyeA})`;
+      ctx.shadowBlur = 5;
+      ctx.beginPath(); ctx.arc(-s * .12, -s * .15, s * .07, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(s * .12, -s * .15, s * .07, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // ── Spider drawing ──
-  function drawCreature(x, y, size, angle, wingPhase, layer, flip) {
+  function drawSpider(x, y, size, angle, wingPhase, layer, flip) {
     ctx.save();
     ctx.translate(x, y);
     if (flip) ctx.scale(-1, 1);
@@ -135,6 +188,7 @@
       this.wingPhase = Math.random() * Math.PI * 2;
       this.flip = Math.random() > .5;
       this.speed = (Math.random() * .4 + .2) * (layer === 0 ? .4 : layer === 2 ? 1.1 : .7);
+      this.type = Math.random() > 0.5 ? "bat" : "spider";
       this.newPath();
     }
 
@@ -195,7 +249,8 @@
       const pos = this.getPos(this.t);
       const tan = this.getTangent(this.t);
       const angle = Math.atan2(tan.y, tan.x) + (this.flip ? Math.PI : 0);
-      drawCreature(pos.x, pos.y, this.baseSize, angle, this.wingPhase, this.layer, this.flip);
+      if (this.type === "bat") drawBat(pos.x, pos.y, this.baseSize, angle, this.wingPhase, this.layer, this.flip);
+      else drawSpider(pos.x, pos.y, this.baseSize, 0, this.wingPhase, this.layer, this.flip);
     }
   }
 
