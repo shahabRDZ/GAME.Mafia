@@ -1,0 +1,75 @@
+/* ── All keyframe animations ── */
+
+@keyframes glowPulse {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+
+@keyframes shine {
+  to { background-position: 200% center; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--accent); }
+  50% { box-shadow: 0 0 18px var(--accent), 0 0 30px var(--accent); }
+}
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(50px) scale(.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cardExit {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-50px) scale(.85); }
+}
+
+@keyframes numPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px var(--accent)); }
+  50% { filter: drop-shadow(0 0 20px var(--accent)); }
+}
+
+@keyframes charFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes eyeGlow {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; filter: brightness(1.5); }
+}
+
+@keyframes shadowPulse {
+  0%, 100% { transform: scaleX(1); opacity: .5; }
+  50% { transform: scaleX(.75); opacity: .3; }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes particleA {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-85px) scale(.4); }
+}
+
+@keyframes startPop {
+  0% { opacity: 0; transform: scale(.5) translateY(30px); }
+  50% { transform: scale(1.08) translateY(-5px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes startGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(233,69,96,.4); }
+  50% { box-shadow: 0 0 35px rgba(233,69,96,.7), 0 0 60px rgba(233,69,96,.3); }
+}
+
+.card-entering { animation: cardEnter .4s cubic-bezier(.34,1.56,.64,1) forwards; }
+.card-exiting { animation: cardExit .3s ease-in forwards; pointer-events: none; }
+.start-btn-pop { animation: startPop .5s cubic-bezier(.34,1.56,.64,1) forwards, startGlow 2s ease-in-out .5s infinite; }

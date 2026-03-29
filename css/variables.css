@@ -1,0 +1,31 @@
+/* ── CSS Variables & Global Reset ── */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap');
+
+:root {
+  --dark: #000000;
+  --dark2: #0a0508;
+  --dark3: #120a0e;
+  --accent: #e94560;
+  --accent2: #f5a623;
+  --neon-red: #ff2244;
+  --neon-green: #00ff88;
+  --neon-blue: #00cfff;
+  --glass: rgba(255,255,255,0.04);
+  --gb: rgba(255,255,255,0.07);
+  --text: #eaeaf5;
+  --dim: rgba(255,255,255,0.38);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Vazirmatn', sans-serif;
+  background: #000000;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.09); border-radius: 3px; }
