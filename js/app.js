@@ -15,18 +15,18 @@ document.getElementById("scenarioOverlay").addEventListener("click", function (e
 applyLang();
 initAuth();
 
-// Track visit
+// Track visit (once per session, not on every reload)
 (async function trackVisit() {
   try {
-    const r = await fetch(API + "/api/visit", { method: "POST", headers: { "Content-Type": "application/json" } });
-    const data = await r.json();
-    document.getElementById("visitCount").textContent = toFarsiNum(data.visits);
-  } catch {
-    // If API unavailable, just fetch count
-    try {
+    if (!sessionStorage.getItem("visited")) {
+      const r = await fetch(API + "/api/visit", { method: "POST", headers: { "Content-Type": "application/json" } });
+      const data = await r.json();
+      document.getElementById("visitCount").textContent = toFarsiNum(data.visits);
+      sessionStorage.setItem("visited", "1");
+    } else {
       const r = await fetch(API + "/api/visit");
       const data = await r.json();
       document.getElementById("visitCount").textContent = toFarsiNum(data.visits);
-    } catch {}
-  }
+    }
+  } catch {}
 })();

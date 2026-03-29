@@ -91,7 +91,10 @@ function spreadShuffle(cards) {
       const next = p < result.length ? result[p] : null;
       const prevOk = !prev || prev.role === "citizen";
       const nextOk = !next || next.role === "citizen";
-      if (prevOk && nextOk) valid.push(p);
+      // Also prevent same non-citizen team adjacent
+      const prevSameTeam = prev && prev.role === card.role;
+      const nextSameTeam = next && next.role === card.role;
+      if (prevOk && nextOk && !prevSameTeam && !nextSameTeam) valid.push(p);
     }
     if (valid.length === 0) {
       result.splice(secureRandomInt(result.length + 1), 0, card);
@@ -284,8 +287,10 @@ function goBack() { exitGameFullscreen(); }
 function newGame() {
   state = { group: null, count: null, mafiaCount: null, citizenCount: null, cards: [], flipped: new Set(), seen: new Set(), isCustom: false, customCards: [] };
   customCardsList = [];
+  selectedTeam = "mafia";
   document.getElementById("gameNavBtn").style.display = "none";
   document.getElementById("startBtn").style.display = "none";
+  const csb = document.getElementById("customStartBtn"); if (csb) csb.style.display = "none";
   document.getElementById("countCard").style.display = "none";
   document.getElementById("customForm").classList.remove("show");
   document.querySelectorAll(".group-btn,.count-btn").forEach(b => b.classList.remove("selected"));
