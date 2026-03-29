@@ -302,7 +302,7 @@ function startPhaseTimer() {
   // Calculate server time offset for accurate sync
   const endTime = chaosState.phaseEndAt;
   if (!endTime) return;
-  const totalDuration = chaosState.phase === "discussion" ? 300 : 90;
+  const totalDuration = chaosState.phase === "discussion" ? 300 : 30;
 
   // Run immediately once, then every second
   function tick() {

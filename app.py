@@ -654,7 +654,7 @@ def handle_vote_end(data):
         end_discussion_votes.pop(code, None)
         # Force transition to voting
         room.phase = "voting"
-        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=90)
+        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
         for p in room.players:
             p.vote_target_id = None
         db.session.commit()
@@ -742,7 +742,7 @@ def run_phase_timer(code):
         if not room or room.phase != "discussion":
             return
         room.phase = "voting"
-        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=90)
+        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
         # Reset votes
         for p in room.players:
             p.vote_target_id = None
@@ -751,8 +751,8 @@ def run_phase_timer(code):
             "phase": "voting",
             "phase_end_at": room.phase_end_at.isoformat()
         }, to=code)
-        # Voting: 90 seconds
-        _time.sleep(90)
+        # Voting: 30 seconds
+        _time.sleep(30)
         room = ChaosRoom.query.filter_by(code=code, status="playing").first()
         if not room or room.phase != "voting":
             return
