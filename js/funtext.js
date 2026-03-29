@@ -22,7 +22,7 @@ const CITIZEN_TEXTS = [
   { text: "تبر نزنی", icon: "knife", color: "#fbbf24" },
   { text: "خنگ‌بازی درنیار", icon: "brain", color: "#a78bfa" },
   { text: "عجول نباش", icon: "clock", color: "#fb923c" },
-  { text: "خونسه نخور", icon: "fire", color: "#f87171" },
+  { text: "کنسه نخور", icon: "fire", color: "#f87171" },
   { text: "یار پنجم تیم مافیا", icon: "skull", color: "#f472b6" },
   { text: "تپانی", icon: "bomb", color: "#fbbf24" },
   { text: "شهروند گردن نگیری باز", icon: "mask", color: "#34d399" },
