@@ -97,8 +97,8 @@
     <button class="nav-btn" onclick="showScreen('game')" id="gameNavBtn" style="display:none">بازی جاری</button>
     <button class="nav-btn" id="navHistory" onclick="showScreen('history')">تاریخچه</button>
     <button class="nav-btn" id="navDM" onclick="showScreen('dm')">💬 پیام</button>
-    <button class="nav-btn" id="navChaos" onclick="showScreen('chaos')">کی‌اس</button>
     <button class="nav-btn" id="navProfile" onclick="showScreen('profile')">پروفایل</button>
+    <button class="nav-btn" id="navAdmin" onclick="window.open('/panel','_blank')" style="display:none">⚙️</button>
   </nav>
 
   <!-- Setup Screen -->
@@ -117,6 +117,9 @@
         </button>
         <button class="group-btn" onclick="selectGroup('دلخواه')" data-group="دلخواه">
           <span class="icon">✏️</span><span class="name">دلخواه</span><span class="desc">سفارشی‌سازی</span>
+        </button>
+        <button class="group-btn" onclick="showScreen('chaos')" data-group="کی‌اس" style="border-color:rgba(233,69,96,.3);background:rgba(233,69,96,.06)">
+          <span class="icon">⚡</span><span class="name">کی‌اس</span><span class="desc">آنلاین ۳ نفره</span>
         </button>
       </div>
       <div class="custom-form" id="customForm">
