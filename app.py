@@ -73,10 +73,35 @@ class Game(db.Model):
         }
 
 
+class SiteStats(db.Model):
+    __tablename__ = "site_stats"
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.Integer, default=0)
+
+
 # ── Routes: Static ────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
     return app.send_static_file("mafia.html")
+
+
+# ── Routes: Visit Counter ────────────────────────────────────────────────────
+@app.route("/api/visit", methods=["POST"])
+def track_visit():
+    stat = SiteStats.query.filter_by(key="visits").first()
+    if not stat:
+        stat = SiteStats(key="visits", value=0)
+        db.session.add(stat)
+    stat.value += 1
+    db.session.commit()
+    return jsonify({"visits": stat.value}), 200
+
+
+@app.route("/api/visit", methods=["GET"])
+def get_visits():
+    stat = SiteStats.query.filter_by(key="visits").first()
+    return jsonify({"visits": stat.value if stat else 0}), 200
 
 
 # ── Routes: Auth ─────────────────────────────────────────────────────────────

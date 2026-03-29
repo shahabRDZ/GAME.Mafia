@@ -14,3 +14,19 @@ document.getElementById("scenarioOverlay").addEventListener("click", function (e
 // Initialize
 applyLang();
 initAuth();
+
+// Track visit
+(async function trackVisit() {
+  try {
+    const r = await fetch(API + "/api/visit", { method: "POST", headers: { "Content-Type": "application/json" } });
+    const data = await r.json();
+    document.getElementById("visitCount").textContent = toFarsiNum(data.visits);
+  } catch {
+    // If API unavailable, just fetch count
+    try {
+      const r = await fetch(API + "/api/visit");
+      const data = await r.json();
+      document.getElementById("visitCount").textContent = toFarsiNum(data.visits);
+    } catch {}
+  }
+})();
