@@ -203,6 +203,47 @@
 .custom-summary .cs-citizen { color: #4ade80; font-weight: 700; }
 .custom-empty { text-align: center; color: var(--dim); font-size: .8rem; padding: 16px 0; }
 
+/* ── Role Catalog ── */
+.role-catalog { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.rc-team-section { border: 1px solid rgba(255,255,255,.07); border-radius: 14px; overflow: hidden; }
+.rc-team-header {
+  width: 100%; padding: 12px 16px; background: rgba(255,255,255,.03); border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 10px; font-family: inherit; font-size: .88rem;
+  font-weight: 700; color: var(--text); transition: background .2s;
+}
+.rc-team-header:hover { background: rgba(255,255,255,.06); }
+.rc-team-label { flex: 1; text-align: right; }
+.rc-team-count {
+  background: var(--rc-color, var(--accent)); color: #000; font-size: .72rem; font-weight: 900;
+  padding: 2px 8px; border-radius: 50px; min-width: 24px; text-align: center;
+}
+.rc-team-header .scn-toggle-icon { font-size: .6rem; color: var(--dim); transition: transform .3s; }
+.rc-team-section.open .rc-team-header .scn-toggle-icon { transform: rotate(90deg); }
+.rc-roles-grid {
+  max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s;
+  padding: 0 12px; display: flex; flex-wrap: wrap; gap: 6px;
+}
+.rc-team-section.open .rc-roles-grid { max-height: 500px; padding: 10px 12px 14px; }
+.rc-role-chip {
+  padding: 7px 14px; border-radius: 50px; cursor: pointer; font-family: inherit; font-size: .78rem;
+  font-weight: 600; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04);
+  color: var(--text); transition: all .2s; display: flex; align-items: center; gap: 6px;
+}
+.rc-role-chip:hover { background: rgba(255,255,255,.08); transform: translateY(-1px); }
+.rc-role-chip.active { border-color: var(--rc-color, var(--accent)); background: rgba(255,255,255,.08); }
+.rc-chip-badge {
+  font-size: .65rem; font-weight: 900; min-width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center;
+}
+.rc-role-chip.active .rc-chip-badge { background: var(--rc-color, var(--accent)); color: #000; }
+.rc-chip-name { white-space: nowrap; }
+
+/* ── Independent team styles ── */
+.custom-card-item.independent-item { background: rgba(192,132,252,.08); border: 1px solid rgba(192,132,252,.18); }
+.custom-card-item.independent-item .item-name { color: #d8b4fe; }
+.custom-summary .cs-independent { color: #c084fc; font-weight: 700; }
+.team-toggle button.active-independent { background: rgba(192,132,252,.25); color: #c084fc; }
+
 /* ── Start btn ── */
 .start-btn {
   width: 100%; padding: 17px; background: linear-gradient(135deg, #e94560, #c0392b);
