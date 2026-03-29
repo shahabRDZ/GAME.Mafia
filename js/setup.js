@@ -1,37 +1,84 @@
 /* ── Setup Screen Logic ── */
 
-// ── Role Catalog ──
-const ROLE_CATALOG = {
-  citizen: {
-    label: "😇 تیم شهروند",
-    color: "#4ade80",
-    roles: [
-      "کارآگاه","دکتر","تکاور","ساقی","کشیش","شهردار","قاضی","روانشناس",
-      "جان‌سخت","نگهبان","فراماسون","کارآگاه ویژه","خبرنگار","نانوا","قصاب",
-      "پرستار","گورکن","جادوگر","کلانتر","فدایی","شهروند ساده",
-      "بازپرس","هانتر","رویین‌تن","راهنما","مین‌گذار","وکیل","محافظ",
-      "تفنگدار","تک‌تیرانداز","سرباز"
-    ]
-  },
-  mafia: {
-    label: "😈 تیم مافیا",
-    color: "#ff6b6b",
-    roles: [
-      "رئیس مافیا","دکتر لکتر","مذاکره‌کننده","جوکر","ناتاشا","معشوقه",
-      "جاسوس","تروریست","شعبده‌باز","آمپول‌زن","سیاه‌زخم","مافیا ساده",
-      "ناتو","هکر","یاغی","شیاد","گروگان‌گیر"
-    ]
-  },
-  independent: {
-    label: "🐺 تیم مستقل",
-    color: "#c084fc",
-    roles: [
-      "هزارچهره","سندیکا","گرگ‌نما","قاتل زنجیره‌ای","زودیاک",
-      "نوستراداموس","دزد","جانی","همزاد"
-    ]
-  }
+// ── Default Role Catalog ──
+const DEFAULT_ROLES = {
+  citizen: [
+    "کارآگاه","دکتر","تکاور","ساقی","کشیش","شهردار","قاضی","روانشناس",
+    "جان‌سخت","نگهبان","فراماسون","کارآگاه ویژه","خبرنگار","نانوا","قصاب",
+    "پرستار","گورکن","جادوگر","کلانتر","فدایی","شهروند ساده",
+    "بازپرس","هانتر","رویین‌تن","راهنما","مین‌گذار","وکیل","محافظ",
+    "تفنگدار","تک‌تیرانداز","سرباز"
+  ],
+  mafia: [
+    "رئیس مافیا","دکتر لکتر","مذاکره‌کننده","جوکر","ناتاشا","معشوقه",
+    "جاسوس","تروریست","شعبده‌باز","آمپول‌زن","سیاه‌زخم","مافیا ساده",
+    "ناتو","هکر","یاغی","شیاد","گروگان‌گیر"
+  ],
+  independent: [
+    "هزارچهره","سندیکا","گرگ‌نما","قاتل زنجیره‌ای","زودیاک",
+    "نوستراداموس","دزد","جانی","همزاد"
+  ]
 };
 
+const ROLE_CATALOG = {
+  citizen: { label: "😇 تیم شهروند", color: "#4ade80", roles: [] },
+  mafia: { label: "😈 تیم مافیا", color: "#ff6b6b", roles: [] },
+  independent: { label: "🐺 تیم مستقل", color: "#c084fc", roles: [] }
+};
+
+// ── Persistent Custom Roles (localStorage) ──
+function getCustomRoles() {
+  try { return JSON.parse(localStorage.getItem("mafiaCustomRoles")) || { citizen: [], mafia: [], independent: [] }; }
+  catch { return { citizen: [], mafia: [], independent: [] }; }
+}
+
+function saveCustomRoles(custom) {
+  localStorage.setItem("mafiaCustomRoles", JSON.stringify(custom));
+}
+
+function buildCatalog() {
+  const custom = getCustomRoles();
+  Object.keys(ROLE_CATALOG).forEach(team => {
+    const defaults = DEFAULT_ROLES[team] || [];
+    const userAdded = custom[team] || [];
+    // Merge: defaults first, then user-added (no duplicates)
+    const all = [...defaults];
+    userAdded.forEach(r => { if (!all.includes(r)) all.push(r); });
+    ROLE_CATALOG[team].roles = all;
+  });
+}
+
+function addRoleToCatalog(name, team) {
+  const custom = getCustomRoles();
+  if (!custom[team]) custom[team] = [];
+  // Don't add if already in defaults or custom
+  if (DEFAULT_ROLES[team]?.includes(name) || custom[team].includes(name)) return;
+  custom[team].push(name);
+  saveCustomRoles(custom);
+  buildCatalog();
+}
+
+function removeRoleFromCatalog(name, team) {
+  const custom = getCustomRoles();
+  if (!custom[team]) return;
+  const idx = custom[team].indexOf(name);
+  if (idx === -1) return;
+  custom[team].splice(idx, 1);
+  saveCustomRoles(custom);
+  buildCatalog();
+  renderRoleCatalog();
+  syncCatalogFromList();
+}
+
+function isCustomRole(name, team) {
+  const custom = getCustomRoles();
+  return custom[team]?.includes(name) || false;
+}
+
+// Init catalog on load
+buildCatalog();
+
+// ── Render Catalog ──
 function renderRoleCatalog() {
   const container = document.getElementById("roleCatalog");
   container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
@@ -43,10 +90,12 @@ function renderRoleCatalog() {
       </button>
       <div class="rc-roles-grid">
         ${data.roles.map(role => `
-          <button class="rc-role-chip" data-role="${role}" data-team="${team}" onclick="toggleCatalogRole(this)">
-            <span class="rc-chip-name">${role}</span>
-            <span class="rc-chip-badge">0</span>
-          </button>
+          <div class="rc-chip-wrap">
+            <button class="rc-role-chip" data-role="${role}" data-team="${team}" onclick="toggleCatalogRole(this)">
+              <span class="rc-chip-name">${role}</span>
+              <span class="rc-chip-badge">0</span>
+            </button>${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog('${role}','${team}')" title="حذف از لیست">✕</button>` : ''}
+          </div>
         `).join("")}
       </div>
     </div>
@@ -58,30 +107,10 @@ function toggleCatalogRole(btn) {
   const team = btn.dataset.team;
   const badge = btn.querySelector(".rc-chip-badge");
   let count = parseInt(badge.textContent) || 0;
-
-  // Click = add one, already active click again = add more
   count++;
   badge.textContent = count;
   btn.classList.add("active");
-
   customCardsList.push({ name: role, team: team });
-  renderCustomCardsList();
-  updateStartBtn();
-  updateCatalogCounts();
-}
-
-function removeCatalogRole(btn) {
-  const role = btn.dataset.role;
-  const badge = btn.querySelector(".rc-chip-badge");
-  let count = parseInt(badge.textContent) || 0;
-  if (count <= 0) return;
-
-  count--;
-  badge.textContent = count;
-  if (count === 0) btn.classList.remove("active");
-
-  const idx = customCardsList.findIndex(c => c.name === role);
-  if (idx !== -1) customCardsList.splice(idx, 1);
   renderCustomCardsList();
   updateStartBtn();
   updateCatalogCounts();
@@ -96,12 +125,10 @@ function updateCatalogCounts() {
 }
 
 function syncCatalogFromList() {
-  // Reset all chips
   document.querySelectorAll(".rc-role-chip").forEach(btn => {
     btn.classList.remove("active");
     btn.querySelector(".rc-chip-badge").textContent = "0";
   });
-  // Count from customCardsList
   customCardsList.forEach(c => {
     const btn = document.querySelector(`.rc-role-chip[data-role="${c.name}"][data-team="${c.team}"]`);
     if (btn) {
@@ -128,6 +155,7 @@ function selectGroup(group) {
     cf.classList.add("show");
     cc.style.display = "none";
     customCardsList = [];
+    buildCatalog();
     renderRoleCatalog();
     renderCustomCardsList();
     sb.style.display = "none";
@@ -173,8 +201,11 @@ function addCustomCard() {
   const name = input.value.trim();
   if (!name) { input.focus(); showToast("⚠️ اسم کارت را بنویسید"); return; }
   customCardsList.push({ name, team: selectedTeam });
+  // Also save to catalog permanently
+  addRoleToCatalog(name, selectedTeam);
   input.value = "";
   input.focus();
+  renderRoleCatalog();
   renderCustomCardsList();
   updateStartBtn();
   syncCatalogFromList();
