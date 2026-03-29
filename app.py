@@ -511,9 +511,12 @@ def handle_chat(data):
     info = sid_to_user.get(request.sid)
     if not info or not content:
         return
-    room = ChaosRoom.query.filter_by(code=code, status="playing").first()
-    if not room or room.phase != "discussion":
+    room = ChaosRoom.query.filter_by(code=code).first()
+    if not room:
         return
+    # Chat works in lobby (waiting) and discussion phase
+    if room.status == "playing" and room.phase == "voting":
+        return  # No chat during voting
     emit("new_message", {
         "username": info["username"],
         "user_id": info["user_id"],
