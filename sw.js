@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shushang-v2';
+const CACHE_NAME = 'shushang-v3';
 const ASSETS = [
   '/',
   '/css/variables.css',

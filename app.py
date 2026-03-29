@@ -830,14 +830,24 @@ def end_game(code, winner, eliminated_id=None, eliminated_role=None):
                 else:
                     user.chaos_losses += 1
         db.session.commit()
-        # Send results
-        all_roles = [{"user_id": p.user_id, "username": p.user.username,
-                       "avatar": p.user.avatar_emoji, "role": p.role} for p in room.players]
+        # Build vote details: who voted for whom
+        votes_detail = []
+        for p in room.players:
+            target = None
+            if p.vote_target_id:
+                t = ChaosPlayer.query.filter_by(room_id=room.id, user_id=p.vote_target_id).first()
+                if t:
+                    target = {"user_id": t.user_id, "username": t.user.username}
+            votes_detail.append({
+                "user_id": p.user_id, "username": p.user.username,
+                "avatar": p.user.avatar_emoji, "role": p.role,
+                "voted_for": target
+            })
         socketio.emit("game_result", {
             "winner": winner,
             "eliminated_id": eliminated_id,
             "eliminated_role": eliminated_role,
-            "players": all_roles
+            "players": votes_detail
         }, to=code)
 
 

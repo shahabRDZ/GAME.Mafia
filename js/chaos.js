@@ -252,15 +252,16 @@ function renderGameResult(data) {
 
   const mafia = data.players.find(p => p.role === "mafia");
   const resultExplain = data.winner === "citizen"
-    ? `هر دو شهروند مافیا (${escapeHtml(mafia?.username || '?')}) را شناسایی کردند!`
-    : `شهروندان نتوانستند هر دو مافیا را پیدا کنند`;
+    ? `هر دو شهروند مافیا (${escapeHtml(mafia?.username || '?')}) را شناسایی کردند! 🎉`
+    : `شهروندان نتوانستند هر دو مافیا را پیدا کنند 😈`;
 
   document.getElementById("chaosGame").innerHTML = `
     <div class="result-area" style="display:block">
       <div class="result-icon">${iWon ? '🏆' : '💀'}</div>
       <div class="result-title ${iWon ? 'win' : 'lose'}">${iWon ? 'پیروز شدید!' : 'باختید!'}</div>
       <div class="result-sub">${data.winner === 'mafia' ? '😈 تیم مافیا برنده شد' : '😇 تیم شهروند برنده شد'}</div>
-      <div style="font-size:.8rem;color:var(--dim);margin:8px 0">${resultExplain}</div>
+      <div style="font-size:.82rem;color:var(--dim);margin:8px 0">${resultExplain}</div>
+
       <div class="result-roles">
         ${data.players.map(p => `
           <div class="result-role-card ${p.role}">
@@ -270,6 +271,19 @@ function renderGameResult(data) {
           </div>
         `).join("")}
       </div>
+
+      <div style="margin:16px 0;padding:14px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:.85rem;font-weight:700;color:var(--accent2);margin-bottom:10px;text-align:center">🗳️ نتیجه رأی‌گیری</div>
+        ${data.players.map(p => `
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.05)">
+            <span>${p.avatar || '🎭'}</span>
+            <span style="font-weight:700;color:${p.role === 'mafia' ? '#ff7777' : '#86efac'}">${escapeHtml(p.username)}</span>
+            <span style="color:var(--dim)">رأی داد به</span>
+            <span style="font-weight:700">${p.voted_for ? '→ ' + escapeHtml(p.voted_for.username) : '❌ رأی نداد'}</span>
+          </div>
+        `).join("")}
+      </div>
+
       <button class="chaos-btn" onclick="leaveChaosRoom()">بازگشت</button>
     </div>
   `;
