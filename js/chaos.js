@@ -84,6 +84,36 @@ function confirmChaosVote() {
   document.querySelectorAll(".vote-card").forEach(c => { c.style.pointerEvents = "none"; });
 }
 
+async function showInviteFriends() {
+  const el = document.getElementById("inviteFriendsList");
+  if (!el) return;
+  if (el.style.display === "block") { el.style.display = "none"; return; }
+  el.style.display = "block";
+  el.innerHTML = '<div class="custom-empty">در حال بارگذاری...</div>';
+  const r = await apiFetch("/api/friends");
+  if (!r.ok || !r.data.length) { el.innerHTML = '<div class="custom-empty">دوستی ندارید</div>'; return; }
+  // Filter out players already in room
+  const inRoom = chaosState.players.map(p => p.user_id);
+  const available = r.data.filter(f => !inRoom.includes(f.id));
+  if (!available.length) { el.innerHTML = '<div class="custom-empty">همه دوستانتان در اتاق هستند</div>'; return; }
+  el.innerHTML = available.map(f => `
+    <div class="friend-item" style="margin-bottom:4px">
+      <span class="friend-avatar">${f.avatar || '🎭'}</span>
+      <div class="friend-info">
+        <div class="friend-name">${f.username}</div>
+        <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
+      </div>
+      <button class="friend-btn friend-btn-invite" onclick="inviteToRoom(${f.id},'${f.username}')">دعوت</button>
+    </div>
+  `).join("");
+}
+
+function inviteToRoom(userId, username) {
+  if (!socket || !chaosState.roomCode) return;
+  socket.emit("invite_to_room", { code: chaosState.roomCode, target_user_id: userId });
+  showToast("📩 دعوت به " + username + " ارسال شد");
+}
+
 function resetChaosState() {
   chaosState = { roomCode: null, players: [], myRole: null, phase: null,
                  phaseEndAt: null, messages: [], isHost: false, myVote: null };
@@ -124,6 +154,8 @@ function renderChaosLobby(data) {
       <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️</button>
       ${voiceEnabled ? '<button class="voice-btn voice-muted" onclick="stopVoiceChat()" style="padding:8px 10px">🔴</button>' : ''}
     </div>
+    ${data.players.length < 3 ? '<button class="chaos-btn secondary" onclick="showInviteFriends()" style="margin-top:10px">👥 دعوت دوستان</button>' : ''}
+    <div id="inviteFriendsList" style="display:none;margin-top:10px"></div>
     ${isHost && data.players.length === 3
       ? '<button class="chaos-btn" onclick="startChaosGame()" style="margin-top:12px">🎮 شروع کی‌اس</button>'
       : isHost
@@ -258,6 +290,44 @@ function startPhaseTimer() {
     if (fill) fill.style.width = `${(remaining / totalDuration) * 100}%`;
     if (remaining <= 0 && chaosTimerInterval) { clearInterval(chaosTimerInterval); chaosTimerInterval = null; }
   }, 1000);
+}
+
+function showRoomInviteNotification(fromUsername, roomCode) {
+  // Remove old invite notification
+  const old = document.getElementById("inviteNotification");
+  if (old) old.remove();
+
+  const notif = document.createElement("div");
+  notif.id = "inviteNotification";
+  notif.className = "invite-notification";
+  notif.innerHTML = `
+    <div class="invite-notif-content">
+      <div class="invite-notif-text">⚡ <strong>${fromUsername}</strong> شما را به بازی کی‌اس دعوت کرد</div>
+      <div class="invite-notif-code">کد اتاق: ${roomCode}</div>
+      <div class="invite-notif-actions">
+        <button class="chaos-btn" onclick="acceptRoomInvite('${roomCode}')" style="padding:8px 20px;font-size:.85rem">✅ قبول</button>
+        <button class="chaos-btn secondary" onclick="this.closest('.invite-notification').remove()" style="padding:8px 20px;font-size:.85rem">❌ رد</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(notif);
+
+  // Auto-remove after 30 seconds
+  setTimeout(() => { if (notif.parentNode) notif.remove(); }, 30000);
+}
+
+function acceptRoomInvite(code) {
+  const notif = document.getElementById("inviteNotification");
+  if (notif) notif.remove();
+  showScreen("chaos");
+  initSocket();
+  chaosState.roomCode = code;
+  chaosState.isHost = false;
+  setTimeout(() => {
+    socket.emit("join_chaos", { code });
+    document.getElementById("chaosEntry").style.display = "none";
+    document.getElementById("chaosLobby").style.display = "block";
+  }, 500);
 }
 
 function escapeHtml(text) {

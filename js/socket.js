@@ -58,6 +58,15 @@ function initSocket() {
   socket.on("vote_update", (data) => { if (data) updateVoteStatus(data); });
   socket.on("game_result", (data) => { if (data) { chaosState.phase = "result"; renderGameResult(data); } });
   socket.on("friend_request", (data) => { if (data?.from) showToast("📩 درخواست دوستی از " + data.from.username); });
+
+  socket.on("room_invite", (data) => {
+    if (!data) return;
+    showRoomInviteNotification(data.from_username, data.room_code);
+  });
+
+  socket.on("invite_sent", (data) => {
+    if (data?.username) showToast("✅ دعوت به " + data.username + " ارسال شد");
+  });
   socket.on("dm_received", (data) => {
     if (!data) return;
     // If chat is open with this user, append message
