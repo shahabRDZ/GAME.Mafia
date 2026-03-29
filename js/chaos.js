@@ -250,16 +250,22 @@ function renderGameResult(data) {
   const myPlayer = data.players.find(p => p.user_id === myId);
   const iWon = (myPlayer && ((myPlayer.role === "mafia" && data.winner === "mafia") || (myPlayer.role === "citizen" && data.winner === "citizen")));
 
+  const mafia = data.players.find(p => p.role === "mafia");
+  const resultExplain = data.winner === "citizen"
+    ? `هر دو شهروند مافیا (${escapeHtml(mafia?.username || '?')}) را شناسایی کردند!`
+    : `شهروندان نتوانستند هر دو مافیا را پیدا کنند`;
+
   document.getElementById("chaosGame").innerHTML = `
     <div class="result-area" style="display:block">
       <div class="result-icon">${iWon ? '🏆' : '💀'}</div>
       <div class="result-title ${iWon ? 'win' : 'lose'}">${iWon ? 'پیروز شدید!' : 'باختید!'}</div>
       <div class="result-sub">${data.winner === 'mafia' ? '😈 تیم مافیا برنده شد' : '😇 تیم شهروند برنده شد'}</div>
+      <div style="font-size:.8rem;color:var(--dim);margin:8px 0">${resultExplain}</div>
       <div class="result-roles">
         ${data.players.map(p => `
           <div class="result-role-card ${p.role}">
             <div class="result-role-avatar">${p.avatar || '🎭'}</div>
-            <div class="result-role-name">${p.username}</div>
+            <div class="result-role-name">${escapeHtml(p.username)}</div>
             <div class="result-role-label">${p.role === 'mafia' ? '😈 مافیا' : '😇 شهروند'}</div>
           </div>
         `).join("")}

@@ -558,13 +558,13 @@ def handle_start_chaos(data):
         emit("error", {"msg": "فقط میزبان می‌تواند بازی را شروع کند"}); return
     if len(room.players) != 3:
         emit("error", {"msg": "باید دقیقاً ۳ بازیکن باشد"}); return
-    # Assign roles: 1 mafia, 2 citizen
+    # Assign roles randomly: 1 mafia, 2 citizen
     import random
     players = list(room.players)
-    random.shuffle(players)
-    players[0].role = "mafia"
-    players[1].role = "citizen"
-    players[2].role = "citizen"
+    roles = ["mafia", "citizen", "citizen"]
+    random.shuffle(roles)
+    for i, p in enumerate(players):
+        p.role = roles[i]
     room.status = "playing"
     room.phase = "discussion"
     room.phase_end_at = datetime.now(timezone.utc) + timedelta(minutes=5)
@@ -764,28 +764,49 @@ def resolve_votes(code):
         room = ChaosRoom.query.filter_by(code=code, status="playing").first()
         if not room:
             return
-        # Tally votes
+
+        # Find mafia and citizens
+        mafia_player = None
+        citizen_players = []
+        for p in room.players:
+            if p.role == "mafia":
+                mafia_player = p
+            else:
+                citizen_players.append(p)
+
+        if not mafia_player or len(citizen_players) != 2:
+            end_game(code, "mafia")
+            return
+
+        # Check: did BOTH citizens vote for the mafia?
+        citizen1_vote = citizen_players[0].vote_target_id
+        citizen2_vote = citizen_players[1].vote_target_id
+
+        both_found_mafia = (citizen1_vote == mafia_player.user_id and citizen2_vote == mafia_player.user_id)
+
+        if both_found_mafia:
+            # Citizens win! They both correctly identified the mafia
+            winner = "citizen"
+        else:
+            # Mafia wins - citizens failed to both identify the mafia
+            winner = "mafia"
+
+        # Find who got eliminated (most votes)
         vote_counts = {}
         for p in room.players:
             if p.vote_target_id:
                 vote_counts[p.vote_target_id] = vote_counts.get(p.vote_target_id, 0) + 1
-        if not vote_counts:
-            # No votes → mafia wins by default
-            end_game(code, "mafia")
-            return
-        # Find most voted
-        max_votes = max(vote_counts.values())
-        most_voted = [uid for uid, count in vote_counts.items() if count == max_votes]
-        # If tie, random elimination
-        import random
-        eliminated_id = random.choice(most_voted)
-        eliminated_player = ChaosPlayer.query.filter_by(room_id=room.id, user_id=eliminated_id).first()
-        eliminated_role = eliminated_player.role if eliminated_player else "citizen"
-        # Determine winner
-        if eliminated_role == "mafia":
-            winner = "citizen"
-        else:
-            winner = "mafia"  # 1v1 mafia vs citizen → mafia wins
+
+        eliminated_id = None
+        eliminated_role = None
+        if vote_counts:
+            import random
+            max_votes = max(vote_counts.values())
+            most_voted = [uid for uid, c in vote_counts.items() if c == max_votes]
+            eliminated_id = random.choice(most_voted)
+            ep = ChaosPlayer.query.filter_by(room_id=room.id, user_id=eliminated_id).first()
+            eliminated_role = ep.role if ep else None
+
         end_game(code, winner, eliminated_id, eliminated_role)
 
 
