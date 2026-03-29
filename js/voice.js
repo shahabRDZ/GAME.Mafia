@@ -2,7 +2,8 @@
 
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:stun1.l.google.com:19302" }
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:stun2.l.google.com:19302" }
 ];
 
 let localStream = null;
@@ -20,29 +21,45 @@ async function startVoiceChat() {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     voiceEnabled = true;
     voiceMuted = false;
-    voiceAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    setupLocalSpeakingDetection();
     updateVoiceUI();
 
-    // Notify others that I joined voice
+    // Resume or create AudioContext (must be after user gesture)
+    if (!voiceAudioCtx || voiceAudioCtx.state === "closed") {
+      voiceAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (voiceAudioCtx.state === "suspended") await voiceAudioCtx.resume();
+
+    setupLocalSpeakingDetection();
+
+    // Notify others
     if (socket && chaosState.roomCode) {
       socket.emit("voice_join", { code: chaosState.roomCode });
     }
 
+    // Connect to all other players
     const myId = currentUser ? currentUser.id : 0;
     chaosState.players.forEach(p => {
-      if (p.user_id !== myId) createPeerConnection(p.user_id, true);
+      if (p.user_id !== myId) {
+        console.log("[Voice] Connecting to player:", p.username, p.user_id);
+        createPeerConnection(p.user_id, true);
+      }
     });
 
     showToast("🎙️ ویس فعال شد");
   } catch (err) {
+    console.error("[Voice] Mic error:", err);
     showToast("⚠️ دسترسی میکروفون رد شد");
   }
 }
 
 function stopVoiceChat() {
+  console.log("[Voice] Stopping voice chat");
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-  Object.values(peerConnections).forEach(pc => pc.close());
+  Object.keys(peerConnections).forEach(uid => {
+    peerConnections[uid].close();
+    const audio = document.getElementById("voice-audio-" + uid);
+    if (audio) audio.remove();
+  });
   peerConnections = {};
   if (speakingCheckInterval) { clearInterval(speakingCheckInterval); speakingCheckInterval = null; }
   remoteIntervals.forEach(id => clearInterval(id));
@@ -52,7 +69,6 @@ function stopVoiceChat() {
   voiceEnabled = false;
   voiceMuted = false;
   document.querySelectorAll(".player-circle").forEach(el => el.classList.remove("speaking"));
-  document.querySelectorAll("audio[id^='voice-audio-']").forEach(el => el.remove());
   updateVoiceUI();
 }
 
@@ -66,38 +82,49 @@ function toggleVoiceMute() {
 
 function setupLocalSpeakingDetection() {
   if (!voiceAudioCtx || !localStream) return;
-  const source = voiceAudioCtx.createMediaStreamSource(localStream);
-  localAnalyser = voiceAudioCtx.createAnalyser();
-  localAnalyser.fftSize = 256;
-  source.connect(localAnalyser);
-  const data = new Uint8Array(localAnalyser.frequencyBinCount);
-  speakingCheckInterval = setInterval(() => {
-    if (!localAnalyser || voiceMuted) { setPlayerSpeaking(currentUser?.id, false); return; }
-    localAnalyser.getByteFrequencyData(data);
-    const avg = data.reduce((a, b) => a + b, 0) / data.length;
-    setPlayerSpeaking(currentUser?.id, avg > 15);
-  }, 200);
+  try {
+    const source = voiceAudioCtx.createMediaStreamSource(localStream);
+    localAnalyser = voiceAudioCtx.createAnalyser();
+    localAnalyser.fftSize = 256;
+    source.connect(localAnalyser);
+    const data = new Uint8Array(localAnalyser.frequencyBinCount);
+    speakingCheckInterval = setInterval(() => {
+      if (!localAnalyser || voiceMuted) { setPlayerSpeaking(currentUser?.id, false); return; }
+      localAnalyser.getByteFrequencyData(data);
+      const avg = data.reduce((a, b) => a + b, 0) / data.length;
+      setPlayerSpeaking(currentUser?.id, avg > 12);
+    }, 200);
+  } catch(e) { console.error("[Voice] Analyser error:", e); }
 }
 
 function createPeerConnection(targetUserId, isInitiator) {
-  // Close existing connection if any
+  console.log("[Voice] createPeerConnection to", targetUserId, "initiator:", isInitiator);
+
+  // Close existing
   if (peerConnections[targetUserId]) {
-    peerConnections[targetUserId].close();
+    try { peerConnections[targetUserId].close(); } catch(e){}
     delete peerConnections[targetUserId];
   }
 
   const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
   peerConnections[targetUserId] = pc;
-  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
+  // Add local tracks
+  if (localStream) {
+    localStream.getTracks().forEach(t => {
+      pc.addTrack(t, localStream);
+      console.log("[Voice] Added local track:", t.kind);
+    });
+  }
+
+  // Receive remote audio
   pc.ontrack = (event) => {
+    console.log("[Voice] Got remote track from", targetUserId);
     const stream = event.streams[0];
 
-    // Remove old audio element
     const old = document.getElementById("voice-audio-" + targetUserId);
     if (old) old.remove();
 
-    // Create audio element and play (with user gesture workaround)
     const audio = document.createElement("audio");
     audio.id = "voice-audio-" + targetUserId;
     audio.srcObject = stream;
@@ -106,15 +133,17 @@ function createPeerConnection(targetUserId, isInitiator) {
     audio.volume = 1.0;
     document.body.appendChild(audio);
 
-    // Force play (workaround for autoplay policy)
-    const playPromise = audio.play();
-    if (playPromise) playPromise.catch(() => {
-      // Retry on next user interaction
-      const retryPlay = () => { audio.play(); document.removeEventListener("click", retryPlay); };
-      document.addEventListener("click", retryPlay);
+    // Force play
+    audio.play().then(() => {
+      console.log("[Voice] Playing audio from", targetUserId);
+    }).catch(err => {
+      console.warn("[Voice] Autoplay blocked, retrying on click");
+      const retry = () => { audio.play(); document.removeEventListener("click", retry); document.removeEventListener("touchstart", retry); };
+      document.addEventListener("click", retry);
+      document.addEventListener("touchstart", retry);
     });
 
-    // Remote speaking detection
+    // Speaking detection
     if (voiceAudioCtx && voiceAudioCtx.state !== "closed") {
       try {
         const source = voiceAudioCtx.createMediaStreamSource(stream);
@@ -125,37 +154,41 @@ function createPeerConnection(targetUserId, isInitiator) {
         const intId = setInterval(() => {
           analyser.getByteFrequencyData(buf);
           const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
-          setPlayerSpeaking(targetUserId, avg > 15);
+          setPlayerSpeaking(targetUserId, avg > 12);
         }, 200);
         remoteIntervals.push(intId);
-      } catch(e){}
+      } catch(e) { console.error("[Voice] Remote analyser error:", e); }
     }
   };
 
+  // ICE candidates
   pc.onicecandidate = (event) => {
     if (event.candidate && socket) {
+      console.log("[Voice] Sending ICE candidate to", targetUserId);
       socket.emit("voice_ice", { target_user_id: targetUserId, candidate: event.candidate.toJSON() });
     }
   };
 
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState === "failed") {
-      // Retry connection
-      pc.close();
+  pc.oniceconnectionstatechange = () => {
+    console.log("[Voice] ICE state with", targetUserId, ":", pc.iceConnectionState);
+    if (pc.iceConnectionState === "failed" || pc.iceConnectionState === "disconnected") {
+      console.log("[Voice] Retrying connection to", targetUserId);
+      try { pc.close(); } catch(e){}
       delete peerConnections[targetUserId];
-      setTimeout(() => {
-        if (voiceEnabled) createPeerConnection(targetUserId, true);
-      }, 2000);
+      if (voiceEnabled) setTimeout(() => createPeerConnection(targetUserId, true), 2000);
     }
   };
 
+  // Create offer if initiator
   if (isInitiator) {
     pc.createOffer({ offerToReceiveAudio: true }).then(offer => {
+      console.log("[Voice] Created offer for", targetUserId);
       return pc.setLocalDescription(offer);
     }).then(() => {
-      socket.emit("voice_offer", { target_user_id: targetUserId, offer: pc.localDescription });
-    }).catch(() => {});
+      socket.emit("voice_offer", { target_user_id: targetUserId, offer: pc.localDescription.toJSON() });
+    }).catch(err => console.error("[Voice] Offer error:", err));
   }
+
   return pc;
 }
 
@@ -176,21 +209,40 @@ function setupVoiceSocketEvents() {
   if (!socket) return;
 
   socket.on("voice_offer", async (data) => {
-    if (!voiceEnabled || !localStream) return;
-    const pc = createPeerConnection(data.from_user_id, false);
+    console.log("[Voice] Received offer from", data.from_user_id);
+    // If voice not enabled, auto-enable mic first
+    if (!voiceEnabled || !localStream) {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        voiceEnabled = true;
+        voiceMuted = false;
+        if (!voiceAudioCtx || voiceAudioCtx.state === "closed") {
+          voiceAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        setupLocalSpeakingDetection();
+        updateVoiceUI();
+        showToast("🎙️ ویس خودکار فعال شد");
+      } catch(e) {
+        console.error("[Voice] Auto-enable mic failed:", e);
+        return;
+      }
+    }
     try {
+      const pc = createPeerConnection(data.from_user_id, false);
       await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-      socket.emit("voice_answer", { target_user_id: data.from_user_id, answer: pc.localDescription });
-    } catch(e) { console.error("Voice offer error:", e); }
+      console.log("[Voice] Sending answer to", data.from_user_id);
+      socket.emit("voice_answer", { target_user_id: data.from_user_id, answer: pc.localDescription.toJSON() });
+    } catch(e) { console.error("[Voice] Handle offer error:", e); }
   });
 
   socket.on("voice_answer", async (data) => {
+    console.log("[Voice] Received answer from", data.from_user_id);
     const pc = peerConnections[data.from_user_id];
-    if (pc && pc.signalingState !== "stable") {
+    if (pc && pc.signalingState === "have-local-offer") {
       try { await pc.setRemoteDescription(new RTCSessionDescription(data.answer)); }
-      catch(e) { console.error("Voice answer error:", e); }
+      catch(e) { console.error("[Voice] Handle answer error:", e); }
     }
   });
 
@@ -202,10 +254,10 @@ function setupVoiceSocketEvents() {
     }
   });
 
-  // When another player joins voice, connect to them
   socket.on("voice_peer_joined", (data) => {
+    console.log("[Voice] Peer joined voice:", data.username, data.user_id);
     if (voiceEnabled && localStream && data.user_id !== (currentUser?.id)) {
-      setTimeout(() => createPeerConnection(data.user_id, true), 500);
+      setTimeout(() => createPeerConnection(data.user_id, true), 1000);
     }
   });
 }
