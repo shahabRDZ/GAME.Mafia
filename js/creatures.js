@@ -62,13 +62,13 @@
     ctx.moveTo(s * .15, -s * .2);
     ctx.quadraticCurveTo(0, -s * .55, -s * .15, -s * .2);
 
-    const alphas = [.15, .35, .6];
-    const blurs = [6, 3, 0];
-    const a = alphas[layer] || .35;
-    // Light color so creatures are visible on black background
-    ctx.fillStyle = `rgba(180,160,170,${a})`;
-    ctx.shadowColor = `rgba(200,50,50,${a * .3})`;
-    ctx.shadowBlur = blurs[layer] || 3;
+    const alphas = [.3, .55, .85];
+    const blurs = [4, 2, 0];
+    const a = alphas[layer] || .55;
+    // White-ish silhouette visible on any background
+    ctx.fillStyle = `rgba(220,210,215,${a})`;
+    ctx.shadowColor = `rgba(255,80,80,${a * .4})`;
+    ctx.shadowBlur = blurs[layer] || 2;
     ctx.fill();
 
     // Red eye glow for mid and foreground creatures
@@ -85,8 +85,8 @@
   class Creature {
     constructor(layer) {
       this.layer = layer;
-      const scales = [.35, .6, 1];
-      this.baseSize = (Math.random() * 5 + 4) * scales[layer];
+      const scales = [.7, 1.2, 2];
+      this.baseSize = (Math.random() * 6 + 5) * scales[layer];
       this.wingSpeed = Math.random() * .04 + .03 + (layer === 0 ? .0 : layer === 2 ? .015 : 0);
       this.wingPhase = Math.random() * Math.PI * 2;
       this.flip = Math.random() > .5;
