@@ -25,28 +25,29 @@ async function startGame() {
 function spreadShuffle(cards) {
   const mafias = cards.filter(c => c.role === "mafia");
   const citizens = cards.filter(c => c.role === "citizen");
-  // Shuffle each group
+  // Shuffle each group independently
   for (let i = mafias.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mafias[i], mafias[j]] = [mafias[j], mafias[i]]; }
   for (let i = citizens.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [citizens[i], citizens[j]] = [citizens[j], citizens[i]]; }
-  // Place mafias into evenly spaced slots among citizens
-  const total = cards.length;
-  const result = [];
-  const gap = Math.floor(citizens.length / (mafias.length + 1));
-  let ci = 0, mi = 0;
-  for (let i = 0; i < total; i++) {
-    if (mi < mafias.length && ci > 0 && ci >= gap + Math.floor(Math.random() * 2) && (result.length === 0 || result[result.length - 1].role !== "mafia")) {
-      result.push(mafias[mi++]);
-      ci = 0;
-    } else if (ci < citizens.length - (mafias.length - mi - 1) * gap) {
-      result.push(citizens[ci++]);
-    } else if (mi < mafias.length) {
-      result.push(mafias[mi++]);
-      ci = 0;
+  // Insert mafias into random slots among citizens, ensuring no two adjacent
+  const result = [...citizens];
+  for (let m = 0; m < mafias.length; m++) {
+    // Find all valid positions (not next to another mafia)
+    const valid = [];
+    for (let p = 0; p <= result.length; p++) {
+      const prev = p > 0 ? result[p - 1] : null;
+      const next = p < result.length ? result[p] : null;
+      if ((!prev || prev.role !== "mafia") && (!next || next.role !== "mafia")) {
+        valid.push(p);
+      }
+    }
+    if (valid.length === 0) {
+      // Fallback: just insert at random position
+      result.splice(Math.floor(Math.random() * (result.length + 1)), 0, mafias[m]);
+    } else {
+      const pos = valid[Math.floor(Math.random() * valid.length)];
+      result.splice(pos, 0, mafias[m]);
     }
   }
-  // Add any remaining
-  while (mi < mafias.length) result.push(mafias[mi++]);
-  while (result.length < total && ci < citizens.length) result.push(citizens[ci++]);
   return result;
 }
 
