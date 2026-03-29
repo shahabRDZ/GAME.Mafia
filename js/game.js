@@ -22,6 +22,34 @@ async function startGame() {
   showScreen("game");
 }
 
+function spreadShuffle(cards) {
+  const mafias = cards.filter(c => c.role === "mafia");
+  const citizens = cards.filter(c => c.role === "citizen");
+  // Shuffle each group
+  for (let i = mafias.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mafias[i], mafias[j]] = [mafias[j], mafias[i]]; }
+  for (let i = citizens.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [citizens[i], citizens[j]] = [citizens[j], citizens[i]]; }
+  // Place mafias into evenly spaced slots among citizens
+  const total = cards.length;
+  const result = [];
+  const gap = Math.floor(citizens.length / (mafias.length + 1));
+  let ci = 0, mi = 0;
+  for (let i = 0; i < total; i++) {
+    if (mi < mafias.length && ci > 0 && ci >= gap + Math.floor(Math.random() * 2) && (result.length === 0 || result[result.length - 1].role !== "mafia")) {
+      result.push(mafias[mi++]);
+      ci = 0;
+    } else if (ci < citizens.length - (mafias.length - mi - 1) * gap) {
+      result.push(citizens[ci++]);
+    } else if (mi < mafias.length) {
+      result.push(mafias[mi++]);
+      ci = 0;
+    }
+  }
+  // Add any remaining
+  while (mi < mafias.length) result.push(mafias[mi++]);
+  while (result.length < total && ci < citizens.length) result.push(citizens[ci++]);
+  return result;
+}
+
 function generateCards() {
   const { count, mafiaCount, citizenCount, group } = state;
   const groupData = ROLES_DATA[group] && ROLES_DATA[group][count];
@@ -46,7 +74,8 @@ function generateCards() {
     for (let i = 0; i < citizenCount; i++) cards.push({ role: "citizen", roleName: "شهروند ساده", charVariant: citizenVariants[i % 4] });
   }
 
-  for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
+  // Smart shuffle: spread mafias apart so they rarely appear back-to-back
+  cards = spreadShuffle(cards);
   const nums = Array.from({ length: count }, (_, i) => i + 1);
   for (let i = nums.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [nums[i], nums[j]] = [nums[j], nums[i]]; }
   state.cards = cards.map((c, i) => ({ ...c, number: nums[i] }));
