@@ -5,13 +5,14 @@ async function startGame() {
     const name = document.getElementById("customName").value.trim() || "گروه دلخواه";
     const mc = customCardsList.filter(c => c.team === "mafia").length;
     const cc = customCardsList.filter(c => c.team === "citizen").length;
+    const ic = customCardsList.filter(c => c.team === "independent").length;
     if (customCardsList.length < 3) { showToast("⚠️ حداقل ۳ کارت اضافه کنید"); return; }
     if (mc < 1) { showToast("⚠️ حداقل یک کارت مافیا لازم است"); return; }
     if (cc < 1) { showToast("⚠️ حداقل یک کارت شهروند لازم است"); return; }
     state.group = name;
     state.count = customCardsList.length;
     state.mafiaCount = mc;
-    state.citizenCount = cc;
+    state.citizenCount = cc + ic;
     state.customCards = [...customCardsList];
   }
   if (!state.group || !state.count) { showToast("⚠️ لطفاً گروه و تعداد را انتخاب کنید"); return; }
@@ -171,7 +172,7 @@ function buildCard(card, flipped = false) {
   const flippedClass = flipped ? "flipped" : "";
   const charSVG = getCharSVG(card.roleName, card.role, card.charVariant || 0);
   const displayName = translateRole(card.roleName);
-  const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : '<div class="citizen-sparks"></div>';
+  const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : card.role === "independent" ? '<div class="citizen-sparks"></div>' : '<div class="citizen-sparks"></div>';
   const delay = (card.charVariant || 0) * 0.4;
   return `
     <div class="card ${flippedClass}" data-num="${card.number}">
@@ -191,21 +192,30 @@ function buildCard(card, flipped = false) {
 function revealAll() {
   const mafias = state.cards.filter(c => c.role === "mafia").sort((a, b) => a.number - b.number);
   const citizens = state.cards.filter(c => c.role === "citizen").sort((a, b) => a.number - b.number);
-  document.getElementById("revealContent").innerHTML = `
-    <div class="summary-grid">
-      <div class="summary-col mafia-col">
-        <h4>😈 مافیا (${toFarsiNum(mafias.length)} نفر)</h4>
-        <ul class="summary-list mafia-list">
-          ${mafias.map(c => `<li>${ROLE_ICONS[c.roleName] || "🔴"} ${translateRole(c.roleName)} — #${toFarsiNum(c.number)}</li>`).join("")}
-        </ul>
-      </div>
-      <div class="summary-col citizen-col">
-        <h4>😇 شهروند (${toFarsiNum(citizens.length)} نفر)</h4>
-        <ul class="summary-list citizen-list">
-          ${citizens.map(c => `<li>${ROLE_ICONS[c.roleName] || "🟢"} ${translateRole(c.roleName)} — #${toFarsiNum(c.number)}</li>`).join("")}
-        </ul>
-      </div>
+  const independents = state.cards.filter(c => c.role === "independent").sort((a, b) => a.number - b.number);
+  let html = `<div class="summary-grid">
+    <div class="summary-col mafia-col">
+      <h4>😈 مافیا (${toFarsiNum(mafias.length)} نفر)</h4>
+      <ul class="summary-list mafia-list">
+        ${mafias.map(c => `<li>${ROLE_ICONS[c.roleName] || "🔴"} ${translateRole(c.roleName)} — #${toFarsiNum(c.number)}</li>`).join("")}
+      </ul>
+    </div>
+    <div class="summary-col citizen-col">
+      <h4>😇 شهروند (${toFarsiNum(citizens.length)} نفر)</h4>
+      <ul class="summary-list citizen-list">
+        ${citizens.map(c => `<li>${ROLE_ICONS[c.roleName] || "🟢"} ${translateRole(c.roleName)} — #${toFarsiNum(c.number)}</li>`).join("")}
+      </ul>
     </div>`;
+  if (independents.length) {
+    html += `<div class="summary-col" style="grid-column:1/-1">
+      <h4 style="color:#c084fc">🐺 مستقل (${toFarsiNum(independents.length)} نفر)</h4>
+      <ul class="summary-list" style="gap:5px">
+        ${independents.map(c => `<li style="background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.2);color:#d8b4fe">${ROLE_ICONS[c.roleName] || "🟣"} ${translateRole(c.roleName)} — #${toFarsiNum(c.number)}</li>`).join("")}
+      </ul>
+    </div>`;
+  }
+  html += `</div>`;
+  document.getElementById("revealContent").innerHTML = html;
   document.getElementById("revealOverlay").classList.add("show");
 }
 

@@ -80,6 +80,19 @@
   background: radial-gradient(ellipse at 50% 100%, rgba(0,120,80,.25) 0%, transparent 65%); pointer-events: none;
 }
 
+/* ── Independent card ── */
+.card-front.independent {
+  background: radial-gradient(ellipse at 50% 0%, #1a0030 0%, #0d0018 50%, #080010 100%);
+  border: 1.5px solid rgba(180,100,255,.35);
+  box-shadow: 0 0 40px rgba(150,80,230,.25), inset 0 0 50px rgba(0,0,0,.5);
+}
+.card-front.independent::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(120,60,200,.25) 0%, transparent 65%); pointer-events: none;
+}
+.independent .card-role-name { color: #d8b4fe; text-shadow: 0 0 10px #9333ea; }
+.independent .card-role-num { color: rgba(180,140,255,.65); }
+
 /* ── Character SVG wrapper ── */
 .char-wrap { position: relative; z-index: 2; width: 72px; height: 88px; animation: charFloat 3.2s ease-in-out infinite; }
 .char-wrap svg { width: 100%; height: 100%; overflow: visible; }

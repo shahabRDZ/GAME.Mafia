@@ -46,7 +46,7 @@ const MAFIA_TEXTS = [
 ];
 
 function getRandomFunny(role) {
-  const list = role === "mafia" ? MAFIA_TEXTS : CITIZEN_TEXTS;
+  const list = role === "mafia" ? MAFIA_TEXTS : role === "independent" ? MAFIA_TEXTS : CITIZEN_TEXTS;
   return list[Math.floor(Math.random() * list.length)];
 }
 
