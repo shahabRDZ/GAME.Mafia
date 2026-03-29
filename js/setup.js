@@ -155,6 +155,8 @@ function selectGroup(group) {
     cf.classList.add("show");
     cc.style.display = "none";
     customCardsList = [];
+    selectedTeam = "mafia";
+    setTeam("mafia");
     buildCatalog();
     renderRoleCatalog();
     renderCustomCardsList();
@@ -228,7 +230,7 @@ function renderCustomCardsList() {
   }
 
   const teamIcons = { mafia: "😈", citizen: "😇", independent: "🐺" };
-  const teamLabels = { mafia: t("mafia"), citizen: t("citizen"), independent: "مستقل" };
+  const teamLabels = { mafia: t("mafia"), citizen: t("citizen"), independent: currentLang === "en" ? "Independent" : currentLang === "tr" ? "Bağımsız" : "مستقل" };
 
   container.innerHTML = customCardsList.map((c, i) => `
     <div class="custom-card-item ${c.team}-item">
