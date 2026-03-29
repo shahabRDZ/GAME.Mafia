@@ -73,3 +73,80 @@
 .card-entering { animation: cardEnter .4s cubic-bezier(.34,1.56,.64,1) forwards; }
 .card-exiting { animation: cardExit .3s ease-in forwards; pointer-events: none; }
 .start-btn-pop { animation: startPop .5s cubic-bezier(.34,1.56,.64,1) forwards, startGlow 2s ease-in-out .5s infinite; }
+
+/* ── Funny text + icon animations ── */
+@keyframes funSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes funBounce {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-6px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-3px); }
+}
+@keyframes funShake {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-8deg); }
+  40% { transform: rotate(8deg); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(5deg); }
+}
+@keyframes funFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes funSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes funFlicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .6; transform: scale(.92); }
+}
+@keyframes funSwing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(12deg); }
+  75% { transform: rotate(-12deg); }
+}
+@keyframes funPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+@keyframes funTilt {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  33% { transform: rotate(-10deg) scale(1.05); }
+  66% { transform: rotate(10deg) scale(1.05); }
+}
+@keyframes funFlash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.funny-container {
+  margin-top: 18px; text-align: center;
+  animation: funSlideUp .5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.funny-inner {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 20px; border-radius: 50px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: blur(8px); font-size: .88rem; font-weight: 700;
+  letter-spacing: .5px;
+}
+.funny-inner:hover {
+  transform: scale(1.05); background: rgba(255,255,255,.1);
+  transition: all .2s ease;
+}
+.funny-icon-wrap { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; }
+.fun-icon { width: 22px; height: 22px; }
+.fun-bounce { animation: funBounce 1.5s ease-in-out infinite; }
+.fun-shake { animation: funShake 1.2s ease-in-out infinite; }
+.fun-float { animation: funFloat 2.5s ease-in-out infinite; }
+.fun-spin { animation: funSpin 4s linear infinite; }
+.fun-flicker { animation: funFlicker 1.8s ease-in-out infinite; }
+.fun-swing { animation: funSwing 2s ease-in-out infinite; }
+.fun-pulse { animation: funPulse 1.5s ease-in-out infinite; }
+.fun-tilt { animation: funTilt 2s ease-in-out infinite; }
+.fun-flash { animation: funFlash 1s ease-in-out infinite; }
+.fun-flicker-dot { animation: funFlicker .8s ease-in-out infinite; }

@@ -109,6 +109,8 @@ function flipCurrentCard(e, card) {
   cardEl.classList.add("flipped");
   state.seen.add(card.number);
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
+  // Show funny text after flip
+  setTimeout(() => showFunnyText(card), 500);
   setTimeout(() => {
     const front = cardEl.querySelector(".card-front");
     if (front) {
@@ -121,6 +123,8 @@ function flipCurrentCard(e, card) {
 }
 
 function nextCard() {
+  const funny = document.querySelector(".funny-container");
+  if (funny) funny.remove();
   const slot = document.getElementById("cardSlot");
   const wrapper = slot.querySelector(".big-card-wrapper");
   if (wrapper) { wrapper.classList.remove("card-entering"); wrapper.classList.add("card-exiting"); }

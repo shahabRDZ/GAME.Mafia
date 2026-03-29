@@ -62,20 +62,21 @@
     ctx.moveTo(s * .15, -s * .2);
     ctx.quadraticCurveTo(0, -s * .55, -s * .15, -s * .2);
 
-    const alphas = [.25, .5, .8];
-    const blurs = [4, 2, 0];
-    const a = alphas[layer] || .5;
-    ctx.fillStyle = `rgba(30,10,15,${a})`;
-    ctx.shadowColor = `rgba(80,10,10,${a * .4})`;
-    ctx.shadowBlur = blurs[layer] || 2;
+    const alphas = [.15, .35, .6];
+    const blurs = [6, 3, 0];
+    const a = alphas[layer] || .35;
+    // Light color so creatures are visible on black background
+    ctx.fillStyle = `rgba(180,160,170,${a})`;
+    ctx.shadowColor = `rgba(200,50,50,${a * .3})`;
+    ctx.shadowBlur = blurs[layer] || 3;
     ctx.fill();
 
     // Red eye glow for mid and foreground creatures
     if (layer >= 1) {
-      const eyeAlpha = layer === 2 ? .7 : .35;
-      const eyeSize = layer === 2 ? s * .08 : s * .05;
+      const eyeAlpha = layer === 2 ? .9 : .5;
+      const eyeSize = layer === 2 ? s * .1 : s * .06;
       ctx.beginPath(); ctx.arc(-s * .04, -s * .28, eyeSize, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,30,30,${eyeAlpha})`; ctx.shadowColor = `rgba(255,0,0,${eyeAlpha})`; ctx.shadowBlur = 6; ctx.fill();
+      ctx.fillStyle = `rgba(255,40,40,${eyeAlpha})`; ctx.shadowColor = `rgba(255,0,0,${eyeAlpha})`; ctx.shadowBlur = 8; ctx.fill();
     }
     ctx.restore();
   }
