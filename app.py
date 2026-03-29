@@ -623,6 +623,39 @@ def handle_vote(data):
         resolve_votes(code)
 
 
+# ── End Discussion Vote ──────────────────────────────────────────────────────
+
+end_discussion_votes = {}  # room_code -> set of user_ids
+
+@socketio.on("vote_end_discussion")
+def handle_vote_end(data):
+    code = (data.get("code") or "").upper()
+    info = sid_to_user.get(request.sid)
+    if not info:
+        return
+    room = ChaosRoom.query.filter_by(code=code, status="playing").first()
+    if not room or room.phase != "discussion":
+        return
+    if code not in end_discussion_votes:
+        end_discussion_votes[code] = set()
+    end_discussion_votes[code].add(info["user_id"])
+    count = len(end_discussion_votes[code])
+    socketio.emit("end_vote_update", {"count": count}, to=code)
+    # If 2 out of 3 voted, skip to voting phase
+    if count >= 2:
+        end_discussion_votes.pop(code, None)
+        # Force transition to voting
+        room.phase = "voting"
+        room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=90)
+        for p in room.players:
+            p.vote_target_id = None
+        db.session.commit()
+        socketio.emit("phase_change", {
+            "phase": "voting",
+            "phase_end_at": room.phase_end_at.isoformat()
+        }, to=code)
+
+
 # ── Room Invitation ──────────────────────────────────────────────────────────
 
 @socketio.on("invite_to_room")

@@ -56,6 +56,11 @@ function initSocket() {
   });
 
   socket.on("vote_update", (data) => { if (data) updateVoteStatus(data); });
+  socket.on("end_vote_update", (data) => {
+    if (!data) return;
+    const el = document.getElementById("endVoteCount");
+    if (el) el.textContent = `${data.count}/۲ رأی پایان`;
+  });
   socket.on("game_result", (data) => { if (data) { chaosState.phase = "result"; renderGameResult(data); } });
   socket.on("friend_request", (data) => { if (data?.from) showToast("📩 درخواست دوستی از " + data.from.username); });
 

@@ -114,6 +114,14 @@ function inviteToRoom(userId, username) {
   showToast("📩 دعوت به " + username + " ارسال شد");
 }
 
+function voteEndDiscussion() {
+  if (chaosState.votedEnd || !socket || !chaosState.roomCode) return;
+  chaosState.votedEnd = true;
+  socket.emit("vote_end_discussion", { code: chaosState.roomCode });
+  const btn = document.getElementById("endVoteBtn");
+  if (btn) { btn.textContent = "✅ رأی داده‌اید"; btn.disabled = true; btn.style.opacity = ".5"; }
+}
+
 function resetChaosState() {
   chaosState = { roomCode: null, players: [], myRole: null, phase: null,
                  phaseEndAt: null, messages: [], isHost: false, myVote: null };
@@ -200,9 +208,14 @@ function renderChaosGame() {
       <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️</button>
       ${voiceEnabled ? '<button class="voice-btn voice-muted" onclick="stopVoiceChat()" style="padding:8px 10px">🔴</button>' : ''}
     </div>
+    <div class="end-vote-bar" id="endVoteBar">
+      <button class="end-vote-btn" id="endVoteBtn" onclick="voteEndDiscussion()">⏩ پایان بحث</button>
+      <span class="end-vote-count" id="endVoteCount"></span>
+    </div>
     <div class="vote-area" id="voteArea" style="display:none"></div>
     <div class="result-area" id="resultArea" style="display:none"></div>
   `;
+  chaosState.votedEnd = false;
   startPhaseTimer();
 }
 
@@ -210,6 +223,8 @@ function renderPhaseChange(phase) {
   if (phase === "voting") {
     document.getElementById("phaseLabel").textContent = "رأی‌گیری";
     document.getElementById("chatInputBar").style.display = "none";
+    const endBar = document.getElementById("endVoteBar");
+    if (endBar) endBar.style.display = "none";
     const myId = currentUser ? currentUser.id : 0;
     document.getElementById("voteArea").style.display = "flex";
     chaosState.selectedVote = null;
