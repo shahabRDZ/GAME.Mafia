@@ -343,11 +343,11 @@
   // Mid
   for (let i = 0; i < 4; i++) creatures.push(new Creature(1, "bat"));
   for (let i = 0; i < 3; i++) creatures.push(new Creature(1, "spider-walk"));
-  for (let i = 0; i < 3; i++) creatures.push(new Creature(1, "spider-hang"));
+  for (let i = 0; i < 2; i++) creatures.push(new Creature(1, "spider-hang"));
   // Foreground
   for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "bat"));
   for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "spider-walk"));
-  for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "spider-hang"));
+  for (let i = 0; i < 1; i++) creatures.push(new Creature(2, "spider-hang"));
 
   // ── Render loop ──
   let lastTime = 0;
