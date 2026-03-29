@@ -10,6 +10,7 @@ function initSocket() {
 
   socket.on("connect", () => {
     console.log("WebSocket connected");
+    setupVoiceSocketEvents();
   });
 
   socket.on("disconnect", () => {

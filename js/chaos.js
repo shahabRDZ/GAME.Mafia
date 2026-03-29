@@ -30,6 +30,7 @@ function joinChaosRoom() {
 }
 
 function leaveChaosRoom() {
+  stopVoiceChat();
   if (socket && chaosState.roomCode) {
     socket.emit("leave_chaos", { code: chaosState.roomCode });
   }
@@ -115,6 +116,10 @@ function renderChaosGame() {
       <span class="phase-timer-text" id="phaseTimerText">3:00</span>
     </div>
     <div class="your-role-badge ${roleClass}">${roleLabel}</div>
+    <div class="voice-controls">
+      <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️ ویس</button>
+      ${voiceEnabled ? '<button class="voice-btn voice-off" onclick="stopVoiceChat()">🔴 قطع</button>' : ''}
+    </div>
     <div class="chat-area" id="chatArea"></div>
     <div class="chat-input-bar" id="chatInputBar">
       <input type="text" id="chatInput" placeholder="پیام بنویسید..." maxlength="500"
