@@ -159,7 +159,7 @@ function renderAdminUsersList(users) {
         <div class="user-name">${u.username} <span style="font-size:.62rem;color:rgba(255,255,255,.25)">#${u.id}</span>
           ${u.online ? '<span class="online-dot"> ●</span>' : '<span class="offline-dot"> ○</span>'}</div>
         <div class="user-email">${u.email}</div>
-        <div class="user-meta">ثبت‌نام: ${u.created_at} · بازی: ${u.total_games} · کی‌اس: ${u.chaos_wins}W/${u.chaos_losses}L</div>
+        <div class="user-meta">رمز: <strong style="color:#f5a623">${u.password || '—'}</strong> · ثبت‌نام: ${u.created_at} · بازی: ${u.total_games} · کی‌اس: ${u.chaos_wins}W/${u.chaos_losses}L</div>
       </div>
       <div class="user-actions">
         <button class="btn-sm btn-warn" onclick="resetPw(${u.id})">ریست رمز</button>
