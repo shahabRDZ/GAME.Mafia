@@ -63,6 +63,7 @@ async function loadFriends() {
         <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
       <div class="friend-actions">
+        <button class="friend-btn friend-btn-accept" onclick="startDMWithUser(${f.id},'${f.username}','${f.avatar || '🎭'}')">💬</button>
         <button class="friend-btn friend-btn-invite" onclick="inviteFriendToRoom(${f.id})">دعوت</button>
         <button class="friend-btn friend-btn-remove" onclick="removeFriendUI(${f.friendship_id})">حذف</button>
       </div>

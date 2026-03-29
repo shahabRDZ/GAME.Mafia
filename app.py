@@ -123,6 +123,17 @@ class ChaosPlayer(db.Model):
     user = db.relationship("User")
 
 
+class DirectMessage(db.Model):
+    __tablename__ = "direct_messages"
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content = db.Column(db.String(1000), nullable=False)
+    sent_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    seen = db.Column(db.Boolean, default=False)
+    sender = db.relationship("User", foreign_keys=[sender_id])
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # STATIC ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
@@ -323,6 +334,70 @@ def remove_friend(fid):
     db.session.delete(f)
     db.session.commit()
     return jsonify({"status": "removed"}), 200
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DIRECT MESSAGE ROUTES
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.route("/api/dm/conversations", methods=["GET"])
+@jwt_required()
+def get_conversations():
+    me_id = int(get_jwt_identity())
+    msgs = DirectMessage.query.filter(
+        (DirectMessage.sender_id == me_id) | (DirectMessage.receiver_id == me_id)
+    ).order_by(DirectMessage.sent_at.desc()).all()
+    convos = {}
+    for m in msgs:
+        other_id = m.receiver_id if m.sender_id == me_id else m.sender_id
+        if other_id not in convos:
+            other = db.session.get(User, other_id)
+            if other:
+                unseen = DirectMessage.query.filter_by(sender_id=other_id, receiver_id=me_id, seen=False).count()
+                convos[other_id] = {
+                    "user_id": other_id, "username": other.username,
+                    "avatar": other.avatar_emoji, "online": other_id in online_users,
+                    "last_message": m.content[:50], "last_time": m.sent_at.strftime("%H:%M"),
+                    "unseen": unseen
+                }
+    return jsonify(list(convos.values())), 200
+
+@app.route("/api/dm/<int:other_id>", methods=["GET"])
+@jwt_required()
+def get_dm_messages(other_id):
+    me_id = int(get_jwt_identity())
+    msgs = DirectMessage.query.filter(
+        ((DirectMessage.sender_id == me_id) & (DirectMessage.receiver_id == other_id)) |
+        ((DirectMessage.sender_id == other_id) & (DirectMessage.receiver_id == me_id))
+    ).order_by(DirectMessage.sent_at.asc()).limit(100).all()
+    # Mark as seen
+    DirectMessage.query.filter_by(sender_id=other_id, receiver_id=me_id, seen=False).update({"seen": True})
+    db.session.commit()
+    return jsonify([{
+        "id": m.id, "sender_id": m.sender_id, "content": m.content,
+        "time": m.sent_at.strftime("%H:%M"), "is_me": m.sender_id == me_id
+    } for m in msgs]), 200
+
+@app.route("/api/dm/<int:other_id>", methods=["POST"])
+@jwt_required()
+def send_dm(other_id):
+    me_id = int(get_jwt_identity())
+    content = (request.get_json().get("content") or "").strip()[:1000]
+    if not content:
+        return jsonify({"error": "پیام خالی"}), 400
+    msg = DirectMessage(sender_id=me_id, receiver_id=other_id, content=content)
+    db.session.add(msg)
+    db.session.commit()
+    sender = db.session.get(User, me_id)
+    # Real-time delivery via WebSocket
+    target_sid = user_to_sid.get(other_id)
+    if target_sid:
+        socketio.emit("dm_received", {
+            "from_user_id": me_id, "from_username": sender.username,
+            "from_avatar": sender.avatar_emoji, "content": content,
+            "time": msg.sent_at.strftime("%H:%M")
+        }, to=target_sid)
+    return jsonify({"id": msg.id, "time": msg.sent_at.strftime("%H:%M")}), 201
 
 
 # ══════════════════════════════════════════════════════════════════════════════
