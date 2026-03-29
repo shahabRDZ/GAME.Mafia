@@ -177,6 +177,28 @@
 }
 .search-result-item:hover { background: rgba(255,255,255,.06); }
 
+/* ── Player Circles ── */
+.players-circles { display: flex; justify-content: center; gap: 16px; margin: 12px 0; }
+.player-circle {
+  width: 80px; text-align: center; position: relative;
+}
+.pc-avatar {
+  width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; background: rgba(255,255,255,.06);
+  border: 3px solid rgba(255,255,255,.12); transition: all .3s;
+}
+.pc-name { font-size: .7rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-circle.speaking .pc-avatar {
+  border-color: #44ff99;
+  box-shadow: 0 0 0 4px rgba(68,255,153,.2), 0 0 20px rgba(68,255,153,.3);
+  animation: speakPulse 1s ease-in-out infinite;
+}
+@keyframes speakPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(68,255,153,.2), 0 0 20px rgba(68,255,153,.3); }
+  50% { box-shadow: 0 0 0 8px rgba(68,255,153,.1), 0 0 30px rgba(68,255,153,.4); }
+}
+
 /* ── Voice Chat ── */
 .voice-controls { display: flex; gap: 6px; margin-bottom: 10px; }
 .voice-btn {
