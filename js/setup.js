@@ -28,6 +28,8 @@ function selectGroup(group) {
         <span class="breakdown"><span class="m">${toFarsiNum(ROLE_MAP[c].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[c].citizen)} ${t("citizen")}</span></span>
       </button>`).join("");
     cc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Show scenario tutorial overlay
+    if (SCENARIO_INFO[group]) openScenarioOverlay(group);
   }
 }
 

@@ -1,3 +1,83 @@
+/* ── Scenario Overlay ── */
+.scenario-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 600;
+  align-items: flex-start; justify-content: center; backdrop-filter: blur(14px);
+  overflow-y: auto; padding: 30px 16px;
+}
+.scenario-overlay.show { display: flex; }
+.scenario-box {
+  background: #0c0c1a; border: 1px solid rgba(255,255,255,.1); border-radius: 26px;
+  padding: 0; max-width: 520px; width: 100%; animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+  overflow: hidden;
+}
+.scn-header {
+  text-align: center; padding: 32px 24px 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.scn-icon { font-size: 3rem; margin-bottom: 8px; }
+.scn-title { font-size: 1.35rem; font-weight: 900; color: var(--scn-color, var(--accent)); margin-bottom: 4px; }
+.scn-subtitle { font-size: .78rem; color: var(--dim); letter-spacing: 1px; }
+.scn-intro {
+  padding: 18px 24px; font-size: .84rem; line-height: 1.7; color: rgba(255,255,255,.7);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.scn-section { border-bottom: 1px solid rgba(255,255,255,.05); }
+.scn-toggle {
+  width: 100%; padding: 14px 24px; background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 10px; font-family: inherit; font-size: .9rem;
+  font-weight: 700; color: var(--text); transition: background .2s;
+}
+.scn-toggle:hover { background: rgba(255,255,255,.03); }
+.scn-toggle-icon {
+  font-size: .65rem; transition: transform .3s; display: inline-block; color: var(--accent2);
+}
+.scn-section.open .scn-toggle-icon { transform: rotate(90deg); }
+.scn-expand {
+  max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s ease;
+  padding: 0 24px;
+}
+.scn-section.open .scn-expand { max-height: 600px; padding: 0 24px 16px; }
+.scn-flow, .scn-rules {
+  padding-right: 18px; display: flex; flex-direction: column; gap: 6px;
+  font-size: .82rem; color: rgba(255,255,255,.65); line-height: 1.6;
+}
+.scn-flow li::marker { color: var(--accent2); font-weight: 700; }
+.scn-rules { list-style: none; padding: 0; }
+.scn-rules li { padding: 6px 10px; background: rgba(255,255,255,.03); border-radius: 8px; }
+.scn-rules li::before { content: "• "; color: var(--accent); font-weight: 900; }
+.scn-quorum { display: flex; gap: 10px; flex-wrap: wrap; }
+.scn-q-item {
+  flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  text-align: center; display: flex; flex-direction: column; gap: 4px;
+}
+.scn-q-range { font-size: .75rem; color: var(--dim); }
+.scn-q-votes { font-size: 1.1rem; font-weight: 900; color: var(--accent2); }
+.scn-roles { display: flex; flex-direction: column; gap: 8px; }
+.scn-role-card {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px;
+  transition: transform .2s, box-shadow .2s;
+}
+.scn-role-card:hover { transform: translateX(-4px); }
+.mafia-rc { background: rgba(233,69,96,.08); border: 1px solid rgba(233,69,96,.18); }
+.mafia-rc:hover { box-shadow: 0 4px 16px rgba(233,69,96,.15); }
+.citizen-rc { background: rgba(74,222,128,.06); border: 1px solid rgba(74,222,128,.14); }
+.citizen-rc:hover { box-shadow: 0 4px 16px rgba(74,222,128,.12); }
+.scn-role-icon { font-size: 1.4rem; flex-shrink: 0; }
+.scn-role-info { flex: 1; }
+.scn-role-name { font-size: .88rem; font-weight: 700; }
+.mafia-rc .scn-role-name { color: #ff7777; }
+.citizen-rc .scn-role-name { color: #86efac; }
+.scn-role-desc { font-size: .72rem; color: var(--dim); margin-top: 2px; }
+.scn-proceed-btn {
+  display: block; width: calc(100% - 48px); margin: 20px 24px 24px; padding: 15px;
+  background: linear-gradient(135deg, #e94560, #c0392b); border: none; border-radius: 14px;
+  color: #fff; font-family: inherit; font-size: 1rem; font-weight: 900; cursor: pointer;
+  letter-spacing: 1px; transition: all .3s; position: relative; overflow: hidden;
+}
+.scn-proceed-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(233,69,96,.4); }
+
 /* ── Auth bar ── */
 .auth-bar { display: flex; align-items: center; gap: 10px; padding: 10px 18px; margin-bottom: 16px; }
 .auth-bar .user-info { flex: 1; display: flex; align-items: center; gap: 10px; }
