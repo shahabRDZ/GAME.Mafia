@@ -80,12 +80,12 @@ def index():
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
-    return send_from_directory("css", filename)
+    return send_from_directory(os.path.join(app.root_path, "css"), filename)
 
 
 @app.route("/js/<path:filename>")
 def serve_js(filename):
-    return send_from_directory("js", filename)
+    return send_from_directory(os.path.join(app.root_path, "js"), filename)
 
 
 # ── Routes: Auth ─────────────────────────────────────────────────────────────
