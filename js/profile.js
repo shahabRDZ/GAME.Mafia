@@ -19,8 +19,8 @@ async function renderProfileScreen() {
     <div class="profile-id">ID: ${u.id}</div>
     <div class="profile-bio">${u.bio || 'بیو ندارید'}</div>
     <div class="profile-stats">
-      <div class="profile-stat wins"><span class="profile-stat-num">${toFarsiNum(u.chaos_wins || 0)}</span><span class="profile-stat-label">برد CHAOS</span></div>
-      <div class="profile-stat losses"><span class="profile-stat-num">${toFarsiNum(u.chaos_losses || 0)}</span><span class="profile-stat-label">باخت CHAOS</span></div>
+      <div class="profile-stat wins"><span class="profile-stat-num">${toFarsiNum(u.chaos_wins || 0)}</span><span class="profile-stat-label">برد کی‌اس</span></div>
+      <div class="profile-stat losses"><span class="profile-stat-num">${toFarsiNum(u.chaos_losses || 0)}</span><span class="profile-stat-label">باخت کی‌اس</span></div>
       <div class="profile-stat"><span class="profile-stat-num">${toFarsiNum(u.total_games || 0)}</span><span class="profile-stat-label">بازی آفلاین</span></div>
     </div>
     <div class="profile-edit-row">

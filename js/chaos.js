@@ -55,6 +55,15 @@ function sendChaosMessage() {
   input.focus();
 }
 
+function sendLobbyChatMessage() {
+  const input = document.getElementById("lobbyChatInput");
+  const text = input.value.trim();
+  if (!text || !socket) return;
+  socket.emit("chat_message", { code: chaosState.roomCode, content: text });
+  input.value = "";
+  input.focus();
+}
+
 function castChaosVote(targetUserId) {
   if (chaosState.myVote) return;
   chaosState.myVote = targetUserId;
@@ -76,6 +85,9 @@ function renderChaosLobby(data) {
   document.getElementById("chaosLobby").style.display = "block";
   const isHost = data.host_id === (currentUser && currentUser.id);
 
+  // Keep chat messages if they exist
+  const oldMessages = document.getElementById("lobbyChatArea")?.innerHTML || "";
+
   document.getElementById("chaosLobby").innerHTML = `
     <div class="room-code-display" onclick="navigator.clipboard.writeText('${data.code}');showToast('📋 کد کپی شد')">${data.code}</div>
     <div class="room-code-label">کد اتاق — برای کپی کلیک کنید</div>
@@ -93,12 +105,22 @@ function renderChaosLobby(data) {
              </div>`;
       }).join("")}
     </div>
+    <div class="voice-controls" style="justify-content:center;margin:10px 0">
+      <button class="voice-btn voice-off" id="voiceToggleBtn" onclick="voiceEnabled ? toggleVoiceMute() : startVoiceChat()">🎙️ ویس</button>
+      ${voiceEnabled ? '<button class="voice-btn voice-muted" onclick="stopVoiceChat()">🔴 قطع ویس</button>' : ''}
+    </div>
+    <div class="chat-area" id="lobbyChatArea" style="max-height:180px;min-height:100px">${oldMessages}</div>
+    <div class="chat-input-bar">
+      <input type="text" id="lobbyChatInput" placeholder="پیام..." maxlength="500"
+        onkeydown="if(event.key==='Enter')sendLobbyChatMessage()">
+      <button onclick="sendLobbyChatMessage()">ارسال</button>
+    </div>
     ${isHost && data.players.length === 3
-      ? '<button class="chaos-btn" onclick="startChaosGame()">🎮 شروع CHAOS</button>'
+      ? '<button class="chaos-btn" onclick="startChaosGame()" style="margin-top:12px">🎮 شروع کی‌اس</button>'
       : isHost
         ? '<p style="color:var(--dim);font-size:.82rem;margin-top:10px">منتظر ورود بازیکنان... ('+toFarsiNum(data.players.length)+'/۳)</p>'
         : '<p style="color:var(--dim);font-size:.82rem;margin-top:10px">منتظر شروع توسط میزبان...</p>'}
-    <button class="chaos-btn secondary" onclick="leaveChaosRoom()" style="margin-top:10px">خروج از اتاق</button>
+    <button class="chaos-btn secondary" onclick="leaveChaosRoom()" style="margin-top:8px">خروج از اتاق</button>
   `;
 }
 
@@ -176,7 +198,8 @@ function renderGameResult(data) {
 }
 
 function appendChatMessage(data) {
-  const area = document.getElementById("chatArea");
+  // Try game chat area first, then lobby chat area
+  const area = document.getElementById("chatArea") || document.getElementById("lobbyChatArea");
   if (!area) return;
   const isSelf = currentUser && data.user_id === currentUser.id;
   area.innerHTML += `
