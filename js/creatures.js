@@ -29,55 +29,99 @@
     });
   }
 
-  // ── Creature silhouette drawing ──
+  // ── Spider drawing ──
   function drawCreature(x, y, size, angle, wingPhase, layer, flip) {
     ctx.save();
-    ctx.translate(x, y); ctx.rotate(angle);
+    ctx.translate(x, y);
     if (flip) ctx.scale(-1, 1);
     const s = size;
+    const legWave = Math.sin(wingPhase) * 0.3;
 
+    const alphas = [.2, .45, .75];
+    const a = alphas[layer] || .45;
+    ctx.strokeStyle = `rgba(220,200,210,${a})`;
+    ctx.fillStyle = `rgba(200,180,190,${a})`;
+    ctx.shadowColor = `rgba(255,50,50,${a * .3})`;
+    ctx.shadowBlur = layer === 0 ? 4 : 1;
+    ctx.lineWidth = s * .12;
+    ctx.lineCap = "round";
+
+    // 8 legs (4 per side, curved with animation)
+    const legAngles = [-0.9, -0.4, 0.1, 0.6];
+    const legLengths = [2.2, 2.5, 2.5, 2.0];
+    for (let i = 0; i < 4; i++) {
+      const la = legAngles[i];
+      const ll = legLengths[i] * s;
+      const wave = legWave * (i % 2 === 0 ? 1 : -1);
+      // Right leg
+      ctx.beginPath();
+      ctx.moveTo(s * .35, la * s * .3);
+      const kneeX = s * .35 + Math.cos(la + wave) * ll * .5;
+      const kneeY = la * s * .3 + Math.sin(la + wave) * ll * .5;
+      const footX = kneeX + Math.cos(la + .8 + wave * .5) * ll * .5;
+      const footY = kneeY + Math.sin(la + .8 + wave * .5) * ll * .5;
+      ctx.quadraticCurveTo(kneeX, kneeY, footX, footY);
+      ctx.stroke();
+      // Left leg (mirrored)
+      ctx.beginPath();
+      ctx.moveTo(-s * .35, la * s * .3);
+      ctx.quadraticCurveTo(-kneeX, kneeY, -footX, footY);
+      ctx.stroke();
+    }
+
+    // Body (abdomen - larger back)
     ctx.beginPath();
-    ctx.ellipse(0, 0, s * 1.1, s * .32, 0, 0, Math.PI * 2);
-
-    const wUp = Math.sin(wingPhase) * s * 1.2;
-    const wMid = Math.sin(wingPhase + .4) * s * .7;
-
-    // Left wing
-    ctx.moveTo(-s * .2, 0);
-    ctx.bezierCurveTo(-s * .7, -wMid * .5, -s * 1.6, -wUp * .8, -s * 2.2, -wUp);
-    ctx.bezierCurveTo(-s * 2.4, -wUp * .6, -s * 2.1, -wUp * .2, -s * 1.8, s * .1);
-    ctx.bezierCurveTo(-s * 1.3, s * .15, -s * .6, s * .08, -s * .2, 0);
-
-    // Right wing
-    ctx.moveTo(s * .2, 0);
-    ctx.bezierCurveTo(s * .7, -wMid * .5, s * 1.6, -wUp * .8, s * 2.2, -wUp);
-    ctx.bezierCurveTo(s * 2.4, -wUp * .6, s * 2.1, -wUp * .2, s * 1.8, s * .1);
-    ctx.bezierCurveTo(s * 1.3, s * .15, s * .6, s * .08, s * .2, 0);
-
-    // Tail
-    ctx.moveTo(-s * .3, s * .25);
-    ctx.quadraticCurveTo(0, s * .8, s * .3, s * .25);
-
-    // Head
-    ctx.moveTo(s * .15, -s * .2);
-    ctx.quadraticCurveTo(0, -s * .55, -s * .15, -s * .2);
-
-    const alphas = [.3, .55, .85];
-    const blurs = [4, 2, 0];
-    const a = alphas[layer] || .55;
-    // White-ish silhouette visible on any background
-    ctx.fillStyle = `rgba(220,210,215,${a})`;
-    ctx.shadowColor = `rgba(255,80,80,${a * .4})`;
-    ctx.shadowBlur = blurs[layer] || 2;
+    ctx.ellipse(0, s * .3, s * .5, s * .6, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Red eye glow for mid and foreground creatures
+    // Cephalothorax (head - smaller front)
+    ctx.beginPath();
+    ctx.ellipse(0, -s * .25, s * .35, s * .3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Red hourglass marking on abdomen (like black widow)
     if (layer >= 1) {
-      const eyeAlpha = layer === 2 ? .9 : .5;
-      const eyeSize = layer === 2 ? s * .1 : s * .06;
-      ctx.beginPath(); ctx.arc(-s * .04, -s * .28, eyeSize, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,40,40,${eyeAlpha})`; ctx.shadowColor = `rgba(255,0,0,${eyeAlpha})`; ctx.shadowBlur = 8; ctx.fill();
+      const markAlpha = layer === 2 ? .8 : .4;
+      ctx.fillStyle = `rgba(255,30,30,${markAlpha})`;
+      ctx.shadowColor = `rgba(255,0,0,${markAlpha})`;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(0, s * .15);
+      ctx.lineTo(s * .12, s * .3);
+      ctx.lineTo(0, s * .35);
+      ctx.lineTo(-s * .12, s * .3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0, s * .35);
+      ctx.lineTo(s * .12, s * .42);
+      ctx.lineTo(0, s * .5);
+      ctx.lineTo(-s * .12, s * .42);
+      ctx.closePath();
+      ctx.fill();
     }
+
+    // Eyes (8 tiny dots in 2 rows)
+    const eyeAlpha = layer === 2 ? .9 : layer === 1 ? .5 : .2;
+    ctx.fillStyle = `rgba(255,40,40,${eyeAlpha})`;
+    ctx.shadowColor = `rgba(255,0,0,${eyeAlpha})`;
+    ctx.shadowBlur = 4;
+    const eyeR = s * .06;
+    // Top row (4 eyes)
+    for (let ex = -1.5; ex <= 1.5; ex += 1) {
+      ctx.beginPath(); ctx.arc(ex * s * .1, -s * .4, eyeR, 0, Math.PI * 2); ctx.fill();
+    }
+    // Bottom row (4 eyes)
+    for (let ex = -1; ex <= 1; ex += 0.67) {
+      ctx.beginPath(); ctx.arc(ex * s * .08, -s * .32, eyeR * .7, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Fangs
+    ctx.strokeStyle = `rgba(220,200,210,${a})`;
+    ctx.lineWidth = s * .08;
+    ctx.beginPath(); ctx.moveTo(-s * .08, -s * .45); ctx.lineTo(-s * .12, -s * .58); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(s * .08, -s * .45); ctx.lineTo(s * .12, -s * .58); ctx.stroke();
+
     ctx.restore();
   }
 
@@ -85,9 +129,9 @@
   class Creature {
     constructor(layer) {
       this.layer = layer;
-      const scales = [.7, 1.2, 2];
-      this.baseSize = (Math.random() * 6 + 5) * scales[layer];
-      this.wingSpeed = Math.random() * .04 + .03 + (layer === 0 ? .0 : layer === 2 ? .015 : 0);
+      const scales = [.5, .9, 1.5];
+      this.baseSize = (Math.random() * 4 + 4) * scales[layer];
+      this.wingSpeed = Math.random() * .06 + .04 + (layer === 0 ? .0 : layer === 2 ? .02 : 0);
       this.wingPhase = Math.random() * Math.PI * 2;
       this.flip = Math.random() > .5;
       this.speed = (Math.random() * .4 + .2) * (layer === 0 ? .4 : layer === 2 ? 1.1 : .7);
