@@ -251,5 +251,15 @@ function renderCustomCardsList() {
 function updateStartBtn() {
   const mc = customCardsList.filter(c => c.team === "mafia").length;
   const cc = customCardsList.filter(c => c.team === "citizen").length;
-  document.getElementById("startBtn").style.display = (customCardsList.length >= 3 && mc >= 1 && cc >= 1) ? "block" : "none";
+  const show = customCardsList.length >= 3 && mc >= 1 && cc >= 1;
+  document.getElementById("startBtn").style.display = show && !state.isCustom ? "block" : "none";
+  const csb = document.getElementById("customStartBtn");
+  if (csb) {
+    csb.style.display = show && state.isCustom ? "block" : "none";
+    if (show && state.isCustom) {
+      csb.classList.remove("start-btn-pop");
+      void csb.offsetWidth;
+      csb.classList.add("start-btn-pop");
+    }
+  }
 }
