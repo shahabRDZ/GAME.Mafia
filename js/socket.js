@@ -32,7 +32,7 @@ function initSocket() {
     if (!data) return;
     chaosState.myRole = data.your_role;
     chaosState.phase = data.phase;
-    chaosState.phaseEndAt = new Date(data.phase_end_at);
+    chaosState.phaseEndAt = new Date(data.phase_end_at.endsWith("Z") ? data.phase_end_at : data.phase_end_at + "Z");
     chaosState.players = data.players || [];
     chaosState.messages = [];
     chaosState.myVote = null;
@@ -49,7 +49,7 @@ function initSocket() {
   socket.on("phase_change", (data) => {
     if (!data) return;
     chaosState.phase = data.phase;
-    chaosState.phaseEndAt = new Date(data.phase_end_at);
+    chaosState.phaseEndAt = new Date(data.phase_end_at.endsWith("Z") ? data.phase_end_at : data.phase_end_at + "Z");
     chaosState.myVote = null;
     chaosState.selectedVote = null;
     renderPhaseChange(data.phase);
