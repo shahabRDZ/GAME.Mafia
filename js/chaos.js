@@ -277,19 +277,28 @@ function updateVoteStatus(data) {
 
 function startPhaseTimer() {
   if (chaosTimerInterval) clearInterval(chaosTimerInterval);
-  chaosTimerInterval = setInterval(() => {
-    if (!chaosState.phaseEndAt) return;
-    const now = new Date();
-    const remaining = Math.max(0, Math.floor((chaosState.phaseEndAt - now) / 1000));
+
+  // Calculate server time offset for accurate sync
+  const endTime = chaosState.phaseEndAt;
+  if (!endTime) return;
+  const totalDuration = chaosState.phase === "discussion" ? 300 : 90;
+
+  // Run immediately once, then every second
+  function tick() {
+    const now = Date.now();
+    const end = endTime instanceof Date ? endTime.getTime() : new Date(endTime).getTime();
+    const remaining = Math.max(0, Math.floor((end - now) / 1000));
     const min = Math.floor(remaining / 60);
     const sec = remaining % 60;
     const el = document.getElementById("phaseTimerText");
     const fill = document.getElementById("phaseTimerFill");
     if (el) el.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
-    const totalDuration = chaosState.phase === "discussion" ? 300 : 90;
     if (fill) fill.style.width = `${(remaining / totalDuration) * 100}%`;
     if (remaining <= 0 && chaosTimerInterval) { clearInterval(chaosTimerInterval); chaosTimerInterval = null; }
-  }, 1000);
+  }
+
+  tick(); // Run immediately
+  chaosTimerInterval = setInterval(tick, 1000);
 }
 
 function showRoomInviteNotification(fromUsername, roomCode) {
