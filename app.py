@@ -623,6 +623,25 @@ def handle_vote(data):
         resolve_votes(code)
 
 
+# ── Room Invitation ──────────────────────────────────────────────────────────
+
+@socketio.on("invite_to_room")
+def handle_invite(data):
+    code = (data.get("code") or "").upper()
+    target_id = data.get("target_user_id")
+    info = sid_to_user.get(request.sid)
+    if not info or not target_id:
+        return
+    target_sid = user_to_sid.get(target_id)
+    if target_sid:
+        emit("room_invite", {
+            "from_user_id": info["user_id"],
+            "from_username": info["username"],
+            "room_code": code
+        }, to=target_sid)
+        emit("invite_sent", {"username": db.session.get(User, target_id).username}, to=request.sid)
+
+
 # ── WebRTC Voice Signaling ────────────────────────────────────────────────────
 
 @socketio.on("voice_join")

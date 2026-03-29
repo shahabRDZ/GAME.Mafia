@@ -211,6 +211,20 @@
 .voice-muted { background: rgba(233,69,96,.15); color: #ff5555; border: 1px solid rgba(233,69,96,.3); }
 @keyframes voicePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,.3); } 50% { box-shadow: 0 0 0 8px rgba(74,222,128,0); } }
 
+/* ── Room Invite Notification ── */
+.invite-notification {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9000;
+  max-width: 360px; width: 90%; animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.invite-notif-content {
+  background: #0d0d1c; border: 2px solid rgba(233,69,96,.4); border-radius: 20px;
+  padding: 18px 20px; text-align: center;
+  box-shadow: 0 10px 40px rgba(233,69,96,.3), 0 0 60px rgba(233,69,96,.1);
+}
+.invite-notif-text { font-size: .9rem; color: var(--text); margin-bottom: 6px; }
+.invite-notif-code { font-size: 1.1rem; font-weight: 900; color: var(--accent2); letter-spacing: 4px; margin-bottom: 12px; }
+.invite-notif-actions { display: flex; gap: 8px; justify-content: center; }
+
 /* ── Direct Messages ── */
 .dm-convo-item {
   display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px;
