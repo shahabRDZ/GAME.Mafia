@@ -15,9 +15,9 @@ async function renderProfileScreen() {
   const u = currentUser;
   card.innerHTML = `
     <div class="profile-avatar-big">${u.avatar || '🎭'}</div>
-    <div class="profile-username">${u.username}</div>
+    <div class="profile-username">${escapeHtml(u.username)}</div>
     <div class="profile-id">ID: ${u.id}</div>
-    <div class="profile-bio">${u.bio || 'بیو ندارید'}</div>
+    <div class="profile-bio">${escapeHtml(u.bio || 'بیو ندارید')}</div>
     <div class="profile-stats">
       <div class="profile-stat wins"><span class="profile-stat-num">${toFarsiNum(u.chaos_wins || 0)}</span><span class="profile-stat-label">برد کی‌اس</span></div>
       <div class="profile-stat losses"><span class="profile-stat-num">${toFarsiNum(u.chaos_losses || 0)}</span><span class="profile-stat-label">باخت کی‌اس</span></div>
@@ -59,7 +59,7 @@ async function loadFriends() {
     <div class="friend-item">
       <span class="friend-avatar">${f.avatar || '🎭'}</span>
       <div class="friend-info">
-        <div class="friend-name">${f.username}</div>
+        <div class="friend-name">${escapeHtml(f.username)}</div>
         <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
       <div class="friend-actions">
@@ -96,7 +96,7 @@ async function searchUsersUI() {
     <div class="search-result-item">
       <span class="friend-avatar">${u.avatar || '🎭'}</span>
       <div class="friend-info">
-        <div class="friend-name">${u.username}</div>
+        <div class="friend-name">${escapeHtml(u.username)}</div>
         <div class="friend-status ${u.online ? 'friend-online' : 'friend-offline'}">${u.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
       <button class="friend-btn friend-btn-invite" onclick="sendFriendRequestUI(${u.id})">درخواست دوستی</button>

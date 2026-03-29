@@ -130,8 +130,4 @@ function startDMWithUser(userId, username, avatar) {
   setTimeout(() => openDMChat(userId, username, avatar || '🎭'), 100);
 }
 
-function escapeHtmlDM(text) {
-  const d = document.createElement("div");
-  d.textContent = text;
-  return d.innerHTML;
-}
+// escapeHtml is defined in helpers.js
