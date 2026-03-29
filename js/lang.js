@@ -4,7 +4,7 @@ const LANG = {
   fa: {
     dir: "rtl",
     ui: {
-      title: "مافیا", newGame: "بازی جدید", currentGame: "بازی جاری", history: "تاریخچه",
+      title: "شوشانگ", newGame: "بازی جدید", currentGame: "بازی جاری", history: "تاریخچه",
       login: "ورود", register: "ثبت‌نام", logout: "خروج",
       guestMsg: "برای ذخیره تاریخچه وارد شوید", gamesRecorded: "بازی ثبت‌شده",
       selectGroup: "🎯 انتخاب گروه", selectCount: "👥 تعداد بازیکنان",
@@ -33,7 +33,7 @@ const LANG = {
   en: {
     dir: "ltr",
     ui: {
-      title: "MAFIA", newGame: "New Game", currentGame: "Current Game", history: "History",
+      title: "SHUSHANG", newGame: "New Game", currentGame: "Current Game", history: "History",
       login: "Login", register: "Register", logout: "Logout",
       guestMsg: "Login to save history", gamesRecorded: "games recorded",
       selectGroup: "🎯 Select Group", selectCount: "👥 Number of Players",
@@ -62,7 +62,7 @@ const LANG = {
   tr: {
     dir: "ltr",
     ui: {
-      title: "MAFİA", newGame: "Yeni Oyun", currentGame: "Devam Eden", history: "Geçmiş",
+      title: "SHUSHANG", newGame: "Yeni Oyun", currentGame: "Devam Eden", history: "Geçmiş",
       login: "Giriş", register: "Kayıt Ol", logout: "Çıkış",
       guestMsg: "Geçmişi kaydetmek için giriş yapın", gamesRecorded: "oyun kaydedildi",
       selectGroup: "🎯 Grup Seç", selectCount: "👥 Oyuncu Sayısı",
