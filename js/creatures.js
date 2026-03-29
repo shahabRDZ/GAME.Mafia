@@ -157,9 +157,9 @@
 
   // ── Spawn creatures in 3 layers ──
   const creatures = [];
-  for (let i = 0; i < 5; i++) creatures.push(new Creature(0));
-  for (let i = 0; i < 4; i++) creatures.push(new Creature(1));
-  for (let i = 0; i < 2; i++) creatures.push(new Creature(2));
+  for (let i = 0; i < 10; i++) creatures.push(new Creature(0));
+  for (let i = 0; i < 8; i++) creatures.push(new Creature(1));
+  for (let i = 0; i < 5; i++) creatures.push(new Creature(2));
 
   // ── Render loop ──
   let lastTime = 0;
