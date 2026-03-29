@@ -588,7 +588,7 @@ const ROLE_CHARS = {
 </svg>`
 };
 
-ROLE_CHARS["اسنایپر"] = ROLE_CHARS["تک‌تیرانداز"];
+ROLE_CHARS["تکاور"] = ROLE_CHARS["تک‌تیرانداز"];
 
 function getCharSVG(roleName, role, variant) {
   if(ROLE_CHARS[roleName]) return ROLE_CHARS[roleName];
