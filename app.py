@@ -647,6 +647,17 @@ for attempt in range(10):
     try:
         with app.app_context():
             db.create_all()
+            # Add missing columns to existing tables
+            try:
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_emoji VARCHAR(10) DEFAULT '🎭'"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(200) DEFAULT ''"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0"))
+                db.session.commit()
+                print("DB columns updated")
+            except Exception as col_err:
+                db.session.rollback()
+                print(f"Column update skipped: {col_err}")
         break
     except Exception as e:
         if attempt < 9:
