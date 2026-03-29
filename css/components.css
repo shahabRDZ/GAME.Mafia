@@ -237,6 +237,15 @@
 }
 .rc-role-chip.active .rc-chip-badge { background: var(--rc-color, var(--accent)); color: #000; }
 .rc-chip-name { white-space: nowrap; }
+.rc-chip-wrap { position: relative; display: inline-flex; }
+.rc-chip-del {
+  position: absolute; top: -6px; left: -6px; width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(233,69,96,.8); border: none; color: #fff; font-size: .6rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; z-index: 2;
+  opacity: 0; transition: opacity .2s; line-height: 1;
+}
+.rc-chip-wrap:hover .rc-chip-del { opacity: 1; }
+.rc-chip-del:hover { background: #e94560; transform: scale(1.15); }
 
 /* ── Independent team styles ── */
 .custom-card-item.independent-item { background: rgba(192,132,252,.08); border: 1px solid rgba(192,132,252,.18); }
