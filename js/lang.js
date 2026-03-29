@@ -56,7 +56,7 @@ const LANG = {
       "هکر": "Hacker", "یاغی": "Outlaw", "مافیا ساده": "Mafia",
       "شهروند ساده": "Citizen", "بازپرس": "Interrogator", "کارآگاه": "Detective", "هانتر": "Hunter",
       "دکتر": "Doctor", "رویین‌تن": "Invincible", "راهنما": "Guide", "مین‌گذار": "Bomb Expert",
-      "وکیل": "Lawyer", "محافظ": "Bodyguard", "تفنگدار": "Rifleman", "نگهبان": "Guard", "تک‌تیرانداز": "Sniper", "اسنایپر": "Sniper", "سرباز": "Soldier"
+      "وکیل": "Lawyer", "محافظ": "Bodyguard", "تفنگدار": "Rifleman", "نگهبان": "Guard", "تک‌تیرانداز": "Sniper", "تکاور": "Commando", "سرباز": "Soldier"
     }
   },
   tr: {
