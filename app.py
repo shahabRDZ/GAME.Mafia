@@ -540,6 +540,30 @@ def handle_vote(data):
         resolve_votes(code)
 
 
+# ── WebRTC Voice Signaling ────────────────────────────────────────────────────
+
+@socketio.on("voice_offer")
+def handle_voice_offer(data):
+    target_sid = user_to_sid.get(data.get("target_user_id"))
+    info = sid_to_user.get(request.sid)
+    if target_sid and info:
+        emit("voice_offer", {"from_user_id": info["user_id"], "offer": data["offer"]}, to=target_sid)
+
+@socketio.on("voice_answer")
+def handle_voice_answer(data):
+    target_sid = user_to_sid.get(data.get("target_user_id"))
+    info = sid_to_user.get(request.sid)
+    if target_sid and info:
+        emit("voice_answer", {"from_user_id": info["user_id"], "answer": data["answer"]}, to=target_sid)
+
+@socketio.on("voice_ice")
+def handle_voice_ice(data):
+    target_sid = user_to_sid.get(data.get("target_user_id"))
+    info = sid_to_user.get(request.sid)
+    if target_sid and info:
+        emit("voice_ice", {"from_user_id": info["user_id"], "candidate": data["candidate"]}, to=target_sid)
+
+
 # ── Game Phase Logic ─────────────────────────────────────────────────────────
 
 def emit_room_update(code):
