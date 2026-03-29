@@ -152,11 +152,14 @@ header{text-align:center;padding:32px 0 18px}
 /* ── Start btn ── */
 .start-btn{width:100%;padding:17px;background:linear-gradient(135deg,#e94560,#c0392b);
   border:none;border-radius:16px;color:#fff;font-family:inherit;font-size:1.15rem;font-weight:900;
-  cursor:pointer;transition:all .3s;letter-spacing:2px;position:relative;overflow:hidden;margin-top:10px}
+  cursor:pointer;transition:all .3s;letter-spacing:2px;position:relative;overflow:hidden;margin-top:16px}
 .start-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:50%;height:200%;
   background:rgba(255,255,255,.1);transform:skewX(-20deg);transition:left .5s}
 .start-btn:hover::before{left:130%}
 .start-btn:hover{transform:translateY(-3px);box-shadow:0 15px 42px rgba(233,69,96,.5)}
+@keyframes startPop{0%{opacity:0;transform:scale(.5) translateY(30px)}50%{transform:scale(1.08) translateY(-5px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes startGlow{0%,100%{box-shadow:0 0 15px rgba(233,69,96,.4)}50%{box-shadow:0 0 35px rgba(233,69,96,.7),0 0 60px rgba(233,69,96,.3)}}
+.start-btn-pop{animation:startPop .5s cubic-bezier(.34,1.56,.64,1) forwards,startGlow 2s ease-in-out .5s infinite}
 
 /* ── Game info ── */
 .game-info{display:flex;justify-content:space-between;align-items:center;
@@ -207,12 +210,12 @@ header{text-align:center;padding:32px 0 18px}
 .fs-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
 
 /* ── Single card stage ── */
-.card-stage{display:flex;flex-direction:column;align-items:center;padding:8px 0 24px;min-height:420px;justify-content:center}
+.card-stage{display:flex;flex-direction:column;align-items:center;padding:40px 0 24px;min-height:480px;justify-content:center}
 
 /* card wrapper — large, centered */
-.big-card-wrapper{perspective:1200px;cursor:pointer;width:280px;height:420px}
-@media(max-width:400px){.big-card-wrapper{width:240px;height:360px}}
-@media(min-width:601px){.big-card-wrapper{width:300px;height:450px}}
+.big-card-wrapper{perspective:1200px;cursor:pointer;width:300px;height:450px}
+@media(max-width:400px){.big-card-wrapper{width:270px;height:405px}}
+@media(min-width:601px){.big-card-wrapper{width:330px;height:495px}}
 .big-card-wrapper .card{width:100%;height:100%;border-radius:28px}
 .big-card-wrapper .card-back .card-number{font-size:5.5rem}
 .big-card-wrapper .card-back .tap-hint{font-size:.8rem;margin-top:14px;letter-spacing:3px}
@@ -240,6 +243,7 @@ header{text-align:center;padding:32px 0 18px}
 .card-back{-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .card-front{-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .card.flipped{transform:rotateY(180deg)}
+.card.flipped .card-back .card-number{display:none}
 .card-face{position:absolute;width:100%;height:100%;border-radius:20px;
   -webkit-backface-visibility:hidden;backface-visibility:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
@@ -537,23 +541,9 @@ header{text-align:center;padding:32px 0 18px}
 
     <div class="setup-card gc" id="countCard" style="display:none">
       <div class="section-title">👥 تعداد بازیکنان</div>
-      <div class="count-grid">
-        <button class="count-btn" onclick="selectCount(10)" data-count="10">
-          <span class="number">۱۰</span><span class="label">نفر</span>
-          <span class="breakdown"><span class="m">۳ مافیا</span> · <span class="c">۷ شهروند</span></span>
-        </button>
-        <button class="count-btn" onclick="selectCount(12)" data-count="12">
-          <span class="number">۱۲</span><span class="label">نفر</span>
-          <span class="breakdown"><span class="m">۴ مافیا</span> · <span class="c">۸ شهروند</span></span>
-        </button>
-        <button class="count-btn" onclick="selectCount(13)" data-count="13">
-          <span class="number">۱۳</span><span class="label">نفر</span>
-          <span class="breakdown"><span class="m">۴ مافیا</span> · <span class="c">۹ شهروند</span></span>
-        </button>
-      </div>
+      <div class="count-grid" id="countGrid"></div>
+      <button class="start-btn start-btn-animated" onclick="startGame()" id="startBtn" style="display:none">🎮 شروع بازی</button>
     </div>
-
-    <button class="start-btn" onclick="startGame()" id="startBtn" style="display:none">🎮 شروع بازی</button>
   </div>
 
   <!-- ── Game ── -->
@@ -1346,7 +1336,7 @@ let state = {
 let customCardsList = [];
 let selectedTeam = "mafia";
 
-const ROLE_MAP = { 10:{mafia:3,citizen:7}, 12:{mafia:4,citizen:8}, 13:{mafia:4,citizen:9} };
+const ROLE_MAP = { 10:{mafia:3,citizen:7}, 12:{mafia:4,citizen:8}, 13:{mafia:4,citizen:9}, 15:{mafia:5,citizen:10} };
 
 const ROLES_DATA = {
   "بازپرس": {
@@ -1362,7 +1352,8 @@ const ROLES_DATA = {
   "تکاور": {
     10: { mafia:["رئیس مافیا","ناتو","گروگان‌گیر"], citizen:["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز"] },
     12: { mafia:["رئیس مافیا","ناتو","گروگان‌گیر","مافیا ساده"], citizen:["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز","شهروند ساده"] },
-    13: { mafia:["رئیس مافیا","ناتو","گروگان‌گیر","مافیا ساده"], citizen:["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز","شهروند ساده","شهروند ساده"] }
+    13: { mafia:["رئیس مافیا","ناتو","گروگان‌گیر","مافیا ساده"], citizen:["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز","شهروند ساده","شهروند ساده"] },
+    15: { mafia:["رئیس مافیا","ناتو","گروگان‌گیر","مافیا ساده","مافیا ساده"], citizen:["تفنگدار","دکتر","کارآگاه","شهروند ساده","شهروند ساده","نگهبان","تک‌تیرانداز","شهروند ساده","شهروند ساده","شهروند ساده"] }
   }
 };
 
@@ -1477,14 +1468,27 @@ function selectGroup(group){
   document.querySelector(`[data-group="${group}"]`).classList.add("selected");
   const cf=document.getElementById("customForm"),cc=document.getElementById("countCard"),sb=document.getElementById("startBtn");
   if(state.isCustom){cf.classList.add("show");cc.style.display="none";customCardsList=[];renderCustomCardsList();sb.style.display="none";}
-  else{cf.classList.remove("show");cc.style.display="block";state.count=null;sb.style.display="none";document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("selected"));}
+  else{
+    cf.classList.remove("show");cc.style.display="block";state.count=null;sb.style.display="none";
+    const counts=Object.keys(ROLES_DATA[group]).map(Number);
+    const toFa=n=>n.toString().replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d]);
+    document.getElementById("countGrid").innerHTML=counts.map(c=>`
+      <button class="count-btn" onclick="selectCount(${c})" data-count="${c}">
+        <span class="number">${toFa(c)}</span><span class="label">نفر</span>
+        <span class="breakdown"><span class="m">${toFa(ROLE_MAP[c].mafia)} مافیا</span> · <span class="c">${toFa(ROLE_MAP[c].citizen)} شهروند</span></span>
+      </button>`).join("");
+    cc.scrollIntoView({behavior:'smooth',block:'center'});
+  }
 }
 
 function selectCount(count){
   state.count=count;state.mafiaCount=ROLE_MAP[count].mafia;state.citizenCount=ROLE_MAP[count].citizen;
   document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("selected"));
   document.querySelector(`[data-count="${count}"]`).classList.add("selected");
-  document.getElementById("startBtn").style.display="block";
+  const sb=document.getElementById("startBtn");
+  sb.style.display="block";sb.classList.remove("start-btn-pop");
+  void sb.offsetWidth;sb.classList.add("start-btn-pop");
+  sb.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 function setTeam(team){
