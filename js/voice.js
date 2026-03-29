@@ -10,6 +10,9 @@ let peerConnections = {};  // user_id -> RTCPeerConnection
 let voiceEnabled = false;
 let voiceMuted = false;
 
+let localAudioAnalyser = null;
+let speakingCheckInterval = null;
+
 async function startVoiceChat() {
   if (voiceEnabled) return;
   try {
@@ -17,6 +20,9 @@ async function startVoiceChat() {
     voiceEnabled = true;
     voiceMuted = false;
     updateVoiceUI();
+
+    // Setup local audio level detection
+    setupLocalSpeakingDetection();
 
     // Connect to all other players in the room
     const myId = currentUser ? currentUser.id : 0;
@@ -31,6 +37,33 @@ async function startVoiceChat() {
   }
 }
 
+function setupLocalSpeakingDetection() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(localStream);
+    localAudioAnalyser = audioCtx.createAnalyser();
+    localAudioAnalyser.fftSize = 512;
+    source.connect(localAudioAnalyser);
+    const data = new Uint8Array(localAudioAnalyser.frequencyBinCount);
+
+    if (speakingCheckInterval) clearInterval(speakingCheckInterval);
+    speakingCheckInterval = setInterval(() => {
+      if (!localAudioAnalyser || voiceMuted) {
+        setPlayerSpeaking(currentUser?.id, false);
+        return;
+      }
+      localAudioAnalyser.getByteFrequencyData(data);
+      const avg = data.reduce((a, b) => a + b, 0) / data.length;
+      setPlayerSpeaking(currentUser?.id, avg > 15);
+    }, 150);
+  } catch (e) { console.error("Audio analyser error:", e); }
+}
+
+function setPlayerSpeaking(userId, speaking) {
+  const el = document.getElementById("pc-" + userId);
+  if (el) el.classList.toggle("speaking", speaking);
+}
+
 function stopVoiceChat() {
   if (localStream) {
     localStream.getTracks().forEach(t => t.stop());
@@ -40,6 +73,10 @@ function stopVoiceChat() {
   peerConnections = {};
   voiceEnabled = false;
   voiceMuted = false;
+  localAudioAnalyser = null;
+  if (speakingCheckInterval) { clearInterval(speakingCheckInterval); speakingCheckInterval = null; }
+  // Reset all speaking indicators
+  document.querySelectorAll(".player-circle").forEach(el => el.classList.remove("speaking"));
   updateVoiceUI();
 }
 
@@ -63,14 +100,29 @@ function createPeerConnection(targetUserId, isInitiator) {
 
   // Handle remote audio
   pc.ontrack = (event) => {
+    const stream = event.streams[0];
     const audio = document.createElement("audio");
-    audio.srcObject = event.streams[0];
+    audio.srcObject = stream;
     audio.autoplay = true;
     audio.id = "voice-audio-" + targetUserId;
-    // Remove old audio element if exists
     const old = document.getElementById("voice-audio-" + targetUserId);
     if (old) old.remove();
     document.body.appendChild(audio);
+
+    // Remote speaking detection
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      setInterval(() => {
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        setPlayerSpeaking(targetUserId, avg > 15);
+      }, 150);
+    } catch (e) {}
   };
 
   // ICE candidates

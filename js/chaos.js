@@ -140,13 +140,26 @@ function renderChaosGame() {
   const roleClass = chaosState.myRole === "mafia" ? "role-mafia" : "role-citizen";
   const roleLabel = chaosState.myRole === "mafia" ? "😈 مافیا" : "😇 شهروند";
 
+  const myId = currentUser ? currentUser.id : 0;
+
   document.getElementById("chaosGame").innerHTML = `
     <div class="phase-bar">
       <span class="phase-label" id="phaseLabel">بحث آزاد</span>
-      <div class="phase-timer-bar"><div class="phase-timer-fill" id="phaseTimerFill" style="width:100%"></div></div>
       <span class="phase-timer-text" id="phaseTimerText">5:00</span>
     </div>
+    <div class="phase-timer-bar"><div class="phase-timer-fill" id="phaseTimerFill" style="width:100%"></div></div>
+
     <div class="your-role-badge ${roleClass}">${roleLabel}</div>
+
+    <div class="players-circles" id="playersCircles">
+      ${chaosState.players.map(p => `
+        <div class="player-circle" id="pc-${p.user_id}" data-uid="${p.user_id}">
+          <div class="pc-avatar">${p.avatar || '🎭'}</div>
+          <div class="pc-name">${p.username}${p.user_id === myId ? ' (شما)' : ''}</div>
+        </div>
+      `).join("")}
+    </div>
+
     <div class="chat-area" id="chatArea"></div>
     <div class="chat-input-bar" id="chatInputBar">
       <input type="text" id="chatInput" placeholder="پیام بنویسید..." maxlength="500"
