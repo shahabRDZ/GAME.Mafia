@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/cards.css">
 <link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/chaos.css">
 </head>
 <body>
 
@@ -95,6 +96,8 @@
     <button class="nav-btn active" id="navNewGame" onclick="showScreen('setup')">بازی جدید</button>
     <button class="nav-btn" onclick="showScreen('game')" id="gameNavBtn" style="display:none">بازی جاری</button>
     <button class="nav-btn" id="navHistory" onclick="showScreen('history')">تاریخچه</button>
+    <button class="nav-btn" id="navChaos" onclick="showScreen('chaos')">CHAOS</button>
+    <button class="nav-btn" id="navProfile" onclick="showScreen('profile')">پروفایل</button>
   </nav>
 
   <!-- Setup Screen -->
@@ -207,6 +210,30 @@
     <div class="history-list" id="historyList"></div>
   </div>
 
+  <!-- CHAOS Screen -->
+  <div class="screen" id="chaosScreen">
+    <div class="chaos-entry gc" id="chaosEntry">
+      <div class="section-title">⚡ CHAOS MODE</div>
+      <p style="color:var(--dim);font-size:.82rem;margin-bottom:18px">بازی آنلاین ۳ نفره · ۱ مافیا vs ۲ شهروند</p>
+      <div class="chaos-actions">
+        <button class="chaos-btn" onclick="createChaosRoom()">🏠 ساخت اتاق</button>
+        <div class="chaos-join">
+          <input type="text" id="joinCodeInput" placeholder="کد اتاق" maxlength="6">
+          <button class="chaos-btn" onclick="joinChaosRoom()">ورود</button>
+        </div>
+      </div>
+    </div>
+    <div class="chaos-lobby gc" id="chaosLobby" style="display:none"></div>
+    <div class="chaos-game" id="chaosGame" style="display:none"></div>
+  </div>
+
+  <!-- Profile Screen -->
+  <div class="screen" id="profileScreen">
+    <div class="profile-card gc" id="profileCard"></div>
+    <div class="friends-section gc" id="friendsSection"></div>
+    <div class="search-section gc" id="searchSection"></div>
+  </div>
+
   <!-- Visit Counter -->
   <div class="visit-counter" id="visitCounter">
     <span class="vc-icon">👁️</span>
@@ -216,6 +243,7 @@
 </div>
 
 <!-- JS Modules (load order matters) -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/helpers.js"></script>
@@ -229,6 +257,9 @@
 <script src="js/funtext.js"></script>
 <script src="js/game.js"></script>
 <script src="js/history.js"></script>
+<script src="js/socket.js"></script>
+<script src="js/chaos.js"></script>
+<script src="js/profile.js"></script>
 <script src="js/creatures.js"></script>
 <script src="js/app.js"></script>
 </body>

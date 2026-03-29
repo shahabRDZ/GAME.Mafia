@@ -17,3 +17,15 @@ let state = {
 
 let customCardsList = [];
 let selectedTeam = "mafia";
+
+// CHAOS mode state
+let chaosState = {
+  roomCode: null,
+  players: [],
+  myRole: null,
+  phase: null,
+  phaseEndAt: null,
+  messages: [],
+  isHost: false,
+  myVote: null
+};
