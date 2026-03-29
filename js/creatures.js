@@ -5,6 +5,7 @@
   const ctx = canvas.getContext("2d");
   let W, H;
 
+  const TOP_SAFE = 0; // No restriction on main page
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   resize();
   window.addEventListener("resize", resize);
@@ -222,9 +223,9 @@
 
     initHanging() {
       this.hangX = 50 + Math.random() * (W - 100);
-      this.hangAnchorY = 0;
-      this.hangMaxY = 100 + Math.random() * (H * .4);
-      this.hangY = 30 + Math.random() * 60; // Start already visible
+      this.hangAnchorY = TOP_SAFE;
+      this.hangMaxY = TOP_SAFE + 80 + Math.random() * (H * .35);
+      this.hangY = TOP_SAFE + 10 + Math.random() * 40;
       this.hangDir = 1;
       this.hangSpeed = Math.random() * .8 + .4; // Faster descent
       this.hangPause = 0;
@@ -232,25 +233,24 @@
     }
 
     newWalkPath() {
-      // Spiders stay inside screen, crawl along edges and surfaces
       const pad = 30;
+      const minY = TOP_SAFE;
       const edge = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
       let sx, sy, ex, ey;
-      if (edge === 0) { sx = pad + Math.random() * (W - pad * 2); sy = pad; ex = pad + Math.random() * (W - pad * 2); ey = pad; }
-      else if (edge === 1) { sx = W - pad; sy = pad + Math.random() * (H - pad * 2); ex = W - pad; ey = pad + Math.random() * (H - pad * 2); }
+      if (edge === 0) { sx = pad + Math.random() * (W - pad * 2); sy = minY; ex = pad + Math.random() * (W - pad * 2); ey = minY; }
+      else if (edge === 1) { sx = W - pad; sy = minY + Math.random() * (H - minY - pad); ex = W - pad; ey = minY + Math.random() * (H - minY - pad); }
       else if (edge === 2) { sx = pad + Math.random() * (W - pad * 2); sy = H - pad; ex = pad + Math.random() * (W - pad * 2); ey = H - pad; }
-      else { sx = pad; sy = pad + Math.random() * (H - pad * 2); ex = pad; ey = pad + Math.random() * (H - pad * 2); }
-      // Sometimes cross to opposite edge
+      else { sx = pad; sy = minY + Math.random() * (H - minY - pad); ex = pad; ey = minY + Math.random() * (H - minY - pad); }
       if (Math.random() > .5) {
         const opp = (edge + 2) % 4;
-        if (opp === 0) { ex = pad + Math.random() * (W - pad * 2); ey = pad; }
-        else if (opp === 1) { ex = W - pad; ey = pad + Math.random() * (H - pad * 2); }
+        if (opp === 0) { ex = pad + Math.random() * (W - pad * 2); ey = minY; }
+        else if (opp === 1) { ex = W - pad; ey = minY + Math.random() * (H - minY - pad); }
         else if (opp === 2) { ex = pad + Math.random() * (W - pad * 2); ey = H - pad; }
-        else { ex = pad; ey = pad + Math.random() * (H - pad * 2); }
+        else { ex = pad; ey = minY + Math.random() * (H - minY - pad); }
       }
       this.p0 = { x: sx, y: sy };
-      this.p1 = { x: pad + Math.random() * (W - pad * 2), y: pad + Math.random() * (H - pad * 2) };
-      this.p2 = { x: pad + Math.random() * (W - pad * 2), y: pad + Math.random() * (H - pad * 2) };
+      this.p1 = { x: pad + Math.random() * (W - pad * 2), y: minY + Math.random() * (H - minY - pad) };
+      this.p2 = { x: pad + Math.random() * (W - pad * 2), y: minY + Math.random() * (H - minY - pad) };
       this.p3 = { x: ex, y: ey };
       this.t = 0;
       this.totalDist = this.estimateLength();
