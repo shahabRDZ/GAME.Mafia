@@ -12,7 +12,7 @@
 
   // ── Dust particles ──
   const particles = [];
-  for (let i = 0; i < 60; i++) particles.push({
+  for (let i = 0; i < 25; i++) particles.push({
     x: Math.random() * 2000, y: Math.random() * 2000,
     vx: (Math.random() - .5) * .15, vy: (Math.random() - .5) * .12,
     r: Math.random() * 2 + .5, a: Math.random() * .25 + .08,
@@ -66,8 +66,6 @@
 
     ctx.fillStyle = `rgba(180,170,185,${a})`;
     ctx.strokeStyle = `rgba(200,190,205,${a * .6})`;
-    ctx.shadowColor = `rgba(200,50,80,${a * .3})`;
-    ctx.shadowBlur = layer === 0 ? 4 : 1;
     ctx.lineWidth = s * .06;
     ctx.fill(); ctx.stroke();
 
@@ -95,8 +93,6 @@
     const a = alphas[layer] || .45;
     ctx.strokeStyle = `rgba(220,200,210,${a})`;
     ctx.fillStyle = `rgba(200,180,190,${a})`;
-    ctx.shadowColor = `rgba(255,50,50,${a * .3})`;
-    ctx.shadowBlur = layer === 0 ? 4 : 1;
     ctx.lineWidth = s * .12;
     ctx.lineCap = "round";
 
@@ -335,37 +331,33 @@
     }
   }
 
-  // ── Spawn creatures in 3 layers ──
+  // ── Spawn creatures (reduced for performance) ──
   const creatures = [];
   // Background
-  for (let i = 0; i < 5; i++) creatures.push(new Creature(0, "bat"));
-  for (let i = 0; i < 4; i++) creatures.push(new Creature(0, "spider-walk"));
+  for (let i = 0; i < 3; i++) creatures.push(new Creature(0, "bat"));
+  for (let i = 0; i < 2; i++) creatures.push(new Creature(0, "spider-walk"));
   // Mid
-  for (let i = 0; i < 4; i++) creatures.push(new Creature(1, "bat"));
-  for (let i = 0; i < 3; i++) creatures.push(new Creature(1, "spider-walk"));
+  for (let i = 0; i < 3; i++) creatures.push(new Creature(1, "bat"));
+  for (let i = 0; i < 2; i++) creatures.push(new Creature(1, "spider-walk"));
   for (let i = 0; i < 2; i++) creatures.push(new Creature(1, "spider-hang"));
   // Foreground
-  for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "bat"));
-  for (let i = 0; i < 2; i++) creatures.push(new Creature(2, "spider-walk"));
+  for (let i = 0; i < 1; i++) creatures.push(new Creature(2, "bat"));
+  for (let i = 0; i < 1; i++) creatures.push(new Creature(2, "spider-walk"));
   for (let i = 0; i < 1; i++) creatures.push(new Creature(2, "spider-hang"));
+  // Pre-sort by layer (never resort)
+  creatures.sort((a, b) => a.layer - b.layer);
 
-  // ── Render loop ──
+  // ── Render loop (capped 30fps for performance) ──
   let lastTime = 0;
+  const FRAME_MS = 33; // ~30fps
   function animate(time) {
-    const dt = time - lastTime; lastTime = time;
-    if (dt > 100) { requestAnimationFrame(animate); return; }
-    ctx.clearRect(0, 0, W, H);
-
-    const grd = ctx.createRadialGradient(W * .5, H * .55, 0, W * .5, H * .55, H * .7);
-    grd.addColorStop(0, "rgba(100,10,15,.06)");
-    grd.addColorStop(.5, "rgba(50,5,8,.03)");
-    grd.addColorStop(1, "transparent");
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-
-    drawParticles();
-    creatures.sort((a, b) => a.layer - b.layer);
-    creatures.forEach(c => { c.update(); c.draw(); });
     requestAnimationFrame(animate);
+    const dt = time - lastTime;
+    if (dt < FRAME_MS) return;
+    lastTime = time;
+    ctx.clearRect(0, 0, W, H);
+    drawParticles();
+    for (let i = 0; i < creatures.length; i++) { creatures[i].update(); creatures[i].draw(); }
   }
   requestAnimationFrame(animate);
 })();
