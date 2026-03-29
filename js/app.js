@@ -20,6 +20,24 @@ initAuth();
   try {
     const r = await fetch(API + "/api/visit", { method: "POST", headers: { "Content-Type": "application/json" } });
     const data = await r.json();
-    document.getElementById("visitCount").textContent = toFarsiNum(data.visits);
+    const el = document.getElementById("visitCount");
+    if (el) el.textContent = toFarsiNum(data.visits);
   } catch {}
 })();
+
+// Register Service Worker for fast loading
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    // Check for updates every 30 seconds
+    setInterval(() => reg.update(), 30000);
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'activated') {
+          // New version available, reload
+          window.location.reload();
+        }
+      });
+    });
+  }).catch(() => {});
+}
