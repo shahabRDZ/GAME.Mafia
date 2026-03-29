@@ -1,6 +1,9 @@
 /* ── WebRTC Voice Chat ── */
 
-const ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
+const ICE_SERVERS = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" }
+];
 
 let localStream = null;
 let peerConnections = {};
@@ -20,10 +23,17 @@ async function startVoiceChat() {
     voiceAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     setupLocalSpeakingDetection();
     updateVoiceUI();
+
+    // Notify others that I joined voice
+    if (socket && chaosState.roomCode) {
+      socket.emit("voice_join", { code: chaosState.roomCode });
+    }
+
     const myId = currentUser ? currentUser.id : 0;
     chaosState.players.forEach(p => {
       if (p.user_id !== myId) createPeerConnection(p.user_id, true);
     });
+
     showToast("🎙️ ویس فعال شد");
   } catch (err) {
     showToast("⚠️ دسترسی میکروفون رد شد");
@@ -51,6 +61,7 @@ function toggleVoiceMute() {
   voiceMuted = !voiceMuted;
   localStream.getAudioTracks().forEach(t => { t.enabled = !voiceMuted; });
   updateVoiceUI();
+  showToast(voiceMuted ? "🔇 صدا قطع شد" : "🎤 صدا فعال شد");
 }
 
 function setupLocalSpeakingDetection() {
@@ -69,31 +80,51 @@ function setupLocalSpeakingDetection() {
 }
 
 function createPeerConnection(targetUserId, isInitiator) {
-  if (peerConnections[targetUserId]) return peerConnections[targetUserId];
+  // Close existing connection if any
+  if (peerConnections[targetUserId]) {
+    peerConnections[targetUserId].close();
+    delete peerConnections[targetUserId];
+  }
+
   const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
   peerConnections[targetUserId] = pc;
   if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
   pc.ontrack = (event) => {
     const stream = event.streams[0];
-    const audio = document.createElement("audio");
-    audio.srcObject = stream;
-    audio.autoplay = true;
-    audio.id = "voice-audio-" + targetUserId;
+
+    // Remove old audio element
     const old = document.getElementById("voice-audio-" + targetUserId);
     if (old) old.remove();
+
+    // Create audio element and play (with user gesture workaround)
+    const audio = document.createElement("audio");
+    audio.id = "voice-audio-" + targetUserId;
+    audio.srcObject = stream;
+    audio.autoplay = true;
+    audio.playsInline = true;
+    audio.volume = 1.0;
     document.body.appendChild(audio);
-    // Remote speaking detection using shared AudioContext
-    if (voiceAudioCtx) {
+
+    // Force play (workaround for autoplay policy)
+    const playPromise = audio.play();
+    if (playPromise) playPromise.catch(() => {
+      // Retry on next user interaction
+      const retryPlay = () => { audio.play(); document.removeEventListener("click", retryPlay); };
+      document.addEventListener("click", retryPlay);
+    });
+
+    // Remote speaking detection
+    if (voiceAudioCtx && voiceAudioCtx.state !== "closed") {
       try {
         const source = voiceAudioCtx.createMediaStreamSource(stream);
         const analyser = voiceAudioCtx.createAnalyser();
         analyser.fftSize = 256;
         source.connect(analyser);
-        const data = new Uint8Array(analyser.frequencyBinCount);
+        const buf = new Uint8Array(analyser.frequencyBinCount);
         const intId = setInterval(() => {
-          analyser.getByteFrequencyData(data);
-          const avg = data.reduce((a, b) => a + b, 0) / data.length;
+          analyser.getByteFrequencyData(buf);
+          const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
           setPlayerSpeaking(targetUserId, avg > 15);
         }, 200);
         remoteIntervals.push(intId);
@@ -107,10 +138,22 @@ function createPeerConnection(targetUserId, isInitiator) {
     }
   };
 
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === "failed") {
+      // Retry connection
+      pc.close();
+      delete peerConnections[targetUserId];
+      setTimeout(() => {
+        if (voiceEnabled) createPeerConnection(targetUserId, true);
+      }, 2000);
+    }
+  };
+
   if (isInitiator) {
-    pc.createOffer().then(offer => {
-      pc.setLocalDescription(offer);
-      socket.emit("voice_offer", { target_user_id: targetUserId, offer });
+    pc.createOffer({ offerToReceiveAudio: true }).then(offer => {
+      return pc.setLocalDescription(offer);
+    }).then(() => {
+      socket.emit("voice_offer", { target_user_id: targetUserId, offer: pc.localDescription });
     }).catch(() => {});
   }
   return pc;
@@ -131,19 +174,38 @@ function updateVoiceUI() {
 
 function setupVoiceSocketEvents() {
   if (!socket) return;
+
   socket.on("voice_offer", async (data) => {
+    if (!voiceEnabled || !localStream) return;
     const pc = createPeerConnection(data.from_user_id, false);
-    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    socket.emit("voice_answer", { target_user_id: data.from_user_id, answer });
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit("voice_answer", { target_user_id: data.from_user_id, answer: pc.localDescription });
+    } catch(e) { console.error("Voice offer error:", e); }
   });
+
   socket.on("voice_answer", async (data) => {
     const pc = peerConnections[data.from_user_id];
-    if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+    if (pc && pc.signalingState !== "stable") {
+      try { await pc.setRemoteDescription(new RTCSessionDescription(data.answer)); }
+      catch(e) { console.error("Voice answer error:", e); }
+    }
   });
+
   socket.on("voice_ice", async (data) => {
     const pc = peerConnections[data.from_user_id];
-    if (pc) try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){}
+    if (pc && pc.remoteDescription) {
+      try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); }
+      catch(e) {}
+    }
+  });
+
+  // When another player joins voice, connect to them
+  socket.on("voice_peer_joined", (data) => {
+    if (voiceEnabled && localStream && data.user_id !== (currentUser?.id)) {
+      setTimeout(() => createPeerConnection(data.user_id, true), 500);
+    }
   });
 }
