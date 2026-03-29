@@ -639,6 +639,80 @@ def end_game(code, winner, eliminated_id=None, eliminated_role=None):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# ADMIN PANEL
+# ══════════════════════════════════════════════════════════════════════════════
+
+ADMIN_USERNAMES = ["shahab", "admin"]  # Add your username here
+
+def is_admin():
+    try:
+        uid = int(get_jwt_identity())
+        user = db.session.get(User, uid)
+        return user and user.username in ADMIN_USERNAMES
+    except Exception:
+        return False
+
+@app.route("/api/admin/users", methods=["GET"])
+@jwt_required()
+def admin_get_users():
+    if not is_admin():
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    users = User.query.order_by(User.created_at.desc()).all()
+    return jsonify([{
+        "id": u.id, "username": u.username, "email": u.email,
+        "avatar": u.avatar_emoji, "bio": u.bio,
+        "chaos_wins": u.chaos_wins, "chaos_losses": u.chaos_losses,
+        "total_games": len(u.games),
+        "created_at": u.created_at.strftime("%Y-%m-%d %H:%M"),
+        "online": u.id in online_users
+    } for u in users]), 200
+
+@app.route("/api/admin/users/<int:uid>", methods=["DELETE"])
+@jwt_required()
+def admin_delete_user(uid):
+    if not is_admin():
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    user = db.session.get(User, uid)
+    if not user:
+        return jsonify({"error": "کاربر یافت نشد"}), 404
+    Friendship.query.filter((Friendship.requester_id == uid) | (Friendship.addressee_id == uid)).delete()
+    ChaosPlayer.query.filter_by(user_id=uid).delete()
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"status": "deleted"}), 200
+
+@app.route("/api/admin/stats", methods=["GET"])
+@jwt_required()
+def admin_stats():
+    if not is_admin():
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    total_users = User.query.count()
+    total_games = Game.query.count()
+    total_chaos = ChaosRoom.query.count()
+    online_count = len(online_users)
+    visits = SiteStats.query.filter_by(key="visits").first()
+    return jsonify({
+        "total_users": total_users, "total_games": total_games,
+        "total_chaos_rooms": total_chaos, "online_now": online_count,
+        "total_visits": visits.value if visits else 0
+    }), 200
+
+@app.route("/api/admin/users/<int:uid>/reset-password", methods=["PUT"])
+@jwt_required()
+def admin_reset_password(uid):
+    if not is_admin():
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    user = db.session.get(User, uid)
+    if not user:
+        return jsonify({"error": "کاربر یافت نشد"}), 404
+    data = request.get_json()
+    new_pw = data.get("password", "123456")
+    user.set_password(new_pw)
+    db.session.commit()
+    return jsonify({"status": "password_reset"}), 200
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # BOOTSTRAP
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -668,4 +742,4 @@ for attempt in range(10):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    socketio.run(app, host="0.0.0.0", port=port, debug=False)
+    socketio.run(app, host="0.0.0.0", port=port, debug=False, allow_unsafe_werkzeug=True)

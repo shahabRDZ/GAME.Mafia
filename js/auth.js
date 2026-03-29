@@ -99,5 +99,14 @@ function renderAuthBar() {
     document.getElementById("userAvatar").textContent = currentUser.username[0].toUpperCase();
     document.getElementById("usernameDisplay").textContent = currentUser.username;
     document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+    // Show admin button for admin users
+    const adminBtn = document.getElementById("navAdmin");
+    if (adminBtn) adminBtn.style.display = ["shahab", "admin"].includes(currentUser.username) ? "inline-block" : "none";
+    // Auto-connect WebSocket when logged in
+    initSocket();
+  } else {
+    const adminBtn = document.getElementById("navAdmin");
+    if (adminBtn) adminBtn.style.display = "none";
+    disconnectSocket();
   }
 }

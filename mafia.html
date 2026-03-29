@@ -98,6 +98,7 @@
     <button class="nav-btn" id="navHistory" onclick="showScreen('history')">تاریخچه</button>
     <button class="nav-btn" id="navChaos" onclick="showScreen('chaos')">کی‌اس</button>
     <button class="nav-btn" id="navProfile" onclick="showScreen('profile')">پروفایل</button>
+    <button class="nav-btn" id="navAdmin" onclick="showScreen('admin')" style="display:none">⚙️ پنل</button>
   </nav>
 
   <!-- Setup Screen -->
@@ -234,6 +235,14 @@
     <div class="search-section gc" id="searchSection"></div>
   </div>
 
+  <!-- Admin Screen -->
+  <div class="screen" id="adminScreen">
+    <div class="setup-card gc" style="padding:20px">
+      <div class="section-title">⚙️ پنل مدیریت</div>
+      <div id="adminContent"></div>
+    </div>
+  </div>
+
   <!-- Visit Counter -->
   <div class="visit-counter" id="visitCounter">
     <span class="vc-icon">👁️</span>
@@ -260,6 +269,7 @@
 <script src="js/socket.js"></script>
 <script src="js/chaos.js"></script>
 <script src="js/profile.js"></script>
+<script src="js/admin.js"></script>
 <script src="js/creatures.js"></script>
 <script src="js/app.js"></script>
 </body>
