@@ -9,7 +9,7 @@ const SCENARIO_INFO = {
       intro: "سناریوی تکاور دارای تعادل بالا بین نقش‌ها و استدلال‌محور است. نسبت مافیا به شهروند نزدیک ۱/۳ است.",
       flow: ["روز معارفه","شب معارفه (بدون شلیک)","روز اول (بحث + رأی‌گیری)","شب‌های اصلی (اجرای نقش‌ها)","روزها (اعلام نتایج + رأی‌گیری)"],
       rules: ["مافیا: شلیک یا ناتویی","ناتویی: حذف شلیک","نقش‌های اطلاعاتی همچنان فعال"],
-      quorum: [{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵–۴ نفر",votes:"۲ رأی"}],
+      quorum: [{range:"۱۵–۱۱ نفر",votes:"۶ رأی"},{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵ نفر به پایین",votes:"۲ رأی"}],
       proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
       flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند"
     },
@@ -18,7 +18,7 @@ const SCENARIO_INFO = {
       intro: "The Commando scenario has high balance between roles and is reasoning-based. The mafia-to-citizen ratio is approximately 1/3.",
       flow: ["Introduction Day","Introduction Night (no shot)","Day 1 (discussion + voting)","Main Nights (role actions)","Days (announce results + voting)"],
       rules: ["Mafia: shoot or NATO","NATO: cancel shot","Information roles remain active"],
-      quorum: [{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5–4 players",votes:"2 votes"}],
+      quorum: [{range:"15–11 players",votes:"6 votes"},{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5 or less",votes:"2 votes"}],
       proceed: "Continue — Select Player Count ➜",
       flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles"
     },
@@ -27,7 +27,7 @@ const SCENARIO_INFO = {
       intro: "Komando senaryosu roller arasında yüksek denge sunar ve akıl yürütmeye dayalıdır. Mafya-vatandaş oranı yaklaşık 1/3'tür.",
       flow: ["Tanışma Günü","Tanışma Gecesi (ateş yok)","1. Gün (tartışma + oylama)","Ana Geceler (rol eylemleri)","Günler (sonuçlar + oylama)"],
       rules: ["Mafya: ateş veya NATO","NATO: ateşi iptal","Bilgi rolleri aktif kalır"],
-      quorum: [{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5–4 oyuncu",votes:"2 oy"}],
+      quorum: [{range:"15–11 oyuncu",votes:"6 oy"},{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5 ve altı",votes:"2 oy"}],
       proceed: "Devam — Oyuncu Sayısı Seç ➜",
       flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri"
     },
@@ -56,7 +56,7 @@ const SCENARIO_INFO = {
       intro: "سناریوی نماینده بر پایه تعادل بین استدلال روز و قابلیت شب طراحی شده. تعامل بالا بین نقش‌ها و مدیریت تصمیم‌ها از ویژگی‌های اصلی است.",
       flow: ["روز معارفه","شب اول (بدون شلیک)","روز اول (بحث + انتخاب نماینده)","شب‌های اصلی","روزها (نماینده مدیریت رأی‌گیری)"],
       rules: ["نماینده با رأی انتخاب می‌شود","نماینده نقش مدیریتی در تصمیم‌ها دارد","هکر می‌تواند نقش‌ها را مختل کند","یاغی قدرت حمله مستقل دارد"],
-      quorum: [{range:"۱۳–۱۰ نفر",votes:"۴ رأی"},{range:"۹–۷ نفر",votes:"۳ رأی"},{range:"۶–۴ نفر",votes:"۲ رأی"}],
+      quorum: [{range:"۱۵–۱۱ نفر",votes:"۶ رأی"},{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵ نفر به پایین",votes:"۲ رأی"}],
       proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
       flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند"
     },
@@ -65,7 +65,7 @@ const SCENARIO_INFO = {
       intro: "The Politicians scenario balances day reasoning and night abilities. High interaction between roles and decision management are its key features.",
       flow: ["Introduction Day","Night 1 (no shot)","Day 1 (discussion + elect representative)","Main Nights","Days (representative manages voting)"],
       rules: ["Representative elected by vote","Representative manages decisions","Hacker can disrupt roles","Rebel has independent attack power"],
-      quorum: [{range:"13–10 players",votes:"4 votes"},{range:"9–7 players",votes:"3 votes"},{range:"6–4 players",votes:"2 votes"}],
+      quorum: [{range:"15–11 players",votes:"6 votes"},{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5 or less",votes:"2 votes"}],
       proceed: "Continue — Select Player Count ➜",
       flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles"
     },
@@ -74,7 +74,7 @@ const SCENARIO_INFO = {
       intro: "Politikacılar senaryosu gündüz akıl yürütme ve gece yetenekleri arasında denge kurar. Roller arası yüksek etkileşim temel özelliğidir.",
       flow: ["Tanışma Günü","1. Gece (ateş yok)","1. Gün (tartışma + temsilci seçimi)","Ana Geceler","Günler (temsilci oylamayı yönetir)"],
       rules: ["Temsilci oyla seçilir","Temsilci kararları yönetir","Hacker rolleri bozabilir","Asi bağımsız saldırı gücüne sahip"],
-      quorum: [{range:"13–10 oyuncu",votes:"4 oy"},{range:"9–7 oyuncu",votes:"3 oy"},{range:"6–4 oyuncu",votes:"2 oy"}],
+      quorum: [{range:"15–11 oyuncu",votes:"6 oy"},{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5 ve altı",votes:"2 oy"}],
       proceed: "Devam — Oyuncu Sayısı Seç ➜",
       flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri"
     },
@@ -104,7 +104,7 @@ const SCENARIO_INFO = {
       intro: "سناریوی بازپرس بر پایه تحلیل اطلاعات، استعلام‌ها و مدیریت داده طراحی شده است. تمرکز اصلی روی نقش‌های اطلاعاتی و تعامل آن‌ها است.",
       flow: ["روز معارفه","شب اول (استعلام اولیه)","روز اول (تحلیل + بحث)","شب‌ها (استعلام + بررسی)","روزها (ارائه تحلیل + رأی‌گیری)"],
       rules: ["تمرکز بر تحلیل منطقی","اهمیت تعامل بین نقش‌های اطلاعاتی","کاهش نقش‌های قدرتی · افزایش نقش‌های فکری","مناسب برای بازی‌های استدلالی و حرفه‌ای"],
-      quorum: [{range:"۱۳–۱۰ نفر",votes:"۴ رأی"},{range:"۹–۷ نفر",votes:"۳ رأی"},{range:"۶–۴ نفر",votes:"۲ رأی"}],
+      quorum: [{range:"۱۵–۱۱ نفر",votes:"۶ رأی"},{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵ نفر به پایین",votes:"۲ رأی"}],
       proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
       flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند"
     },
@@ -113,7 +113,7 @@ const SCENARIO_INFO = {
       intro: "The Investigator scenario is built on data analysis, inquiries and information management. The focus is on information roles and their interactions.",
       flow: ["Introduction Day","Night 1 (initial inquiry)","Day 1 (analysis + discussion)","Nights (inquiry + investigation)","Days (present analysis + voting)"],
       rules: ["Focus on logical analysis","Importance of information role interactions","Fewer power roles · More intellectual roles","Ideal for reasoning-based professional games"],
-      quorum: [{range:"13–10 players",votes:"4 votes"},{range:"9–7 players",votes:"3 votes"},{range:"6–4 players",votes:"2 votes"}],
+      quorum: [{range:"15–11 players",votes:"6 votes"},{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5 or less",votes:"2 votes"}],
       proceed: "Continue — Select Player Count ➜",
       flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles"
     },
@@ -122,7 +122,7 @@ const SCENARIO_INFO = {
       intro: "Müfettiş senaryosu veri analizi, sorgulamalar ve bilgi yönetimi üzerine kurulmuştur. Odak noktası bilgi rolleri ve etkileşimleridir.",
       flow: ["Tanışma Günü","1. Gece (ilk sorgulama)","1. Gün (analiz + tartışma)","Geceler (sorgulama + araştırma)","Günler (analiz sunumu + oylama)"],
       rules: ["Mantıksal analize odaklan","Bilgi rolleri etkileşimi önemli","Daha az güç rolü · Daha çok düşünce rolü","Akıl yürütme oyunları için ideal"],
-      quorum: [{range:"13–10 oyuncu",votes:"4 oy"},{range:"9–7 oyuncu",votes:"3 oy"},{range:"6–4 oyuncu",votes:"2 oy"}],
+      quorum: [{range:"15–11 oyuncu",votes:"6 oy"},{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5 ve altı",votes:"2 oy"}],
       proceed: "Devam — Oyuncu Sayısı Seç ➜",
       flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri"
     },
