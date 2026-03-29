@@ -96,6 +96,7 @@
     <button class="nav-btn active" id="navNewGame" onclick="showScreen('setup')">بازی جدید</button>
     <button class="nav-btn" onclick="showScreen('game')" id="gameNavBtn" style="display:none">بازی جاری</button>
     <button class="nav-btn" id="navHistory" onclick="showScreen('history')">تاریخچه</button>
+    <button class="nav-btn" id="navDM" onclick="showScreen('dm')">💬 پیام</button>
     <button class="nav-btn" id="navChaos" onclick="showScreen('chaos')">کی‌اس</button>
     <button class="nav-btn" id="navProfile" onclick="showScreen('profile')">پروفایل</button>
   </nav>
@@ -227,6 +228,14 @@
     <div class="chaos-game" id="chaosGame" style="display:none"></div>
   </div>
 
+  <!-- DM Screen -->
+  <div class="screen" id="dmScreen">
+    <div class="setup-card gc" style="padding:20px">
+      <div class="section-title">💬 پیام‌ها</div>
+      <div id="dmContent"></div>
+    </div>
+  </div>
+
   <!-- Profile Screen -->
   <div class="screen" id="profileScreen">
     <div class="profile-card gc" id="profileCard"></div>
@@ -260,6 +269,7 @@
 <script src="js/socket.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/chaos.js"></script>
+<script src="js/dm.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/creatures.js"></script>
 <script src="js/app.js"></script>

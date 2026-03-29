@@ -16,6 +16,7 @@ function showScreen(name) {
   });
   if (name === "history") renderHistory();
   if (name === "profile") renderProfileScreen();
+  if (name === "dm") renderDMScreen();
   if (name === "chaos" && authToken) initSocket();
   if (name === "admin") renderAdminScreen();
 }
