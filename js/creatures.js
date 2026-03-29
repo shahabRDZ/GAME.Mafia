@@ -201,8 +201,8 @@
   class Creature {
     constructor(layer, forceType) {
       this.layer = layer;
-      const scales = [.5, .9, 1.5];
-      this.baseSize = (Math.random() * 4 + 4) * scales[layer];
+      const scales = this.type === "bat" ? [.6, 1, 1.6] : [.4, .7, 1.1];
+      this.baseSize = (Math.random() * 3 + 3) * scales[layer];
       this.wingSpeed = Math.random() * .06 + .04 + (layer === 0 ? .0 : layer === 2 ? .02 : 0);
       this.wingPhase = Math.random() * Math.PI * 2;
       this.flip = Math.random() > .5;
@@ -216,6 +216,7 @@
         else this.type = "spider-hang";
       }
       if (this.type === "spider-hang") this.initHanging();
+      else if (this.type === "spider-walk") this.newWalkPath();
       else this.newPath();
     }
 
@@ -228,6 +229,32 @@
       this.hangSpeed = Math.random() * .8 + .4; // Faster descent
       this.hangPause = 0;
       this.hangSwing = Math.random() * Math.PI * 2;
+    }
+
+    newWalkPath() {
+      // Spiders stay inside screen, crawl along edges and surfaces
+      const pad = 30;
+      const edge = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
+      let sx, sy, ex, ey;
+      if (edge === 0) { sx = pad + Math.random() * (W - pad * 2); sy = pad; ex = pad + Math.random() * (W - pad * 2); ey = pad; }
+      else if (edge === 1) { sx = W - pad; sy = pad + Math.random() * (H - pad * 2); ex = W - pad; ey = pad + Math.random() * (H - pad * 2); }
+      else if (edge === 2) { sx = pad + Math.random() * (W - pad * 2); sy = H - pad; ex = pad + Math.random() * (W - pad * 2); ey = H - pad; }
+      else { sx = pad; sy = pad + Math.random() * (H - pad * 2); ex = pad; ey = pad + Math.random() * (H - pad * 2); }
+      // Sometimes cross to opposite edge
+      if (Math.random() > .5) {
+        const opp = (edge + 2) % 4;
+        if (opp === 0) { ex = pad + Math.random() * (W - pad * 2); ey = pad; }
+        else if (opp === 1) { ex = W - pad; ey = pad + Math.random() * (H - pad * 2); }
+        else if (opp === 2) { ex = pad + Math.random() * (W - pad * 2); ey = H - pad; }
+        else { ex = pad; ey = pad + Math.random() * (H - pad * 2); }
+      }
+      this.p0 = { x: sx, y: sy };
+      this.p1 = { x: pad + Math.random() * (W - pad * 2), y: pad + Math.random() * (H - pad * 2) };
+      this.p2 = { x: pad + Math.random() * (W - pad * 2), y: pad + Math.random() * (H - pad * 2) };
+      this.p3 = { x: ex, y: ey };
+      this.t = 0;
+      this.totalDist = this.estimateLength();
+      this.flip = this.p3.x > this.p0.x;
     }
 
     newPath() {
@@ -287,7 +314,10 @@
         if (this.hangY <= this.hangAnchorY + 10) { this.hangDir = 1; this.hangPause = 60 + Math.random() * 100; this.hangX = Math.random() * W; this.hangMaxY = 80 + Math.random() * (H * .5); }
       } else {
         this.t += this.speed / this.totalDist;
-        if (this.t >= 1) this.newPath();
+        if (this.t >= 1) {
+          if (this.type === "spider-walk") this.newWalkPath();
+          else this.newPath();
+        }
       }
     }
 
