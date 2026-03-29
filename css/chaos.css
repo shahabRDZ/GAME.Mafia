@@ -177,6 +177,16 @@
 }
 .search-result-item:hover { background: rgba(255,255,255,.06); }
 
+/* ── End Discussion Vote ── */
+.end-vote-bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; justify-content: center; }
+.end-vote-btn {
+  padding: 6px 16px; border-radius: 50px; border: 1px solid rgba(245,166,35,.3);
+  background: rgba(245,166,35,.1); color: var(--accent2); font-family: inherit;
+  font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .2s;
+}
+.end-vote-btn:hover { background: rgba(245,166,35,.2); }
+.end-vote-count { font-size: .72rem; color: var(--dim); }
+
 /* ── Player Circles ── */
 .players-circles { display: flex; justify-content: center; gap: 16px; margin: 12px 0; }
 .player-circle {
