@@ -15,8 +15,14 @@ async function apiFetch(path, opts = {}) {
   try {
     const res = await fetch(API + path, { ...opts, headers, signal: controller.signal });
     clearTimeout(timeoutId);
-    const data = await res.json();
     if (!isBackground) hideLoading();
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      return { ok: false, status: res.status, data: { error: getHttpErrorMessage(res.status) } };
+    }
 
     if (!res.ok) {
       const errMsg = data.error || getHttpErrorMessage(res.status);

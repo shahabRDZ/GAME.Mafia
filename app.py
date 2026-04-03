@@ -520,29 +520,39 @@ ROLE_ICONS = {
 @app.route("/api/lab/create", methods=["POST"])
 @jwt_required()
 def create_lab_room():
-    uid = int(get_jwt_identity())
-    # Clean up old waiting rooms by this user
-    LabRoom.query.filter_by(host_id=uid, status="waiting").delete()
-    db.session.commit()
+    try:
+        uid = int(get_jwt_identity())
+        # Clean up old waiting rooms by this user
+        try:
+            LabRoom.query.filter_by(host_id=uid, status="waiting").delete()
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
-    code = secrets.token_hex(3).upper()[:6]
-    while LabRoom.query.filter_by(code=code).first():
         code = secrets.token_hex(3).upper()[:6]
+        while LabRoom.query.filter_by(code=code).first():
+            code = secrets.token_hex(3).upper()[:6]
 
-    data = request.get_json() or {}
-    scenario = data.get("scenario", "تکاور")
+        data = request.get_json() or {}
+        scenario = data.get("scenario", "تکاور")
 
-    room = LabRoom(code=code, host_id=uid, scenario=scenario)
-    db.session.add(room)
-    db.session.flush()
+        room = LabRoom(code=code, host_id=uid, scenario=scenario)
+        db.session.add(room)
+        db.session.flush()
 
-    # Add host as first player
-    user = User.query.get(uid)
-    host_player = LabPlayer(room_id=room.id, user_id=uid, is_bot=False, slot=1, avatar=user.avatar_emoji)
-    db.session.add(host_player)
-    db.session.commit()
+        # Add host as first player
+        user = User.query.get(uid)
+        host_player = LabPlayer(room_id=room.id, user_id=uid, is_bot=False, slot=1, avatar=user.avatar_emoji)
+        db.session.add(host_player)
+        db.session.commit()
 
-    return jsonify({"code": code, "room_id": room.id, "scenario": scenario})
+        return jsonify({"code": code, "room_id": room.id, "scenario": scenario})
+    except Exception as e:
+        db.session.rollback()
+        print(f"[LAB ERROR] create_lab_room: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"خطای سرور: {str(e)}"}), 500
 
 @app.route("/api/lab/room/<code>")
 @jwt_required()
@@ -3372,26 +3382,14 @@ for attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_plain_pw VARCHAR(100)"))
-                # Lab room new columns
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS defense_player_id INTEGER"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS night_kill_target INTEGER"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS doctor_save_target INTEGER"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS hunter_block_target INTEGER"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS detective_result VARCHAR(50)"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS doctor_self_save_used BOOLEAN DEFAULT FALSE"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS bazpors_ability_used BOOLEAN DEFAULT FALSE"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS bazpors_target1 INTEGER"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS bazpors_target2 INTEGER"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS phase VARCHAR(30) DEFAULT 'lobby'"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS current_turn INTEGER DEFAULT 0"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS turn_end_at TIMESTAMP"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS day_number INTEGER DEFAULT 0"))
-                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS eliminated_today INTEGER"))
-                # Lab player new columns
-                db.session.execute(db.text("ALTER TABLE lab_players ADD COLUMN IF NOT EXISTS role_name VARCHAR(50)"))
-                db.session.execute(db.text("ALTER TABLE lab_players ADD COLUMN IF NOT EXISTS team VARCHAR(20)"))
-                db.session.execute(db.text("ALTER TABLE lab_players ADD COLUMN IF NOT EXISTS is_alive BOOLEAN DEFAULT TRUE"))
-                db.session.execute(db.text("ALTER TABLE lab_players ADD COLUMN IF NOT EXISTS is_eliminated BOOLEAN DEFAULT FALSE"))
+                # Recreate lab tables to ensure all columns exist
+                db.session.execute(db.text("DROP TABLE IF EXISTS lab_messages CASCADE"))
+                db.session.execute(db.text("DROP TABLE IF EXISTS lab_players CASCADE"))
+                db.session.execute(db.text("DROP TABLE IF EXISTS lab_rooms CASCADE"))
+                db.session.execute(db.text("DROP TABLE IF EXISTS bot_memories CASCADE"))
+                db.session.commit()
+                # Recreate with all columns
+                db.create_all()
                 db.session.commit()
                 print("DB columns updated")
             except Exception as col_err:
