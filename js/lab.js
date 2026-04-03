@@ -41,13 +41,20 @@ function waitForSocket() {
     if (socket && socket.connected) { resolve(); return; }
     initSocket();
     if (socket && socket.connected) { resolve(); return; }
-    // Wait for connect event
-    const check = setInterval(() => {
-      if (socket && socket.connected) { clearInterval(check); resolve(); }
-    }, 100);
-    // Timeout after 5s
-    setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+    const onConnect = () => { socket.off("connect", onConnect); resolve(); };
+    socket.on("connect", onConnect);
+    setTimeout(() => { if (socket) socket.off("connect", onConnect); resolve(); }, 5000);
   });
+}
+
+async function fetchAndShowLobby(code) {
+  const res = await apiFetch("/api/lab/room/" + code, { _background: true });
+  if (res && res.ok && res.data) {
+    showLabLobby();
+    renderLabLobby(res.data);
+  } else {
+    showToast(res?.data?.error || "خطا در بارگذاری اتاق");
+  }
 }
 
 async function createLabRoom(scenario) {
@@ -58,31 +65,36 @@ async function createLabRoom(scenario) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ scenario: scenario || "بازپرس" })
   });
-  if (!res || !res.ok) { showToast(res?.data?.error || "خطا در ساخت اتاق", "error"); return; }
+  if (!res || !res.ok) { showToast(res?.data?.error || "خطا در ساخت اتاق"); return; }
   const room = res.data;
   labState.roomCode = room.code;
   labState.scenario = room.scenario;
   labState.isHost = true;
-  socket.emit("join_lab", { code: room.code });
-  showLabLobby();
+  if (socket && socket.connected) {
+    socket.emit("join_lab", { code: room.code });
+  }
+  await fetchAndShowLobby(room.code);
 }
 
 async function joinLabRoom() {
   const code = document.getElementById("labJoinCode")?.value?.trim().toUpperCase();
-  if (!code || code.length < 4) { showToast("کد اتاق را وارد کنید", "error"); return; }
+  if (!code || code.length < 4) { showToast("کد اتاق را وارد کنید"); return; }
   if (!authToken) { openAuthModal("login"); return; }
   await waitForSocket();
   labState.roomCode = code;
   labState.isHost = false;
-  socket.emit("join_lab", { code });
-  showLabLobby();
+  if (socket && socket.connected) {
+    socket.emit("join_lab", { code });
+  }
+  await fetchAndShowLobby(code);
 }
 
 function leaveLabRoom() {
-  if (labState.roomCode && socket) {
+  if (labState.roomCode && socket && socket.connected) {
     socket.emit("leave_lab", { code: labState.roomCode });
   }
   clearLabTimer();
+  bazporsSelections = [];
   labState = {
     roomCode: null, players: [], scenario: null, isHost: false,
     maxPlayers: 10, phase: "lobby", myRole: null, myTeam: null,
@@ -94,22 +106,22 @@ function leaveLabRoom() {
 }
 
 function addLabBot() {
-  if (!labState.roomCode || !socket) return;
+  if (!labState.roomCode || !socket || !socket.connected) return;
   socket.emit("add_bot", { code: labState.roomCode });
 }
 
 function removeLabPlayer(playerId) {
-  if (!labState.roomCode || !socket) return;
+  if (!labState.roomCode || !socket || !socket.connected) return;
   socket.emit("remove_player", { code: labState.roomCode, player_id: playerId });
 }
 
-function inviteLabFriend(userId, username) {
-  if (!labState.roomCode || !socket) return;
+function inviteLabFriend(userId) {
+  if (!labState.roomCode || !socket || !socket.connected) return;
   socket.emit("invite_lab", { code: labState.roomCode, target_user_id: userId });
 }
 
 function startLabGame() {
-  if (!labState.roomCode || !socket) return;
+  if (!labState.roomCode || !socket || !socket.connected) return;
   socket.emit("start_lab", { code: labState.roomCode });
 }
 
@@ -247,12 +259,13 @@ async function showLabInviteFriends() {
     panel.style.display = "";
     const res = await apiFetch("/api/friends", { _background: true });
     const list = document.getElementById("labInviteList");
+    if (!list) return;
     const friends = res?.ok ? (res.data?.friends || []) : [];
     if (friends.length === 0) {
       list.innerHTML = '<p style="color:var(--dim);text-align:center;font-size:.82rem;">دوستی پیدا نشد</p>';
       return;
     }
-    const inRoom = new Set(labState.players.filter(p => !p.is_bot).map(p => p.user_id));
+    const inRoom = new Set((labState.players || []).filter(p => !p.is_bot).map(p => p.user_id));
     const available = friends.filter(f => f.status === "accepted" && !inRoom.has(f.user_id));
     if (available.length === 0) {
       list.innerHTML = '<p style="color:var(--dim);text-align:center;font-size:.82rem;">همه دوستان در اتاق هستند</p>';
@@ -261,7 +274,7 @@ async function showLabInviteFriends() {
     list.innerHTML = available.map(f => `
       <div class="lab-invite-item">
         <span>${escapeHtml(f.avatar || '🎭')} ${escapeHtml(f.username)}</span>
-        <button class="lab-invite-btn" onclick="inviteLabFriend(${f.user_id}, ${JSON.stringify(escapeHtml(f.username))})">دعوت</button>
+        <button class="lab-invite-btn" onclick="inviteLabFriend(${f.user_id})">دعوت</button>
       </div>
     `).join('');
   } else {
@@ -999,10 +1012,11 @@ function handleLabRoleAssigned(data) {
 
 function handleLabGameStarted(data) {
   labState.phase = "intro";
-  labState.players = data.players || labState.players;
+  labState.players = data.players || labState.players || [];
   labState.dayNumber = 0;
   labState.messages = [];
   labState.voteResults = {};
+  bazporsSelections = [];
 
   labState.messages.push({
     id: 0, msg_type: "system",
@@ -1179,6 +1193,7 @@ function handleDetectiveResult(data) {
 }
 
 function handleLabReaction(data) {
+  if (!data || !data.reaction || !data.message_id) return;
   const el = document.getElementById(data.reaction + "_" + data.message_id);
   if (el) {
     el.textContent = parseInt(el.textContent || "0") + 1;
