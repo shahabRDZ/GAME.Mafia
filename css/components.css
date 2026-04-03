@@ -800,6 +800,7 @@
 .lab-chat-area {
   flex: 1; overflow-y: auto; padding: var(--space-sm) var(--space-md);
   scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.1) transparent;
+  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
 }
 .lab-chat-messages { display: flex; flex-direction: column; gap: var(--space-xs); }
 

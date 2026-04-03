@@ -730,7 +730,7 @@ function appendLabMessage(msg) {
   const container = document.getElementById("labChatMessages");
   if (!container) { renderChatMessages(); return; }
   container.insertAdjacentHTML("beforeend", renderMessageHTML(msg));
-  container.scrollTop = container.scrollHeight;
+  container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 }
 
 function sendLabReaction(messageId, reaction) {
