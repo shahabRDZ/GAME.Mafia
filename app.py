@@ -1441,11 +1441,28 @@ def bot_sequential_vote(code, bot_player):
             if not alive:
                 return
 
+            brain = get_bot_brain(code, bot_player.id)
+
             if bot_player.team == "mafia":
+                # Mafia: coordinate to vote citizens, prefer dangerous roles
                 citizens = [p for p in alive if p.team == "citizen"]
-                target = random.choice(citizens if citizens else alive)
+                dangerous = [p for p in citizens if p.role_name in ("کارآگاه", "بازپرس", "دکتر")]
+                if dangerous and random.random() < 0.6:
+                    target = random.choice(dangerous)
+                elif citizens:
+                    target = random.choice(citizens)
+                else:
+                    target = random.choice(alive)
             else:
-                target = random.choice(alive)
+                # Citizen: vote based on suspicion analysis
+                sus_scores = [(p, brain["suspicion"].get(p.id, 0) - brain["trust"].get(p.id, 0)) for p in alive]
+                sus_scores.sort(key=lambda x: x[1], reverse=True)
+                if sus_scores and sus_scores[0][1] > 0:
+                    # Vote for most suspicious, with some randomness
+                    top_sus = [s for s in sus_scores if s[1] > 0][:3]
+                    target = random.choice(top_sus)[0]
+                else:
+                    target = random.choice(alive)
 
             room_key = f"{code}_{room.day_number}"
             if room_key not in lab_votes:
@@ -2395,7 +2412,64 @@ def handle_bazpors_vote(data):
     }, room=f"lab_{code}")
 
 
-# ── Bot Message Generation ──────────────────────────────────────────────────
+# ── Bot AI System (Smart, Human-like) ────────────────────────────────────────
+
+# In-memory bot analysis per room
+bot_game_memory = {}  # {room_code: {bot_id: {suspicion: {pid: score}, allies: [], messages_seen: [], voted_for: [], day_context: str}}}
+
+def get_bot_brain(code, bot_id):
+    """Get or create bot's game memory"""
+    if code not in bot_game_memory:
+        bot_game_memory[code] = {}
+    if bot_id not in bot_game_memory[code]:
+        bot_game_memory[code][bot_id] = {
+            "suspicion": {},   # {player_id: score} higher = more suspicious
+            "trust": {},       # {player_id: score} higher = more trusted
+            "messages_seen": [],  # recent messages for context
+            "accusations": [],  # who accused whom
+            "defense_quality": {},  # {player_id: score}
+            "vote_history": {},  # {player_id: [targets]}
+        }
+    return bot_game_memory[code][bot_id]
+
+
+def bot_analyze_message(code, bot_player, speaker_player, content):
+    """Bot analyzes a message from another player"""
+    brain = get_bot_brain(code, bot_player.id)
+    sid = speaker_player.id
+
+    # Track message
+    brain["messages_seen"].append({"from": sid, "content": content, "slot": speaker_player.slot})
+    if len(brain["messages_seen"]) > 30:
+        brain["messages_seen"] = brain["messages_seen"][-30:]
+
+    # Analyze suspicion signals
+    suspicious_words = ["نمیدونم", "فرقی نداره", "هرکی", "بیخیال", "مهم نیست", "حالا ولش"]
+    defensive_words = ["من پاکم", "بهم اعتماد کنید", "من شهروندم", "من مثبتم", "قسم میخورم"]
+    analytical_words = ["دقت کنید", "تحلیل", "منطقی", "رفتارش", "مشکوک", "تناقض", "دیشب"]
+    accusation_words = ["تو مافیایی", "شک دارم به", "مشکوکی", "رای بدین به"]
+
+    content_lower = content.strip()
+
+    # Passive/evasive = slightly suspicious
+    if any(w in content_lower for w in suspicious_words):
+        brain["suspicion"][sid] = brain["suspicion"].get(sid, 0) + 1
+
+    # Over-defensive = slightly suspicious (especially for mafia bots analyzing)
+    if any(w in content_lower for w in defensive_words):
+        if bot_player.team == "citizen":
+            brain["trust"][sid] = brain["trust"].get(sid, 0) + 0.5
+        else:
+            brain["suspicion"][sid] = brain["suspicion"].get(sid, 0) + 0.3
+
+    # Analytical = trustworthy (real analysis)
+    if any(w in content_lower for w in analytical_words):
+        brain["trust"][sid] = brain["trust"].get(sid, 0) + 1
+
+    # Accusations tracked
+    if any(w in content_lower for w in accusation_words):
+        brain["accusations"].append({"from": sid, "content": content_lower})
+
 
 def save_to_bot_memory(role_name, team, phase, message, room_id):
     """Save real player messages for bot learning"""
@@ -2410,33 +2484,48 @@ def save_to_bot_memory(role_name, team, phase, message, room_id):
         db.session.add(mem)
     db.session.commit()
 
+    # Also feed to all bot brains in same room for analysis
+    room = LabRoom.query.get(room_id) if room_id else None
+    if room:
+        speaker = LabPlayer.query.filter_by(room_id=room_id, role_name=role_name).first()
+        if speaker:
+            for p in room.players:
+                if p.is_bot and p.is_alive and p.id != speaker.id:
+                    bot_analyze_message(room.code, p, speaker, message)
+
 
 def generate_bot_message(code, bot_player):
-    """Generate a message for a bot player using learned memories"""
+    """Generate intelligent, context-aware message for bot"""
     def send():
-        _time_module.sleep(random.uniform(2, 8))
+        _time_module.sleep(random.uniform(3, 12))  # Natural typing delay
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.phase != "day_talk" or room.current_turn != bot_player.slot:
                 return
 
+            # Try learned messages first (70% chance)
             memories = BotMemory.query.filter_by(
                 role_name=bot_player.role_name,
                 team=bot_player.team,
                 phase="day_talk"
-            ).order_by(BotMemory.effectiveness.desc(), BotMemory.times_used.desc()).limit(20).all()
+            ).order_by(BotMemory.effectiveness.desc()).limit(20).all()
 
-            if memories and random.random() < 0.7:
+            if memories and random.random() < 0.6:
                 weights = [max(m.effectiveness + 5, 1) for m in memories]
                 chosen = random.choices(memories, weights=weights, k=1)[0]
                 content = chosen.message
                 chosen.times_used += 1
             else:
-                content = get_fallback_bot_message(bot_player.role_name, bot_player.team, room.day_number)
+                content = get_smart_bot_message(code, bot_player, room)
 
             msg = LabMessage(room_id=room.id, player_id=bot_player.id, content=content)
             db.session.add(msg)
             db.session.commit()
+
+            # Other bots analyze this message
+            for p in room.players:
+                if p.is_bot and p.is_alive and p.id != bot_player.id:
+                    bot_analyze_message(code, p, bot_player, content)
 
             player_info = get_player_public_info(bot_player)
             socketio.emit("lab_new_message", {
@@ -2450,37 +2539,193 @@ def generate_bot_message(code, bot_player):
     threading.Thread(target=send, daemon=True).start()
 
 
-def get_fallback_bot_message(role_name, team, day_number):
-    """Generic bot messages when no learned data is available"""
-    citizen_msgs = [
-        "من شهروندم، باید مافیاها رو پیدا کنیم",
-        "یکی اینجا مشکوک رفتار میکنه...",
-        "بیاین منطقی فکر کنیم، کی تا الان مشکوک بوده؟",
-        "من به حرف\u200cهای قبلی دقت کردم، یه نفر داره دروغ میگه",
-        "باید دقت کنیم کی داره از بحث فرار میکنه",
-        "من نقشم مثبته، اعتماد کنید",
-        "فکر میکنم باید بیشتر به رفتارها دقت کنیم",
-        "من پاکم، بیاین با هم مافیا رو پیدا کنیم",
-        "دیشب اتفاقات مهمی افتاد، باید تحلیل کنیم",
-        "من به یکی شک دارم ولی مطمئن نیستم هنوز"
-    ]
+def get_smart_bot_message(code, bot_player, room):
+    """Generate context-aware message based on role, game state, and memory"""
+    brain = get_bot_brain(code, bot_player.id)
+    day = room.day_number
+    alive_players = [p for p in room.players if p.is_alive and p.id != bot_player.id]
+    role = bot_player.role_name
+    team = bot_player.team
 
-    mafia_msgs = [
-        "من شهروندم، بیاین مافیا رو پیدا کنیم",
-        "فکر میکنم اون یکی مشکوکه، نظرتون چیه؟",
-        "من پاکم، دارم کمک میکنم مافیا رو پیدا کنیم",
-        "بیاین رأی بدیم، وقت تلف نکنیم",
-        "من به اون نفر شک دارم",
-        "من نقش مثبت دارم، بهم اعتماد کنید",
-        "فکر میکنم باید روی رفتارها تمرکز کنیم",
-        "من هیچ مشکلی ندارم، سؤال دارین بپرسین",
-        "بیاین با منطق پیش بریم",
-        "من تا آخر بازی کنار شهروندام"
-    ]
+    # Find most suspicious player from bot's perspective
+    most_sus = None
+    max_sus = 0
+    for p in alive_players:
+        score = brain["suspicion"].get(p.id, 0) - brain["trust"].get(p.id, 0)
+        if score > max_sus:
+            max_sus = score
+            most_sus = p
+
+    # Find most trusted
+    most_trusted = None
+    max_trust = 0
+    for p in alive_players:
+        score = brain["trust"].get(p.id, 0) - brain["suspicion"].get(p.id, 0)
+        if score > max_trust:
+            max_trust = score
+            most_trusted = p
+
+    # Get recent context
+    recent_msgs = brain["messages_seen"][-5:]
+    context_names = [get_player_public_info(LabPlayer.query.get(m["from"]))["name"]
+                     for m in recent_msgs if LabPlayer.query.get(m["from"])]
+
+    # ── MESSAGE TEMPLATES BY ROLE & TEAM ──
 
     if team == "mafia":
-        return random.choice(mafia_msgs)
-    return random.choice(citizen_msgs)
+        return _mafia_bot_message(bot_player, role, day, most_sus, most_trusted, alive_players, brain, recent_msgs)
+    else:
+        return _citizen_bot_message(bot_player, role, day, most_sus, most_trusted, alive_players, brain, recent_msgs)
+
+
+def _get_name(player):
+    if not player:
+        return "یکی"
+    return player.bot_name if player.is_bot else (player.user_id and User.query.get(player.user_id).username if User.query.get(player.user_id) else "?")
+
+
+def _citizen_bot_message(bot_player, role, day, most_sus, most_trusted, alive_players, brain, recent_msgs):
+    """Generate citizen team messages"""
+    sus_name = _get_name(most_sus) if most_sus else None
+    trust_name = _get_name(most_trusted) if most_trusted else None
+
+    # Day 1: introduction style
+    if day == 1:
+        intros = [
+            f"سلام، من {role} هستم. بیاین با دقت رفتارها رو بررسی کنیم",
+            "روز اوله، بیاین همه حرف بزنیم ببینیم کی مشکوکه",
+            f"من {role}م. حواسم به همه هست، مافیا نمیتونه مخفی بمونه",
+            "خب بچه‌ها، دقت کنید کی عصبیه یا از بحث فرار میکنه",
+            f"سلام، {role} هستم. امروز باید خوب تحلیل کنیم",
+            "من پاکم، بیاین با منطق شروع کنیم"
+        ]
+        return random.choice(intros)
+
+    # Later days: analytical messages
+    msgs = []
+
+    if sus_name:
+        accusation_msgs = [
+            f"من به {sus_name} شک دارم. رفتارش طبیعی نیست",
+            f"{sus_name} تو صحبت‌هاش تناقض داره، دقت کنید",
+            f"از دیروز تا الان {sus_name} داره از بحث فرار میکنه",
+            f"یه نگاه به رفتار {sus_name} بندازید، خیلی مشکوکه",
+            f"فکر میکنم {sus_name} داره نقش بازی میکنه",
+        ]
+        msgs.extend(accusation_msgs)
+
+    if trust_name and random.random() < 0.3:
+        trust_msgs = [
+            f"من فکر میکنم {trust_name} پاکه، حرف‌هاش منطقیه",
+            f"تحلیل‌های {trust_name} درسته، بهش اعتماد دارم",
+        ]
+        msgs.extend(trust_msgs)
+
+    # Role-specific messages
+    if role == "کارآگاه":
+        msgs.extend([
+            "من اطلاعاتی دارم ولی الان نمیتونم بگم، صبر کنید",
+            "دیشب استعلام گرفتم، نتیجه جالبی داشت",
+            "باید مواظب باشم زیاد حرف نزنم، مافیا دنبالمه",
+        ])
+    elif role == "دکتر":
+        msgs.extend([
+            "دیشب یه نفر رو سیو کردم، خدا رو شکر",
+            "باید بفهمیم مافیا کیه تا بتونم درست سیو کنم",
+            "من نقشم مهمه، باید زنده بمونم",
+        ])
+    elif role == "بازپرس":
+        msgs.extend([
+            "من دارم رفتارها رو تحلیل میکنم، یه سری چیزا مشکوکه",
+            "ارتباط بین بعضی بازیکنا جالبه، دقت کنید",
+            "من قابلیت خاصی دارم، بذارید وقتش برسه استفاده میکنم",
+        ])
+    elif role == "هانتر":
+        msgs.extend([
+            "من میتونم کمک کنم، بگید کی مشکوکه",
+            "دیشب یه کاری کردم، نتیجش مشخص میشه",
+        ])
+
+    # General analytical
+    general = [
+        "به رفتار رأی‌گیری دیروز دقت کنید، یه الگوی عجیب بود",
+        "کسی که خیلی ساکته احتمالاً داره چیزی پنهان میکنه",
+        "مافیا معمولاً سعی میکنه با جمع هماهنگ باشه، دقت کنید",
+        "بیاین ببینیم کی دیشب کشته شد و چرا، نتیجه‌گیری کنیم",
+        "من به حرف‌های همه دقت کردم، یه نفر داره دروغ میگه",
+        "باید ببینیم کی از اتهام فرار میکنه، اون مشکوکه",
+    ]
+    msgs.extend(general)
+
+    return random.choice(msgs)
+
+
+def _mafia_bot_message(bot_player, role, day, most_sus, most_trusted, alive_players, brain, recent_msgs):
+    """Generate mafia team messages (deceptive, strategic)"""
+    # Find a citizen to frame
+    citizens = [p for p in alive_players if p.team == "citizen"]
+    frame_target = random.choice(citizens) if citizens else None
+    frame_name = _get_name(frame_target) if frame_target else None
+
+    # Find a fellow mafia to not accuse
+    mafia_allies = [p for p in alive_players if p.team == "mafia" and p.id != bot_player.id]
+
+    if day == 1:
+        intros = [
+            "سلام، من شهروندم. بیاین با هم مافیا رو پیدا کنیم",
+            "روز اوله، باید دقت کنیم کی مشکوک رفتار میکنه",
+            "من پاکم، هرکسی سؤالی داره بپرسه",
+            "خب بچه‌ها، امروز باید خوب گوش بدیم ببینیم کی دروغ میگه",
+            "من با تحلیل پیش میرم، بیاین منطقی باشیم",
+            "سلام، آماده‌ام برای بازی. بیاین مافیا رو پیدا کنیم",
+        ]
+        return random.choice(intros)
+
+    msgs = []
+
+    # Frame a citizen
+    if frame_name:
+        frame_msgs = [
+            f"من به {frame_name} شک دارم، رفتارش عوض شده",
+            f"دقت کنید {frame_name} چطور از بحث فرار میکنه",
+            f"فکر میکنم {frame_name} مشکوکه، نظرتون چیه؟",
+            f"{frame_name} دیروز عجیب رأی داد، این نرماله؟",
+            f"من حس میکنم {frame_name} داره نقش بازی میکنه",
+        ]
+        msgs.extend(frame_msgs)
+
+    # Defend an ally subtly if accused
+    if mafia_allies:
+        ally = random.choice(mafia_allies)
+        ally_name = _get_name(ally)
+        accused = any(a["from"] != bot_player.id and ally_name and ally_name in str(a.get("content", ""))
+                      for a in brain.get("accusations", []))
+        if accused:
+            msgs.extend([
+                f"فکر نکنم {ally_name} مافیا باشه، حرف‌هاش منطقیه",
+                f"بیخیال {ally_name} بشید، مشکوک‌ترا هستن",
+            ])
+
+    # Self-defense / blending in
+    blend_msgs = [
+        "من دارم سعی میکنم رفتارها رو تحلیل کنم، مافیا بین ماست",
+        "بیاین رو یه نفر تمرکز کنیم، وقت تلف نکنیم",
+        "من نقشم مثبته، دارم کمک میکنم",
+        "بیاین ببینیم دیشب چی شد و نتیجه‌گیری کنیم",
+        "من به حرف‌های همه دقت دارم، یه سری تناقض‌ها هست",
+        "فکر میکنم باید بیشتر روی رفتار رأی‌گیری تمرکز کنیم",
+        "من پاکم و تا آخر بازی کنار شهروندام",
+        "اگه کسی به من شک داره بگه، جواب میدم",
+    ]
+    msgs.extend(blend_msgs)
+
+    # Fake role claim (risky, rare)
+    if role == "رئیس مافیا" and random.random() < 0.1:
+        msgs.append("من شهروند ساده‌ام، نقش خاصی ندارم ولی تحلیلم خوبه")
+    if role == "شیاد" and random.random() < 0.1:
+        msgs.append("من نقش مثبت دارم، بهم اعتماد کنید")
+
+    return random.choice(msgs)
 
 
 # ── Socket Events: Game Start ──────────────────────────────────────────────
