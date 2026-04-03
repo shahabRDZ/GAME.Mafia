@@ -114,6 +114,7 @@
     <button class="nav-btn active" id="navNewGame" onclick="showScreen('setup')" aria-current="page">بازی جدید</button>
     <button class="nav-btn" onclick="showScreen('game')" id="gameNavBtn" style="display:none">بازی جاری</button>
     <button class="nav-btn" id="navHistory" onclick="showScreen('history')">تاریخچه</button>
+    <button class="nav-btn" id="navLab" onclick="showScreen('lab')">🧪 آزمایشی</button>
     <button class="nav-btn" id="navDM" onclick="showScreen('dm')">💬 پیام</button>
     <button class="nav-btn" id="navProfile" onclick="showScreen('profile')">پروفایل</button>
     <button class="nav-btn" id="navAdmin" onclick="window.open('/panel','_blank')" style="display:none" aria-label="پنل مدیریت">⚙️</button>
@@ -250,6 +251,32 @@
     <div class="chaos-game" id="chaosGame" style="display:none"></div>
   </section>
 
+  <!-- Lab Screen (آزمایشی) -->
+  <section class="screen" id="labScreen" aria-labelledby="labTitle">
+    <div class="lab-entry gc" id="labEntry">
+      <div class="section-title" id="labTitle">🧪 حالت آزمایشی</div>
+      <p style="color:var(--dim);font-size:.82rem;margin-bottom:12px">بازی ۱۰ نفره آنلاین · دعوت دوستان یا بات · سناریوهای مختلف</p>
+
+      <div class="lab-scenario-select">
+        <div class="lab-scenario-label">انتخاب سناریو:</div>
+        <div class="lab-scenario-options" id="labScenarioOptions">
+          <button class="lab-scenario-btn active" data-scenario="تکاور" onclick="selectLabScenario(this)">⚔️ تکاور</button>
+          <button class="lab-scenario-btn" data-scenario="نماینده" onclick="selectLabScenario(this)">🏛️ نماینده</button>
+          <button class="lab-scenario-btn" data-scenario="بازپرس" onclick="selectLabScenario(this)">🔍 بازپرس</button>
+        </div>
+      </div>
+
+      <div class="lab-entry-actions">
+        <button class="lab-action-btn lab-btn-create" onclick="createLabRoom(getSelectedLabScenario())">🏠 ساخت اتاق</button>
+        <div class="lab-join-row">
+          <input type="text" id="labJoinCode" placeholder="کد اتاق" maxlength="6" autocomplete="off" inputmode="text" class="lab-join-input">
+          <button class="lab-action-btn lab-btn-join" onclick="joinLabRoom()">ورود</button>
+        </div>
+      </div>
+    </div>
+    <div class="lab-lobby gc" id="labLobby" style="display:none"></div>
+  </section>
+
   <!-- DM Screen -->
   <section class="screen" id="dmScreen" aria-label="پیام‌ها" aria-labelledby="dmHeading">
     <div class="setup-card gc" style="padding:20px">
@@ -313,6 +340,7 @@
 <script src="js/socket.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/chaos.js"></script>
+<script src="js/lab.js"></script>
 <script src="js/dm.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/creatures.js"></script>
