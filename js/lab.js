@@ -753,71 +753,51 @@ function renderSequentialVoting(data) {
   const container = document.getElementById("labChatMessages");
   if (!container) return;
 
-  const turnPlayer = data.turn_player || null;
-  const isMyTurn = turnPlayer && !turnPlayer.is_bot && turnPlayer.user_id === currentUser?.id;
-  const alivePlayers = labState.players.filter(p => p.is_alive !== false);
-  labState.currentVoterId = turnPlayer ? turnPlayer.id : null;
+  const candidate = data.candidate || data.turn_player;
+  const candidateSlot = data.candidate_slot || data.current_turn;
+  const candidateName = data.candidate_name ||
+    (candidate ? (candidate.is_bot ? candidate.bot_name : (candidate.username || candidate.name)) : "?");
+  const isMe = candidate && !candidate.is_bot && candidate.user_id === currentUser?.id;
 
-  const turnName = turnPlayer
-    ? (turnPlayer.is_bot ? escapeHtml(turnPlayer.bot_name || turnPlayer.name) : escapeHtml(turnPlayer.username || turnPlayer.name))
-    : "?";
+  // System message announcing the candidate
+  const msg = data.message || ("🗳️ رأی برای شماره " + toFarsiNum(candidateSlot) + " (" + escapeHtml(candidateName) + ") — موافقید حذف شود؟");
 
-  let html = '<div class="lab-msg lab-msg-system">\uD83D\uDDF3\uFE0F نوبت رأی: ' + turnName + ' (' + toFarsiNum(3) + ' ثانیه)</div>';
+  let html = '<div class="lab-msg lab-msg-system">' + escapeHtml(msg) + '</div>';
 
-  // Show accumulated vote results
-  html += '<div class="lab-vote-seq-list" id="labVoteSeqList">';
-  alivePlayers.forEach(p => {
-    const pName = p.is_bot ? escapeHtml(p.bot_name || p.name) : escapeHtml(p.username || p.name);
-    const avatar = escapeHtml(p.avatar || "🎭");
-    const votes = labState.voteResults[p.id] || 0;
-    const isCurrent = turnPlayer && p.id === turnPlayer.id;
-    html += '<div class="lab-vote-seq-item ' + (isCurrent ? 'lab-vote-seq-current' : '') + '" data-pid="' + p.id + '">' +
-      '<span>' + avatar + '</span>' +
-      '<span>' + pName + '</span>' +
-      '<span class="vote-count">' + (votes > 0 ? toFarsiNum(votes) : '') + '</span>' +
+  // Vote button (everyone except the candidate)
+  if (!isMe) {
+    html += '<div class="lab-revote-btns" id="labVoteBtns_' + candidateSlot + '">' +
+      '<button class="lab-revote-btn lab-revote-eliminate" onclick="castVoteYes(' + candidateSlot + ')">✋ موافقم</button>' +
+      '<button class="lab-revote-btn lab-revote-keep" onclick="castVoteSkip(' + candidateSlot + ')">— مخالفم</button>' +
     '</div>';
-  });
-  html += '</div>';
-
-  if (isMyTurn) {
-    html += '<div class="lab-msg lab-msg-system" style="margin-block-start:8px">یک نفر را برای حذف انتخاب کنید:</div>';
-    html += '<div class="lab-vote-grid" id="labVoteGrid">';
-    alivePlayers.forEach(p => {
-      if (!p.is_bot && p.user_id === currentUser?.id) return; // Can't vote for self
-      const pName = p.is_bot ? escapeHtml(p.bot_name || p.name) : escapeHtml(p.username || p.name);
-      const avatar = escapeHtml(p.avatar || "🎭");
-      html += '<button class="lab-vote-card" onclick="castLabVote(' + p.id + ')" data-pid="' + p.id + '">' +
-        '<span class="lab-vote-avatar">' + avatar + '</span>' +
-        '<span class="lab-vote-name">' + pName + '</span>' +
-      '</button>';
-    });
-    // Skip button
-    html += '<button class="lab-vote-card" onclick="castLabVote(0)" data-pid="0" style="border-color:var(--dim)">' +
-      '<span class="lab-vote-avatar">⏭️</span>' +
-      '<span class="lab-vote-name">رد شدن</span>' +
-    '</button>';
-    html += '</div>';
   } else {
-    html += '<div class="lab-msg lab-msg-system">\u0645\u0646\u062A\u0638\u0631 ' + turnName + '...</div>';
+    html += '<div class="lab-msg lab-msg-system" style="font-size:.75rem">شما نمی‌توانید به خودتان رأی بدهید</div>';
   }
+
+  // Vote count display
+  html += '<div class="lab-vote-count-display" id="labVoteCount_' + candidateSlot + '" style="text-align:center;color:var(--accent);font-weight:700;font-size:.9rem;margin:4px 0">' +
+    toFarsiNum(labState.voteResults[candidateSlot] || 0) + ' رأی</div>';
 
   container.insertAdjacentHTML("beforeend", html);
   container.scrollTop = container.scrollHeight;
 }
 
-function castLabVote(targetPlayerId) {
+function castVoteYes(candidateSlot) {
   if (!labState.roomCode || !socket) return;
-  socket.emit("lab_vote", { code: labState.roomCode, target_player_id: targetPlayerId });
+  socket.emit("lab_vote", { code: labState.roomCode, vote: "yes" });
 
-  // Highlight selected
-  document.querySelectorAll('.lab-vote-card').forEach(c => c.classList.remove('lab-vote-selected'));
-  const sel = document.querySelector('.lab-vote-card[data-pid="' + targetPlayerId + '"]');
-  if (sel) sel.classList.add('lab-vote-selected');
+  const btns = document.getElementById("labVoteBtns_" + candidateSlot);
+  if (btns) {
+    btns.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '0.4'; });
+  }
+  showToast("رأی ثبت شد ✓");
+}
 
-  // Disable all vote cards
-  document.querySelectorAll('.lab-vote-card').forEach(c => { c.disabled = true; c.style.opacity = '0.5'; });
-
-  showToast("رأی شما ثبت شد ✓");
+function castVoteSkip(candidateSlot) {
+  const btns = document.getElementById("labVoteBtns_" + candidateSlot);
+  if (btns) {
+    btns.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '0.4'; });
+  }
 }
 
 // ═══════════════════════════
@@ -1219,28 +1199,26 @@ function handleRevoteStart(data) {
 }
 
 function handleVoteCast(data) {
-  // Update vote results in real-time
-  if (data.target_player_id && data.target_player_id !== 0) {
-    labState.voteResults[data.target_player_id] = (labState.voteResults[data.target_player_id] || 0) + 1;
+  // Update vote counts from server
+  if (data.vote_counts) {
+    labState.voteResults = data.vote_counts;
   }
 
-  // Update UI vote counts
-  const seqList = document.getElementById("labVoteSeqList");
-  if (seqList) {
-    const item = seqList.querySelector('[data-pid="' + data.target_player_id + '"]');
-    if (item) {
-      const countEl = item.querySelector('.vote-count');
-      if (countEl) countEl.textContent = toFarsiNum(labState.voteResults[data.target_player_id] || 0);
+  // Update the vote count display for this candidate
+  const candidateSlot = data.candidate_slot;
+  if (candidateSlot) {
+    const countEl = document.getElementById("labVoteCount_" + candidateSlot);
+    if (countEl) {
+      const count = labState.voteResults[candidateSlot] || 0;
+      countEl.textContent = toFarsiNum(count) + " رأی";
     }
   }
 
   // Show who voted
-  const voterName = data.voter_name ? escapeHtml(data.voter_name) : "?";
-  const targetName = data.target_name ? escapeHtml(data.target_name) : "رد شد";
-  if (data.target_player_id === 0) {
-    appendLabMessage({ id: 0, msg_type: "system", content: voterName + " رأی نداد (رد شد)" });
-  } else {
-    appendLabMessage({ id: 0, msg_type: "system", content: voterName + " به " + targetName + " رأی داد" });
+  const voter = data.voter;
+  const voterName = voter ? (voter.is_bot ? escapeHtml(voter.bot_name || voter.name) : escapeHtml(voter.username || voter.name)) : "?";
+  if (data.vote === "yes") {
+    appendLabMessage({ id: 0, msg_type: "system", content: "✋ " + voterName + " رأی داد" });
   }
 
   renderPlayersBar();
