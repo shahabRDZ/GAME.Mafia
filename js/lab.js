@@ -44,11 +44,12 @@ async function createLabRoom(scenario) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ scenario: scenario || "بازپرس" })
   });
-  if (!res || res.error) { showToast(res?.error || "خطا در ساخت اتاق", "error"); return; }
-  labState.roomCode = res.code;
-  labState.scenario = res.scenario;
+  if (!res || !res.ok) { showToast(res?.data?.error || "خطا در ساخت اتاق", "error"); return; }
+  const room = res.data;
+  labState.roomCode = room.code;
+  labState.scenario = room.scenario;
   labState.isHost = true;
-  socket.emit("join_lab", { code: res.code });
+  socket.emit("join_lab", { code: room.code });
   showLabLobby();
 }
 
@@ -232,12 +233,13 @@ async function showLabInviteFriends() {
     panel.style.display = "";
     const res = await apiFetch("/api/friends", { _background: true });
     const list = document.getElementById("labInviteList");
-    if (!res || !res.friends || res.friends.length === 0) {
+    const friends = res?.ok ? (res.data?.friends || []) : [];
+    if (friends.length === 0) {
       list.innerHTML = '<p style="color:var(--dim);text-align:center;font-size:.82rem;">دوستی پیدا نشد</p>';
       return;
     }
     const inRoom = new Set(labState.players.filter(p => !p.is_bot).map(p => p.user_id));
-    const available = res.friends.filter(f => f.status === "accepted" && !inRoom.has(f.user_id));
+    const available = friends.filter(f => f.status === "accepted" && !inRoom.has(f.user_id));
     if (available.length === 0) {
       list.innerHTML = '<p style="color:var(--dim);text-align:center;font-size:.82rem;">همه دوستان در اتاق هستند</p>';
       return;
