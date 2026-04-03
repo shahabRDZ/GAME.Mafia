@@ -91,10 +91,10 @@ function renderRoleCatalog() {
       <div class="rc-roles-grid">
         ${data.roles.map(role => `
           <div class="rc-chip-wrap">
-            <button class="rc-role-chip" data-role="${role}" data-team="${team}" onclick="toggleCatalogRole(this)">
-              <span class="rc-chip-name">${role}</span>
+            <button class="rc-role-chip" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
+              <span class="rc-chip-name">${escapeHtml(role)}</span>
               <span class="rc-chip-badge">0</span>
-            </button>${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog('${role}','${team}')" title="حذف از لیست">✕</button>` : ''}
+            </button>${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog(${JSON.stringify(role)},${JSON.stringify(team)})" title="حذف از لیست">✕</button>` : ''}
           </div>
         `).join("")}
       </div>
@@ -235,7 +235,7 @@ function renderCustomCardsList() {
   container.innerHTML = customCardsList.map((c, i) => `
     <div class="custom-card-item ${c.team}-item">
       <span class="item-icon">${teamIcons[c.team] || "❓"}</span>
-      <span class="item-name">${c.name}</span>
+      <span class="item-name">${escapeHtml(c.name)}</span>
       <span class="item-team">${teamLabels[c.team] || c.team}</span>
       <button class="item-del" onclick="removeCustomCard(${i})" title="حذف">✕</button>
     </div>`).join("");

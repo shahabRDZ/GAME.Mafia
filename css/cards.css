@@ -1,22 +1,28 @@
 /* ── Single card stage ── */
-.card-stage { display: flex; flex-direction: column; align-items: center; padding: 40px 0 24px; min-height: 480px; justify-content: center; }
+.card-stage {
+  display: flex; flex-direction: column; align-items: center;
+  padding-block: 2.5rem var(--space-lg);
+  min-height: 30rem; justify-content: center;
+}
 
 /* ── Card wrapper — large, centered ── */
-.big-card-wrapper { perspective: 1200px; cursor: pointer; width: 300px; height: 450px; }
-@media(max-width:400px) { .big-card-wrapper { width: 270px; height: 405px; } }
-@media(min-width:601px) { .big-card-wrapper { width: 330px; height: 495px; } }
-.big-card-wrapper .card { width: 100%; height: 100%; border-radius: 28px; }
+.big-card-wrapper {
+  perspective: 1200px; cursor: pointer;
+  width: clamp(16.875rem, 50vw, 20.625rem);
+  aspect-ratio: 2/3;
+}
+.big-card-wrapper .card { width: 100%; height: 100%; border-radius: 1.75rem; }
 .big-card-wrapper .card-back .card-number { font-size: 5.5rem; }
-.big-card-wrapper .card-back .tap-hint { font-size: .8rem; margin-top: 14px; letter-spacing: 3px; }
-.big-card-wrapper .char-wrap { width: 120px; height: 148px; }
-.big-card-wrapper .card-role-name { font-size: 1.15rem; margin-top: 10px; letter-spacing: 1px; }
-.big-card-wrapper .char-shadow { width: 72px; height: 12px; }
-.big-card-wrapper .card-face { border-radius: 28px; }
+.big-card-wrapper .card-back .tap-hint { font-size: 0.8rem; margin-block-start: var(--space-sm); letter-spacing: 3px; }
+.big-card-wrapper .char-wrap { width: 7.5rem; height: 9.25rem; }
+.big-card-wrapper .card-role-name { font-size: var(--font-size-lg); margin-block-start: var(--space-sm); letter-spacing: 1px; }
+.big-card-wrapper .char-shadow { width: 4.5rem; height: 0.75rem; }
+.big-card-wrapper .card-face { border-radius: 1.75rem; }
 
 /* ── Tap hint on flipped card ── */
 .tap-hint-next {
-  position: absolute; bottom: 12px; left: 0; right: 0; text-align: center;
-  font-size: .68rem; color: rgba(255,255,255,.3); letter-spacing: 2px; z-index: 5;
+  position: absolute; bottom: var(--space-sm); inset-inline: 0; text-align: center;
+  font-size: 0.68rem; color: rgba(255,255,255,.3); letter-spacing: 2px; z-index: 5;
   animation: fadeIn .5s ease;
 }
 
@@ -25,16 +31,28 @@
 .card {
   width: 100%; height: 100%; position: relative;
   -webkit-transform-style: preserve-3d; transform-style: preserve-3d;
-  transition: transform .72s cubic-bezier(.4,0,.2,1); border-radius: 20px;
+  transition: transform .72s cubic-bezier(.4,0,.2,1); border-radius: 1.25rem;
 }
 .card-back { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
 .card-front { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
 .card.flipped { transform: rotateY(180deg); }
 .card.flipped .card-back .card-number { display: none; }
 .card-face {
-  position: absolute; width: 100%; height: 100%; border-radius: 20px;
+  position: absolute; width: 100%; height: 100%; border-radius: 1.25rem;
   -webkit-backface-visibility: hidden; backface-visibility: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;
+}
+
+/* ── Card hover/focus states ── */
+.card-wrapper:hover .card,
+.big-card-wrapper:hover .card {
+  box-shadow: 0 0 30px rgba(233,69,96,.15);
+}
+.card-wrapper:focus-visible,
+.big-card-wrapper:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 4px;
+  border-radius: 1.25rem;
 }
 
 /* ── Card back ── */
@@ -44,16 +62,19 @@
   box-shadow: 0 12px 36px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .card-back::before {
-  content: ''; position: absolute; inset: 8px; border: 1px solid rgba(255,255,255,.04);
-  border-radius: 14px;
-  background: repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(255,255,255,.012) 12px, rgba(255,255,255,.012) 13px);
+  content: ''; position: absolute; inset: 0.5rem; border: 1px solid rgba(255,255,255,.04);
+  border-radius: var(--radius-lg);
+  background: repeating-linear-gradient(45deg, transparent, transparent 0.75rem, rgba(255,255,255,.012) 0.75rem, rgba(255,255,255,.012) 0.8125rem);
 }
 .card-number {
   font-size: 2.8rem; font-weight: 900; color: var(--accent);
   text-shadow: 0 0 22px var(--accent); position: relative; z-index: 1;
   filter: drop-shadow(0 0 12px var(--accent)); animation: numPulse 3s ease-in-out infinite;
 }
-.card-back .tap-hint { font-size: .66rem; color: rgba(255,255,255,.2); margin-top: 10px; position: relative; z-index: 1; letter-spacing: 2px; }
+.card-back .tap-hint {
+  font-size: var(--font-size-xs); color: rgba(255,255,255,.2);
+  margin-block-start: var(--space-sm); position: relative; z-index: 1; letter-spacing: 2px;
+}
 
 /* ── Card front shared ── */
 .card-front { transform: rotateY(180deg); }
@@ -94,7 +115,10 @@
 .independent .card-role-num { color: rgba(180,140,255,.65); }
 
 /* ── Character SVG wrapper ── */
-.char-wrap { position: relative; z-index: 2; width: 72px; height: 88px; animation: charFloat 3.2s ease-in-out infinite; }
+.char-wrap {
+  position: relative; z-index: 2; width: 4.5rem; height: 5.5rem;
+  animation: charFloat 3.2s ease-in-out infinite;
+}
 .char-wrap svg { width: 100%; height: 100%; overflow: visible; }
 
 /* ── Eye glow pulse ── */
@@ -102,21 +126,35 @@
 
 /* ── Shadow under character ── */
 .char-shadow {
-  width: 48px; height: 8px; background: rgba(0,0,0,.5); border-radius: 50%;
-  margin-top: -4px; z-index: 2; position: relative; animation: shadowPulse 3.2s ease-in-out infinite; filter: blur(4px);
+  width: 3rem; height: 0.5rem; background: rgba(0,0,0,.5); border-radius: 50%;
+  margin-block-start: -0.25rem; z-index: 2; position: relative;
+  animation: shadowPulse 3.2s ease-in-out infinite; filter: blur(4px);
 }
 
 /* ── Role label ── */
-.card-role-name { font-size: .8rem; font-weight: 700; position: relative; z-index: 3; margin-top: 6px; letter-spacing: .5px; text-align: center; padding: 0 6px; }
+.card-role-name {
+  font-size: 0.8rem; font-weight: 700; position: relative; z-index: 3;
+  margin-block-start: var(--space-2xs); letter-spacing: .5px; text-align: center;
+  padding-inline: var(--space-2xs);
+}
 .mafia .card-role-name { color: #ff5555; text-shadow: 0 0 10px #ff0000; }
 .citizen .card-role-name { color: #44ff99; text-shadow: 0 0 10px #00cc55; }
-.card-role-num { font-size: 1.2rem; font-weight: 900; position: relative; z-index: 3; margin-top: 3px; }
+.card-role-num { font-size: 1.2rem; font-weight: 900; position: relative; z-index: 3; margin-block-start: 3px; }
 .mafia .card-role-num { color: rgba(255,100,100,.65); }
 .citizen .card-role-num { color: rgba(80,255,160,.65); }
 
 /* ── Mafia/citizen ambient particles on card ── */
-.mafia-sparks, .citizen-sparks { position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: 18px; overflow: hidden; }
-.mafia-sparks::before { content: '\2620'; position: absolute; font-size: 4.5rem; opacity: .04; bottom: -8px; right: -8px; transform: rotate(-15deg); }
-.mafia-sparks::after { content: '\26A1'; position: absolute; font-size: 2.8rem; opacity: .05; top: 4px; left: 4px; }
-.citizen-sparks::before { content: '\2B50'; position: absolute; font-size: 3.5rem; opacity: .05; bottom: -5px; right: -5px; }
-.citizen-sparks::after { content: '\2728'; position: absolute; font-size: 2.2rem; opacity: .06; top: 4px; left: 4px; }
+.mafia-sparks, .citizen-sparks {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  border-radius: 1.125rem; overflow: hidden;
+}
+.mafia-sparks::before { content: '\2620'; position: absolute; font-size: 4.5rem; opacity: .04; bottom: -0.5rem; inset-inline-end: -0.5rem; transform: rotate(-15deg); }
+.mafia-sparks::after { content: '\26A1'; position: absolute; font-size: 2.8rem; opacity: .05; top: 0.25rem; inset-inline-start: 0.25rem; }
+.citizen-sparks::before { content: '\2B50'; position: absolute; font-size: 3.5rem; opacity: .05; bottom: -0.3125rem; inset-inline-end: -0.3125rem; }
+.citizen-sparks::after { content: '\2728'; position: absolute; font-size: 2.2rem; opacity: .06; top: 0.25rem; inset-inline-start: 0.25rem; }
+
+/* ── Card responsive ── */
+@media (max-width: 30em) {
+  .card-stage { min-height: 24rem; padding-block: var(--space-lg) var(--space-md); }
+  .big-card-wrapper { width: 85vw; max-width: 18rem; }
+}

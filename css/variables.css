@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap');
 
 :root {
+  /* Colors */
   --dark: #000000;
   --dark2: #0a0508;
   --dark3: #120a0e;
@@ -14,18 +15,107 @@
   --gb: rgba(255,255,255,0.07);
   --text: #eaeaf5;
   --dim: rgba(255,255,255,0.38);
+
+  /* Spacing scale */
+  --space-2xs: 0.25rem;   /* 4px */
+  --space-xs: 0.5rem;     /* 8px */
+  --space-sm: 0.75rem;    /* 12px */
+  --space-md: 1rem;       /* 16px */
+  --space-lg: 1.5rem;     /* 24px */
+  --space-xl: 2rem;       /* 32px */
+  --space-2xl: 2.5rem;    /* 40px */
+  --space-3xl: 3.5rem;    /* 56px */
+
+  /* Border radius */
+  --radius-sm: 0.5rem;    /* 8px */
+  --radius-md: 0.75rem;   /* 12px */
+  --radius-lg: 1rem;      /* 16px */
+  --radius-xl: 1.375rem;  /* 22px */
+  --radius-2xl: 1.625rem; /* 26px */
+  --radius-full: 50px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  --shadow-lg: 0 15px 42px rgba(0,0,0,0.5);
+  --shadow-glow-accent: 0 0 24px rgba(233,69,96,0.45);
+  --shadow-glow-accent2: 0 8px 24px rgba(245,166,35,0.2);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
+  --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Typography */
+  --font-family: 'Vazirmatn', sans-serif;
+  --font-size-xs: 0.65rem;
+  --font-size-sm: 0.78rem;
+  --font-size-base: 0.88rem;
+  --font-size-md: 0.95rem;
+  --font-size-lg: 1.15rem;
+  --font-size-xl: 1.35rem;
+  --font-size-2xl: 1.5rem;
+
+  /* Touch target minimum */
+  --touch-min: 2.75rem; /* 44px */
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-overlay: 100;
+  --z-modal: 500;
+  --z-toast: 9999;
 }
 
+/* ── Light scheme adjustments (optional future use) ── */
+@media (prefers-color-scheme: light) {
+  :root {
+    /* Keep dark theme by default — only override if site adds [data-theme="auto"] */
+  }
+  [data-theme="auto"] {
+    --dark: #f0f0f5;
+    --dark2: #e8e5ea;
+    --dark3: #ddd8dc;
+    --glass: rgba(0,0,0,0.04);
+    --gb: rgba(0,0,0,0.07);
+    --text: #1a1a2e;
+    --dim: rgba(0,0,0,0.45);
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Global Reset ── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Vazirmatn', sans-serif;
+  font-family: var(--font-family);
   background: #000000;
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.09) var(--dark);
 }
 
+/* Webkit scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--dark); }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.09); border-radius: 3px; }
+
+/* Global focus-visible */
+:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}

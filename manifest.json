@@ -1,14 +1,32 @@
 {
   "name": "شوشانگ - MAFIA",
   "short_name": "MAFIA",
-  "description": "بازی مافیا آنلاین",
+  "description": "بازی آنلاین مافیا - نقش‌بندی، مدیریت بازی و چت صوتی برای شب‌نشینی‌های دوستانه",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#e94560",
   "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "fa",
+  "categories": ["games", "entertainment"],
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "بازی جدید",
+      "short_name": "بازی",
+      "url": "/?action=new-game",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "تاریخچه بازی‌ها",
+      "short_name": "تاریخچه",
+      "url": "/?action=history",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
