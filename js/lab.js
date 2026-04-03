@@ -138,14 +138,26 @@ async function ensureSocket() {
 
 async function addLabBot() {
   if (!labState.roomCode) return;
-  if (!await ensureSocket()) { showToast("در حال اتصال..."); return; }
-  socket.emit("add_bot", { code: labState.roomCode });
+  const res = await apiFetch("/api/lab/room/" + labState.roomCode + "/add-bot", {
+    method: "POST"
+  });
+  if (res && res.ok && res.data) {
+    renderLabLobby(res.data);
+  } else {
+    showToast(res?.data?.error || "خطا در افزودن بات");
+  }
 }
 
 async function removeLabPlayer(playerId) {
   if (!labState.roomCode) return;
-  if (!await ensureSocket()) return;
-  socket.emit("remove_player", { code: labState.roomCode, player_id: playerId });
+  const res = await apiFetch("/api/lab/room/" + labState.roomCode + "/remove-player/" + playerId, {
+    method: "DELETE"
+  });
+  if (res && res.ok && res.data) {
+    renderLabLobby(res.data);
+  } else {
+    showToast(res?.data?.error || "خطا در حذف");
+  }
 }
 
 async function inviteLabFriend(userId) {

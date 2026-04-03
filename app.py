@@ -583,6 +583,68 @@ def get_lab_room(code):
     })
 
 
+# ── Lab REST: Add Bot & Remove Player ─────────────────────────────────────────
+
+@app.route("/api/lab/room/<code>/add-bot", methods=["POST"])
+@jwt_required()
+def api_add_bot(code):
+    uid = int(get_jwt_identity())
+    room = LabRoom.query.filter_by(code=code.upper()).first()
+    if not room:
+        return jsonify({"error": "اتاق پیدا نشد"}), 404
+    if room.host_id != uid:
+        return jsonify({"error": "فقط میزبان می‌تواند بات اضافه کند"}), 403
+    if len(room.players) >= 10:
+        return jsonify({"error": "اتاق پر است"}), 400
+
+    taken = {p.slot for p in room.players}
+    slot = next(s for s in range(1, 11) if s not in taken)
+
+    used_names = {p.bot_name for p in room.players if p.is_bot}
+    available_names = [n for n in BOT_NAMES if n not in used_names]
+    bot_name = available_names[0] if available_names else f"بات {slot}"
+
+    bot_idx = len([p for p in room.players if p.is_bot])
+    avatar = BOT_AVATARS[bot_idx % len(BOT_AVATARS)]
+
+    bot = LabPlayer(room_id=room.id, is_bot=True, bot_name=bot_name, avatar=avatar, slot=slot)
+    db.session.add(bot)
+    db.session.commit()
+
+    # Notify via socket if available
+    try:
+        room_data = get_lab_room_data(room)
+        socketio.emit("lab_update", room_data, room=f"lab_{code.upper()}")
+    except Exception:
+        pass
+
+    return get_lab_room(code)
+
+
+@app.route("/api/lab/room/<code>/remove-player/<int:player_id>", methods=["DELETE"])
+@jwt_required()
+def api_remove_player(code, player_id):
+    uid = int(get_jwt_identity())
+    room = LabRoom.query.filter_by(code=code.upper()).first()
+    if not room:
+        return jsonify({"error": "اتاق پیدا نشد"}), 404
+    if room.host_id != uid:
+        return jsonify({"error": "فقط میزبان می‌تواند حذف کند"}), 403
+
+    player = LabPlayer.query.get(player_id)
+    if player and player.room_id == room.id and player.user_id != uid:
+        db.session.delete(player)
+        db.session.commit()
+
+    try:
+        room_data = get_lab_room_data(room)
+        socketio.emit("lab_update", room_data, room=f"lab_{code.upper()}")
+    except Exception:
+        pass
+
+    return get_lab_room(code)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # GAME HISTORY ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
