@@ -130,23 +130,33 @@ function leaveLabRoom() {
   showLabEntry();
 }
 
-function addLabBot() {
-  if (!labState.roomCode || !socket || !socket.connected) return;
+async function ensureSocket() {
+  if (socket && socket.connected) return true;
+  await waitForSocket();
+  return socket && socket.connected;
+}
+
+async function addLabBot() {
+  if (!labState.roomCode) return;
+  if (!await ensureSocket()) { showToast("در حال اتصال..."); return; }
   socket.emit("add_bot", { code: labState.roomCode });
 }
 
-function removeLabPlayer(playerId) {
-  if (!labState.roomCode || !socket || !socket.connected) return;
+async function removeLabPlayer(playerId) {
+  if (!labState.roomCode) return;
+  if (!await ensureSocket()) return;
   socket.emit("remove_player", { code: labState.roomCode, player_id: playerId });
 }
 
-function inviteLabFriend(userId) {
-  if (!labState.roomCode || !socket || !socket.connected) return;
+async function inviteLabFriend(userId) {
+  if (!labState.roomCode) return;
+  if (!await ensureSocket()) return;
   socket.emit("invite_lab", { code: labState.roomCode, target_user_id: userId });
 }
 
-function startLabGame() {
-  if (!labState.roomCode || !socket || !socket.connected) return;
+async function startLabGame() {
+  if (!labState.roomCode) return;
+  if (!await ensureSocket()) { showToast("در حال اتصال..."); return; }
   socket.emit("start_lab", { code: labState.roomCode });
 }
 
