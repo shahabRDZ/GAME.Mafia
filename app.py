@@ -135,6 +135,27 @@ class DirectMessage(db.Model):
     sender = db.relationship("User", foreign_keys=[sender_id])
 
 
+class LabRoom(db.Model):
+    __tablename__ = "lab_rooms"
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(6), unique=True, nullable=False)
+    host_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    status = db.Column(db.String(20), default="waiting")  # waiting, playing, finished
+    scenario = db.Column(db.String(50), default="تکاور")  # scenario name
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    players = db.relationship("LabPlayer", backref="room", lazy=True, cascade="all, delete-orphan")
+
+class LabPlayer(db.Model):
+    __tablename__ = "lab_players"
+    id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer, db.ForeignKey("lab_rooms.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)  # null for bots
+    is_bot = db.Column(db.Boolean, default=False)
+    bot_name = db.Column(db.String(50), nullable=True)
+    avatar = db.Column(db.String(10), default="🤖")
+    slot = db.Column(db.Integer, nullable=False)  # 1-10
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # STATIC ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
@@ -436,6 +457,69 @@ def get_chaos_room(code):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# LAB MODE REST ROUTES
+# ══════════════════════════════════════════════════════════════════════════════
+
+BOT_NAMES = ["آرش", "سارا", "مهدی", "نازنین", "امیر", "لیلا", "رضا", "مریم", "حسین"]
+BOT_AVATARS = ["🤖", "👾", "🎮", "🕹️", "💀", "👻", "🦊", "🐺", "🦇"]
+
+@app.route("/api/lab/create", methods=["POST"])
+@jwt_required()
+def create_lab_room():
+    uid = int(get_jwt_identity())
+    # Clean up old waiting rooms by this user
+    LabRoom.query.filter_by(host_id=uid, status="waiting").delete()
+    db.session.commit()
+
+    code = secrets.token_hex(3).upper()[:6]
+    while LabRoom.query.filter_by(code=code).first():
+        code = secrets.token_hex(3).upper()[:6]
+
+    data = request.get_json() or {}
+    scenario = data.get("scenario", "تکاور")
+
+    room = LabRoom(code=code, host_id=uid, scenario=scenario)
+    db.session.add(room)
+    db.session.flush()
+
+    # Add host as first player
+    user = User.query.get(uid)
+    host_player = LabPlayer(room_id=room.id, user_id=uid, is_bot=False, slot=1, avatar=user.avatar_emoji)
+    db.session.add(host_player)
+    db.session.commit()
+
+    return jsonify({"code": code, "room_id": room.id, "scenario": scenario})
+
+@app.route("/api/lab/room/<code>")
+@jwt_required()
+def get_lab_room(code):
+    room = LabRoom.query.filter_by(code=code.upper()).first()
+    if not room:
+        return jsonify({"error": "اتاق پیدا نشد"}), 404
+
+    players = []
+    for p in sorted(room.players, key=lambda x: x.slot):
+        if p.is_bot:
+            players.append({
+                "slot": p.slot, "is_bot": True, "bot_name": p.bot_name,
+                "avatar": p.avatar, "id": p.id
+            })
+        else:
+            u = User.query.get(p.user_id)
+            players.append({
+                "slot": p.slot, "is_bot": False, "user_id": p.user_id,
+                "username": u.username if u else "?", "avatar": u.avatar_emoji if u else "🎭",
+                "id": p.id
+            })
+
+    return jsonify({
+        "code": room.code, "status": room.status, "scenario": room.scenario,
+        "host_id": room.host_id, "players": players,
+        "player_count": len(players), "max_players": 10
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # GAME HISTORY ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -717,6 +801,167 @@ def handle_voice_ice(data):
     info = sid_to_user.get(request.sid)
     if target_sid and info:
         emit("voice_ice", {"from_user_id": info["user_id"], "candidate": data["candidate"]}, to=target_sid)
+
+
+# ── Lab Socket Events ──────────────────────────────────────────────────────
+
+def get_lab_room_data(room):
+    """Helper to serialize lab room data"""
+    players = []
+    for p in sorted(room.players, key=lambda x: x.slot):
+        if p.is_bot:
+            players.append({
+                "slot": p.slot, "is_bot": True, "bot_name": p.bot_name,
+                "avatar": p.avatar, "id": p.id
+            })
+        else:
+            u = User.query.get(p.user_id)
+            players.append({
+                "slot": p.slot, "is_bot": False, "user_id": p.user_id,
+                "username": u.username if u else "?", "avatar": u.avatar_emoji if u else "🎭",
+                "id": p.id
+            })
+    return {
+        "code": room.code, "status": room.status, "scenario": room.scenario,
+        "host_id": room.host_id, "players": players,
+        "player_count": len(players), "max_players": 10
+    }
+
+@socketio.on("join_lab")
+def handle_join_lab(data):
+    code = data.get("code", "").upper()
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        emit("error", {"msg": "اتاق پیدا نشد"})
+        return
+    if room.status != "waiting":
+        emit("error", {"msg": "بازی شروع شده"})
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        emit("error", {"msg": "لطفاً وارد شوید"})
+        return
+
+    # Check if already in room
+    existing = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not existing:
+        if len(room.players) >= 10:
+            emit("error", {"msg": "اتاق پر است"})
+            return
+        # Find next available slot
+        taken = {p.slot for p in room.players}
+        slot = next(s for s in range(1, 11) if s not in taken)
+        user = User.query.get(uid)
+        player = LabPlayer(room_id=room.id, user_id=uid, is_bot=False, slot=slot, avatar=user.avatar_emoji)
+        db.session.add(player)
+        db.session.commit()
+
+    join_room(f"lab_{code}")
+
+    # Broadcast updated room
+    room_data = get_lab_room_data(room)
+    emit("lab_update", room_data, room=f"lab_{code}")
+
+@socketio.on("leave_lab")
+def handle_leave_lab(data):
+    code = data.get("code", "").upper()
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if player:
+        db.session.delete(player)
+        db.session.commit()
+
+    leave_room(f"lab_{code}")
+
+    # If host left, delete room
+    if room.host_id == uid:
+        db.session.delete(room)
+        db.session.commit()
+        emit("lab_closed", {}, room=f"lab_{code}")
+    else:
+        room_data = get_lab_room_data(room)
+        emit("lab_update", room_data, room=f"lab_{code}")
+
+@socketio.on("add_bot")
+def handle_add_bot(data):
+    code = data.get("code", "").upper()
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if room.host_id != uid:
+        emit("error", {"msg": "فقط میزبان می‌تواند بات اضافه کند"})
+        return
+
+    if len(room.players) >= 10:
+        emit("error", {"msg": "اتاق پر است"})
+        return
+
+    taken = {p.slot for p in room.players}
+    slot = next(s for s in range(1, 11) if s not in taken)
+
+    # Pick a bot name not already used
+    used_names = {p.bot_name for p in room.players if p.is_bot}
+    available_names = [n for n in BOT_NAMES if n not in used_names]
+    bot_name = available_names[0] if available_names else f"بات {slot}"
+
+    bot_idx = len([p for p in room.players if p.is_bot])
+    avatar = BOT_AVATARS[bot_idx % len(BOT_AVATARS)]
+
+    bot = LabPlayer(room_id=room.id, is_bot=True, bot_name=bot_name, avatar=avatar, slot=slot)
+    db.session.add(bot)
+    db.session.commit()
+
+    room_data = get_lab_room_data(room)
+    emit("lab_update", room_data, room=f"lab_{code}")
+
+@socketio.on("remove_player")
+def handle_remove_player(data):
+    code = data.get("code", "").upper()
+    player_id = data.get("player_id")
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if room.host_id != uid:
+        emit("error", {"msg": "فقط میزبان می‌تواند حذف کند"})
+        return
+
+    player = LabPlayer.query.get(player_id)
+    if player and player.room_id == room.id and player.user_id != uid:
+        db.session.delete(player)
+        db.session.commit()
+        room_data = get_lab_room_data(room)
+        emit("lab_update", room_data, room=f"lab_{code}")
+
+@socketio.on("invite_lab")
+def handle_invite_lab(data):
+    code = data.get("code", "").upper()
+    target_id = data.get("target_user_id")
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    username = sid_to_user.get(request.sid, {}).get("username", "?")
+
+    target_sid = user_to_sid.get(target_id)
+    if target_sid:
+        emit("lab_invite", {
+            "from_user_id": uid, "from_username": username,
+            "room_code": code, "scenario": room.scenario
+        }, room=target_sid)
+        emit("invite_sent", {"username": User.query.get(target_id).username if User.query.get(target_id) else "?"})
 
 
 # ── Game Phase Logic ─────────────────────────────────────────────────────────

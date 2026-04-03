@@ -69,6 +69,10 @@ function initSocket() {
     showRoomInviteNotification(data.from_username, data.room_code);
   });
 
+  socket.on("lab_update", (data) => handleLabUpdate(data));
+  socket.on("lab_closed", () => handleLabClosed());
+  socket.on("lab_invite", (data) => handleLabInvite(data));
+
   socket.on("invite_sent", (data) => {
     if (data?.username) showToast("✅ دعوت به " + data.username + " ارسال شد");
   });

@@ -10,6 +10,7 @@ function showScreen(name) {
         (name === "game" && b.textContent.includes("جاری")) ||
         (name === "history" && b.textContent.includes("تاریخچه")) ||
         (name === "chaos" && (b.textContent.includes("CHAOS") || b.textContent.includes("کی‌اس"))) ||
+        (name === "lab" && b.textContent.includes("آزمایشی")) ||
         (name === "profile" && b.textContent.includes("پروفایل"))) {
       b.classList.add("active");
     }
@@ -18,5 +19,6 @@ function showScreen(name) {
   if (name === "profile") renderProfileScreen();
   if (name === "dm") renderDMScreen();
   if (name === "chaos" && authToken) initSocket();
+  if (name === "lab" && authToken) initSocket();
   if (name === "admin") renderAdminScreen();
 }
