@@ -153,6 +153,9 @@ class LabRoom(db.Model):
     hunter_block_target = db.Column(db.Integer, nullable=True)  # hunter's block target
     detective_result = db.Column(db.String(50), nullable=True)  # detective inquiry result
     doctor_self_save_used = db.Column(db.Boolean, default=False)  # doctor can save self once
+    bazpors_ability_used = db.Column(db.Boolean, default=False)  # bazpors can use ability once per game
+    bazpors_target1 = db.Column(db.Integer, nullable=True)  # first bazpors target player id
+    bazpors_target2 = db.Column(db.Integer, nullable=True)  # second bazpors target player id
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     players = db.relationship("LabPlayer", backref="room", lazy=True, cascade="all, delete-orphan")
 
@@ -1825,15 +1828,18 @@ def start_night_sub(code, sub_phase):
 
     elif sub_phase == "night_bazpors":
         bazpors = find_player_by_role(room, "بازپرس")
-        if bazpors:
+        if bazpors and not room.bazpors_ability_used:
             emit_to_player(bazpors, "lab_night_action_prompt", {
                 "sub_phase": sub_phase,
                 "role": "بازپرس",
+                "description": "۲ بازیکن انتخاب کنید — فردا این ۲ نفر دفاع می‌کنند و بین آنها رأی‌گیری می‌شود",
+                "select_count": 2,
                 "targets": [p for p in alive_info if p and p["id"] != bazpors.id],
                 "turn_end_at": room.turn_end_at.isoformat()
             })
             if bazpors.is_bot:
                 bot_night_action(code, bazpors, sub_phase)
+        # If ability already used, skip
 
     elif sub_phase == "night_doctor":
         doctor = find_player_by_role(room, "دکتر")
@@ -1944,14 +1950,16 @@ def bot_night_action(code, bot_player, sub_phase):
                 db.session.commit()
 
             elif sub_phase == "night_bazpors":
-                target = random.choice(targets)
-                lab_night_actions[room_key]["bazpors"] = target.id
-                result = "مافیا" if target.team == "mafia" else "شهروند"
+                if room.bazpors_ability_used:
+                    return
+                if len(targets) < 2:
+                    return
+                chosen = random.sample(targets, 2)
+                room.bazpors_ability_used = True
+                room.bazpors_target1 = chosen[0].id
+                room.bazpors_target2 = chosen[1].id
+                lab_night_actions[room_key]["bazpors"] = [chosen[0].id, chosen[1].id]
                 db.session.commit()
-                emit_to_player(bot_player, "lab_detective_result", {
-                    "target": get_player_public_info(target),
-                    "result": result
-                })
 
     threading.Thread(target=act, daemon=True).start()
 
@@ -2040,8 +2048,351 @@ def resolve_night(code):
         with app.app_context():
             r = LabRoom.query.filter_by(code=code).first()
             if r and r.status == "playing":
+                # Check if bazpors selected 2 targets last night
+                if r.bazpors_target1 and r.bazpors_target2:
+                    t1 = LabPlayer.query.get(r.bazpors_target1)
+                    t2 = LabPlayer.query.get(r.bazpors_target2)
+                    if t1 and t1.is_alive and t2 and t2.is_alive:
+                        start_bazpors_trial(code, r.day_number + 1)
+                        return
+                    # Clear if targets are dead
+                    r.bazpors_target1 = None
+                    r.bazpors_target2 = None
+                    db.session.commit()
                 start_day_talk(code, r.day_number + 1)
     threading.Thread(target=next_day, daemon=True).start()
+
+
+# ── Bazpors Trial Phase ──────────────────────────────────────────────────────
+
+def start_bazpors_trial(code, day_number):
+    """Bazpors selected 2 players: they defend, then vote between them"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room.phase = "bazpors_defense1"
+    room.day_number = day_number
+    room.current_turn = 0
+
+    t1 = LabPlayer.query.get(room.bazpors_target1)
+    t2 = LabPlayer.query.get(room.bazpors_target2)
+
+    # First target defends for 30s
+    room.defense_player_id = t1.id
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+    db.session.commit()
+
+    t1_info = get_player_public_info(t1)
+    t2_info = get_player_public_info(t2)
+
+    socketio.emit("lab_phase_change", {
+        "phase": "bazpors_defense1",
+        "day_number": day_number,
+        "defense_player": t1_info,
+        "defense_player2": t2_info,
+        "turn_end_at": room.turn_end_at.isoformat(),
+        "message": f"🔍 بازپرس ۲ نفر را انتخاب کرده! اول {t1_info['name']} دفاع می‌کند (۳۰ ثانیه)"
+    }, room=f"lab_{code}")
+
+    # Bot defense
+    if t1.is_bot:
+        generate_bot_defense(code, t1)
+
+    # After 30s, switch to second player
+    def switch_to_defense2():
+        _time_module.sleep(31)
+        with app.app_context():
+            r = LabRoom.query.filter_by(code=code).first()
+            if not r or r.phase != "bazpors_defense1":
+                return
+            r.phase = "bazpors_defense2"
+            r.defense_player_id = r.bazpors_target2
+            r.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+            db.session.commit()
+
+            t2_p = LabPlayer.query.get(r.bazpors_target2)
+            socketio.emit("lab_phase_change", {
+                "phase": "bazpors_defense2",
+                "day_number": day_number,
+                "defense_player": get_player_public_info(t2_p),
+                "turn_end_at": r.turn_end_at.isoformat(),
+                "message": f"حالا {get_player_public_info(t2_p)['name']} دفاع می‌کند (۳۰ ثانیه)"
+            }, room=f"lab_{code}")
+
+            if t2_p.is_bot:
+                generate_bot_defense(code, t2_p)
+
+            # After 30s, start bazpors vote
+            def start_bvote():
+                _time_module.sleep(31)
+                with app.app_context():
+                    r2 = LabRoom.query.filter_by(code=code).first()
+                    if not r2 or r2.phase != "bazpors_defense2":
+                        return
+                    start_bazpors_vote(code)
+            threading.Thread(target=start_bvote, daemon=True).start()
+
+    threading.Thread(target=switch_to_defense2, daemon=True).start()
+
+
+def generate_bot_defense(code, bot_player):
+    """Bot generates a defense message"""
+    def send():
+        _time_module.sleep(random.uniform(3, 10))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or "bazpors_defense" not in room.phase:
+                return
+            if room.defense_player_id != bot_player.id:
+                return
+            content = get_fallback_bot_message(bot_player.role_name, bot_player.team, room.day_number)
+            msg = LabMessage(room_id=room.id, player_id=bot_player.id, content=content)
+            db.session.add(msg)
+            db.session.commit()
+            socketio.emit("lab_new_message", {
+                "id": msg.id,
+                "player": get_player_public_info(bot_player),
+                "content": content,
+                "msg_type": "chat",
+                "time": msg.created_at.isoformat()
+            }, room=f"lab_{code}")
+    threading.Thread(target=send, daemon=True).start()
+
+
+def start_bazpors_vote(code):
+    """Vote between the 2 bazpors targets"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room.phase = "bazpors_vote"
+    alive = get_alive_sorted(room)
+    room.current_turn = alive[0].slot if alive else 0
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+    db.session.commit()
+
+    t1 = LabPlayer.query.get(room.bazpors_target1)
+    t2 = LabPlayer.query.get(room.bazpors_target2)
+
+    room_key = f"{code}_{room.day_number}_bvote"
+    lab_votes[room_key] = {}
+
+    socketio.emit("lab_phase_change", {
+        "phase": "bazpors_vote",
+        "day_number": room.day_number,
+        "current_turn": alive[0].slot if alive else 0,
+        "turn_player": get_player_public_info(alive[0]) if alive else None,
+        "turn_end_at": room.turn_end_at.isoformat(),
+        "candidate1": get_player_public_info(t1),
+        "candidate2": get_player_public_info(t2),
+        "message": "بین این ۲ نفر رأی بدهید"
+    }, room=f"lab_{code}")
+
+    # Bot votes
+    if alive and alive[0].is_bot:
+        bot_bazpors_vote(code, alive[0], t1, t2)
+
+    schedule_bazpors_vote_advance(code, alive[0].slot if alive else 0, room.day_number)
+
+
+def schedule_bazpors_vote_advance(code, current_slot, day_number):
+    """Auto-advance bazpors vote after 3s"""
+    def advance():
+        _time_module.sleep(4)
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.phase != "bazpors_vote" or room.day_number != day_number:
+                return
+            if room.current_turn != current_slot:
+                return
+            advance_bazpors_vote(code)
+    threading.Thread(target=advance, daemon=True).start()
+
+
+def advance_bazpors_vote(code):
+    """Move to next voter in bazpors vote"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "bazpors_vote":
+        return
+
+    alive = get_alive_sorted(room)
+    current = room.current_turn
+    alive_slots = [p.slot for p in alive]
+
+    next_slot = None
+    for s in alive_slots:
+        if s > current:
+            next_slot = s
+            break
+
+    if next_slot is None:
+        # All voted - resolve
+        resolve_bazpors_vote(code)
+    else:
+        room.current_turn = next_slot
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+        db.session.commit()
+
+        player = next((p for p in alive if p.slot == next_slot), None)
+        socketio.emit("lab_phase_change", {
+            "phase": "bazpors_vote",
+            "day_number": room.day_number,
+            "current_turn": next_slot,
+            "turn_player": get_player_public_info(player),
+            "turn_end_at": room.turn_end_at.isoformat()
+        }, room=f"lab_{code}")
+
+        if player and player.is_bot:
+            t1 = LabPlayer.query.get(room.bazpors_target1)
+            t2 = LabPlayer.query.get(room.bazpors_target2)
+            bot_bazpors_vote(code, player, t1, t2)
+
+        schedule_bazpors_vote_advance(code, next_slot, room.day_number)
+
+
+def bot_bazpors_vote(code, bot_player, t1, t2):
+    """Bot votes in bazpors vote"""
+    def vote():
+        _time_module.sleep(random.uniform(0.5, 2))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.phase != "bazpors_vote":
+                return
+            room_key = f"{code}_{room.day_number}_bvote"
+            if room_key not in lab_votes:
+                lab_votes[room_key] = {}
+            # Mafia bots vote for citizens, citizen bots vote randomly
+            if bot_player.team == "mafia":
+                target = t1 if t1.team == "citizen" else t2
+            else:
+                target = random.choice([t1, t2])
+            lab_votes[room_key][bot_player.id] = target.id
+            socketio.emit("lab_vote_cast", {
+                "voter": get_player_public_info(bot_player),
+                "target_id": target.id,
+                "vote_results": count_bazpors_votes(room_key, t1.id, t2.id)
+            }, room=f"lab_{code}")
+    threading.Thread(target=vote, daemon=True).start()
+
+
+def count_bazpors_votes(room_key, t1_id, t2_id):
+    """Count votes for bazpors candidates"""
+    votes = lab_votes.get(room_key, {})
+    return {
+        str(t1_id): sum(1 for v in votes.values() if v == t1_id),
+        str(t2_id): sum(1 for v in votes.values() if v == t2_id)
+    }
+
+
+def resolve_bazpors_vote(code):
+    """Resolve bazpors vote - eliminate the one with more votes"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room_key = f"{code}_{room.day_number}_bvote"
+    votes = lab_votes.get(room_key, {})
+
+    t1_id = room.bazpors_target1
+    t2_id = room.bazpors_target2
+    t1_votes = sum(1 for v in votes.values() if v == t1_id)
+    t2_votes = sum(1 for v in votes.values() if v == t2_id)
+
+    # Eliminate the one with more votes (tie = no elimination)
+    eliminated = None
+    if t1_votes > t2_votes:
+        eliminated = LabPlayer.query.get(t1_id)
+    elif t2_votes > t1_votes:
+        eliminated = LabPlayer.query.get(t2_id)
+
+    if eliminated:
+        eliminated.is_alive = False
+        eliminated.is_eliminated = True
+
+    # Clear bazpors targets
+    room.bazpors_target1 = None
+    room.bazpors_target2 = None
+
+    db.session.commit()
+    lab_votes.pop(room_key, None)
+
+    # Announce result with team reveal
+    if eliminated:
+        team_label = "مافیا 🔴" if eliminated.team == "mafia" else "شهروند 🟢"
+        socketio.emit("lab_phase_change", {
+            "phase": "bazpors_result",
+            "eliminated": get_player_public_info(eliminated),
+            "eliminated_role": eliminated.role_name,
+            "eliminated_team": eliminated.team,
+            "team_label": team_label,
+            "message": f"{get_player_public_info(eliminated)['name']} با رأی حذف شد — ساید: {team_label}",
+            "day_number": room.day_number
+        }, room=f"lab_{code}")
+    else:
+        socketio.emit("lab_phase_change", {
+            "phase": "bazpors_result",
+            "eliminated": None,
+            "message": "تساوی آرا! کسی حذف نشد",
+            "day_number": room.day_number
+        }, room=f"lab_{code}")
+
+    # Check win condition
+    winner = check_win_condition(room)
+    if winner:
+        emit_game_result(code, room, winner, eliminated)
+        return
+
+    # Continue to normal day_talk after 5s
+    def continue_day():
+        _time_module.sleep(5)
+        with app.app_context():
+            r = LabRoom.query.filter_by(code=code).first()
+            if r and r.status == "playing":
+                start_day_talk(code, r.day_number)
+    threading.Thread(target=continue_day, daemon=True).start()
+
+
+# ── Bazpors Vote Socket Event ────────────────────────────────────────────────
+
+@socketio.on("lab_bazpors_vote")
+def handle_bazpors_vote(data):
+    """Handle vote in bazpors trial"""
+    code = data.get("code", "").upper()
+    target_player_id = data.get("target_player_id")
+
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "bazpors_vote":
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not player or not player.is_alive:
+        return
+
+    if player.slot != room.current_turn:
+        emit("error", {"msg": "الان نوبت شما نیست"})
+        return
+
+    # Must vote for one of the two candidates
+    if target_player_id not in (room.bazpors_target1, room.bazpors_target2):
+        emit("error", {"msg": "فقط بین ۲ کاندید رأی بدهید"})
+        return
+
+    room_key = f"{code}_{room.day_number}_bvote"
+    if room_key not in lab_votes:
+        lab_votes[room_key] = {}
+
+    lab_votes[room_key][player.id] = target_player_id
+
+    socketio.emit("lab_vote_cast", {
+        "voter": get_player_public_info(player),
+        "target_id": target_player_id,
+        "vote_results": count_bazpors_votes(room_key, room.bazpors_target1, room.bazpors_target2)
+    }, room=f"lab_{code}")
 
 
 # ── Bot Message Generation ──────────────────────────────────────────────────
@@ -2279,7 +2630,7 @@ def handle_defense_chat(data):
         return
 
     room = LabRoom.query.filter_by(code=code).first()
-    if not room or room.phase != "defense":
+    if not room or room.phase not in ("defense", "bazpors_defense1", "bazpors_defense2"):
         return
 
     uid = sid_to_user.get(request.sid, {}).get("user_id")
@@ -2488,15 +2839,28 @@ def handle_night_action(data):
     elif current_phase == "night_bazpors":
         if player.role_name != "بازپرس":
             return
-        target = LabPlayer.query.get(target_player_id)
-        if not target:
+        if room.bazpors_ability_used:
+            emit("error", {"msg": "قابلیت بازپرس قبلاً استفاده شده"})
             return
-        result = "مافیا" if target.team == "mafia" else "شهروند"
-        lab_night_actions[room_key]["bazpors"] = target.id
+        # Expect two targets: target_player_id and target_player_id_2
+        target_id_2 = data.get("target_player_id_2")
+        target1 = LabPlayer.query.get(target_player_id)
+        target2 = LabPlayer.query.get(target_id_2) if target_id_2 else None
+        if not target1 or not target2:
+            emit("error", {"msg": "باید ۲ بازیکن انتخاب کنید"})
+            return
+        if target1.id == target2.id:
+            emit("error", {"msg": "دو بازیکن متفاوت انتخاب کنید"})
+            return
+        room.bazpors_ability_used = True
+        room.bazpors_target1 = target1.id
+        room.bazpors_target2 = target2.id
+        lab_night_actions[room_key]["bazpors"] = [target1.id, target2.id]
         db.session.commit()
         emit_to_player(player, "lab_detective_result", {
-            "target": get_player_public_info(target),
-            "result": result
+            "target": get_player_public_info(target1),
+            "target2": get_player_public_info(target2),
+            "result": "فردا این ۲ نفر دفاع می‌کنند و بین آنها رأی‌گیری می‌شود"
         })
 
     elif current_phase == "night_doctor":
