@@ -48,12 +48,20 @@ function waitForSocket() {
 }
 
 async function fetchAndShowLobby(code) {
-  const res = await apiFetch("/api/lab/room/" + code, { _background: true });
-  if (res && res.ok && res.data) {
-    showLabLobby();
-    renderLabLobby(res.data);
-  } else {
-    showToast(res?.data?.error || "خطا در بارگذاری اتاق");
+  console.log("[LAB] fetchAndShowLobby code:", code);
+  try {
+    const res = await apiFetch("/api/lab/room/" + code, { _background: true });
+    console.log("[LAB] fetchAndShowLobby res:", JSON.stringify(res));
+    if (res && res.ok && res.data) {
+      showLabLobby();
+      renderLabLobby(res.data);
+    } else {
+      console.error("[LAB] fetchAndShowLobby failed:", res);
+      showToast(res?.data?.error || "خطا در بارگذاری اتاق");
+    }
+  } catch(e) {
+    console.error("[LAB] fetchAndShowLobby error:", e);
+    showToast("خطا: " + e.message);
   }
 }
 
@@ -61,10 +69,12 @@ async function createLabRoom(scenario) {
   if (!authToken) { openAuthModal("login"); return; }
 
   // 1. Create room via REST API
+  console.log("[LAB] Creating room, authToken:", authToken ? "yes" : "no");
   const res = await apiFetch("/api/lab/create", {
     method: "POST",
     body: JSON.stringify({ scenario: scenario || "بازپرس" })
   });
+  console.log("[LAB] Create response:", JSON.stringify(res));
   if (!res || !res.ok) { showToast(res?.data?.error || "خطا در ساخت اتاق"); return; }
   const room = res.data;
   labState.roomCode = room.code;
