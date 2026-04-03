@@ -1427,7 +1427,7 @@ def generate_bot_mafia_chat(code, bot_player):
 # ── Sequential Voting ──────────────────────────────────────────────────────
 
 def start_sequential_voting(code):
-    """Start voting: each alive player votes in turn, 3s each"""
+    """Voting: for each alive player, everyone votes yes/no in 3 seconds"""
     room = LabRoom.query.filter_by(code=code).first()
     if not room:
         return
@@ -1437,30 +1437,37 @@ def start_sequential_voting(code):
         return
 
     room.phase = "voting"
-    room.current_turn = alive[0].slot
+    room.current_turn = alive[0].slot  # candidate being voted on
     room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
     db.session.commit()
 
     room_key = f"{code}_{room.day_number}"
-    lab_votes[room_key] = {}
+    lab_votes[room_key] = {}  # {candidate_slot: vote_count}
+
+    candidate = alive[0]
+    candidate_info = get_player_public_info(candidate)
+    candidate_name = candidate.bot_name if candidate.is_bot else (User.query.get(candidate.user_id).username if candidate.user_id else "?")
 
     socketio.emit("lab_phase_change", {
         "phase": "voting",
         "day_number": room.day_number,
-        "current_turn": alive[0].slot,
-        "turn_player": get_player_public_info(alive[0]),
+        "current_turn": candidate.slot,
+        "candidate": candidate_info,
+        "candidate_name": candidate_name,
+        "candidate_slot": candidate.slot,
         "turn_end_at": room.turn_end_at.isoformat(),
-        "alive_players": [get_player_public_info(p) for p in alive]
+        "alive_players": [get_player_public_info(p) for p in alive],
+        "message": f"🗳️ رأی برای شماره {candidate.slot} ({candidate_name}) — موافقید حذف شود؟"
     }, room=f"lab_{code}")
 
-    if alive[0].is_bot:
-        bot_sequential_vote(code, alive[0])
+    # Bots vote for this candidate
+    bot_vote_for_candidate(code, candidate, alive)
 
-    schedule_vote_advance(code, alive[0].slot, room.day_number)
+    schedule_vote_advance(code, candidate.slot, room.day_number)
 
 
 def advance_sequential_vote(code):
-    """Move to next voter or resolve votes"""
+    """Move to next candidate or resolve"""
     room = LabRoom.query.filter_by(code=code).first()
     if not room or room.phase != "voting":
         return
@@ -1476,88 +1483,86 @@ def advance_sequential_vote(code):
             break
 
     if next_slot is None:
-        # All voted - resolve
         resolve_voting(code)
     else:
         room.current_turn = next_slot
         room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
         db.session.commit()
 
-        player = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
+        candidate = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
+        candidate_info = get_player_public_info(candidate)
+        candidate_name = candidate.bot_name if candidate.is_bot else (User.query.get(candidate.user_id).username if candidate.user_id else "?")
+
         socketio.emit("lab_phase_change", {
             "phase": "voting",
             "day_number": room.day_number,
             "current_turn": next_slot,
-            "turn_player": get_player_public_info(player),
-            "turn_end_at": room.turn_end_at.isoformat()
+            "candidate": candidate_info,
+            "candidate_name": candidate_name,
+            "candidate_slot": next_slot,
+            "turn_end_at": room.turn_end_at.isoformat(),
+            "message": f"🗳️ رأی برای شماره {next_slot} ({candidate_name}) — موافقید حذف شود؟"
         }, room=f"lab_{code}")
 
-        if player and player.is_bot:
-            bot_sequential_vote(code, player)
-
+        bot_vote_for_candidate(code, candidate, alive)
         schedule_vote_advance(code, next_slot, room.day_number)
 
 
-def bot_sequential_vote(code, bot_player):
-    """Bot votes during sequential voting"""
+def bot_vote_for_candidate(code, candidate, alive_players):
+    """All bots vote yes/no for the current candidate"""
     def vote():
-        _time_module.sleep(random.uniform(0.5, 2))
+        _time_module.sleep(random.uniform(0.5, 1.5))
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.phase != "voting":
                 return
-            if room.current_turn != bot_player.slot:
-                return
-
-            alive = [p for p in room.players if p.is_alive and p.id != bot_player.id]
-            if not alive:
-                return
-
-            brain = get_bot_brain(code, bot_player.id)
-
-            if bot_player.team == "mafia":
-                # Mafia: coordinate to vote citizens, prefer dangerous roles
-                citizens = [p for p in alive if p.team == "citizen"]
-                dangerous = [p for p in citizens if p.role_name in ("کارآگاه", "بازپرس", "دکتر")]
-                if dangerous and random.random() < 0.6:
-                    target = random.choice(dangerous)
-                elif citizens:
-                    target = random.choice(citizens)
-                else:
-                    target = random.choice(alive)
-            else:
-                # Citizen: vote based on suspicion analysis
-                sus_scores = [(p, brain["suspicion"].get(p.id, 0) - brain["trust"].get(p.id, 0)) for p in alive]
-                sus_scores.sort(key=lambda x: x[1], reverse=True)
-                if sus_scores and sus_scores[0][1] > 0:
-                    # Vote for most suspicious, with some randomness
-                    top_sus = [s for s in sus_scores if s[1] > 0][:3]
-                    target = random.choice(top_sus)[0]
-                else:
-                    target = random.choice(alive)
 
             room_key = f"{code}_{room.day_number}"
             if room_key not in lab_votes:
                 lab_votes[room_key] = {}
-            lab_votes[room_key][bot_player.id] = target.id
 
-            socketio.emit("lab_vote_cast", {
-                "voter": get_player_public_info(bot_player),
-                "target": get_player_public_info(target),
-                "vote_counts": get_vote_counts(code, room.day_number)
-            }, room=f"lab_{code}")
+            for bot in alive_players:
+                if not bot.is_bot or not bot.is_alive:
+                    continue
+                if bot.id == candidate.id:
+                    continue  # Can't vote for yourself
+
+                brain = get_bot_brain(code, bot.id)
+                should_vote_yes = False
+
+                if bot.team == "mafia":
+                    # Mafia votes yes for citizens (to eliminate them)
+                    if candidate.team == "citizen":
+                        dangerous = candidate.role_name in ("کارآگاه", "بازپرس", "دکتر")
+                        should_vote_yes = dangerous or random.random() < 0.4
+                    else:
+                        should_vote_yes = False  # Don't vote out fellow mafia
+                else:
+                    # Citizen votes based on suspicion
+                    sus = brain["suspicion"].get(candidate.id, 0)
+                    trust = brain["trust"].get(candidate.id, 0)
+                    if sus > trust:
+                        should_vote_yes = random.random() < 0.7
+                    else:
+                        should_vote_yes = random.random() < 0.15
+
+                if should_vote_yes:
+                    lab_votes[room_key][candidate.slot] = lab_votes[room_key].get(candidate.slot, 0) + 1
+
+                    socketio.emit("lab_vote_cast", {
+                        "voter": get_player_public_info(bot),
+                        "candidate_slot": candidate.slot,
+                        "vote": "yes",
+                        "vote_counts": lab_votes[room_key]
+                    }, room=f"lab_{code}")
 
     threading.Thread(target=vote, daemon=True).start()
 
 
 def get_vote_counts(code, day_number):
-    """Get current vote counts per target"""
+    """Get vote counts per candidate slot"""
     room_key = f"{code}_{day_number}"
-    votes = lab_votes.get(room_key, {})
-    counts = {}
-    for voter_id, target_id in votes.items():
-        counts[str(target_id)] = counts.get(str(target_id), 0) + 1
-    return counts
+    return lab_votes.get(room_key, {})
 
 
 def resolve_voting(code):
@@ -1567,22 +1572,18 @@ def resolve_voting(code):
         return
 
     room_key = f"{code}_{room.day_number}"
-    votes = lab_votes.get(room_key, {})
-
-    vote_counts = {}
-    for voter_id, target_id in votes.items():
-        vote_counts[target_id] = vote_counts.get(target_id, 0) + 1
+    vote_counts = lab_votes.get(room_key, {})  # {candidate_slot: count}
 
     # Find player with most votes
-    max_voted_id = None
+    max_voted_slot = None
     max_count = 0
     if vote_counts:
-        max_voted_id = max(vote_counts, key=vote_counts.get)
-        max_count = vote_counts[max_voted_id]
+        max_voted_slot = max(vote_counts, key=vote_counts.get)
+        max_count = vote_counts[max_voted_slot]
 
     if max_count >= 4:
         # Go to defense phase
-        defense_player = LabPlayer.query.get(max_voted_id)
+        defense_player = LabPlayer.query.filter_by(room_id=room.id, slot=max_voted_slot).first()
         if defense_player:
             start_defense(code, defense_player, max_count)
             return
@@ -3151,9 +3152,9 @@ def handle_lab_reaction(data):
 
 @socketio.on("lab_vote")
 def handle_lab_vote(data):
-    """Sequential voting: current turn player picks a target"""
+    """Player votes yes for the current candidate"""
     code = data.get("code", "").upper()
-    target_player_id = data.get("target_player_id")  # None means skip
+    vote = data.get("vote", "yes")  # "yes" to vote for elimination
 
     room = LabRoom.query.filter_by(code=code).first()
     if not room or room.phase != "voting":
@@ -3167,27 +3168,25 @@ def handle_lab_vote(data):
     if not player or not player.is_alive:
         return
 
-    # Must be this player's turn
-    if player.slot != room.current_turn:
-        emit("error", {"msg": "الان نوبت شما نیست"})
+    # Can't vote for yourself
+    if player.slot == room.current_turn:
+        emit("error", {"msg": "نمی‌توانید به خودتان رأی بدهید"})
         return
 
+    candidate_slot = room.current_turn
     room_key = f"{code}_{room.day_number}"
     if room_key not in lab_votes:
         lab_votes[room_key] = {}
 
-    if target_player_id:
-        lab_votes[room_key][player.id] = target_player_id
+    if vote == "yes":
+        lab_votes[room_key][candidate_slot] = lab_votes[room_key].get(candidate_slot, 0) + 1
 
-    target = LabPlayer.query.get(target_player_id) if target_player_id else None
-    socketio.emit("lab_vote_cast", {
-        "voter": get_player_public_info(player),
-        "target": get_player_public_info(target) if target else None,
-        "vote_counts": get_vote_counts(code, room.day_number)
-    }, room=f"lab_{code}")
-
-    # Advance immediately (don't wait for timer)
-    advance_sequential_vote(code)
+        socketio.emit("lab_vote_cast", {
+            "voter": get_player_public_info(player),
+            "candidate_slot": candidate_slot,
+            "vote": "yes",
+            "vote_counts": lab_votes[room_key]
+        }, room=f"lab_{code}")
 
 
 @socketio.on("lab_revote")
