@@ -1307,10 +1307,10 @@ def start_day_talk(code, day_number):
         "alive_players": [get_player_public_info(p) for p in alive]
     }, room=f"lab_{code}")
 
-    schedule_turn_timer(code, alive[0].slot, day_number)
-
     if alive[0].is_bot:
         generate_bot_message(code, alive[0])
+    else:
+        schedule_turn_timer(code, alive[0].slot, day_number)
 
 
 def advance_turn(code):
@@ -1347,10 +1347,10 @@ def advance_turn(code):
             "turn_end_at": room.turn_end_at.isoformat()
         }, room=f"lab_{code}")
 
-        schedule_turn_timer(code, next_slot, room.day_number)
-
         if player and player.is_bot:
             generate_bot_message(code, player)
+        else:
+            schedule_turn_timer(code, next_slot, room.day_number)
 
 
 # ── Mafia Chat ──────────────────────────────────────────────────────────────
@@ -2567,14 +2567,14 @@ def save_to_bot_memory(role_name, team, phase, message, room_id):
 
 
 def generate_bot_message(code, bot_player):
-    """Generate multiple intelligent messages for bot during 30s turn"""
+    """Generate multiple messages for bot, then auto-advance turn"""
     def send():
-        num_messages = random.randint(2, 4)  # 2-4 messages per turn
+        num_messages = random.randint(2, 4)
         slot = bot_player.slot
         pid = bot_player.id
 
         for i in range(num_messages):
-            delay = random.uniform(2, 6) if i == 0 else random.uniform(3, 7)
+            delay = random.uniform(1.5, 3.5) if i == 0 else random.uniform(2, 4)
             _time_module.sleep(delay)
 
             with app.app_context():
@@ -2586,14 +2586,11 @@ def generate_bot_message(code, bot_player):
                 if not bp or not bp.is_alive:
                     return
 
-                # First message: intro/opening
-                # Later messages: react to previous messages
                 if i == 0:
                     content = get_smart_bot_message(code, bp, room)
                 else:
                     content = get_reactive_bot_message(code, bp, room)
 
-                # Try learned messages occasionally
                 if random.random() < 0.3:
                     memories = BotMemory.query.filter_by(
                         role_name=bp.role_name, team=bp.team, phase="day_talk"
@@ -2620,6 +2617,13 @@ def generate_bot_message(code, bot_player):
                     "msg_type": "chat",
                     "time": msg.created_at.isoformat()
                 }, room=f"lab_{code}")
+
+        # Bot done talking — advance turn after a short pause
+        _time_module.sleep(random.uniform(1, 2))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if room and room.phase == "day_talk" and room.current_turn == slot:
+                advance_turn(code)
 
     threading.Thread(target=send, daemon=True).start()
 
