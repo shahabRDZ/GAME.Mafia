@@ -1197,7 +1197,7 @@ def emit_to_player(player, event, data):
 def schedule_turn_timer(code, current_slot, day_number):
     """Schedule auto-advance for day_talk after 30 seconds"""
     def advance():
-        _time_module.sleep(31)
+        _time_module.sleep(41)
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.status != "playing" or room.phase != "day_talk":
@@ -1294,7 +1294,7 @@ def start_day_talk(code, day_number):
         return
 
     room.current_turn = alive[0].slot
-    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=40)
     db.session.commit()
 
     player_info = get_player_public_info(alive[0])
@@ -1334,7 +1334,7 @@ def advance_turn(code):
         start_mafia_chat(code)
     else:
         room.current_turn = next_slot
-        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=40)
         db.session.commit()
 
         player = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
@@ -1620,7 +1620,7 @@ def start_defense(code, defense_player, vote_count):
     room.phase = "defense"
     room.defense_player_id = defense_player.id
     room.current_turn = defense_player.slot
-    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=40)
     db.session.commit()
 
     socketio.emit("lab_phase_change", {
@@ -1650,10 +1650,10 @@ def generate_bot_defense(code, bot_player):
             defense_msgs = [
                 "من بی\u200cگناهم! من شهروندم!",
                 "دارین اشتباه میکنین، من مافیا نیستم",
-                "بذارین توضیح بدم، من نقش مثبت دارم",
+                "بذارین توضیح بدم، اشتباه میکنید",
                 "اگه منو بندازین بیرون ضرر میکنین",
                 "من کارآگاهم، نندازینم!",
-                "به خدا من پاکم، مافیا داره گولتون میزنه",
+                "به خدا اشتباه میکنید، مافیا داره گولتون میزنه",
                 "یکی داره منو قربانی میکنه",
                 "صبر کنید، من میتونم ثابت کنم"
             ]
@@ -2170,7 +2170,7 @@ def start_bazpors_trial(code, day_number):
 
     # First target defends for 30s
     room.defense_player_id = t1.id
-    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=40)
     db.session.commit()
 
     t1_info = get_player_public_info(t1)
@@ -2191,14 +2191,14 @@ def start_bazpors_trial(code, day_number):
 
     # After 30s, switch to second player
     def switch_to_defense2():
-        _time_module.sleep(31)
+        _time_module.sleep(41)
         with app.app_context():
             r = LabRoom.query.filter_by(code=code).first()
             if not r or r.phase != "bazpors_defense1":
                 return
             r.phase = "bazpors_defense2"
             r.defense_player_id = r.bazpors_target2
-            r.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+            r.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=40)
             db.session.commit()
 
             t2_p = LabPlayer.query.get(r.bazpors_target2)
@@ -2215,7 +2215,7 @@ def start_bazpors_trial(code, day_number):
 
             # After 30s, start bazpors vote
             def start_bvote():
-                _time_module.sleep(31)
+                _time_module.sleep(41)
                 with app.app_context():
                     r2 = LabRoom.query.filter_by(code=code).first()
                     if not r2 or r2.phase != "bazpors_defense2":
@@ -2751,12 +2751,12 @@ def _citizen_bot_message(bot_player, role, day, most_sus, most_trusted, alive_pl
     # Day 1: introduction style
     if day == 1:
         intros = [
-            f"سلام، من {role} هستم. بیاین با دقت رفتارها رو بررسی کنیم",
+            "سلام، بیاین با دقت رفتارها رو بررسی کنیم",
             "روز اوله، بیاین همه حرف بزنیم ببینیم کی مشکوکه",
-            f"من {role}م. حواسم به همه هست، مافیا نمیتونه مخفی بمونه",
+            "حواسم به همه هست، مافیا نمیتونه مخفی بمونه",
             "خب بچه‌ها، دقت کنید کی عصبیه یا از بحث فرار میکنه",
-            f"سلام، {role} هستم. امروز باید خوب تحلیل کنیم",
-            "من پاکم، بیاین با منطق شروع کنیم"
+            "سلام، امروز باید خوب تحلیل کنیم",
+            "بیاین با منطق شروع کنیم"
         ]
         return random.choice(intros)
 
@@ -2791,7 +2791,7 @@ def _citizen_bot_message(bot_player, role, day, most_sus, most_trusted, alive_pl
         msgs.extend([
             "دیشب یه نفر رو سیو کردم، خدا رو شکر",
             "باید بفهمیم مافیا کیه تا بتونم درست سیو کنم",
-            "من نقشم مهمه، باید زنده بمونم",
+            "باید مواظب باشیم کی مشکوکه",
         ])
     elif role == "بازپرس":
         msgs.extend([
@@ -2831,9 +2831,9 @@ def _mafia_bot_message(bot_player, role, day, most_sus, most_trusted, alive_play
 
     if day == 1:
         intros = [
-            "سلام، من شهروندم. بیاین با هم مافیا رو پیدا کنیم",
+            "سلام، بیاین با هم مشکوکا رو پیدا کنیم",
             "روز اوله، باید دقت کنیم کی مشکوک رفتار میکنه",
-            "من پاکم، هرکسی سؤالی داره بپرسه",
+            "هرکسی سؤالی داره بپرسه",
             "خب بچه‌ها، امروز باید خوب گوش بدیم ببینیم کی دروغ میگه",
             "من با تحلیل پیش میرم، بیاین منطقی باشیم",
             "سلام، آماده‌ام برای بازی. بیاین مافیا رو پیدا کنیم",
@@ -2869,20 +2869,20 @@ def _mafia_bot_message(bot_player, role, day, most_sus, most_trusted, alive_play
     blend_msgs = [
         "من دارم سعی میکنم رفتارها رو تحلیل کنم، مافیا بین ماست",
         "بیاین رو یه نفر تمرکز کنیم، وقت تلف نکنیم",
-        "من نقشم مثبته، دارم کمک میکنم",
+        "دارم کمک میکنم مشکوکا رو پیدا کنیم",
         "بیاین ببینیم دیشب چی شد و نتیجه‌گیری کنیم",
         "من به حرف‌های همه دقت دارم، یه سری تناقض‌ها هست",
         "فکر میکنم باید بیشتر روی رفتار رأی‌گیری تمرکز کنیم",
-        "من پاکم و تا آخر بازی کنار شهروندام",
+        "تا آخر بازی تلاش میکنم",
         "اگه کسی به من شک داره بگه، جواب میدم",
     ]
     msgs.extend(blend_msgs)
 
     # Fake role claim (risky, rare)
     if role == "رئیس مافیا" and random.random() < 0.1:
-        msgs.append("من شهروند ساده‌ام، نقش خاصی ندارم ولی تحلیلم خوبه")
+        msgs.append("نقش خاصی ندارم ولی تحلیلم خوبه")
     if role == "شیاد" and random.random() < 0.1:
-        msgs.append("من نقش مثبت دارم، بهم اعتماد کنید")
+        msgs.append("بهم اعتماد کنید، تلاش میکنم")
 
     return random.choice(msgs)
 
@@ -2954,6 +2954,27 @@ def handle_start_lab(data):
     threading.Thread(target=start_day_after_intro, daemon=True).start()
 
 
+# ── Socket Events: End Turn ──────────────────────────────────────────────
+
+@socketio.on("lab_end_turn")
+def handle_end_turn(data):
+    """Player ends their turn early"""
+    code = data.get("code", "").upper()
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "day_talk":
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not player or player.slot != room.current_turn:
+        return
+
+    advance_turn(code)
+
+
 # ── Socket Events: Chat ──────────────────────────────────────────────────
 
 @socketio.on("lab_chat")
@@ -2979,13 +3000,15 @@ def handle_lab_chat(data):
         emit("error", {"msg": "الان نوبت شما نیست"})
         return
 
-    # Block ALL role name mentions in chat
-    ROLE_NAMES_ALL = ["رئیس مافیا", "ناتو", "شیاد", "مافیا ساده", "بازپرس", "کارآگاه", "هانتر", "دکتر", "رویین‌تن", "تک‌تیرانداز", "شهروند ساده", "مافیا", "رئیس"]
+    # Block role CLAIMS (saying your own role) but allow accusing others
+    ROLE_NAMES_SPECIFIC = ["رئیس مافیا", "ناتو", "شیاد", "مافیا ساده", "بازپرس", "کارآگاه", "هانتر", "دکتر", "رویین‌تن", "تک‌تیرانداز", "شهروند ساده"]
+    CLAIM_PATTERNS = ["من ", "نقشم ", "نقش من ", "منم ", "خودم "]
     content_check = content.strip()
-    for rn in ROLE_NAMES_ALL:
-        if rn in content_check:
-            emit("error", {"msg": "⛔ ذکر نام نقش در چت ممنوع است!"})
-            return
+    for rn in ROLE_NAMES_SPECIFIC:
+        for cp in CLAIM_PATTERNS:
+            if cp + rn in content_check:
+                emit("error", {"msg": "⛔ ادعای نقش ممنوع است! نمی‌توانید بگویید نقشتان چیست"})
+                return
 
     msg = LabMessage(room_id=room.id, player_id=player.id, content=content)
     db.session.add(msg)
