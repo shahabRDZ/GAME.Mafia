@@ -906,3 +906,92 @@
   .lab-player-pip { min-width: 40px; }
   .lab-pip-name { font-size: .5rem; max-width: 40px; }
 }
+
+/* ── Player pip vote count ── */
+.lab-pip-votes {
+  position: absolute; inset-block-start: -4px; inset-inline-end: -4px;
+  background: var(--accent); color: #fff; font-size: .6rem; font-weight: 700;
+  min-width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+/* ── Night Phase ── */
+.lab-night-overlay {
+  background: rgba(0,0,20,.85); border-color: rgba(100,100,255,.15);
+  text-align: center; padding: var(--space-lg);
+}
+.lab-night-title { color: #8888ff; font-size: 1.1rem; font-weight: 700; margin-block-end: var(--space-sm); }
+.lab-night-desc { color: var(--dim); font-size: .82rem; margin-block-end: var(--space-md); }
+.lab-night-targets {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xs);
+}
+.lab-night-target {
+  padding: var(--space-sm); background: rgba(255,255,255,.04);
+  border: 2px solid rgba(255,255,255,.08); border-radius: var(--radius-md, 12px);
+  cursor: pointer; transition: all .25s; font-family: inherit;
+  color: var(--text); display: flex; flex-direction: column;
+  align-items: center; gap: 4px; min-height: 60px;
+}
+.lab-night-target:hover { border-color: #8888ff; background: rgba(100,100,255,.1); }
+.lab-night-target.selected { border-color: var(--neon-green); background: rgba(0,255,136,.1); box-shadow: 0 0 12px rgba(0,255,136,.2); }
+
+/* ── Mafia Chat ── */
+.lab-mafia-banner {
+  background: rgba(233,69,96,.08); border-color: rgba(233,69,96,.2);
+  text-align: center; padding: var(--space-sm);
+  color: var(--accent); font-weight: 600; font-size: .85rem;
+}
+.lab-msg-mafia {
+  background: rgba(233,69,96,.06); border-color: rgba(233,69,96,.12);
+}
+
+/* ── Defense Phase ── */
+.lab-defense-banner {
+  background: rgba(245,166,35,.08); border-color: rgba(245,166,35,.2);
+  text-align: center; padding: var(--space-md);
+}
+.lab-defense-title { color: var(--accent2); font-size: 1rem; font-weight: 700; }
+.lab-defense-name { color: #fff; font-size: 1.2rem; margin-block: var(--space-xs); }
+
+/* ── Sequential Voting ── */
+.lab-vote-seq-list {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-block: var(--space-sm);
+}
+.lab-vote-seq-item {
+  display: flex; align-items: center; gap: var(--space-xs);
+  padding: 8px 12px; border-radius: var(--radius-md, 12px);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+  font-size: .82rem;
+}
+.lab-vote-seq-item .vote-count {
+  margin-inline-start: auto; font-weight: 700;
+  color: var(--accent); font-size: .9rem;
+}
+.lab-vote-seq-current { border-color: var(--neon-blue); background: rgba(0,207,255,.06); }
+
+/* ── Revote ── */
+.lab-revote-btns {
+  display: flex; gap: var(--space-sm); justify-content: center;
+  margin-block: var(--space-md);
+}
+.lab-revote-btn {
+  padding: 0.7rem 2rem; border-radius: var(--radius-md, 12px);
+  font-family: inherit; font-size: .9rem; font-weight: 600;
+  cursor: pointer; transition: all .25s; min-height: 44px; border: 2px solid;
+}
+.lab-revote-eliminate {
+  background: rgba(233,69,96,.12); border-color: var(--accent); color: var(--accent);
+}
+.lab-revote-eliminate:hover { background: rgba(233,69,96,.25); }
+.lab-revote-keep {
+  background: rgba(0,255,136,.08); border-color: var(--neon-green); color: var(--neon-green);
+}
+.lab-revote-keep:hover { background: rgba(0,255,136,.2); }
+
+/* ── Night & Revote responsive ── */
+@media (max-width: 30em) {
+  .lab-night-targets { grid-template-columns: repeat(2, 1fr); }
+  .lab-revote-btns { flex-direction: column; }
+}

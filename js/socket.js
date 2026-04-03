@@ -79,6 +79,13 @@ function initSocket() {
   socket.on("lab_reaction", (data) => handleLabReaction(data));
   socket.on("lab_vote_update", (data) => handleLabVoteUpdate(data));
   socket.on("lab_game_result", (data) => handleLabGameResult(data));
+  socket.on("lab_mafia_message", (data) => handleLabMafiaMessage(data));
+  socket.on("lab_night_action_prompt", (data) => handleNightActionPrompt(data));
+  socket.on("lab_night_result", (data) => handleNightResult(data));
+  socket.on("lab_defense_start", (data) => handleDefenseStart(data));
+  socket.on("lab_revote_start", (data) => handleRevoteStart(data));
+  socket.on("lab_vote_cast", (data) => handleVoteCast(data));
+  socket.on("lab_detective_result", (data) => handleDetectiveResult(data));
 
   socket.on("invite_sent", (data) => {
     if (data?.username) showToast("✅ دعوت به " + data.username + " ارسال شد");
