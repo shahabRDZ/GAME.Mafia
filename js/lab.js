@@ -1069,15 +1069,32 @@ function handleLabGameStarted(data) {
     id: 0, msg_type: "system",
     content: "🎬 بازی آزمایشی شروع شد! سناریو: " + (data.scenario || "بازپرس")
   });
-  if (labState.myRole) {
-    labState.messages.push({
-      id: 0, msg_type: "system",
-      content: "نقش شما: " + (labState.myRoleIcon || "🎭") + " " + labState.myRole + " (" + (labState.myTeam === "mafia" ? "مافیا" : "شهروند") + ")"
-    });
-  }
 
   showLabGame();
   renderLabGame();
+
+  // Show role reveal overlay
+  if (labState.myRole) {
+    const teamText = labState.myTeam === "mafia" ? "تیم مافیا 🔴" : "تیم شهروند 🟢";
+    const teamClass = labState.myTeam === "mafia" ? "lab-role-mafia" : "lab-role-citizen";
+    const overlay = document.createElement("div");
+    overlay.className = "lab-role-reveal";
+    overlay.id = "labRoleReveal";
+    overlay.innerHTML =
+      '<div class="lab-role-reveal-card ' + teamClass + '">' +
+        '<div class="lab-role-reveal-icon">' + (labState.myRoleIcon || "🎭") + '</div>' +
+        '<div class="lab-role-reveal-name">' + escapeHtml(labState.myRole) + '</div>' +
+        '<div class="lab-role-reveal-team">' + teamText + '</div>' +
+        '<div class="lab-role-reveal-hint">این نقش محرمانه شماست — به کسی نگویید!</div>' +
+        '<button class="lab-role-reveal-btn" onclick="closeRoleReveal()">فهمیدم ✓</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+  }
+}
+
+function closeRoleReveal() {
+  const el = document.getElementById("labRoleReveal");
+  if (el) el.remove();
 }
 
 function handleLabPhaseChange(data) {

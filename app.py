@@ -2567,48 +2567,127 @@ def save_to_bot_memory(role_name, team, phase, message, room_id):
 
 
 def generate_bot_message(code, bot_player):
-    """Generate intelligent, context-aware message for bot"""
+    """Generate multiple intelligent messages for bot during 30s turn"""
     def send():
-        _time_module.sleep(random.uniform(3, 12))  # Natural typing delay
-        with app.app_context():
-            room = LabRoom.query.filter_by(code=code).first()
-            if not room or room.phase != "day_talk" or room.current_turn != bot_player.slot:
-                return
+        num_messages = random.randint(2, 4)  # 2-4 messages per turn
+        slot = bot_player.slot
+        pid = bot_player.id
 
-            # Try learned messages first (70% chance)
-            memories = BotMemory.query.filter_by(
-                role_name=bot_player.role_name,
-                team=bot_player.team,
-                phase="day_talk"
-            ).order_by(BotMemory.effectiveness.desc()).limit(20).all()
+        for i in range(num_messages):
+            delay = random.uniform(2, 6) if i == 0 else random.uniform(3, 7)
+            _time_module.sleep(delay)
 
-            if memories and random.random() < 0.6:
-                weights = [max(m.effectiveness + 5, 1) for m in memories]
-                chosen = random.choices(memories, weights=weights, k=1)[0]
-                content = chosen.message
-                chosen.times_used += 1
-            else:
-                content = get_smart_bot_message(code, bot_player, room)
+            with app.app_context():
+                room = LabRoom.query.filter_by(code=code).first()
+                if not room or room.phase != "day_talk" or room.current_turn != slot:
+                    return
 
-            msg = LabMessage(room_id=room.id, player_id=bot_player.id, content=content)
-            db.session.add(msg)
-            db.session.commit()
+                bp = LabPlayer.query.get(pid)
+                if not bp or not bp.is_alive:
+                    return
 
-            # Other bots analyze this message
-            for p in room.players:
-                if p.is_bot and p.is_alive and p.id != bot_player.id:
-                    bot_analyze_message(code, p, bot_player, content)
+                # First message: intro/opening
+                # Later messages: react to previous messages
+                if i == 0:
+                    content = get_smart_bot_message(code, bp, room)
+                else:
+                    content = get_reactive_bot_message(code, bp, room)
 
-            player_info = get_player_public_info(bot_player)
-            socketio.emit("lab_new_message", {
-                "id": msg.id,
-                "player": player_info,
-                "content": content,
-                "msg_type": "chat",
-                "time": msg.created_at.isoformat()
-            }, room=f"lab_{code}")
+                # Try learned messages occasionally
+                if random.random() < 0.3:
+                    memories = BotMemory.query.filter_by(
+                        role_name=bp.role_name, team=bp.team, phase="day_talk"
+                    ).order_by(BotMemory.effectiveness.desc()).limit(10).all()
+                    if memories:
+                        weights = [max(m.effectiveness + 5, 1) for m in memories]
+                        chosen = random.choices(memories, weights=weights, k=1)[0]
+                        content = chosen.message
+                        chosen.times_used += 1
+
+                msg = LabMessage(room_id=room.id, player_id=bp.id, content=content)
+                db.session.add(msg)
+                db.session.commit()
+
+                for p in room.players:
+                    if p.is_bot and p.is_alive and p.id != bp.id:
+                        bot_analyze_message(code, p, bp, content)
+
+                player_info = get_player_public_info(bp)
+                socketio.emit("lab_new_message", {
+                    "id": msg.id,
+                    "player": player_info,
+                    "content": content,
+                    "msg_type": "chat",
+                    "time": msg.created_at.isoformat()
+                }, room=f"lab_{code}")
 
     threading.Thread(target=send, daemon=True).start()
+
+
+def get_reactive_bot_message(code, bot_player, room):
+    """Generate a message reacting to previous messages"""
+    brain = get_bot_brain(code, bot_player.id)
+    recent = brain["messages_seen"][-5:]
+
+    if not recent:
+        return get_smart_bot_message(code, bot_player, room)
+
+    last_msg = recent[-1]
+    last_speaker = LabPlayer.query.get(last_msg.get("from"))
+    last_name = _get_name(last_speaker) if last_speaker else "یکی"
+    last_content = last_msg.get("content", "")
+
+    # Analyze the last message and react
+    sus_score = brain["suspicion"].get(last_msg.get("from"), 0)
+    trust_score = brain["trust"].get(last_msg.get("from"), 0)
+
+    reactions = []
+
+    if bot_player.team == "citizen":
+        if sus_score > trust_score:
+            reactions = [
+                f"حرف‌های {last_name} منو قانع نکرد، هنوز بهش شک دارم",
+                f"{last_name} داره سعی میکنه خودشو تبرئه کنه، مشکوکه",
+                f"دقت کنید {last_name} چطور از سؤال فرار میکنه",
+                f"من موافق نیستم، {last_name} داره دروغ میگه",
+                f"جالبه {last_name} هیچ تحلیل درستی نداد",
+            ]
+        elif trust_score > sus_score:
+            reactions = [
+                f"موافقم با {last_name}، حرف‌هاش منطقیه",
+                f"{last_name} درست میگه، باید رو مشکوکا تمرکز کنیم",
+                f"من هم همین فکرو میکنم، ممنون {last_name}",
+            ]
+        else:
+            reactions = [
+                f"حرف‌های {last_name} رو شنیدم، باید بیشتر فکر کنم",
+                f"هنوز مطمئن نیستم درباره {last_name}، صبر کنیم",
+                "بیاین بقیه هم نظرشونو بگن",
+                "باید ببینیم رأی‌ها چی میشه",
+                f"سؤالی از {last_name} دارم: چرا دیروز اونطوری رأی دادی؟",
+            ]
+    else:
+        # Mafia: deflect, agree strategically, frame others
+        citizens = [p for p in room.players if p.is_alive and p.team == "citizen" and p.id != last_msg.get("from")]
+        frame = random.choice(citizens) if citizens else None
+        frame_name = _get_name(frame) if frame else "اون یکی"
+
+        if last_speaker and last_speaker.team == "mafia":
+            reactions = [
+                f"موافقم با {last_name}، حرف‌هاش درسته",
+                f"{last_name} درست میگه",
+                f"منم همین نظرو دارم",
+            ]
+        else:
+            reactions = [
+                f"حرف‌های {last_name} جالبه ولی فکر میکنم {frame_name} مشکوک‌تره",
+                f"بجای بحث بیخود بیاین رو {frame_name} تمرکز کنیم",
+                f"من اتفاقاً به {frame_name} شک دارم نه به کسی دیگه",
+                f"موافقم، ولی {frame_name} هم باید جواب بده",
+                f"{last_name} یه چیزایی میگه ولی من مطمئن نیستم",
+            ]
+
+    return random.choice(reactions) if reactions else get_smart_bot_message(code, bot_player, room)
 
 
 def get_smart_bot_message(code, bot_player, room):
@@ -2891,6 +2970,14 @@ def handle_lab_chat(data):
     if player.slot != room.current_turn:
         emit("error", {"msg": "الان نوبت شما نیست"})
         return
+
+    # Block role reveals
+    ROLE_NAMES_ALL = ["رئیس مافیا", "ناتو", "شیاد", "مافیا ساده", "بازپرس", "کارآگاه", "هانتر", "دکتر", "رویین‌تن", "تک‌تیرانداز", "شهروند ساده"]
+    content_check = content.lower().strip()
+    for rn in ROLE_NAMES_ALL:
+        if f"من {rn}" in content_check or f"نقشم {rn}" in content_check or f"نقش من {rn}" in content_check:
+            emit("error", {"msg": "⛔ اعلام نقش ممنوع است!"})
+            return
 
     msg = LabMessage(room_id=room.id, player_id=player.id, content=content)
     db.session.add(msg)
