@@ -76,6 +76,18 @@ header { text-align: center; padding: 32px 0 18px; }
 .lang-btn:hover { border-color: rgba(255,255,255,.2); color: #fff; }
 .lang-btn.lang-active { background: rgba(245,166,35,.18); border-color: var(--accent2); color: var(--accent2); font-weight: 700; }
 
+/* ── Footer ── */
+.site-footer {
+  text-align: center; padding: 24px 16px 18px; margin-top: 40px;
+  font-size: .78rem; color: var(--dim); letter-spacing: .5px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.site-footer a {
+  color: var(--accent2); text-decoration: none; font-weight: 600;
+  margin-right: 5px; transition: color .25s;
+}
+.site-footer a:hover { color: var(--accent); }
+
 /* ── Responsive ── */
 @media(max-width:600px) {
   .summary-grid { grid-template-columns: 1fr; }
