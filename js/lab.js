@@ -59,10 +59,10 @@ async function fetchAndShowLobby(code) {
 
 async function createLabRoom(scenario) {
   if (!authToken) { openAuthModal("login"); return; }
-  await waitForSocket();
+
+  // 1. Create room via REST API
   const res = await apiFetch("/api/lab/create", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ scenario: scenario || "بازپرس" })
   });
   if (!res || !res.ok) { showToast(res?.data?.error || "خطا در ساخت اتاق"); return; }
@@ -70,23 +70,38 @@ async function createLabRoom(scenario) {
   labState.roomCode = room.code;
   labState.scenario = room.scenario;
   labState.isHost = true;
+
+  // 2. Show lobby from API data
+  await fetchAndShowLobby(room.code);
+
+  // 3. Connect socket in background for real-time updates
+  await waitForSocket();
   if (socket && socket.connected) {
     socket.emit("join_lab", { code: room.code });
   }
-  await fetchAndShowLobby(room.code);
 }
 
 async function joinLabRoom() {
   const code = document.getElementById("labJoinCode")?.value?.trim().toUpperCase();
   if (!code || code.length < 4) { showToast("کد اتاق را وارد کنید"); return; }
   if (!authToken) { openAuthModal("login"); return; }
-  await waitForSocket();
+
+  // 1. Fetch room info first
+  const res = await apiFetch("/api/lab/room/" + code, { _background: true });
+  if (!res || !res.ok) { showToast(res?.data?.error || "اتاق پیدا نشد"); return; }
+
   labState.roomCode = code;
-  labState.isHost = false;
+  labState.isHost = res.data.host_id === currentUser?.id;
+
+  // 2. Show lobby
+  showLabLobby();
+  renderLabLobby(res.data);
+
+  // 3. Connect socket for real-time
+  await waitForSocket();
   if (socket && socket.connected) {
     socket.emit("join_lab", { code });
   }
-  await fetchAndShowLobby(code);
 }
 
 function leaveLabRoom() {
