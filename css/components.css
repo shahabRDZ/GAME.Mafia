@@ -734,3 +734,175 @@
   .lab-code { font-size: 1.2rem; letter-spacing: 4px; }
   .lab-header-top { flex-direction: column; gap: var(--space-xs); align-items: stretch; }
 }
+
+/* ── Lab Game ── */
+.lab-desc { color: var(--dim); font-size: .82rem; margin-block-end: var(--space-sm); line-height: 1.6; }
+
+.lab-rules { padding: var(--space-md); margin-block-end: var(--space-md); background: rgba(0,207,255,.04); border-color: rgba(0,207,255,.12); }
+.lab-rules-title { color: var(--neon-blue); font-size: .88rem; font-weight: 600; margin-block-end: var(--space-xs); }
+.lab-rules-list { list-style: none; padding: 0; }
+.lab-rules-list li { color: var(--text); font-size: .8rem; padding: 4px 0; line-height: 1.6; opacity: .85; }
+
+.lab-game { display: flex; flex-direction: column; height: calc(100vh - 120px); min-height: 400px; }
+
+.lab-game-header { padding: var(--space-sm) var(--space-md); flex-shrink: 0; }
+.lab-game-header-row { display: flex; align-items: center; gap: var(--space-sm); margin-block-end: var(--space-xs); }
+.lab-phase-badge {
+  padding: 0.3rem 0.8rem; background: rgba(0,207,255,.12); border: 1px solid rgba(0,207,255,.2);
+  border-radius: var(--radius-full, 50px); color: var(--neon-blue); font-size: .8rem; font-weight: 600;
+}
+.lab-my-role {
+  padding: 0.3rem 0.8rem; border-radius: var(--radius-full, 50px); font-size: .78rem; font-weight: 600;
+  margin-inline-start: auto;
+}
+.lab-my-role.mafia { background: rgba(233,69,96,.15); border: 1px solid rgba(233,69,96,.3); color: var(--accent); }
+.lab-my-role.citizen { background: rgba(0,255,136,.1); border: 1px solid rgba(0,255,136,.25); color: var(--neon-green); }
+
+/* Players bar */
+.lab-players-bar {
+  display: flex; gap: 6px; overflow-x: auto; padding-block: var(--space-xs);
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.lab-players-bar::-webkit-scrollbar { display: none; }
+.lab-player-pip {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 48px; padding: 4px; border-radius: var(--radius-md, 12px);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  transition: all .3s; position: relative; flex-shrink: 0;
+}
+.lab-pip-active {
+  background: rgba(0,207,255,.12); border-color: var(--neon-blue);
+  box-shadow: 0 0 12px rgba(0,207,255,.2);
+  animation: pipPulse 1.5s ease-in-out infinite;
+}
+.lab-pip-dead { opacity: .3; }
+.lab-pip-dead .lab-pip-avatar { filter: grayscale(1); }
+.lab-pip-avatar { font-size: 1.1rem; }
+.lab-pip-name { font-size: .55rem; color: var(--dim); max-width: 48px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+.lab-pip-x { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 1.2rem; font-weight: 900; }
+
+@keyframes pipPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0,207,255,.15); }
+  50% { box-shadow: 0 0 20px rgba(0,207,255,.35); }
+}
+
+/* Turn info */
+.lab-turn-info {
+  display: flex; align-items: center; gap: var(--space-xs);
+  padding: 6px 0; font-size: .82rem;
+}
+.lab-turn-label { color: var(--dim); }
+.lab-turn-name { color: var(--accent2); font-weight: 600; }
+.lab-turn-me { color: var(--neon-green); }
+.lab-turn-timer { color: var(--accent); font-weight: 700; margin-inline-start: auto; font-size: .9rem; }
+
+/* Chat area */
+.lab-chat-area {
+  flex: 1; overflow-y: auto; padding: var(--space-sm) var(--space-md);
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.1) transparent;
+}
+.lab-chat-messages { display: flex; flex-direction: column; gap: var(--space-xs); }
+
+.lab-msg {
+  padding: var(--space-sm); border-radius: var(--radius-md, 12px);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+  animation: fadeIn .3s ease;
+}
+.lab-msg-me { background: rgba(0,207,255,.06); border-color: rgba(0,207,255,.12); }
+.lab-msg-system {
+  background: rgba(245,166,35,.06); border-color: rgba(245,166,35,.12);
+  color: var(--accent2); font-size: .8rem; text-align: center;
+  padding: 8px; font-weight: 500;
+}
+.lab-msg-header { display: flex; align-items: center; gap: 6px; margin-block-end: 4px; }
+.lab-msg-avatar { font-size: 1rem; }
+.lab-msg-name { font-size: .78rem; font-weight: 600; color: var(--text); }
+.lab-msg-slot { font-size: .65rem; color: var(--dim); }
+.lab-msg-body { font-size: .88rem; line-height: 1.6; color: var(--text); word-wrap: break-word; }
+.lab-msg-reactions { display: flex; gap: 6px; margin-block-start: 6px; }
+
+.lab-react-btn {
+  padding: 2px 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-full, 50px); cursor: pointer; font-size: .72rem;
+  color: var(--dim); transition: all .2s; display: flex; align-items: center; gap: 3px;
+}
+.lab-react-btn:hover { background: rgba(255,255,255,.1); }
+.lab-react-like:hover { border-color: rgba(0,255,136,.3); color: var(--neon-green); }
+.lab-react-dislike:hover { border-color: rgba(233,69,96,.3); color: var(--accent); }
+
+/* Timer bar */
+.lab-chat-input-area { flex-shrink: 0; padding: 0 var(--space-md) var(--space-md); }
+.lab-timer-bar {
+  height: 3px; background: rgba(255,255,255,.06); border-radius: 2px;
+  margin-block-end: var(--space-xs); overflow: hidden;
+}
+.lab-timer-fill {
+  height: 100%; width: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+  transition: width .2s linear;
+}
+.lab-timer-fill.lab-timer-danger {
+  background: linear-gradient(90deg, var(--accent), #ff7700);
+}
+
+.lab-input-row { display: flex; gap: var(--space-xs); }
+.lab-chat-input {
+  flex: 1; padding: 0.65rem 1rem; background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-md, 12px);
+  color: #fff; font-family: inherit; font-size: .88rem;
+  transition: all .25s;
+}
+.lab-chat-input:focus { outline: none; border-color: var(--neon-blue); box-shadow: 0 0 12px rgba(0,207,255,.15); }
+.lab-chat-input:disabled { opacity: .4; cursor: not-allowed; }
+.lab-chat-input::placeholder { color: var(--dim); }
+
+.lab-send-btn {
+  padding: 0.65rem 1.2rem; background: rgba(0,207,255,.15); border: 1px solid var(--neon-blue);
+  color: var(--neon-blue); border-radius: var(--radius-md, 12px); cursor: pointer;
+  font-family: inherit; font-size: .85rem; font-weight: 600; transition: all .25s;
+  min-height: 44px;
+}
+.lab-send-btn:hover:not(:disabled) { background: rgba(0,207,255,.25); }
+.lab-send-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* Voting */
+.lab-vote-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xs);
+  margin-block: var(--space-sm);
+}
+.lab-vote-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: var(--space-sm); background: rgba(255,255,255,.04);
+  border: 2px solid rgba(255,255,255,.08); border-radius: var(--radius-md, 12px);
+  cursor: pointer; transition: all .25s; font-family: inherit;
+  color: var(--text); min-height: 60px;
+}
+.lab-vote-card:hover { border-color: var(--accent); background: rgba(233,69,96,.06); }
+.lab-vote-selected { border-color: var(--accent) !important; background: rgba(233,69,96,.15) !important; box-shadow: 0 0 16px rgba(233,69,96,.2); }
+.lab-vote-avatar { font-size: 1.3rem; }
+.lab-vote-name { font-size: .75rem; color: var(--text); }
+
+/* Result */
+.lab-result-banner { text-align: center; padding: var(--space-lg) !important; }
+.lab-result-title { font-size: 1.3rem; font-weight: 900; margin-block-end: var(--space-sm); }
+.lab-result-elim { font-size: .82rem; color: var(--dim); margin-block-end: var(--space-md); }
+.lab-result-grid { display: flex; flex-direction: column; gap: 6px; margin-block-start: var(--space-sm); }
+.lab-result-player {
+  display: flex; align-items: center; gap: var(--space-xs);
+  padding: 6px 10px; border-radius: var(--radius-md, 12px);
+  font-size: .8rem;
+}
+.lab-team-mafia { background: rgba(233,69,96,.1); border: 1px solid rgba(233,69,96,.2); }
+.lab-team-citizen { background: rgba(0,255,136,.06); border: 1px solid rgba(0,255,136,.15); }
+.lab-result-name { flex: 1; font-weight: 600; }
+.lab-result-role { color: var(--accent2); font-size: .75rem; }
+.lab-result-status { font-size: .7rem; color: var(--dim); }
+
+/* Lab Game responsive */
+@media (max-width: 30em) {
+  .lab-game { height: calc(100vh - 80px); }
+  .lab-game-header-row { flex-wrap: wrap; }
+  .lab-vote-grid { grid-template-columns: repeat(2, 1fr); }
+  .lab-player-pip { min-width: 40px; }
+  .lab-pip-name { font-size: .5rem; max-width: 40px; }
+}

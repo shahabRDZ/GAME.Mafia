@@ -255,14 +255,23 @@
   <section class="screen" id="labScreen" aria-labelledby="labTitle">
     <div class="lab-entry gc" id="labEntry">
       <div class="section-title" id="labTitle">🧪 حالت آزمایشی</div>
-      <p style="color:var(--dim);font-size:.82rem;margin-bottom:12px">بازی ۱۰ نفره آنلاین · دعوت دوستان یا بات · سناریوهای مختلف</p>
+      <p class="lab-desc">بازی ۱۰ نفره آنلاین مافیا · سناریو بازپرس · چت نوبتی · بات‌های هوشمند</p>
+
+      <div class="lab-rules gc">
+        <div class="lab-rules-title">📖 قوانین بازی</div>
+        <ul class="lab-rules-list">
+          <li>🎭 ۱۰ بازیکن: ۳ مافیا + ۷ شهروند</li>
+          <li>⏱️ هر بازیکن ۲۰ ثانیه وقت صحبت دارد</li>
+          <li>👍 بقیه فقط می‌توانند لایک/دیسلایک بدهند</li>
+          <li>🗳️ بعد از صحبت همه، رأی‌گیری شروع می‌شود (۳۰ ثانیه)</li>
+          <li>🤖 بات‌ها از بازیکنان واقعی یاد می‌گیرند!</li>
+        </ul>
+      </div>
 
       <div class="lab-scenario-select">
-        <div class="lab-scenario-label">انتخاب سناریو:</div>
+        <div class="lab-scenario-label">سناریو:</div>
         <div class="lab-scenario-options" id="labScenarioOptions">
-          <button class="lab-scenario-btn active" data-scenario="تکاور" onclick="selectLabScenario(this)">⚔️ تکاور</button>
-          <button class="lab-scenario-btn" data-scenario="نماینده" onclick="selectLabScenario(this)">🏛️ نماینده</button>
-          <button class="lab-scenario-btn" data-scenario="بازپرس" onclick="selectLabScenario(this)">🔍 بازپرس</button>
+          <button class="lab-scenario-btn active" data-scenario="بازپرس" onclick="selectLabScenario(this)">🔍 بازپرس</button>
         </div>
       </div>
 
@@ -275,6 +284,7 @@
       </div>
     </div>
     <div class="lab-lobby gc" id="labLobby" style="display:none"></div>
+    <div class="lab-game" id="labGame" style="display:none"></div>
   </section>
 
   <!-- DM Screen -->
