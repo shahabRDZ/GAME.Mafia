@@ -1,145 +1,237 @@
 /* ── All keyframe animations ── */
 
-@keyframes glowPulse {
-  0%, 100% { opacity: .7; }
-  50% { opacity: 1; }
-}
-
-@keyframes shine {
-  to { background-position: 200% center; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 8px var(--accent); }
-  50% { box-shadow: 0 0 18px var(--accent), 0 0 30px var(--accent); }
-}
-
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(50px) scale(.9); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes cardExit {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(-50px) scale(.85); }
-}
-
-@keyframes numPulse {
-  0%, 100% { filter: drop-shadow(0 0 8px var(--accent)); }
-  50% { filter: drop-shadow(0 0 20px var(--accent)); }
-}
-
-@keyframes charFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
-}
-
-@keyframes eyeGlow {
-  0%, 100% { opacity: .7; }
-  50% { opacity: 1; filter: brightness(1.5); }
-}
-
-@keyframes shadowPulse {
-  0%, 100% { transform: scaleX(1); opacity: .5; }
-  50% { transform: scaleX(.75); opacity: .3; }
-}
-
-@keyframes popIn {
-  from { opacity: 0; transform: scale(.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes particleA {
-  0% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-85px) scale(.4); }
-}
-
-@keyframes startPop {
-  0% { opacity: 0; transform: scale(.5) translateY(30px); }
-  50% { transform: scale(1.08) translateY(-5px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-@keyframes startGlow {
-  0%, 100% { box-shadow: 0 0 15px rgba(233,69,96,.4); }
-  50% { box-shadow: 0 0 35px rgba(233,69,96,.7), 0 0 60px rgba(233,69,96,.3); }
-}
-
-.card-entering { animation: cardEnter .4s cubic-bezier(.34,1.56,.64,1) forwards; }
-.card-exiting { animation: cardExit .3s ease-in forwards; pointer-events: none; }
-.start-btn-pop { animation: startPop .5s cubic-bezier(.34,1.56,.64,1) forwards, startGlow 2s ease-in-out .5s infinite; }
-
-/* ── Funny text + icon animations ── */
-@keyframes funSlideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes funBounce {
-  0%, 100% { transform: translateY(0); }
-  25% { transform: translateY(-6px); }
-  50% { transform: translateY(0); }
-  75% { transform: translateY(-3px); }
-}
-@keyframes funShake {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-8deg); }
-  40% { transform: rotate(8deg); }
-  60% { transform: rotate(-5deg); }
-  80% { transform: rotate(5deg); }
-}
-@keyframes funFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-@keyframes funSpin {
-  from { transform: rotate(0deg); }
+/* Animations that always run (essential UI feedback) */
+@keyframes spinnerRotate {
   to { transform: rotate(360deg); }
 }
-@keyframes funFlicker {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .6; transform: scale(.92); }
-}
-@keyframes funSwing {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(12deg); }
-  75% { transform: rotate(-12deg); }
-}
-@keyframes funPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
-@keyframes funTilt {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  33% { transform: rotate(-10deg) scale(1.05); }
-  66% { transform: rotate(10deg) scale(1.05); }
-}
-@keyframes funFlash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .3; }
+
+@keyframes skeletonShimmer {
+  to { background-position: -200% 0; }
 }
 
+/* Animations gated by motion preference */
+@media (prefers-reduced-motion: no-preference) {
+
+  @keyframes glowPulse {
+    0%, 100% { opacity: .7; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes shine {
+    to { background-position: 200% center; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(1.125rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 8px var(--accent); }
+    50% { box-shadow: 0 0 18px var(--accent), 0 0 30px var(--accent); }
+  }
+
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(3.125rem) scale(.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes cardExit {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-3.125rem) scale(.85); }
+  }
+
+  @keyframes numPulse {
+    0%, 100% { filter: drop-shadow(0 0 8px var(--accent)); }
+    50% { filter: drop-shadow(0 0 20px var(--accent)); }
+  }
+
+  @keyframes charFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+  }
+
+  @keyframes eyeGlow {
+    0%, 100% { opacity: .7; }
+    50% { opacity: 1; filter: brightness(1.5); }
+  }
+
+  @keyframes shadowPulse {
+    0%, 100% { transform: scaleX(1); opacity: .5; }
+    50% { transform: scaleX(.75); opacity: .3; }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes particleA {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-85px) scale(.4); }
+  }
+
+  @keyframes startPop {
+    0% { opacity: 0; transform: scale(.5) translateY(30px); }
+    50% { transform: scale(1.08) translateY(-5px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes startGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(233,69,96,.4); }
+    50% { box-shadow: 0 0 35px rgba(233,69,96,.7), 0 0 60px rgba(233,69,96,.3); }
+  }
+
+  /* ── Funny text + icon animations ── */
+  @keyframes funSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes funBounce {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-6px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-3px); }
+  }
+  @keyframes funShake {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-8deg); }
+    40% { transform: rotate(8deg); }
+    60% { transform: rotate(-5deg); }
+    80% { transform: rotate(5deg); }
+  }
+  @keyframes funFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes funSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes funFlicker {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .6; transform: scale(.92); }
+  }
+  @keyframes funSwing {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(12deg); }
+    75% { transform: rotate(-12deg); }
+  }
+  @keyframes funPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  @keyframes funTilt {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    33% { transform: rotate(-10deg) scale(1.05); }
+    66% { transform: rotate(10deg) scale(1.05); }
+  }
+  @keyframes funFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .3; }
+  }
+
+} /* end prefers-reduced-motion: no-preference */
+
+/* Fallback keyframes for reduced-motion (simple opacity-only fades) */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes cardEnter { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes cardExit { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes glowPulse { 0%, 100% { opacity: .85; } }
+  @keyframes shine { to { background-position: 200% center; } }
+  @keyframes numPulse { 0%, 100% { opacity: 1; } }
+  @keyframes charFloat { 0%, 100% { transform: none; } }
+  @keyframes eyeGlow { 0%, 100% { opacity: .85; } }
+  @keyframes shadowPulse { 0%, 100% { opacity: .4; } }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 8px var(--accent); } }
+  @keyframes startPop { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes startGlow { 0%, 100% { box-shadow: 0 0 15px rgba(233,69,96,.4); } }
+  @keyframes particleA { 0% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes funSlideUp { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes funBounce { 0%, 100% { transform: none; } }
+  @keyframes funShake { 0%, 100% { transform: none; } }
+  @keyframes funFloat { 0%, 100% { transform: none; } }
+  @keyframes funSpin { from { transform: none; } to { transform: none; } }
+  @keyframes funFlicker { 0%, 100% { opacity: 1; } }
+  @keyframes funSwing { 0%, 100% { transform: none; } }
+  @keyframes funPulse { 0%, 100% { transform: none; } }
+  @keyframes funTilt { 0%, 100% { transform: none; } }
+  @keyframes funFlash { 0%, 100% { opacity: 1; } }
+}
+
+/* ── Animation utility classes ── */
+.card-entering {
+  animation: cardEnter var(--transition-bounce) forwards;
+  will-change: transform, opacity;
+}
+.card-exiting {
+  animation: cardExit .3s ease-in forwards; pointer-events: none;
+  will-change: transform, opacity;
+}
+.start-btn-pop {
+  animation: startPop .5s cubic-bezier(.34,1.56,.64,1) forwards, startGlow 2s ease-in-out .5s infinite;
+  will-change: transform, box-shadow;
+}
+
+/* ── Will-change hints for animated elements ── */
+.logo { will-change: background-position; }
+.atmo-glow { will-change: opacity; }
+.card { will-change: transform; }
+.char-wrap { will-change: transform; }
+.card-number { will-change: filter; }
+.info-badge .dot { will-change: box-shadow; }
+
+/* ── Stagger animation utilities ── */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeIn var(--transition-slow) ease forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(n+11) { animation-delay: 0.55s; }
+
+/* Faster stagger variant */
+.stagger-fast > * {
+  opacity: 0;
+  animation: fadeIn var(--transition-base) ease forwards;
+}
+.stagger-fast > *:nth-child(1) { animation-delay: 0.03s; }
+.stagger-fast > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger-fast > *:nth-child(3) { animation-delay: 0.09s; }
+.stagger-fast > *:nth-child(4) { animation-delay: 0.12s; }
+.stagger-fast > *:nth-child(5) { animation-delay: 0.15s; }
+.stagger-fast > *:nth-child(6) { animation-delay: 0.18s; }
+.stagger-fast > *:nth-child(7) { animation-delay: 0.21s; }
+.stagger-fast > *:nth-child(8) { animation-delay: 0.24s; }
+.stagger-fast > *:nth-child(n+9) { animation-delay: 0.27s; }
+
+/* Funny animation classes */
 .funny-container {
-  margin-top: 18px; text-align: center;
+  margin-block-start: var(--space-md); text-align: center;
   animation: funSlideUp .5s cubic-bezier(.34,1.56,.64,1) forwards;
 }
 .funny-inner {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 10px 20px; border-radius: 50px;
+  display: inline-flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md); border-radius: var(--radius-full);
   background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  backdrop-filter: blur(8px); font-size: .88rem; font-weight: 700;
-  letter-spacing: .5px;
+  backdrop-filter: blur(8px); font-size: var(--font-size-base); font-weight: 700;
+  letter-spacing: .5px; transition: all var(--transition-fast);
 }
 .funny-inner:hover {
   transform: scale(1.05); background: rgba(255,255,255,.1);
-  transition: all .2s ease;
 }
-.funny-icon-wrap { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; }
-.fun-icon { width: 22px; height: 22px; }
+.funny-icon-wrap { width: 1.375rem; height: 1.375rem; flex-shrink: 0; display: flex; align-items: center; }
+.fun-icon { width: 1.375rem; height: 1.375rem; }
 .fun-bounce { animation: funBounce 1.5s ease-in-out infinite; }
 .fun-shake { animation: funShake 1.2s ease-in-out infinite; }
 .fun-float { animation: funFloat 2.5s ease-in-out infinite; }

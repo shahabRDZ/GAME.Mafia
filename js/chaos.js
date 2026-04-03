@@ -100,10 +100,10 @@ async function showInviteFriends() {
     <div class="friend-item" style="margin-bottom:4px">
       <span class="friend-avatar">${f.avatar || '🎭'}</span>
       <div class="friend-info">
-        <div class="friend-name">${f.username}</div>
+        <div class="friend-name">${escapeHtml(f.username)}</div>
         <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
-      <button class="friend-btn friend-btn-invite" onclick="inviteToRoom(${f.id},'${f.username}')">دعوت</button>
+      <button class="friend-btn friend-btn-invite" onclick="inviteToRoom(${f.id},${JSON.stringify(f.username)})">دعوت</button>
     </div>
   `).join("");
 }
@@ -111,7 +111,7 @@ async function showInviteFriends() {
 function inviteToRoom(userId, username) {
   if (!socket || !chaosState.roomCode) return;
   socket.emit("invite_to_room", { code: chaosState.roomCode, target_user_id: userId });
-  showToast("📩 دعوت به " + username + " ارسال شد");
+  showToast("📩 دعوت به " + escapeHtml(username) + " ارسال شد");
 }
 
 function voteEndDiscussion() {
@@ -145,8 +145,8 @@ function renderChaosLobby(data) {
         const p = data.players[i];
         return p
           ? `<div class="player-slot filled ${data.host_id === p.user_id ? 'host' : ''}">
-               <div class="slot-avatar">${p.avatar || '🎭'}</div>
-               <div class="slot-name">${p.username}</div>
+               <div class="slot-avatar">${escapeHtml(p.avatar || '🎭')}</div>
+               <div class="slot-name">${escapeHtml(p.username)}</div>
              </div>`
           : `<div class="player-slot empty">
                <div class="slot-avatar">❓</div>
@@ -194,8 +194,8 @@ function renderChaosGame() {
     <div class="players-circles" id="playersCircles">
       ${chaosState.players.map(p => `
         <div class="player-circle" id="pc-${p.user_id}" data-uid="${p.user_id}">
-          <div class="pc-avatar">${p.avatar || '🎭'}</div>
-          <div class="pc-name">${p.username}${p.user_id === myId ? ' (شما)' : ''}</div>
+          <div class="pc-avatar">${escapeHtml(p.avatar || '🎭')}</div>
+          <div class="pc-name">${escapeHtml(p.username)}${p.user_id === myId ? ' (شما)' : ''}</div>
         </div>
       `).join("")}
     </div>
@@ -232,8 +232,8 @@ function renderPhaseChange(phase) {
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
         ${chaosState.players.filter(p => p.user_id !== myId).map(p => `
           <div class="vote-card" data-uid="${p.user_id}" onclick="selectChaosVote(${p.user_id})">
-            <div class="vote-avatar">${p.avatar || '🎭'}</div>
-            <div class="vote-name">${p.username}</div>
+            <div class="vote-avatar">${escapeHtml(p.avatar || '🎭')}</div>
+            <div class="vote-name">${escapeHtml(p.username)}</div>
           </div>
         `).join("")}
       </div>
@@ -297,7 +297,7 @@ function appendChatMessage(data) {
   area.innerHTML += `
     <div class="chat-msg ${isSelf ? 'chat-msg-self' : 'chat-msg-other'}">
       <div class="chat-body">
-        <div class="chat-username">${data.username}</div>
+        <div class="chat-username">${escapeHtml(data.username)}</div>
         <div class="chat-text">${escapeHtml(data.content)}</div>
         <div class="chat-time">${data.time}</div>
       </div>

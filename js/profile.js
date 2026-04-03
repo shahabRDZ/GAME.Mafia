@@ -24,7 +24,7 @@ async function renderProfileScreen() {
       <div class="profile-stat"><span class="profile-stat-num">${toFarsiNum(u.total_games || 0)}</span><span class="profile-stat-label">بازی آفلاین</span></div>
     </div>
     <div class="profile-edit-row">
-      <input type="text" id="editBio" placeholder="بیو..." value="${u.bio || ''}" maxlength="200" style="flex:1">
+      <input type="text" id="editBio" placeholder="بیو..." value="${escapeHtml(u.bio || '')}" maxlength="200" style="flex:1">
       <button class="chaos-btn secondary" onclick="updateBio()" style="padding:8px 16px;font-size:.8rem">ذخیره</button>
     </div>
   `;
@@ -63,7 +63,7 @@ async function loadFriends() {
         <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
       <div class="friend-actions">
-        <button class="friend-btn friend-btn-accept" onclick="startDMWithUser(${f.id},'${f.username}','${f.avatar || '🎭'}')">💬</button>
+        <button class="friend-btn friend-btn-accept" onclick="startDMWithUser(${f.id},${JSON.stringify(f.username)},${JSON.stringify(f.avatar || '🎭')})">💬</button>
         <button class="friend-btn friend-btn-invite" onclick="inviteFriendToRoom(${f.id})">دعوت</button>
         <button class="friend-btn friend-btn-remove" onclick="removeFriendUI(${f.friendship_id})">حذف</button>
       </div>
@@ -78,7 +78,7 @@ async function loadFriendRequests() {
     r.data.map(f => `
     <div class="friend-item">
       <span class="friend-avatar">${f.avatar || '🎭'}</span>
-      <div class="friend-info"><div class="friend-name">${f.username}</div></div>
+      <div class="friend-info"><div class="friend-name">${escapeHtml(f.username)}</div></div>
       <div class="friend-actions">
         <button class="friend-btn friend-btn-accept" onclick="acceptFriendUI(${f.friendship_id})">قبول</button>
         <button class="friend-btn friend-btn-reject" onclick="rejectFriendUI(${f.friendship_id})">رد</button>

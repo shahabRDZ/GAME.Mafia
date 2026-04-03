@@ -39,7 +39,7 @@ async function renderHistory() {
       }
       list.innerHTML = r.data.map(h => `
         <div class="history-item gc">
-          <div class="history-meta"><div class="history-group">${h.group}</div><div class="history-date">${h.date}</div></div>
+          <div class="history-meta"><div class="history-group">${escapeHtml(h.group)}</div><div class="history-date">${escapeHtml(h.date)}</div></div>
           <div class="history-counts">
             <div class="h-count total"><span class="n">${toFarsiNum(h.count)}</span><span class="l">نفر</span></div>
             <div class="h-count mafia"><span class="n">${toFarsiNum(h.mafia)}</span><span class="l">مافیا</span></div>
@@ -57,7 +57,7 @@ async function renderHistory() {
   }
   list.innerHTML = history.map(h => `
     <div class="history-item gc">
-      <div class="history-meta"><div class="history-group">${h.group}</div><div class="history-date">${h.date}</div></div>
+      <div class="history-meta"><div class="history-group">${escapeHtml(h.group)}</div><div class="history-date">${escapeHtml(h.date)}</div></div>
       <div class="history-counts">
         <div class="h-count total"><span class="n">${toFarsiNum(h.count)}</span><span class="l">نفر</span></div>
         <div class="h-count mafia"><span class="n">${toFarsiNum(h.mafia)}</span><span class="l">مافیا</span></div>

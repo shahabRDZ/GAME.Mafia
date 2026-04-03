@@ -22,11 +22,11 @@ async function loadConversations() {
     return;
   }
   el.innerHTML = r.data.map(c => `
-    <div class="dm-convo-item" onclick="openDMChat(${c.user_id},'${c.username}','${c.avatar || '🎭'}')">
-      <span class="dm-convo-avatar">${c.avatar || '🎭'}</span>
+    <div class="dm-convo-item" onclick="openDMChat(${c.user_id},${JSON.stringify(c.username)},${JSON.stringify(c.avatar || '🎭')})">
+      <span class="dm-convo-avatar">${escapeHtml(c.avatar || '🎭')}</span>
       <div class="dm-convo-info">
-        <div class="dm-convo-name">${c.username} ${c.online ? '<span class="friend-online">●</span>' : ''}</div>
-        <div class="dm-convo-last">${c.last_message}</div>
+        <div class="dm-convo-name">${escapeHtml(c.username)} ${c.online ? '<span class="friend-online">●</span>' : ''}</div>
+        <div class="dm-convo-last">${escapeHtml(c.last_message)}</div>
       </div>
       <div class="dm-convo-meta">
         <div class="dm-convo-time">${c.last_time}</div>
@@ -46,8 +46,8 @@ async function openDMChat(userId, username, avatar) {
   chatView.innerHTML = `
     <div class="dm-chat-header">
       <button class="dm-back-btn" onclick="closeDMChat()">◀</button>
-      <span class="dm-chat-avatar">${avatar}</span>
-      <span class="dm-chat-name">${username}</span>
+      <span class="dm-chat-avatar">${escapeHtml(avatar)}</span>
+      <span class="dm-chat-name">${escapeHtml(username)}</span>
     </div>
     <div class="dm-messages" id="dmMessages"><div class="custom-empty">در حال بارگذاری...</div></div>
     <div class="chat-input-bar">

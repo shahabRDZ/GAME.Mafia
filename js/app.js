@@ -41,3 +41,25 @@ if ('serviceWorker' in navigator) {
     });
   }).catch(() => {});
 }
+
+// ── Keyboard Navigation ──
+document.addEventListener('keydown', (e) => {
+  // ESC to close modals
+  if (e.key === 'Escape') {
+    const authModal = document.getElementById('authModal');
+    if (authModal && authModal.style.display !== 'none') {
+      closeAuthModal();
+    }
+  }
+});
+
+// ── Focus management for nav ──
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.setAttribute('tabindex', '0');
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+});

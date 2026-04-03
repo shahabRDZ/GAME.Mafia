@@ -1,4 +1,14 @@
 .git
-data
+node_modules
+__pycache__
+*.pyc
+.env
+.env.*
 docker-compose.yml
 *.md
+.github
+.vscode
+.idea
+data
+*.log
+.DS_Store
