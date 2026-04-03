@@ -389,6 +389,7 @@ function renderLabGame() {
         <input type="text" id="labChatInput" placeholder="پیام خود را بنویسید..." maxlength="500"
                autocomplete="off" disabled class="lab-chat-input">
         <button id="labSendBtn" onclick="handleLabSend()" disabled class="lab-send-btn">ارسال</button>
+        <button id="labEndTurnBtn" onclick="endMyTurn()" style="display:none" class="lab-end-turn-btn">⏭️</button>
       </div>
     </div>
   `;
@@ -446,13 +447,16 @@ function updateTurnInfo() {
       <span class="lab-turn-timer" id="labTurnTimer"></span>
     `;
 
+    const endBtn = document.getElementById("labEndTurnBtn");
     if (input) input.disabled = !isMyTurn;
     if (sendBtn) sendBtn.disabled = !isMyTurn;
     if (isMyTurn && input) {
-      input.placeholder = "الان نوبت شماست! پیام بنویسید...";
+      input.placeholder = "الان نوبت شماست! پیام بنویسید... (۴۰ ثانیه)";
       input.focus();
+      if (endBtn) { endBtn.style.display = ""; endBtn.disabled = false; }
     } else if (input) {
       input.placeholder = "\u0645\u0646\u062A\u0638\u0631 " + escapeHtml(turnName) + "...";
+      if (endBtn) endBtn.style.display = "none";
     }
   } else if (phase === "mafia_chat") {
     info.innerHTML = `
@@ -540,7 +544,7 @@ function clearLabTimer() {
 
 function getTimerTotal() {
   const phase = labState.phase;
-  if (phase === "day_talk") return 30000;
+  if (phase === "day_talk") return 40000;
   if (phase === "mafia_chat") return 15000;
   if (phase === "voting" || phase === "revote" || phase === "bazpors_vote") return 3000;
   if (phase === "defense" || phase === "bazpors_defense1" || phase === "bazpors_defense2") return 30000;
@@ -587,6 +591,13 @@ function handleLabSend() {
   } else {
     sendLabMessage();
   }
+}
+
+function endMyTurn() {
+  if (!labState.roomCode || !socket || !socket.connected) return;
+  socket.emit("lab_end_turn", { code: labState.roomCode });
+  const btn = document.getElementById("labEndTurnBtn");
+  if (btn) { btn.disabled = true; btn.style.display = "none"; }
 }
 
 function sendLabMessage() {

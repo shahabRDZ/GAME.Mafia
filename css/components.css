@@ -865,6 +865,14 @@
 .lab-send-btn:hover:not(:disabled) { background: rgba(0,207,255,.25); }
 .lab-send-btn:disabled { opacity: .3; cursor: not-allowed; }
 
+.lab-end-turn-btn {
+  padding: 0.65rem 0.8rem; background: rgba(245,166,35,.15); border: 1px solid var(--accent2);
+  color: var(--accent2); border-radius: var(--radius-md, 12px); cursor: pointer;
+  font-family: inherit; font-size: 1rem; transition: all .25s; min-height: 44px;
+  white-space: nowrap;
+}
+.lab-end-turn-btn:hover { background: rgba(245,166,35,.25); }
+
 /* Voting */
 .lab-vote-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-xs);
