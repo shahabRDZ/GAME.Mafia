@@ -147,6 +147,12 @@ class LabRoom(db.Model):
     turn_end_at = db.Column(db.DateTime, nullable=True)
     day_number = db.Column(db.Integer, default=0)
     eliminated_today = db.Column(db.Integer, nullable=True)  # player id eliminated in voting
+    defense_player_id = db.Column(db.Integer, nullable=True)  # player in defense
+    night_kill_target = db.Column(db.Integer, nullable=True)  # mafia's kill target
+    doctor_save_target = db.Column(db.Integer, nullable=True)  # doctor's save target
+    hunter_block_target = db.Column(db.Integer, nullable=True)  # hunter's block target
+    detective_result = db.Column(db.String(50), nullable=True)  # detective inquiry result
+    doctor_self_save_used = db.Column(db.Boolean, default=False)  # doctor can save self once
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     players = db.relationship("LabPlayer", backref="room", lazy=True, cascade="all, delete-orphan")
 
@@ -872,7 +878,12 @@ def get_lab_room_data(room):
         "player_count": len(players), "max_players": 10,
         "phase": room.phase, "current_turn": room.current_turn,
         "day_number": room.day_number,
-        "turn_end_at": room.turn_end_at.isoformat() if room.turn_end_at else None
+        "turn_end_at": room.turn_end_at.isoformat() if room.turn_end_at else None,
+        "defense_player_id": room.defense_player_id,
+        "night_kill_target": room.night_kill_target,
+        "doctor_save_target": room.doctor_save_target,
+        "hunter_block_target": room.hunter_block_target,
+        "detective_result": room.detective_result
     }
 
 @socketio.on("join_lab")
@@ -1014,7 +1025,13 @@ def handle_invite_lab(data):
 
 # ── Lab Game Engine ──────────────────────────────────────────────────────────
 
-lab_votes = {}  # Global: {room_code_day: {player_id: target_player_id}}
+import random
+import threading
+import time as _time_module
+
+lab_votes = {}          # {room_code_day: {voter_player_id: target_player_id}}
+lab_revotes = {}        # {room_code_day: {voter_player_id: "eliminate" | "keep"}}
+lab_night_actions = {}  # {room_code_day: {role: target_player_id}}
 
 
 def get_player_public_info(player):
@@ -1037,11 +1054,75 @@ def get_player_public_info(player):
         }
 
 
+def get_alive_sorted(room):
+    """Return alive players sorted by slot"""
+    return sorted([p for p in room.players if p.is_alive], key=lambda x: x.slot)
+
+
+def check_win_condition(room):
+    """Return 'mafia', 'citizen', or None"""
+    alive = [p for p in room.players if p.is_alive]
+    alive_mafia = [p for p in alive if p.team == "mafia"]
+    alive_citizens = [p for p in alive if p.team == "citizen"]
+    if len(alive_mafia) == 0:
+        return "citizen"
+    if len(alive_mafia) >= len(alive_citizens):
+        return "mafia"
+    return None
+
+
+def emit_game_result(code, room, winner, eliminated_player=None):
+    """End game and reveal roles"""
+    room.status = "finished"
+    room.phase = "result"
+    db.session.commit()
+
+    all_players = []
+    for p in sorted(room.players, key=lambda x: x.slot):
+        info = get_player_public_info(p)
+        info["role_name"] = p.role_name
+        info["team"] = p.team
+        info["is_alive"] = p.is_alive
+        all_players.append(info)
+
+    socketio.emit("lab_game_result", {
+        "winner": winner,
+        "eliminated": get_player_public_info(eliminated_player) if eliminated_player else None,
+        "eliminated_role": eliminated_player.role_name if eliminated_player else None,
+        "players": all_players
+    }, room=f"lab_{code}")
+
+
+def find_player_by_role(room, role_name):
+    """Find alive player with given role_name"""
+    for p in room.players:
+        if p.role_name == role_name and p.is_alive:
+            return p
+    return None
+
+
+def get_mafia_players(room, alive_only=True):
+    """Return mafia team players"""
+    if alive_only:
+        return [p for p in room.players if p.team == "mafia" and p.is_alive]
+    return [p for p in room.players if p.team == "mafia"]
+
+
+def emit_to_player(player, event, data):
+    """Emit event to a specific player (skip bots)"""
+    if player.is_bot or not player.user_id:
+        return
+    sid = user_to_sid.get(player.user_id)
+    if sid:
+        socketio.emit(event, data, to=sid)
+
+
+# ── Timer Scheduling ──────────────────────────────────────────────────────
+
 def schedule_turn_timer(code, current_slot, day_number):
-    """Schedule auto-advance after 20 seconds"""
-    import threading, time
+    """Schedule auto-advance for day_talk after 30 seconds"""
     def advance():
-        time.sleep(21)
+        _time_module.sleep(31)
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.status != "playing" or room.phase != "day_talk":
@@ -1052,18 +1133,121 @@ def schedule_turn_timer(code, current_slot, day_number):
     threading.Thread(target=advance, daemon=True).start()
 
 
+def schedule_phase_timer(code, phase, day_number, seconds):
+    """Generic phase timer - after seconds, call phase_timeout"""
+    def timeout():
+        _time_module.sleep(seconds + 1)
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.status != "playing":
+                return
+            if room.phase != phase or room.day_number != day_number:
+                return
+            handle_phase_timeout(code, phase)
+    threading.Thread(target=timeout, daemon=True).start()
+
+
+def schedule_vote_advance(code, current_slot, day_number):
+    """Advance sequential voting after 3 seconds"""
+    def advance():
+        _time_module.sleep(4)
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.status != "playing":
+                return
+            if room.phase != "voting" or room.day_number != day_number:
+                return
+            if room.current_turn != current_slot:
+                return
+            advance_sequential_vote(code)
+    threading.Thread(target=advance, daemon=True).start()
+
+
+def schedule_revote_advance(code, current_slot, day_number):
+    """Advance sequential revote after 3 seconds"""
+    def advance():
+        _time_module.sleep(4)
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.status != "playing":
+                return
+            if room.phase != "revote" or room.day_number != day_number:
+                return
+            if room.current_turn != current_slot:
+                return
+            advance_sequential_revote(code)
+    threading.Thread(target=advance, daemon=True).start()
+
+
+def schedule_night_sub_advance(code, sub_phase, day_number):
+    """Advance night sub-phase after 10 seconds"""
+    def advance():
+        _time_module.sleep(11)
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.status != "playing":
+                return
+            if room.phase != sub_phase or room.day_number != day_number:
+                return
+            advance_night(code)
+    threading.Thread(target=advance, daemon=True).start()
+
+
+# ── Phase Timeout Handler ──────────────────────────────────────────────────
+
+def handle_phase_timeout(code, phase):
+    """Handle when a phase timer expires"""
+    if phase == "mafia_chat":
+        start_sequential_voting(code)
+    elif phase == "defense":
+        start_revote(code)
+
+
+# ── Day Talk ──────────────────────────────────────────────────────────────
+
+def start_day_talk(code, day_number):
+    """Start day_talk phase for a new day"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.status != "playing":
+        return
+
+    room.phase = "day_talk"
+    room.day_number = day_number
+
+    alive = get_alive_sorted(room)
+    if not alive:
+        return
+
+    room.current_turn = alive[0].slot
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+    db.session.commit()
+
+    player_info = get_player_public_info(alive[0])
+    socketio.emit("lab_phase_change", {
+        "phase": "day_talk",
+        "day_number": day_number,
+        "current_turn": alive[0].slot,
+        "turn_player": player_info,
+        "turn_end_at": room.turn_end_at.isoformat(),
+        "alive_players": [get_player_public_info(p) for p in alive]
+    }, room=f"lab_{code}")
+
+    schedule_turn_timer(code, alive[0].slot, day_number)
+
+    if alive[0].is_bot:
+        generate_bot_message(code, alive[0])
+
+
 def advance_turn(code):
-    """Move to next player's turn"""
+    """Move to next player's turn in day_talk"""
     room = LabRoom.query.filter_by(code=code).first()
     if not room or room.phase != "day_talk":
         return
 
     current = room.current_turn
-    players = sorted(room.players, key=lambda x: x.slot)
-    alive_players = [p for p in players if p.is_alive]
-    alive_slots = [p.slot for p in alive_players]
+    alive = get_alive_sorted(room)
+    alive_slots = [p.slot for p in alive]
 
-    # Find next alive player after current
     next_slot = None
     for s in alive_slots:
         if s > current:
@@ -1071,29 +1255,11 @@ def advance_turn(code):
             break
 
     if next_slot is None:
-        # All players have spoken - move to voting
-        room.phase = "voting"
-        room.current_turn = 0
-        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
-        db.session.commit()
-
-        # Get alive players for voting
-        vote_players = [get_player_public_info(p) for p in alive_players]
-        socketio.emit("lab_phase_change", {
-            "phase": "voting",
-            "day_number": room.day_number,
-            "players": vote_players,
-            "turn_end_at": room.turn_end_at.isoformat()
-        }, room=f"lab_{code}")
-
-        # Schedule voting end
-        schedule_voting_end(code, room.day_number)
-
-        # Bots vote
-        bot_vote(code)
+        # All players have spoken - move to mafia_chat
+        start_mafia_chat(code)
     else:
         room.current_turn = next_slot
-        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=20)
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
         db.session.commit()
 
         player = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
@@ -1108,25 +1274,202 @@ def advance_turn(code):
 
         schedule_turn_timer(code, next_slot, room.day_number)
 
-        # If it's a bot's turn, generate a message
         if player and player.is_bot:
             generate_bot_message(code, player)
 
 
-def schedule_voting_end(code, day_number):
-    import threading, time
-    def end_voting():
-        time.sleep(31)
+# ── Mafia Chat ──────────────────────────────────────────────────────────────
+
+def start_mafia_chat(code):
+    """Start 15s private mafia chat phase"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room.phase = "mafia_chat"
+    room.current_turn = 0
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=15)
+    db.session.commit()
+
+    mafia_players = get_mafia_players(room)
+
+    # Notify all players that mafia_chat phase started (they see "شب مافیا")
+    socketio.emit("lab_phase_change", {
+        "phase": "mafia_chat",
+        "day_number": room.day_number,
+        "turn_end_at": room.turn_end_at.isoformat()
+    }, room=f"lab_{code}")
+
+    # Send private mafia chat notification to mafia players only
+    mafia_info = [get_player_public_info(p) for p in mafia_players]
+    for p in mafia_players:
+        emit_to_player(p, "lab_mafia_chat_start", {
+            "mafia_team": mafia_info,
+            "turn_end_at": room.turn_end_at.isoformat()
+        })
+
+    # Bot mafia send short messages
+    for p in mafia_players:
+        if p.is_bot:
+            generate_bot_mafia_chat(code, p)
+
+    schedule_phase_timer(code, "mafia_chat", room.day_number, 15)
+
+
+def generate_bot_mafia_chat(code, bot_player):
+    """Bot mafia sends a short message during mafia_chat"""
+    def send():
+        _time_module.sleep(random.uniform(2, 8))
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
-            if not room or room.phase != "voting" or room.day_number != day_number:
+            if not room or room.phase != "mafia_chat":
                 return
-            resolve_lab_votes(code)
-    threading.Thread(target=end_voting, daemon=True).start()
+
+            msgs = [
+                "بزنیم اون شهروند رو",
+                "کارآگاه رو بزنیم بهتره",
+                "دکتر خطرناکه",
+                "موافقم",
+                "باشه همونو میزنیم",
+                "حواسمون به هانتر باشه",
+                "من فردا از اون دفاع میکنم",
+                "رأی رو بندازیم رو یکی دیگه"
+            ]
+            content = random.choice(msgs)
+
+            mafia_players = get_mafia_players(room)
+            player_info = get_player_public_info(bot_player)
+            for mp in mafia_players:
+                emit_to_player(mp, "lab_mafia_message", {
+                    "player": player_info,
+                    "content": content,
+                    "time": datetime.now(timezone.utc).isoformat()
+                })
+
+    threading.Thread(target=send, daemon=True).start()
 
 
-def resolve_lab_votes(code):
-    """Count votes and eliminate most voted player"""
+# ── Sequential Voting ──────────────────────────────────────────────────────
+
+def start_sequential_voting(code):
+    """Start voting: each alive player votes in turn, 3s each"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    alive = get_alive_sorted(room)
+    if not alive:
+        return
+
+    room.phase = "voting"
+    room.current_turn = alive[0].slot
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+    db.session.commit()
+
+    room_key = f"{code}_{room.day_number}"
+    lab_votes[room_key] = {}
+
+    socketio.emit("lab_phase_change", {
+        "phase": "voting",
+        "day_number": room.day_number,
+        "current_turn": alive[0].slot,
+        "turn_player": get_player_public_info(alive[0]),
+        "turn_end_at": room.turn_end_at.isoformat(),
+        "alive_players": [get_player_public_info(p) for p in alive]
+    }, room=f"lab_{code}")
+
+    if alive[0].is_bot:
+        bot_sequential_vote(code, alive[0])
+
+    schedule_vote_advance(code, alive[0].slot, room.day_number)
+
+
+def advance_sequential_vote(code):
+    """Move to next voter or resolve votes"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "voting":
+        return
+
+    current = room.current_turn
+    alive = get_alive_sorted(room)
+    alive_slots = [p.slot for p in alive]
+
+    next_slot = None
+    for s in alive_slots:
+        if s > current:
+            next_slot = s
+            break
+
+    if next_slot is None:
+        # All voted - resolve
+        resolve_voting(code)
+    else:
+        room.current_turn = next_slot
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+        db.session.commit()
+
+        player = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
+        socketio.emit("lab_phase_change", {
+            "phase": "voting",
+            "day_number": room.day_number,
+            "current_turn": next_slot,
+            "turn_player": get_player_public_info(player),
+            "turn_end_at": room.turn_end_at.isoformat()
+        }, room=f"lab_{code}")
+
+        if player and player.is_bot:
+            bot_sequential_vote(code, player)
+
+        schedule_vote_advance(code, next_slot, room.day_number)
+
+
+def bot_sequential_vote(code, bot_player):
+    """Bot votes during sequential voting"""
+    def vote():
+        _time_module.sleep(random.uniform(0.5, 2))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.phase != "voting":
+                return
+            if room.current_turn != bot_player.slot:
+                return
+
+            alive = [p for p in room.players if p.is_alive and p.id != bot_player.id]
+            if not alive:
+                return
+
+            if bot_player.team == "mafia":
+                citizens = [p for p in alive if p.team == "citizen"]
+                target = random.choice(citizens if citizens else alive)
+            else:
+                target = random.choice(alive)
+
+            room_key = f"{code}_{room.day_number}"
+            if room_key not in lab_votes:
+                lab_votes[room_key] = {}
+            lab_votes[room_key][bot_player.id] = target.id
+
+            socketio.emit("lab_vote_cast", {
+                "voter": get_player_public_info(bot_player),
+                "target": get_player_public_info(target),
+                "vote_counts": get_vote_counts(code, room.day_number)
+            }, room=f"lab_{code}")
+
+    threading.Thread(target=vote, daemon=True).start()
+
+
+def get_vote_counts(code, day_number):
+    """Get current vote counts per target"""
+    room_key = f"{code}_{day_number}"
+    votes = lab_votes.get(room_key, {})
+    counts = {}
+    for voter_id, target_id in votes.items():
+        counts[str(target_id)] = counts.get(str(target_id), 0) + 1
+    return counts
+
+
+def resolve_voting(code):
+    """Check if anyone got 4+ votes, if so go to defense, else night"""
     room = LabRoom.query.filter_by(code=code).first()
     if not room:
         return
@@ -1134,117 +1477,580 @@ def resolve_lab_votes(code):
     room_key = f"{code}_{room.day_number}"
     votes = lab_votes.get(room_key, {})
 
-    # Count votes per target
     vote_counts = {}
     for voter_id, target_id in votes.items():
         vote_counts[target_id] = vote_counts.get(target_id, 0) + 1
 
-    eliminated_id = None
-    max_votes = 0
+    # Find player with most votes
+    max_voted_id = None
+    max_count = 0
     if vote_counts:
-        eliminated_id = max(vote_counts, key=vote_counts.get)
-        max_votes = vote_counts[eliminated_id]
+        max_voted_id = max(vote_counts, key=vote_counts.get)
+        max_count = vote_counts[max_voted_id]
 
-    eliminated_player = None
-    if eliminated_id:
-        eliminated_player = LabPlayer.query.get(eliminated_id)
-        if eliminated_player:
-            eliminated_player.is_alive = False
-            eliminated_player.is_eliminated = True
+    if max_count >= 4:
+        # Go to defense phase
+        defense_player = LabPlayer.query.get(max_voted_id)
+        if defense_player:
+            start_defense(code, defense_player, max_count)
+            return
+
+    # No one has 4+ votes - go to night
+    socketio.emit("lab_phase_change", {
+        "phase": "voting_result",
+        "day_number": room.day_number,
+        "message": "هیچکس رأی کافی نگرفت",
+        "vote_counts": {str(k): v for k, v in vote_counts.items()}
+    }, room=f"lab_{code}")
+
+    # Clean up votes
+    lab_votes.pop(room_key, None)
+
+    # Start night after 3 seconds
+    def go_night():
+        _time_module.sleep(3)
+        with app.app_context():
+            r = LabRoom.query.filter_by(code=code).first()
+            if r and r.status == "playing":
+                start_night(code)
+    threading.Thread(target=go_night, daemon=True).start()
+
+
+# ── Defense Phase ──────────────────────────────────────────────────────────
+
+def start_defense(code, defense_player, vote_count):
+    """Player with 4+ votes gets 30s to defend"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room.phase = "defense"
+    room.defense_player_id = defense_player.id
+    room.current_turn = defense_player.slot
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+    db.session.commit()
+
+    socketio.emit("lab_phase_change", {
+        "phase": "defense",
+        "day_number": room.day_number,
+        "defense_player": get_player_public_info(defense_player),
+        "vote_count": vote_count,
+        "turn_end_at": room.turn_end_at.isoformat()
+    }, room=f"lab_{code}")
+
+    # Bot defense
+    if defense_player.is_bot:
+        generate_bot_defense(code, defense_player)
+
+    schedule_phase_timer(code, "defense", room.day_number, 30)
+
+
+def generate_bot_defense(code, bot_player):
+    """Bot sends a defense message"""
+    def send():
+        _time_module.sleep(random.uniform(3, 10))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.phase != "defense":
+                return
+
+            defense_msgs = [
+                "من بی\u200cگناهم! من شهروندم!",
+                "دارین اشتباه میکنین، من مافیا نیستم",
+                "بذارین توضیح بدم، من نقش مثبت دارم",
+                "اگه منو بندازین بیرون ضرر میکنین",
+                "من کارآگاهم، نندازینم!",
+                "به خدا من پاکم، مافیا داره گولتون میزنه",
+                "یکی داره منو قربانی میکنه",
+                "صبر کنید، من میتونم ثابت کنم"
+            ]
+            content = random.choice(defense_msgs)
+
+            msg = LabMessage(room_id=room.id, player_id=bot_player.id, content=content, msg_type="defense")
+            db.session.add(msg)
+            db.session.commit()
+
+            socketio.emit("lab_new_message", {
+                "id": msg.id,
+                "player": get_player_public_info(bot_player),
+                "content": content,
+                "msg_type": "defense",
+                "time": msg.created_at.isoformat()
+            }, room=f"lab_{code}")
+
+    threading.Thread(target=send, daemon=True).start()
+
+
+# ── Revote Phase ──────────────────────────────────────────────────────────
+
+def start_revote(code):
+    """Each alive player votes eliminate or keep"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    alive = get_alive_sorted(room)
+    if not alive:
+        return
+
+    room.phase = "revote"
+    room.current_turn = alive[0].slot
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+    db.session.commit()
+
+    room_key = f"{code}_{room.day_number}"
+    lab_revotes[room_key] = {}
+
+    defense_player = LabPlayer.query.get(room.defense_player_id) if room.defense_player_id else None
+
+    socketio.emit("lab_phase_change", {
+        "phase": "revote",
+        "day_number": room.day_number,
+        "defense_player": get_player_public_info(defense_player),
+        "current_turn": alive[0].slot,
+        "turn_player": get_player_public_info(alive[0]),
+        "turn_end_at": room.turn_end_at.isoformat(),
+        "alive_players": [get_player_public_info(p) for p in alive]
+    }, room=f"lab_{code}")
+
+    if alive[0].is_bot:
+        bot_sequential_revote(code, alive[0])
+
+    schedule_revote_advance(code, alive[0].slot, room.day_number)
+
+
+def advance_sequential_revote(code):
+    """Move to next revote voter or resolve"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "revote":
+        return
+
+    current = room.current_turn
+    alive = get_alive_sorted(room)
+    alive_slots = [p.slot for p in alive]
+
+    next_slot = None
+    for s in alive_slots:
+        if s > current:
+            next_slot = s
+            break
+
+    if next_slot is None:
+        resolve_revote(code)
+    else:
+        room.current_turn = next_slot
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+        db.session.commit()
+
+        player = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
+        socketio.emit("lab_phase_change", {
+            "phase": "revote",
+            "day_number": room.day_number,
+            "current_turn": next_slot,
+            "turn_player": get_player_public_info(player),
+            "turn_end_at": room.turn_end_at.isoformat()
+        }, room=f"lab_{code}")
+
+        if player and player.is_bot:
+            bot_sequential_revote(code, player)
+
+        schedule_revote_advance(code, next_slot, room.day_number)
+
+
+def bot_sequential_revote(code, bot_player):
+    """Bot votes in revote"""
+    def vote():
+        _time_module.sleep(random.uniform(0.5, 2))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.phase != "revote":
+                return
+            if room.current_turn != bot_player.slot:
+                return
+
+            defense_player = LabPlayer.query.get(room.defense_player_id) if room.defense_player_id else None
+            if not defense_player:
+                return
+
+            # Mafia bots protect their own, citizen bots vote to eliminate
+            if bot_player.team == "mafia" and defense_player.team == "mafia":
+                decision = "keep"
+            elif bot_player.team == "mafia" and defense_player.team == "citizen":
+                decision = "eliminate"
+            else:
+                decision = random.choice(["eliminate", "eliminate", "keep"])  # citizens lean eliminate
+
+            room_key = f"{code}_{room.day_number}"
+            if room_key not in lab_revotes:
+                lab_revotes[room_key] = {}
+            lab_revotes[room_key][bot_player.id] = decision
+
+            socketio.emit("lab_revote_cast", {
+                "voter": get_player_public_info(bot_player),
+                "decision": decision
+            }, room=f"lab_{code}")
+
+    threading.Thread(target=vote, daemon=True).start()
+
+
+def resolve_revote(code):
+    """Count revotes - majority eliminate = player eliminated"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room_key = f"{code}_{room.day_number}"
+    revotes = lab_revotes.get(room_key, {})
+
+    eliminate_count = sum(1 for d in revotes.values() if d == "eliminate")
+    keep_count = sum(1 for d in revotes.values() if d == "keep")
+
+    defense_player = LabPlayer.query.get(room.defense_player_id) if room.defense_player_id else None
+
+    if eliminate_count > keep_count and defense_player:
+        # Eliminate
+        defense_player.is_alive = False
+        defense_player.is_eliminated = True
+        room.eliminated_today = defense_player.id
+        db.session.commit()
+
+        socketio.emit("lab_elimination", {
+            "eliminated": get_player_public_info(defense_player),
+            "eliminated_role": defense_player.role_name,
+            "eliminate_votes": eliminate_count,
+            "keep_votes": keep_count
+        }, room=f"lab_{code}")
+
+        # Check win
+        winner = check_win_condition(room)
+        if winner:
+            emit_game_result(code, room, winner, defense_player)
+            lab_revotes.pop(room_key, None)
+            lab_votes.pop(f"{code}_{room.day_number}", None)
+            return
+    else:
+        socketio.emit("lab_elimination", {
+            "eliminated": None,
+            "message": "بازیکن ابقا شد",
+            "eliminate_votes": eliminate_count,
+            "keep_votes": keep_count
+        }, room=f"lab_{code}")
+
+    # Clean up
+    lab_revotes.pop(room_key, None)
+    lab_votes.pop(f"{code}_{room.day_number}", None)
+    room.defense_player_id = None
+    db.session.commit()
+
+    # Go to night after 3 seconds
+    def go_night():
+        _time_module.sleep(3)
+        with app.app_context():
+            r = LabRoom.query.filter_by(code=code).first()
+            if r and r.status == "playing":
+                start_night(code)
+    threading.Thread(target=go_night, daemon=True).start()
+
+
+# ── Night Phase (sub-phases) ──────────────────────────────────────────────
+
+NIGHT_ORDER = ["night_hunter", "night_shayad", "night_mafia", "night_detective", "night_doctor", "night_bazpors"]
+
+
+def start_night(code):
+    """Begin night with first sub-phase"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    # Reset night targets
+    room.night_kill_target = None
+    room.doctor_save_target = None
+    room.hunter_block_target = None
+    room.detective_result = None
+
+    room_key = f"{code}_{room.day_number}"
+    lab_night_actions[room_key] = {}
 
     db.session.commit()
 
-    # Check win condition
-    alive_players = [p for p in room.players if p.is_alive]
-    alive_mafia = [p for p in alive_players if p.team == "mafia"]
-    alive_citizens = [p for p in alive_players if p.team == "citizen"]
+    start_night_sub(code, NIGHT_ORDER[0])
 
-    winner = None
-    if len(alive_mafia) == 0:
-        winner = "citizen"
-    elif len(alive_mafia) >= len(alive_citizens):
-        winner = "mafia"
 
-    if winner:
-        room.status = "finished"
-        room.phase = "result"
-        db.session.commit()
+def start_night_sub(code, sub_phase):
+    """Start a night sub-phase"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.status != "playing":
+        return
 
-        # Reveal all roles
-        all_players = []
-        for p in sorted(room.players, key=lambda x: x.slot):
-            info = get_player_public_info(p)
-            info["role_name"] = p.role_name
-            info["team"] = p.team
-            info["is_alive"] = p.is_alive
-            all_players.append(info)
+    room.phase = sub_phase
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=10)
+    db.session.commit()
 
-        socketio.emit("lab_game_result", {
-            "winner": winner,
-            "eliminated": get_player_public_info(eliminated_player) if eliminated_player else None,
-            "eliminated_role": eliminated_player.role_name if eliminated_player else None,
-            "players": all_players,
-            "votes": {str(k): v for k, v in votes.items()}
-        }, room=f"lab_{code}")
-    else:
-        # Night phase - show who was eliminated, then start next day
-        elim_info = get_player_public_info(eliminated_player) if eliminated_player else None
-        socketio.emit("lab_phase_change", {
-            "phase": "night",
-            "day_number": room.day_number,
-            "eliminated": elim_info,
-            "eliminated_role": eliminated_player.role_name if eliminated_player else None,
-            "eliminated_votes": max_votes
-        }, room=f"lab_{code}")
+    alive = get_alive_sorted(room)
+    alive_info = [get_player_public_info(p) for p in alive]
 
-        room.phase = "night"
-        db.session.commit()
+    # Notify everyone about the sub-phase (without revealing who acts)
+    socketio.emit("lab_phase_change", {
+        "phase": sub_phase,
+        "day_number": room.day_number,
+        "turn_end_at": room.turn_end_at.isoformat()
+    }, room=f"lab_{code}")
 
-        # After 5 seconds, start next day
-        import threading, time
-        def next_day():
-            time.sleep(5)
-            with app.app_context():
-                r = LabRoom.query.filter_by(code=code).first()
-                if not r or r.status != "playing":
-                    return
-                r.phase = "day_talk"
-                r.day_number += 1
+    # Send action prompt to the relevant player(s)
+    if sub_phase == "night_detective":
+        detective = find_player_by_role(room, "کارآگاه")
+        if detective:
+            emit_to_player(detective, "lab_night_action_prompt", {
+                "sub_phase": sub_phase,
+                "role": "کارآگاه",
+                "targets": [p for p in alive_info if p and p["id"] != detective.id],
+                "turn_end_at": room.turn_end_at.isoformat()
+            })
+            if detective.is_bot:
+                bot_night_action(code, detective, sub_phase)
 
-                alive = sorted([p for p in r.players if p.is_alive], key=lambda x: x.slot)
-                if alive:
-                    r.current_turn = alive[0].slot
-                    r.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=20)
+    elif sub_phase == "night_shayad":
+        shayad = find_player_by_role(room, "شیاد")
+        if shayad:
+            emit_to_player(shayad, "lab_night_action_prompt", {
+                "sub_phase": sub_phase,
+                "role": "شیاد",
+                "description": "یک بازیکن انتخاب کنید — اگر کارآگاه باشد، استعلامش منفی می‌شود",
+                "targets": [p for p in alive_info if p and p["id"] != shayad.id],
+                "turn_end_at": room.turn_end_at.isoformat()
+            })
+            if shayad.is_bot:
+                bot_night_action(code, shayad, sub_phase)
+
+    elif sub_phase == "night_bazpors":
+        bazpors = find_player_by_role(room, "بازپرس")
+        if bazpors:
+            emit_to_player(bazpors, "lab_night_action_prompt", {
+                "sub_phase": sub_phase,
+                "role": "بازپرس",
+                "targets": [p for p in alive_info if p and p["id"] != bazpors.id],
+                "turn_end_at": room.turn_end_at.isoformat()
+            })
+            if bazpors.is_bot:
+                bot_night_action(code, bazpors, sub_phase)
+
+    elif sub_phase == "night_doctor":
+        doctor = find_player_by_role(room, "دکتر")
+        if doctor:
+            emit_to_player(doctor, "lab_night_action_prompt", {
+                "sub_phase": sub_phase,
+                "role": "دکتر",
+                "targets": alive_info,
+                "can_self_save": not room.doctor_self_save_used,
+                "turn_end_at": room.turn_end_at.isoformat()
+            })
+            if doctor.is_bot:
+                bot_night_action(code, doctor, sub_phase)
+
+    elif sub_phase == "night_hunter":
+        hunter = find_player_by_role(room, "هانتر")
+        if hunter:
+            emit_to_player(hunter, "lab_night_action_prompt", {
+                "sub_phase": sub_phase,
+                "role": "هانتر",
+                "targets": [p for p in alive_info if p and p["id"] != hunter.id],
+                "turn_end_at": room.turn_end_at.isoformat()
+            })
+            if hunter.is_bot:
+                bot_night_action(code, hunter, sub_phase)
+
+    elif sub_phase == "night_mafia":
+        mafia_players = get_mafia_players(room)
+        non_mafia = [p for p in alive_info if p and p["id"] not in [m.id for m in mafia_players]]
+        for mp in mafia_players:
+            emit_to_player(mp, "lab_night_action_prompt", {
+                "sub_phase": sub_phase,
+                "role": mp.role_name,
+                "is_boss": mp.role_name == "رئیس مافیا",
+                "targets": non_mafia,
+                "mafia_team": [get_player_public_info(m) for m in mafia_players],
+                "turn_end_at": room.turn_end_at.isoformat()
+            })
+        # Bot mafia boss chooses kill
+        boss = find_player_by_role(room, "رئیس مافیا")
+        if boss and boss.is_bot:
+            bot_night_action(code, boss, sub_phase)
+
+    schedule_night_sub_advance(code, sub_phase, room.day_number)
+
+
+def bot_night_action(code, bot_player, sub_phase):
+    """Bot performs a night action"""
+    def act():
+        _time_module.sleep(random.uniform(2, 6))
+        with app.app_context():
+            room = LabRoom.query.filter_by(code=code).first()
+            if not room or room.phase != sub_phase:
+                return
+
+            alive = [p for p in room.players if p.is_alive]
+            targets = [p for p in alive if p.id != bot_player.id]
+
+            if not targets:
+                return
+
+            room_key = f"{code}_{room.day_number}"
+            if room_key not in lab_night_actions:
+                lab_night_actions[room_key] = {}
+
+            if sub_phase == "night_detective":
+                target = random.choice(targets)
+                lab_night_actions[room_key]["detective"] = target.id
+                result = "مافیا" if target.team == "mafia" else "شهروند"
+                room.detective_result = result
+                db.session.commit()
+                emit_to_player(bot_player, "lab_detective_result", {
+                    "target": get_player_public_info(target),
+                    "result": result
+                })
+
+            elif sub_phase == "night_doctor":
+                # Can save self once
+                if not room.doctor_self_save_used:
+                    all_targets = alive
+                else:
+                    all_targets = targets
+                target = random.choice(all_targets) if all_targets else None
+                if target:
+                    lab_night_actions[room_key]["doctor"] = target.id
+                    room.doctor_save_target = target.id
+                    if target.id == bot_player.id:
+                        room.doctor_self_save_used = True
                     db.session.commit()
 
-                    player_info = get_player_public_info(alive[0])
-                    socketio.emit("lab_phase_change", {
-                        "phase": "day_talk",
-                        "day_number": r.day_number,
-                        "current_turn": alive[0].slot,
-                        "turn_player": player_info,
-                        "turn_end_at": r.turn_end_at.isoformat()
-                    }, room=f"lab_{code}")
+            elif sub_phase == "night_hunter":
+                target = random.choice(targets)
+                lab_night_actions[room_key]["hunter"] = target.id
+                room.hunter_block_target = target.id
+                db.session.commit()
 
-                    schedule_turn_timer(code, alive[0].slot, r.day_number)
+            elif sub_phase == "night_mafia":
+                citizens = [p for p in targets if p.team == "citizen"]
+                target = random.choice(citizens if citizens else targets)
+                lab_night_actions[room_key]["mafia"] = target.id
+                room.night_kill_target = target.id
+                db.session.commit()
 
-                    if alive[0].is_bot:
-                        generate_bot_message(code, alive[0])
+            elif sub_phase == "night_shayad":
+                # Shayad picks a random target, hoping to find detective
+                target = random.choice(targets)
+                lab_night_actions[room_key]["shayad"] = target.id
+                db.session.commit()
 
-        threading.Thread(target=next_day, daemon=True).start()
+            elif sub_phase == "night_bazpors":
+                target = random.choice(targets)
+                lab_night_actions[room_key]["bazpors"] = target.id
+                result = "مافیا" if target.team == "mafia" else "شهروند"
+                db.session.commit()
+                emit_to_player(bot_player, "lab_detective_result", {
+                    "target": get_player_public_info(target),
+                    "result": result
+                })
 
-    # Clean up votes
-    if room_key in lab_votes:
-        del lab_votes[room_key]
+    threading.Thread(target=act, daemon=True).start()
 
+
+def advance_night(code):
+    """Move to next night sub-phase or resolve"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.status != "playing":
+        return
+
+    current_phase = room.phase
+    if current_phase not in NIGHT_ORDER:
+        return
+
+    idx = NIGHT_ORDER.index(current_phase)
+    if idx < len(NIGHT_ORDER) - 1:
+        start_night_sub(code, NIGHT_ORDER[idx + 1])
+    else:
+        resolve_night(code)
+
+
+def resolve_night(code):
+    """Resolve all night actions"""
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room:
+        return
+
+    room_key = f"{code}_{room.day_number}"
+    actions = lab_night_actions.get(room_key, {})
+
+    kill_target_id = actions.get("mafia") or room.night_kill_target
+    save_target_id = actions.get("doctor") or room.doctor_save_target
+    # hunter blocks target's ability, not mafia kill
+
+    killed_player = None
+    saved = False
+
+    if kill_target_id:
+        if save_target_id and kill_target_id == save_target_id:
+            saved = True
+        else:
+            killed_player = LabPlayer.query.get(kill_target_id)
+            if killed_player:
+                killed_player.is_alive = False
+                killed_player.is_eliminated = True
+
+    room.phase = "night_resolve"
+    db.session.commit()
+
+    if saved:
+        saved_player = LabPlayer.query.get(kill_target_id)
+        socketio.emit("lab_night_result", {
+            "killed": None,
+            "saved": get_player_public_info(saved_player) if saved_player else None,
+            "message": "دکتر نجاتش داد! 🩺",
+            "day_number": room.day_number
+        }, room=f"lab_{code}")
+    elif killed_player:
+        socketio.emit("lab_night_result", {
+            "killed": get_player_public_info(killed_player),
+            "killed_role": killed_player.role_name,
+            "saved": None,
+            "message": None,
+            "day_number": room.day_number
+        }, room=f"lab_{code}")
+    else:
+        socketio.emit("lab_night_result", {
+            "killed": None,
+            "saved": None,
+            "message": "شب بدون تلفات گذشت",
+            "day_number": room.day_number
+        }, room=f"lab_{code}")
+
+    # Clean up night actions
+    lab_night_actions.pop(room_key, None)
+
+    # Check win condition
+    winner = check_win_condition(room)
+    if winner:
+        emit_game_result(code, room, winner, killed_player)
+        return
+
+    # Start next day after 5 seconds
+    def next_day():
+        _time_module.sleep(5)
+        with app.app_context():
+            r = LabRoom.query.filter_by(code=code).first()
+            if r and r.status == "playing":
+                start_day_talk(code, r.day_number + 1)
+    threading.Thread(target=next_day, daemon=True).start()
+
+
+# ── Bot Message Generation ──────────────────────────────────────────────────
 
 def save_to_bot_memory(role_name, team, phase, message, room_id):
     """Save real player messages for bot learning"""
-    # Get recent messages for context
     recent = LabMessage.query.filter_by(room_id=room_id).order_by(LabMessage.id.desc()).limit(3).all()
     context = " | ".join([m.content for m in reversed(recent)])
 
-    # Check if similar message already exists
     existing = BotMemory.query.filter_by(role_name=role_name, team=team, phase=phase, message=message).first()
     if existing:
         existing.times_used += 1
@@ -1256,30 +2062,25 @@ def save_to_bot_memory(role_name, team, phase, message, room_id):
 
 def generate_bot_message(code, bot_player):
     """Generate a message for a bot player using learned memories"""
-    import threading, time, random
-
     def send():
-        time.sleep(random.uniform(2, 8))  # Natural delay
+        _time_module.sleep(random.uniform(2, 8))
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.phase != "day_talk" or room.current_turn != bot_player.slot:
                 return
 
-            # Try to find a learned message
             memories = BotMemory.query.filter_by(
                 role_name=bot_player.role_name,
                 team=bot_player.team,
                 phase="day_talk"
             ).order_by(BotMemory.effectiveness.desc(), BotMemory.times_used.desc()).limit(20).all()
 
-            if memories and random.random() < 0.7:  # 70% chance to use learned message
-                # Weight by effectiveness
+            if memories and random.random() < 0.7:
                 weights = [max(m.effectiveness + 5, 1) for m in memories]
                 chosen = random.choices(memories, weights=weights, k=1)[0]
                 content = chosen.message
                 chosen.times_used += 1
             else:
-                # Fallback: generic messages based on role/team
                 content = get_fallback_bot_message(bot_player.role_name, bot_player.team, room.day_number)
 
             msg = LabMessage(room_id=room.id, player_id=bot_player.id, content=content)
@@ -1300,8 +2101,6 @@ def generate_bot_message(code, bot_player):
 
 def get_fallback_bot_message(role_name, team, day_number):
     """Generic bot messages when no learned data is available"""
-    import random
-
     citizen_msgs = [
         "من شهروندم، باید مافیاها رو پیدا کنیم",
         "یکی اینجا مشکوک رفتار میکنه...",
@@ -1333,48 +2132,7 @@ def get_fallback_bot_message(role_name, team, day_number):
     return random.choice(citizen_msgs)
 
 
-def bot_vote(code):
-    """Make bots vote during voting phase"""
-    import threading, time, random
-
-    def do_vote():
-        time.sleep(random.uniform(3, 15))
-        with app.app_context():
-            room = LabRoom.query.filter_by(code=code).first()
-            if not room or room.phase != "voting":
-                return
-
-            alive_bots = [p for p in room.players if p.is_bot and p.is_alive]
-            alive_players = [p for p in room.players if p.is_alive]
-
-            room_key = f"{code}_{room.day_number}"
-            if room_key not in lab_votes:
-                lab_votes[room_key] = {}
-
-            for bot in alive_bots:
-                # Bots vote for someone else (not themselves)
-                targets = [p for p in alive_players if p.id != bot.id]
-
-                if bot.team == "mafia":
-                    # Mafia bots prefer voting for citizens
-                    citizen_targets = [p for p in targets if p.team == "citizen"]
-                    target = random.choice(citizen_targets if citizen_targets else targets)
-                else:
-                    # Citizen bots vote somewhat randomly (they don't know roles)
-                    target = random.choice(targets)
-
-                lab_votes[room_key][bot.id] = target.id
-
-            voted_count = len(lab_votes[room_key])
-            alive_count = len(alive_players)
-
-            socketio.emit("lab_vote_update", {
-                "voted": voted_count,
-                "total": alive_count
-            }, room=f"lab_{code}")
-
-    threading.Thread(target=do_vote, daemon=True).start()
-
+# ── Socket Events: Game Start ──────────────────────────────────────────────
 
 @socketio.on("start_lab")
 def handle_start_lab(data):
@@ -1394,7 +2152,6 @@ def handle_start_lab(data):
         return
 
     # Assign roles randomly
-    import random
     scenario = room.scenario or "بازپرس"
     roles_data = LAB_ROLES.get(scenario, LAB_ROLES["بازپرس"])
     all_roles = [(r, "mafia") for r in roles_data["mafia"]] + [(r, "citizen") for r in roles_data["citizen"]]
@@ -1411,6 +2168,7 @@ def handle_start_lab(data):
     room.phase = "intro"
     room.day_number = 0
     room.current_turn = 0
+    room.doctor_self_save_used = False
     db.session.commit()
 
     # Send each player their role privately
@@ -1431,34 +2189,17 @@ def handle_start_lab(data):
     emit("lab_game_started", room_data, room=f"lab_{code}")
 
     # Start intro phase (5 seconds), then move to day_talk
-    import threading
     def start_day_after_intro():
-        import time
-        time.sleep(5)
+        _time_module.sleep(5)
         with app.app_context():
             r = LabRoom.query.filter_by(code=code).first()
             if r and r.status == "playing":
-                r.phase = "day_talk"
-                r.day_number = 1
-                r.current_turn = 1
-                r.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=20)
-                db.session.commit()
-
-                player = LabPlayer.query.filter_by(room_id=r.id, slot=1).first()
-                player_info = get_player_public_info(player)
-                socketio.emit("lab_phase_change", {
-                    "phase": "day_talk",
-                    "day_number": 1,
-                    "current_turn": 1,
-                    "turn_player": player_info,
-                    "turn_end_at": r.turn_end_at.isoformat()
-                }, room=f"lab_{code}")
-
-                # Schedule turn timer
-                schedule_turn_timer(code, 1, 1)
+                start_day_talk(code, 1)
 
     threading.Thread(target=start_day_after_intro, daemon=True).start()
 
+
+# ── Socket Events: Chat ──────────────────────────────────────────────────
 
 @socketio.on("lab_chat")
 def handle_lab_chat(data):
@@ -1479,20 +2220,16 @@ def handle_lab_chat(data):
     if not player or not player.is_alive:
         return
 
-    # Check it's this player's turn
     if player.slot != room.current_turn:
         emit("error", {"msg": "الان نوبت شما نیست"})
         return
 
-    # Save message
     msg = LabMessage(room_id=room.id, player_id=player.id, content=content)
     db.session.add(msg)
     db.session.commit()
 
-    # Save to bot memory (real player messages for learning)
     save_to_bot_memory(player.role_name, player.team, room.phase, content, room.id)
 
-    # Broadcast
     player_info = get_player_public_info(player)
     socketio.emit("lab_new_message", {
         "id": msg.id,
@@ -1503,11 +2240,79 @@ def handle_lab_chat(data):
     }, room=f"lab_{code}")
 
 
+@socketio.on("lab_mafia_chat")
+def handle_mafia_chat(data):
+    """Private mafia chat during mafia_chat phase"""
+    code = data.get("code", "").upper()
+    content = data.get("content", "").strip()
+    if not content or len(content) > 300:
+        return
+
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "mafia_chat":
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not player or not player.is_alive or player.team != "mafia":
+        return
+
+    mafia_players = get_mafia_players(room)
+    player_info = get_player_public_info(player)
+    for mp in mafia_players:
+        emit_to_player(mp, "lab_mafia_message", {
+            "player": player_info,
+            "content": content,
+            "time": datetime.now(timezone.utc).isoformat()
+        })
+
+
+@socketio.on("lab_defense_chat")
+def handle_defense_chat(data):
+    """Only the defending player can send messages"""
+    code = data.get("code", "").upper()
+    content = data.get("content", "").strip()
+    if not content or len(content) > 500:
+        return
+
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "defense":
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not player or player.id != room.defense_player_id:
+        emit("error", {"msg": "فقط بازیکن دفاعی می‌تواند پیام بفرستد"})
+        return
+
+    msg = LabMessage(room_id=room.id, player_id=player.id, content=content, msg_type="defense")
+    db.session.add(msg)
+    db.session.commit()
+
+    save_to_bot_memory(player.role_name, player.team, "defense", content, room.id)
+
+    socketio.emit("lab_new_message", {
+        "id": msg.id,
+        "player": get_player_public_info(player),
+        "content": content,
+        "msg_type": "defense",
+        "time": msg.created_at.isoformat()
+    }, room=f"lab_{code}")
+
+
+# ── Socket Events: Reactions ──────────────────────────────────────────────
+
 @socketio.on("lab_reaction")
 def handle_lab_reaction(data):
     code = data.get("code", "").upper()
     message_id = data.get("message_id")
-    reaction = data.get("reaction")  # "like" or "dislike"
+    reaction = data.get("reaction")
 
     if reaction not in ("like", "dislike"):
         return
@@ -1519,10 +2324,8 @@ def handle_lab_reaction(data):
     uid = sid_to_user.get(request.sid, {}).get("user_id")
     username = sid_to_user.get(request.sid, {}).get("username", "?")
 
-    # Update bot memory effectiveness if the message was from a bot that learned from memory
     msg = LabMessage.query.get(message_id)
     if msg:
-        # Update effectiveness in bot_memories for matching content
         memories = BotMemory.query.filter_by(message=msg.content).all()
         for mem in memories:
             if reaction == "like":
@@ -1538,10 +2341,13 @@ def handle_lab_reaction(data):
     }, room=f"lab_{code}")
 
 
+# ── Socket Events: Voting ──────────────────────────────────────────────────
+
 @socketio.on("lab_vote")
 def handle_lab_vote(data):
+    """Sequential voting: current turn player picks a target"""
     code = data.get("code", "").upper()
-    target_player_id = data.get("target_player_id")
+    target_player_id = data.get("target_player_id")  # None means skip
 
     room = LabRoom.query.filter_by(code=code).first()
     if not room or room.phase != "voting":
@@ -1555,20 +2361,182 @@ def handle_lab_vote(data):
     if not player or not player.is_alive:
         return
 
-    # Store vote in global lab_votes dict
+    # Must be this player's turn
+    if player.slot != room.current_turn:
+        emit("error", {"msg": "الان نوبت شما نیست"})
+        return
+
     room_key = f"{code}_{room.day_number}"
     if room_key not in lab_votes:
         lab_votes[room_key] = {}
 
-    lab_votes[room_key][player.id] = target_player_id
+    if target_player_id:
+        lab_votes[room_key][player.id] = target_player_id
 
-    voted_count = len(lab_votes[room_key])
-    alive_count = len([p for p in room.players if p.is_alive])
-
-    socketio.emit("lab_vote_update", {
-        "voted": voted_count,
-        "total": alive_count
+    target = LabPlayer.query.get(target_player_id) if target_player_id else None
+    socketio.emit("lab_vote_cast", {
+        "voter": get_player_public_info(player),
+        "target": get_player_public_info(target) if target else None,
+        "vote_counts": get_vote_counts(code, room.day_number)
     }, room=f"lab_{code}")
+
+    # Advance immediately (don't wait for timer)
+    advance_sequential_vote(code)
+
+
+@socketio.on("lab_revote")
+def handle_lab_revote(data):
+    """Sequential revote: eliminate or keep"""
+    code = data.get("code", "").upper()
+    decision = data.get("decision")  # "eliminate" or "keep"
+
+    if decision not in ("eliminate", "keep"):
+        return
+
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.phase != "revote":
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not player or not player.is_alive:
+        return
+
+    if player.slot != room.current_turn:
+        emit("error", {"msg": "الان نوبت شما نیست"})
+        return
+
+    room_key = f"{code}_{room.day_number}"
+    if room_key not in lab_revotes:
+        lab_revotes[room_key] = {}
+
+    lab_revotes[room_key][player.id] = decision
+
+    socketio.emit("lab_revote_cast", {
+        "voter": get_player_public_info(player),
+        "decision": decision
+    }, room=f"lab_{code}")
+
+    advance_sequential_revote(code)
+
+
+# ── Socket Events: Night Actions ──────────────────────────────────────────
+
+@socketio.on("lab_night_action")
+def handle_night_action(data):
+    """Handle night role action"""
+    code = data.get("code", "").upper()
+    target_player_id = data.get("target_player_id")
+
+    room = LabRoom.query.filter_by(code=code).first()
+    if not room or room.status != "playing":
+        return
+
+    uid = sid_to_user.get(request.sid, {}).get("user_id")
+    if not uid:
+        return
+
+    player = LabPlayer.query.filter_by(room_id=room.id, user_id=uid).first()
+    if not player or not player.is_alive:
+        return
+
+    current_phase = room.phase
+    room_key = f"{code}_{room.day_number}"
+    if room_key not in lab_night_actions:
+        lab_night_actions[room_key] = {}
+
+    if current_phase == "night_detective":
+        if player.role_name != "کارآگاه":
+            return
+        target = LabPlayer.query.get(target_player_id)
+        if not target:
+            return
+        # Check if شیاد blocked detective this night
+        shayad = find_player_by_role(room, "شیاد")
+        shayad_target = lab_night_actions.get(room_key, {}).get("shayad")
+        if shayad and shayad.is_alive and shayad_target == player.id:
+            # شیاد found detective - all detective results this night are negative
+            result = "شهروند"
+        else:
+            result = "مافیا" if target.team == "mafia" else "شهروند"
+        lab_night_actions[room_key]["detective"] = target.id
+        room.detective_result = result
+        db.session.commit()
+        emit_to_player(player, "lab_detective_result", {
+            "target": get_player_public_info(target),
+            "result": result
+        })
+
+    elif current_phase == "night_shayad":
+        if player.role_name != "شیاد":
+            return
+        target = LabPlayer.query.get(target_player_id)
+        if not target:
+            return
+        lab_night_actions[room_key]["shayad"] = target.id
+        db.session.commit()
+        # Tell shayad if they found detective
+        found_detective = target.role_name == "کارآگاه"
+        emit_to_player(player, "lab_detective_result", {
+            "target": get_player_public_info(target),
+            "result": "کارآگاه پیدا شد! ✓" if found_detective else "کارآگاه نبود"
+        })
+
+    elif current_phase == "night_bazpors":
+        if player.role_name != "بازپرس":
+            return
+        target = LabPlayer.query.get(target_player_id)
+        if not target:
+            return
+        result = "مافیا" if target.team == "mafia" else "شهروند"
+        lab_night_actions[room_key]["bazpors"] = target.id
+        db.session.commit()
+        emit_to_player(player, "lab_detective_result", {
+            "target": get_player_public_info(target),
+            "result": result
+        })
+
+    elif current_phase == "night_doctor":
+        if player.role_name != "دکتر":
+            return
+        target = LabPlayer.query.get(target_player_id)
+        if not target:
+            return
+        # Check self-save
+        if target.id == player.id and room.doctor_self_save_used:
+            emit("error", {"msg": "قبلاً خودتان را نجات داده‌اید"})
+            return
+        lab_night_actions[room_key]["doctor"] = target.id
+        room.doctor_save_target = target.id
+        if target.id == player.id:
+            room.doctor_self_save_used = True
+        db.session.commit()
+
+    elif current_phase == "night_hunter":
+        if player.role_name != "هانتر":
+            return
+        target = LabPlayer.query.get(target_player_id)
+        if not target:
+            return
+        lab_night_actions[room_key]["hunter"] = target.id
+        room.hunter_block_target = target.id
+        db.session.commit()
+
+    elif current_phase == "night_mafia":
+        if player.team != "mafia":
+            return
+        # Only boss can choose kill target
+        if player.role_name != "رئیس مافیا":
+            return
+        target = LabPlayer.query.get(target_player_id)
+        if not target:
+            return
+        lab_night_actions[room_key]["mafia"] = target.id
+        room.night_kill_target = target.id
+        db.session.commit()
 
 
 # ── Game Phase Logic ─────────────────────────────────────────────────────────
@@ -1795,6 +2763,13 @@ for attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_plain_pw VARCHAR(100)"))
+                # Lab room new columns
+                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS defense_player_id INTEGER"))
+                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS night_kill_target INTEGER"))
+                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS doctor_save_target INTEGER"))
+                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS hunter_block_target INTEGER"))
+                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS detective_result VARCHAR(50)"))
+                db.session.execute(db.text("ALTER TABLE lab_rooms ADD COLUMN IF NOT EXISTS doctor_self_save_used BOOLEAN DEFAULT FALSE"))
                 db.session.commit()
                 print("DB columns updated")
             except Exception as col_err:
