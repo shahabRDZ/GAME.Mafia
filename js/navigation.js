@@ -10,7 +10,7 @@ function showScreen(name) {
         (name === "game" && b.textContent.includes("جاری")) ||
         (name === "history" && b.textContent.includes("تاریخچه")) ||
         (name === "chaos" && (b.textContent.includes("CHAOS") || b.textContent.includes("کی‌اس"))) ||
-        (name === "lab" && b.textContent.includes("آزمایشی")) ||
+        (name === "lab" && b.textContent.includes("جدید")) ||
         (name === "profile" && b.textContent.includes("پروفایل"))) {
       b.classList.add("active");
     }
