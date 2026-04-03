@@ -2618,6 +2618,9 @@ def generate_bot_message(code, bot_player):
                     "time": msg.created_at.isoformat()
                 }, room=f"lab_{code}")
 
+                # Other bots randomly react
+                bots_react_to_message(code, room, msg.id, bp.id)
+
         # Bot done talking — advance turn after a short pause
         _time_module.sleep(random.uniform(1, 2))
         with app.app_context():
@@ -2975,12 +2978,12 @@ def handle_lab_chat(data):
         emit("error", {"msg": "الان نوبت شما نیست"})
         return
 
-    # Block role reveals
-    ROLE_NAMES_ALL = ["رئیس مافیا", "ناتو", "شیاد", "مافیا ساده", "بازپرس", "کارآگاه", "هانتر", "دکتر", "رویین‌تن", "تک‌تیرانداز", "شهروند ساده"]
-    content_check = content.lower().strip()
+    # Block ALL role name mentions in chat
+    ROLE_NAMES_ALL = ["رئیس مافیا", "ناتو", "شیاد", "مافیا ساده", "بازپرس", "کارآگاه", "هانتر", "دکتر", "رویین‌تن", "تک‌تیرانداز", "شهروند ساده", "مافیا", "رئیس"]
+    content_check = content.strip()
     for rn in ROLE_NAMES_ALL:
-        if f"من {rn}" in content_check or f"نقشم {rn}" in content_check or f"نقش من {rn}" in content_check:
-            emit("error", {"msg": "⛔ اعلام نقش ممنوع است!"})
+        if rn in content_check:
+            emit("error", {"msg": "⛔ ذکر نام نقش در چت ممنوع است!"})
             return
 
     msg = LabMessage(room_id=room.id, player_id=player.id, content=content)
@@ -2997,6 +3000,50 @@ def handle_lab_chat(data):
         "msg_type": "chat",
         "time": msg.created_at.isoformat()
     }, room=f"lab_{code}")
+
+    # Bots react when their name is mentioned
+    bot_react_to_mention(code, room, msg.id, content)
+
+
+def bots_react_to_message(code, room, message_id, sender_id):
+    """Random bots react to messages with like/dislike"""
+    def react():
+        for p in room.players:
+            if not p.is_bot or not p.is_alive or p.id == sender_id:
+                continue
+            if random.random() < 0.4:  # 40% chance each bot reacts
+                _time_module.sleep(random.uniform(0.5, 2))
+                sender = LabPlayer.query.get(sender_id)
+                # Same team = like, different team = mixed
+                if sender and p.team == sender.team:
+                    reaction = "like"
+                else:
+                    reaction = random.choice(["like", "dislike", "dislike"])
+                socketio.emit("lab_reaction", {
+                    "message_id": message_id,
+                    "reaction": reaction,
+                    "from_user": p.bot_name
+                }, room=f"lab_{code}")
+    threading.Thread(target=react, daemon=True).start()
+
+
+def bot_react_to_mention(code, room, message_id, content):
+    """Bots react with like/dislike when their name is mentioned"""
+    def react():
+        _time_module.sleep(random.uniform(1, 3))
+        with app.app_context():
+            for p in room.players:
+                if not p.is_bot or not p.is_alive:
+                    continue
+                name = p.bot_name or ""
+                if name and name in content:
+                    reaction = random.choice(["like", "like", "dislike"])  # Slightly prefer like
+                    socketio.emit("lab_reaction", {
+                        "message_id": message_id,
+                        "reaction": reaction,
+                        "from_user": name
+                    }, room=f"lab_{code}")
+    threading.Thread(target=react, daemon=True).start()
 
 
 @socketio.on("lab_mafia_chat")
