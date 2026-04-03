@@ -1238,7 +1238,7 @@ def schedule_phase_timer(code, phase, day_number, seconds):
 def schedule_vote_advance(code, current_slot, day_number):
     """Advance sequential voting after 3 seconds"""
     def advance():
-        _time_module.sleep(4)
+        _time_module.sleep(6)
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.status != "playing":
@@ -1254,7 +1254,7 @@ def schedule_vote_advance(code, current_slot, day_number):
 def schedule_revote_advance(code, current_slot, day_number):
     """Advance sequential revote after 3 seconds"""
     def advance():
-        _time_module.sleep(4)
+        _time_module.sleep(6)
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.status != "playing":
@@ -1440,7 +1440,7 @@ def generate_bot_mafia_chat(code, bot_player):
 # ── Sequential Voting ──────────────────────────────────────────────────────
 
 def start_sequential_voting(code):
-    """Voting: for each alive player, everyone votes yes/no in 3 seconds"""
+    """Voting: for each alive player, everyone votes yes/no in 5 seconds"""
     room = LabRoom.query.filter_by(code=code).first()
     if not room:
         return
@@ -1451,7 +1451,7 @@ def start_sequential_voting(code):
 
     room.phase = "voting"
     room.current_turn = alive[0].slot  # candidate being voted on
-    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=5)
     db.session.commit()
 
     room_key = f"{code}_{room.day_number}"
@@ -1499,7 +1499,7 @@ def advance_sequential_vote(code):
         resolve_voting(code)
     else:
         room.current_turn = next_slot
-        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=5)
         db.session.commit()
 
         candidate = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
@@ -1701,7 +1701,7 @@ def start_revote(code):
 
     room.phase = "revote"
     room.current_turn = alive[0].slot
-    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=5)
     db.session.commit()
 
     room_key = f"{code}_{room.day_number}"
@@ -1745,7 +1745,7 @@ def advance_sequential_revote(code):
         resolve_revote(code)
     else:
         room.current_turn = next_slot
-        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=5)
         db.session.commit()
 
         player = LabPlayer.query.filter_by(room_id=room.id, slot=next_slot).first()
@@ -2272,7 +2272,7 @@ def start_bazpors_vote(code):
     room.phase = "bazpors_vote"
     alive = get_alive_sorted(room)
     room.current_turn = alive[0].slot if alive else 0
-    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+    room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=5)
     db.session.commit()
 
     t1 = LabPlayer.query.get(room.bazpors_target1)
@@ -2302,7 +2302,7 @@ def start_bazpors_vote(code):
 def schedule_bazpors_vote_advance(code, current_slot, day_number):
     """Auto-advance bazpors vote after 3s"""
     def advance():
-        _time_module.sleep(4)
+        _time_module.sleep(6)
         with app.app_context():
             room = LabRoom.query.filter_by(code=code).first()
             if not room or room.phase != "bazpors_vote" or room.day_number != day_number:
@@ -2334,7 +2334,7 @@ def advance_bazpors_vote(code):
         resolve_bazpors_vote(code)
     else:
         room.current_turn = next_slot
-        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=3)
+        room.turn_end_at = datetime.now(timezone.utc) + timedelta(seconds=5)
         db.session.commit()
 
         player = next((p for p in alive if p.slot == next_slot), None)
