@@ -546,7 +546,7 @@ function getTimerTotal() {
   const phase = labState.phase;
   if (phase === "day_talk") return 40000;
   if (phase === "mafia_chat") return 15000;
-  if (phase === "voting" || phase === "revote" || phase === "bazpors_vote") return 3000;
+  if (phase === "voting" || phase === "revote" || phase === "bazpors_vote") return 5000;
   if (phase === "defense" || phase === "bazpors_defense1" || phase === "bazpors_defense2") return 30000;
   if (phase === "night_detective" || phase === "night_doctor" || phase === "night_hunter" || phase === "night_mafia" || phase === "night_shayad" || phase === "night_bazpors") return 10000;
   return 30000;
@@ -770,32 +770,37 @@ function renderSequentialVoting(data) {
     (candidate ? (candidate.is_bot ? candidate.bot_name : (candidate.username || candidate.name)) : "?");
   const isMe = candidate && !candidate.is_bot && candidate.user_id === currentUser?.id;
 
-  // System message announcing the candidate
-  const msg = data.message || ("🗳️ رأی برای شماره " + toFarsiNum(candidateSlot) + " (" + escapeHtml(candidateName) + ") — موافقید حذف شود؟");
+  // System message announcing the candidate (don't double-escape)
+  const displayMsg = "🗳️ رأی برای شماره " + toFarsiNum(candidateSlot) + " (" + escapeHtml(candidateName) + ") — موافقید حذف شود؟";
 
-  let html = '<div class="lab-msg lab-msg-system">' + escapeHtml(msg) + '</div>';
+  // Remove previous vote buttons
+  document.querySelectorAll('.lab-vote-active').forEach(el => el.remove());
 
-  // Vote button (everyone except the candidate)
+  let html = '<div class="lab-msg lab-msg-system">' + displayMsg + '</div>';
+
+  // Vote button (everyone except the candidate) — 3 seconds
   if (!isMe) {
-    html += '<div class="lab-revote-btns" id="labVoteBtns_' + candidateSlot + '">' +
-      '<button class="lab-revote-btn lab-revote-eliminate" onclick="castVoteYes(' + candidateSlot + ')">✋ موافقم</button>' +
-      '<button class="lab-revote-btn lab-revote-keep" onclick="castVoteSkip(' + candidateSlot + ')">— مخالفم</button>' +
+    html += '<div class="lab-revote-btns lab-vote-active" id="labVoteBtns_' + candidateSlot + '">' +
+      '<button class="lab-revote-btn lab-revote-eliminate" onclick="castVoteYes(' + candidateSlot + ')">✋ موافقم — حذف بشه</button>' +
+      '<button class="lab-revote-btn lab-revote-keep" onclick="castVoteSkip(' + candidateSlot + ')">✕ مخالفم</button>' +
     '</div>';
   } else {
-    html += '<div class="lab-msg lab-msg-system" style="font-size:.75rem">شما نمی‌توانید به خودتان رأی بدهید</div>';
+    html += '<div class="lab-msg lab-msg-system" style="font-size:.75rem;opacity:.6">⏭️ خودتان هستید — نمی‌توانید رأی بدهید</div>';
   }
 
   // Vote count display
-  html += '<div class="lab-vote-count-display" id="labVoteCount_' + candidateSlot + '" style="text-align:center;color:var(--accent);font-weight:700;font-size:.9rem;margin:4px 0">' +
+  html += '<div class="lab-vote-count-display" id="labVoteCount_' + candidateSlot + '" style="text-align:center;color:var(--accent);font-weight:700;font-size:.9rem;margin:6px 0">' +
     toFarsiNum(labState.voteResults[candidateSlot] || 0) + ' رأی</div>';
 
   container.insertAdjacentHTML("beforeend", html);
-  container.scrollTop = container.scrollHeight;
+  container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 }
 
 function castVoteYes(candidateSlot) {
-  if (!labState.roomCode || !socket) return;
-  socket.emit("lab_vote", { code: labState.roomCode, vote: "yes" });
+  if (!labState.roomCode) return;
+  if (socket && socket.connected) {
+    socket.emit("lab_vote", { code: labState.roomCode, vote: "yes" });
+  }
 
   const btns = document.getElementById("labVoteBtns_" + candidateSlot);
   if (btns) {
@@ -1111,7 +1116,7 @@ function handleLabPhaseChange(data) {
 
     case "voting":
       labState.currentTurn = data.current_turn || 0;
-      labState.voteResults = data.vote_results || {};
+      if (data.vote_counts) labState.voteResults = data.vote_counts;
       renderSequentialVoting(data);
       break;
 
