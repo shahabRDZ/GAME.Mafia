@@ -36,9 +36,23 @@ function getSelectedLabScenario() {
   return active ? active.dataset.scenario : 'بازپرس';
 }
 
+function waitForSocket() {
+  return new Promise((resolve) => {
+    if (socket && socket.connected) { resolve(); return; }
+    initSocket();
+    if (socket && socket.connected) { resolve(); return; }
+    // Wait for connect event
+    const check = setInterval(() => {
+      if (socket && socket.connected) { clearInterval(check); resolve(); }
+    }, 100);
+    // Timeout after 5s
+    setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+  });
+}
+
 async function createLabRoom(scenario) {
   if (!authToken) { openAuthModal("login"); return; }
-  initSocket();
+  await waitForSocket();
   const res = await apiFetch("/api/lab/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -53,11 +67,11 @@ async function createLabRoom(scenario) {
   showLabLobby();
 }
 
-function joinLabRoom() {
+async function joinLabRoom() {
   const code = document.getElementById("labJoinCode")?.value?.trim().toUpperCase();
   if (!code || code.length < 4) { showToast("کد اتاق را وارد کنید", "error"); return; }
   if (!authToken) { openAuthModal("login"); return; }
-  initSocket();
+  await waitForSocket();
   labState.roomCode = code;
   labState.isHost = false;
   socket.emit("join_lab", { code });

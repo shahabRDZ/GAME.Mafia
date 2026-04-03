@@ -16,8 +16,8 @@ function initSocket() {
   socket.on("connect", () => { setupVoiceSocketEvents(); });
   socket.on("disconnect", () => { console.log("WS disconnected"); });
   socket.on("reconnect", () => {
-    // Rejoin room if was in one
     if (chaosState.roomCode) socket.emit("join_chaos", { code: chaosState.roomCode });
+    if (typeof labState !== 'undefined' && labState.roomCode) socket.emit("join_lab", { code: labState.roomCode });
   });
   socket.on("error", (data) => { showToast("⚠️ " + (data?.msg || "خطا")); });
 
