@@ -144,6 +144,53 @@ const SCENARIO_INFO = {
       ]
     }
   }
+  "مذاکره": {
+    icon: "🤝",
+    color: "#a855f7",
+    fa: {
+      title: "سناریو مذاکره", subtitle: "جذب شهروند · تغییر تیم",
+      intro: "سناریوی مذاکره بر پایه قدرت جذب مافیا طراحی شده. مذاکره‌کننده می‌تواند شهروندان ساده یا زره‌پوش را به تیم مافیا بکشاند. در شب مذاکره، مافیا حق شلیک ندارد.",
+      flow: ["روز معارفه","شب اول (بدون شلیک)","روز اول (بحث + رأی‌گیری)","شب‌های اصلی (شلیک یا مذاکره)","روزها (اعلام نتایج + رأی‌گیری)"],
+      rules: ["مذاکره فقط پس از حذف یک مافیا فعال می‌شود","در شب مذاکره، مافیا شلیک ندارد","مذاکره با شهروند ساده یا زره‌پوش موفق است","مذاکره با نقش‌دارها (دکتر، کارآگاه و...) شکست می‌خورد","استعلام پدرخوانده برای کارآگاه منفی است","اسنایپر ۲ تیر دارد · شلیک به شهروند = حذف خودش"],
+      quorum: [{range:"۱۳–۱۱ نفر",votes:"۶ رأی"},{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵ نفر به پایین",votes:"۲ رأی"}],
+      proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
+      flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند"
+    },
+    en: {
+      title: "Negotiation Scenario", subtitle: "Recruit Citizens · Team Switch",
+      intro: "The Negotiation scenario is based on mafia's power to recruit. The Negotiator can turn simple citizens or the Armored into mafia. On negotiation nights, mafia cannot shoot.",
+      flow: ["Introduction Day","Night 1 (no shot)","Day 1 (discussion + voting)","Main Nights (shoot or negotiate)","Days (announce results + voting)"],
+      rules: ["Negotiation activates only after one mafia is eliminated","No mafia shot on negotiation night","Negotiation succeeds on simple citizens or Armored","Negotiation fails on special roles (Doctor, Detective, etc.)","Godfather's inquiry always shows negative","Sniper has 2 bullets · shooting a citizen eliminates self"],
+      quorum: [{range:"13–11 players",votes:"6 votes"},{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5 or less",votes:"2 votes"}],
+      proceed: "Continue — Select Player Count ➜",
+      flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles"
+    },
+    tr: {
+      title: "Müzakere Senaryosu", subtitle: "Vatandaş Kazanma · Takım Değişimi",
+      intro: "Müzakere senaryosu mafyanın kazanma gücüne dayanır. Müzakereci basit vatandaşları veya Zırhlıyı mafyaya çevirebilir. Müzakere gecelerinde mafya ateş edemez.",
+      flow: ["Tanışma Günü","1. Gece (ateş yok)","1. Gün (tartışma + oylama)","Ana Geceler (ateş veya müzakere)","Günler (sonuçlar + oylama)"],
+      rules: ["Müzakere yalnızca bir mafya elendikten sonra aktif olur","Müzakere gecesi mafya ateş edemez","Basit vatandaş veya Zırhlı ile müzakere başarılı","Özel rollerle müzakere başarısız","Baba'nın sorgusu her zaman negatif","Keskin nişancının 2 mermisi var · vatandaşa ateş = kendini ele"],
+      quorum: [{range:"13–11 oyuncu",votes:"6 oy"},{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5 ve altı",votes:"2 oy"}],
+      proceed: "Devam — Oyuncu Sayısı Seç ➜",
+      flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri"
+    },
+    roles: {
+      mafia: [
+        {name:"پدرخوانده", fa:"رهبر مافیا · تصمیم شلیک · استعلام منفی", en:"Mafia leader · Shot decision · Negative inquiry", tr:"Mafya lideri · Ateş kararı · Negatif sorgulama", icon:"👑"},
+        {name:"مذاکره‌کننده", fa:"جذب شهروند به مافیا · شب مذاکره بدون شلیک", en:"Recruit citizen to mafia · No shot on negotiation night", tr:"Vatandaşı mafyaya kazan · Müzakere gecesi ateş yok", icon:"🤝"},
+        {name:"مافیا ساده", fa:"هماهنگی در شب · جهت‌دهی آرا در روز", en:"Night coordination · Guide votes during day", tr:"Gece koordinasyonu · Gündüz oyları yönlendir", icon:"😈"}
+      ],
+      citizen: [
+        {name:"کارآگاه", fa:"استعلام شبانه · پدرخوانده منفی نشان داده می‌شود", en:"Night inquiry · Godfather shows negative", tr:"Gece sorgulama · Baba negatif görünür", icon:"🕵️"},
+        {name:"دکتر", fa:"نجات یک نفر در شب از شلیک مافیا", en:"Save one player at night from mafia shot", tr:"Gece bir oyuncuyu mafya ateşinden kurtar", icon:"⚕️"},
+        {name:"تک‌تیرانداز", fa:"۲ تیر · شلیک به شهروند = حذف خودش", en:"2 bullets · Shooting citizen = self elimination", tr:"2 mermi · Vatandaşa ateş = kendini ele", icon:"🎯"},
+        {name:"خبرنگار", fa:"بعد از شب مذاکره نتیجه را می‌فهمد", en:"Learns negotiation result after negotiation night", tr:"Müzakere gecesinden sonra sonucu öğrenir", icon:"📰"},
+        {name:"زره‌پوش", fa:"شلیک شب اثر ندارد · رأی روز = زره می‌افتد", en:"Immune to night shot · Day vote = loses armor", tr:"Gece ateşine bağışık · Gündüz oyu = zırhı düşer", icon:"🛡️"},
+        {name:"روانشناس", fa:"سایلنت کردن یک نفر در روز", en:"Silence one player during day", tr:"Gündüz bir oyuncuyu sustur", icon:"🧠"},
+        {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
+      ]
+    }
+  }
 };
 
 function openScenarioOverlay(group) {
