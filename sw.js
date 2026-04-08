@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const STATIC_CACHE = `shushang-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `shushang-dynamic-${CACHE_VERSION}`;
 
@@ -27,6 +27,7 @@ const STATIC_ASSETS = [
   '/js/voice.js',
   '/js/socket.js',
   '/js/chaos.js',
+  '/js/lab.js',
   '/js/profile.js',
   '/js/admin.js',
   '/js/creatures.js',
@@ -60,19 +61,24 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static assets
+// Fetch: stale-while-revalidate for static, network-first for API
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
   const url = new URL(e.request.url);
+
+  // Skip external requests (CDN, etc.)
+  if (url.origin !== self.location.origin) return;
 
   // Network-first for API calls
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(
       fetch(e.request)
         .then(res => {
-          const clone = res.clone();
-          caches.open(DYNAMIC_CACHE).then(c => c.put(e.request, clone));
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(DYNAMIC_CACHE).then(c => c.put(e.request, clone));
+          }
           return res;
         })
         .catch(() => caches.match(e.request))
@@ -80,20 +86,22 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cache-first for static assets (CSS, JS, images)
+  // Stale-while-revalidate for static assets (faster loads + always fresh)
   if (
     url.pathname.startsWith('/css/') ||
     url.pathname.startsWith('/js/') ||
-    url.pathname.match(/\.(png|svg|ico|woff2?)$/)
+    url.pathname.match(/\.(png|svg|ico|woff2?|webp)$/)
   ) {
     e.respondWith(
       caches.match(e.request).then(cached => {
-        if (cached) return cached;
-        return fetch(e.request).then(res => {
-          const clone = res.clone();
-          caches.open(STATIC_CACHE).then(c => c.put(e.request, clone));
+        const fetchPromise = fetch(e.request).then(res => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(STATIC_CACHE).then(c => c.put(e.request, clone));
+          }
           return res;
-        });
+        }).catch(() => cached);
+        return cached || fetchPromise;
       })
     );
     return;
@@ -103,8 +111,10 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        const clone = res.clone();
-        caches.open(DYNAMIC_CACHE).then(c => c.put(e.request, clone));
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(DYNAMIC_CACHE).then(c => c.put(e.request, clone));
+        }
         return res;
       })
       .catch(() =>
