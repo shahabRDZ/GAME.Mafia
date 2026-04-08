@@ -655,9 +655,20 @@ function toggleNearbyPlayer(uid, el) {
 function updateNearbyAssignBtn() {
   const btn = document.getElementById("nearbyAssignBtn");
   const roles = window._nearbyRoles || [];
-  if (nearbySelectedIds.size > 0 && nearbySelectedIds.size <= roles.length) {
+  const requiredPlayers = roles.length - 1; // minus host
+  const selected = nearbySelectedIds.size;
+
+  if (selected > 0) {
     btn.style.display = "block";
-    btn.textContent = `🎲 پخش نقش به ${toFarsiNum(nearbySelectedIds.size)} نفر`;
+    if (selected < requiredPlayers) {
+      btn.textContent = `⏳ ${toFarsiNum(selected)} از ${toFarsiNum(requiredPlayers)} نفر — ${toFarsiNum(requiredPlayers - selected)} نفر مونده`;
+      btn.disabled = true;
+      btn.style.opacity = "0.5";
+    } else {
+      btn.textContent = `🎲 پخش رندوم نقش به ${toFarsiNum(requiredPlayers)} نفر`;
+      btn.disabled = false;
+      btn.style.opacity = "1";
+    }
   } else {
     btn.style.display = "none";
   }
@@ -666,22 +677,26 @@ function updateNearbyAssignBtn() {
 async function assignNearbyRoles() {
   const roles = window._nearbyRoles || [];
   const playerIds = [...nearbySelectedIds];
-  if (playerIds.length > roles.length) {
-    showToast(`⚠️ ${toFarsiNum(roles.length)} نقش برای ${toFarsiNum(playerIds.length)} نفر کافی نیست`);
+  const requiredPlayers = roles.length - 1; // minus host
+
+  if (playerIds.length < requiredPlayers) {
+    showToast(`⚠️ ${toFarsiNum(requiredPlayers)} بازیکن لازمه — ${toFarsiNum(playerIds.length)} نفر انتخاب شده`);
     return;
   }
-  // Take only needed roles
-  const selectedRoles = roles.slice(0, playerIds.length);
+
+  // Take exactly requiredPlayers
+  const finalIds = playerIds.slice(0, requiredPlayers);
+  const selectedRoles = roles.slice(0, requiredPlayers);
 
   const r = await apiFetch("/api/nearby/assign", {
     method: "POST",
-    body: JSON.stringify({ player_ids: playerIds, roles: selectedRoles })
+    body: JSON.stringify({ player_ids: finalIds, roles: selectedRoles })
   });
 
   if (!r.ok) { showToast("⚠️ " + (r.data?.error || "خطا")); return; }
 
   haptic('heavy');
-  showToast(`🎉 نقش‌ها به ${toFarsiNum(playerIds.length)} نفر ارسال شد!`);
+  showToast(`🎉 نقش‌ها به ${toFarsiNum(finalIds.length)} نفر ارسال شد!`);
   document.getElementById("nearbyStatus").textContent = "✅ نقش‌ها ارسال شد — بازیکنان نوتیفیکیشن دریافت می‌کنن";
   document.getElementById("nearbyAssignBtn").style.display = "none";
 }
@@ -704,9 +719,9 @@ async function shareMyLocation() {
       });
       showToast("📍 لوکیشن ثبت شد — منتظر نقش باشید");
 
-      // Start polling for role
+      // Start polling for role — every 2 seconds
       if (nearbyRoleCheckInterval) clearInterval(nearbyRoleCheckInterval);
-      nearbyRoleCheckInterval = setInterval(checkMyNearbyRole, 3000);
+      nearbyRoleCheckInterval = setInterval(checkMyNearbyRole, 2000);
     },
     () => showToast("❌ دسترسی لوکیشن رد شد"),
     { enableHighAccuracy: true }
@@ -721,18 +736,25 @@ async function checkMyNearbyRole() {
   nearbyRoleCheckInterval = null;
 
   const role = r.data.role;
-  haptic('heavy');
-  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
 
-  // Send notification
+  // Strong vibration pattern
+  haptic('heavy');
+  if (navigator.vibrate) navigator.vibrate([100, 50, 200, 50, 100]);
+
+  // Play alarm sound
+  if (typeof playAlarm === 'function') playAlarm();
+
+  // Push notification
   if (typeof sendLocalNotification === 'function') {
-    sendLocalNotification('🎭 نقش شما آماده شد!', `${role.name} — لمس کنید`);
+    sendLocalNotification('🎭 نقش شما آماده شد!', `${role.name} — الان ببینید!`);
   }
 
-  // Show role
+  // Show role immediately — full screen
   const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
   const teamNames = { mafia: "😈 مافیا", citizen: "😇 شهروند", independent: "🐺 مستقل" };
-  document.getElementById("nearbyRoleEmoji").textContent = ROLE_ICONS[role.name] || "🎭";
+  const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
+
+  document.getElementById("nearbyRoleEmoji").textContent = ROLE_ICONS[role.name] || teamEmojis[role.team] || "🎭";
   document.getElementById("nearbyRoleName").textContent = role.name;
   document.getElementById("nearbyRoleName").style.color = teamColors[role.team] || "#fff";
   document.getElementById("nearbyRoleTeam").textContent = teamNames[role.team] || role.team;
@@ -740,7 +762,19 @@ async function checkMyNearbyRole() {
   const abilityInfo = ROLE_ABILITIES[role.name];
   document.getElementById("nearbyRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
   document.getElementById("nearbyRoleNum").textContent = `بازیکن شماره ${toFarsiNum(r.data.playerNum)}`;
+
+  // Show overlay immediately on top of everything
   document.getElementById("nearbyRoleOverlay").classList.add("show");
+
+  // Bring app to front if in background (best effort)
+  if (document.hidden) {
+    document.addEventListener('visibilitychange', function once() {
+      document.removeEventListener('visibilitychange', once);
+      document.getElementById("nearbyRoleOverlay").classList.add("show");
+    });
+  }
+
+  showToast("🎭 نقش شما آماده شد!");
 }
 
 function generateHostQr(code) {
