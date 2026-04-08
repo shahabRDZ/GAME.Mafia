@@ -194,7 +194,7 @@ function showCurrentCard() {
   document.getElementById("fsProgNums").textContent = `${toFarsiNum(total - done)} باقی‌مانده`;
   document.getElementById("fsProgressFill").style.width = `${(done / total) * 100}%`;
   const slot = document.getElementById("cardSlot");
-  slot.innerHTML = `<div class="big-card-wrapper card-entering">${buildCard(card, false)}</div>`;
+  slot.innerHTML = `<div class="big-card-wrapper" style="animation: cardSlideUp 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards">${buildCard(card, false)}</div>`;
   const cardEl = slot.querySelector(".card");
   cardEl.addEventListener("click", e => flipCurrentCard(e, card));
   initSwipeGesture(slot.querySelector(".big-card-wrapper"), card);
@@ -285,10 +285,10 @@ function flipCurrentCard(e, card) {
     if (front) {
       const hint = document.createElement("div");
       hint.className = "tap-hint-next";
-      hint.textContent = "بکشید یا لمس کنید — نفر بعدی";
+      hint.innerHTML = '<span class="swipe-arrow">👈</span> بکشید یا لمس کنید';
       front.appendChild(hint);
     }
-  }, 950);
+  }, 700);
 }
 
 // ── Screen-wide lightning flash ──
@@ -390,13 +390,24 @@ function buildCard(card, flipped = false) {
   const flippedClass = flipped ? "flipped" : "";
   const charSVG = getCharSVG(card.roleName, card.role, card.charVariant || 0);
   const displayName = translateRole(card.roleName);
-  const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : card.role === "independent" ? '<div class="citizen-sparks"></div>' : '<div class="citizen-sparks"></div>';
+  const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : '<div class="citizen-sparks"></div>';
   const delay = (card.charVariant || 0) * 0.4;
+  // Generate floating particles for card back
+  let particles = '<div class="card-particles">';
+  for (let i = 0; i < 12; i++) {
+    const x = 10 + Math.random() * 80;
+    const y = Math.random() * 30;
+    const dur = 3 + Math.random() * 4;
+    const del = Math.random() * 3;
+    particles += `<div class="card-particle" style="--x:${x}%;--y:${y}%;--dur:${dur}s;--delay:${del}s"></div>`;
+  }
+  particles += '</div>';
   return `
     <div class="card ${flippedClass}" data-num="${card.number}">
       <div class="card-face card-back">
+        ${particles}
         <div class="card-number">${toFarsiNum(card.number)}</div>
-        <div class="tap-hint">لمس کنید</div>
+        <div class="tap-hint"><span class="tap-hint-arrow">👆</span> لمس کنید</div>
       </div>
       <div class="card-face card-front ${card.role}">
         ${sparks}
