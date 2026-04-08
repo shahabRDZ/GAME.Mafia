@@ -684,9 +684,26 @@ def save_game():
 @jwt_required()
 def clear_games():
     user = db.session.get(User, int(get_jwt_identity()))
-    Game.query.filter_by(user_id=user.id).delete()
+    keep_last = 10
+    try:
+        data = request.get_json(silent=True)
+        if data and "keep_last" in data:
+            keep_last = int(data["keep_last"])
+    except:
+        pass
+    if keep_last > 0:
+        # Keep the last N games, delete the rest
+        recent = Game.query.filter_by(user_id=user.id).order_by(Game.played_at.desc()).limit(keep_last).all()
+        recent_ids = [g.id for g in recent]
+        if recent_ids:
+            Game.query.filter(Game.user_id == user.id, Game.id.notin_(recent_ids)).delete(synchronize_session=False)
+        else:
+            Game.query.filter_by(user_id=user.id).delete()
+    else:
+        Game.query.filter_by(user_id=user.id).delete()
     db.session.commit()
-    return jsonify({"message": "تاریخچه پاک شد"}), 200
+    remaining = Game.query.filter_by(user_id=user.id).count()
+    return jsonify({"message": "تاریخچه پاک شد", "remaining": remaining}), 200
 
 
 # ══════════════════════════════════════════════════════════════════════════════
