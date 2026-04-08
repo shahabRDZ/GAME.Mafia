@@ -303,46 +303,60 @@ let ambientLightningEl = null;
 
 function startAmbientLightning() {
   stopAmbientLightning();
-  // Create persistent ambient container
+  // Append to gameScreen so it's visible in fullscreen mode
+  const parent = document.getElementById("gameScreen") || document.body;
   ambientLightningEl = document.createElement("div");
   ambientLightningEl.id = "ambientLightning";
   ambientLightningEl.style.cssText = `
-    position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    position: fixed; inset: 0; z-index: 999; pointer-events: none;
   `;
-  document.body.appendChild(ambientLightningEl);
+  parent.appendChild(ambientLightningEl);
 
   function strike() {
     if (!ambientLightningEl) return;
     // Random position for each bolt
-    const x = 10 + Math.random() * 80;
-    const y = 10 + Math.random() * 80;
-    const angle = -20 + Math.random() * 40;
+    const x = 5 + Math.random() * 90;
+    const y = 5 + Math.random() * 90;
+    const angle = -30 + Math.random() * 60;
+    const brightness = 0.4 + Math.random() * 0.4;
+
+    // Main bolt
     const bolt = document.createElement("div");
     bolt.style.cssText = `
       position: absolute; inset: 0; pointer-events: none;
       background:
-        linear-gradient(${170 + angle}deg, transparent ${y - 2}%, rgba(140,160,255,.5) ${y}%, transparent ${y + 1.5}%),
-        linear-gradient(${185 + angle}deg, transparent ${y + 5}%, rgba(180,200,255,.3) ${y + 5.5}%, transparent ${y + 7}%);
+        linear-gradient(${160 + angle}deg, transparent ${y - 3}%, rgba(160,180,255,${brightness}) ${y}%, transparent ${y + 2}%),
+        linear-gradient(${190 + angle}deg, transparent ${y + 4}%, rgba(200,220,255,${brightness * 0.7}) ${y + 4.5}%, transparent ${y + 6}%),
+        linear-gradient(${175 + angle}deg, transparent ${y - 8}%, rgba(120,140,255,${brightness * 0.4}) ${y - 7}%, transparent ${y - 5.5}%);
       animation: lightningFlash 0.5s ease-out forwards;
     `;
+    // Glow around bolt
     const glow = document.createElement("div");
     glow.style.cssText = `
       position: absolute; pointer-events: none;
-      width: 200px; height: 200px;
+      width: 300px; height: 300px;
       left: ${x}%; top: ${y}%;
       transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(140,170,255,.15) 0%, transparent 70%);
-      animation: lightningGlow 0.5s ease-out forwards;
+      background: radial-gradient(circle, rgba(140,170,255,.25) 0%, rgba(100,130,255,.08) 40%, transparent 70%);
+      animation: lightningGlow 0.6s ease-out forwards;
+    `;
+    // Screen flash
+    const screenFlash = document.createElement("div");
+    screenFlash.style.cssText = `
+      position: absolute; inset: 0; pointer-events: none;
+      background: rgba(180,200,255,${brightness * 0.08});
+      animation: lightningGlow 0.3s ease-out forwards;
     `;
     ambientLightningEl.appendChild(bolt);
     ambientLightningEl.appendChild(glow);
-    setTimeout(() => { bolt.remove(); glow.remove(); }, 600);
+    ambientLightningEl.appendChild(screenFlash);
+    setTimeout(() => { bolt.remove(); glow.remove(); screenFlash.remove(); }, 700);
 
-    // Schedule next strike randomly (800ms - 2500ms)
-    ambientLightningTimer = setTimeout(strike, 800 + Math.random() * 1700);
+    // Schedule next strike randomly (500ms - 1800ms)
+    ambientLightningTimer = setTimeout(strike, 500 + Math.random() * 1300);
   }
-  // First strike after short delay
-  ambientLightningTimer = setTimeout(strike, 400);
+  // First strike immediately
+  ambientLightningTimer = setTimeout(strike, 200);
 }
 
 function stopAmbientLightning() {
