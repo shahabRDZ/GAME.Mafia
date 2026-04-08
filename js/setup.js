@@ -200,12 +200,11 @@ function selectCount(count) {
   document.querySelectorAll(".count-btn").forEach(b => b.classList.remove("selected"));
   document.querySelector(`[data-count="${count}"]`).classList.add("selected");
   updateStepIndicator(3);
-  const sb = document.getElementById("startBtn");
-  sb.style.display = "block";
-  sb.classList.remove("start-btn-pop");
-  void sb.offsetWidth;
-  sb.classList.add("start-btn-pop");
-  sb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const row = document.getElementById("startBtnRow");
+  if (row) {
+    row.style.display = "flex";
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
 function setTeam(team) {
@@ -271,14 +270,9 @@ function updateStartBtn() {
   const mc = customCardsList.filter(c => c.team === "mafia").length;
   const cc = customCardsList.filter(c => c.team === "citizen").length;
   const show = customCardsList.length >= 3 && mc >= 1 && cc >= 1;
-  document.getElementById("startBtn").style.display = show && !state.isCustom ? "block" : "none";
-  const csb = document.getElementById("customStartBtn");
-  if (csb) {
-    csb.style.display = show && state.isCustom ? "block" : "none";
-    if (show && state.isCustom) {
-      csb.classList.remove("start-btn-pop");
-      void csb.offsetWidth;
-      csb.classList.add("start-btn-pop");
-    }
-  }
+  // Show row with both buttons
+  const startRow = document.getElementById("startBtnRow");
+  if (startRow) startRow.style.display = show && !state.isCustom ? "flex" : "none";
+  const customRow = document.getElementById("customStartRow");
+  if (customRow) customRow.style.display = show && state.isCustom ? "flex" : "none";
 }
