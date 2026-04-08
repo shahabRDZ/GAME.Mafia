@@ -438,6 +438,7 @@ function openModeratorTools() {
   const panel = document.getElementById("modPanel");
   panel.style.display = "block";
   renderWarningPlayers();
+  renderNightActions();
   resetModTimer();
 }
 
@@ -574,49 +575,164 @@ function resetWarnings() {
   showToast("اخطارها ریست شد");
 }
 
-// ── Night Actions (Shot + Doctor Save) ──
-let nightShotTarget = null;
-let nightSaveTarget = null;
+// ── Night Actions — dynamic based on roles ──
+const ROLE_ABILITIES = {
+  // Mafia
+  "رئیس مافیا":    { icon: "👑", action: "شات", color: "#ff5555", type: "kill" },
+  "پدرخوانده":     { icon: "👑", action: "شات", color: "#ff5555", type: "kill" },
+  "مافیا ساده":    { icon: "😈", action: "شات", color: "#ff5555", type: "kill" },
+  "ناتو":          { icon: "🔫", action: "شات ناتو", color: "#ff5555", type: "kill" },
+  "ناتاشا":        { icon: "💋", action: "بلاک", color: "#ff77aa", type: "block" },
+  "مذاکره‌کننده":  { icon: "🤝", action: "جذب", color: "#ff9955", type: "recruit" },
+  "هکر":           { icon: "💻", action: "هک", color: "#ff7777", type: "hack" },
+  "شیاد":          { icon: "🃏", action: "فریب", color: "#ff7777", type: "deceive" },
+  "گروگان‌گیر":    { icon: "💣", action: "گروگان", color: "#ff5555", type: "hostage" },
+  "یاغی":          { icon: "🗡️", action: "حمله", color: "#ff5555", type: "attack" },
+  // Citizen
+  "دکتر":          { icon: "⚕️", action: "سیو", color: "#4ade80", type: "save" },
+  "کارآگاه":       { icon: "🕵️", action: "استعلام", color: "#60a5fa", type: "inquiry" },
+  "بازپرس":        { icon: "🔍", action: "استعلام", color: "#60a5fa", type: "inquiry" },
+  "کارآگاه ویژه":  { icon: "🔍", action: "استعلام", color: "#60a5fa", type: "inquiry" },
+  "تکاور":         { icon: "🎯", action: "شات", color: "#4ade80", type: "snipe" },
+  "تک‌تیرانداز":   { icon: "🎯", action: "شات", color: "#4ade80", type: "snipe" },
+  "نگهبان":        { icon: "👮", action: "محافظت", color: "#4ade80", type: "guard" },
+  "محافظ":         { icon: "🛡️", action: "محافظت", color: "#4ade80", type: "guard" },
+  "رویین‌تن":      { icon: "🛡️", action: "سپر", color: "#4ade80", type: "shield" },
+  "زره‌پوش":       { icon: "🛡️", action: "سپر", color: "#4ade80", type: "shield" },
+  "هانتر":         { icon: "🏹", action: "نشانه", color: "#4ade80", type: "mark" },
+  "ساقی":          { icon: "🍷", action: "مست کردن", color: "#fbbf24", type: "silence" },
+  "کشیش":          { icon: "⛪", action: "تحقیق", color: "#60a5fa", type: "inquiry" },
+  "روانشناس":      { icon: "🧠", action: "آنالیز", color: "#c084fc", type: "inquiry" },
+  "خبرنگار":       { icon: "📰", action: "تحقیق", color: "#60a5fa", type: "inquiry" },
+  "فدایی":         { icon: "💥", action: "انتحاری", color: "#fbbf24", type: "suicide" },
+  "وکیل":          { icon: "⚖️", action: "دفاع", color: "#4ade80", type: "defend" },
+  "مین‌گذار":      { icon: "💥", action: "مین", color: "#fbbf24", type: "mine" },
+  "راهنما":        { icon: "🧭", action: "هدایت", color: "#4ade80", type: "guide" },
+  "گورکن":         { icon: "⚰️", action: "بررسی", color: "#94a3b8", type: "inquiry" },
+  "جادوگر":        { icon: "🔮", action: "طلسم", color: "#c084fc", type: "spell" },
+  "پرستار":        { icon: "💊", action: "سیو", color: "#4ade80", type: "save" },
+  // Independent
+  "هزارچهره":      { icon: "🎭", action: "تبدیل", color: "#c084fc", type: "transform" },
+  "قاتل زنجیره‌ای": { icon: "🔪", action: "قتل", color: "#c084fc", type: "kill" },
+  "زودیاک":        { icon: "♏", action: "قتل", color: "#c084fc", type: "kill" },
+  "سندیکا":        { icon: "🕶️", action: "جذب", color: "#c084fc", type: "recruit" },
+  "گرگ‌نما":       { icon: "🐺", action: "حمله", color: "#c084fc", type: "kill" },
+  "دزد":           { icon: "🦹", action: "دزدی", color: "#c084fc", type: "steal" },
+};
 
-function nightShot() {
-  const input = document.getElementById("nightShotInput");
-  const num = parseInt(input.value);
-  if (!num || num < 1 || num > state.cards.length) { showToast("⚠️ شماره نامعتبر"); return; }
-  nightShotTarget = num;
-  document.getElementById("nightShotResult").innerHTML = `💀 شات: بازیکن <strong style="color:var(--accent)">${toFarsiNum(num)}</strong>`;
-  haptic('medium');
+let nightActions = {};
+
+function renderNightActions() {
+  const container = document.getElementById("nightActionsContainer");
+  if (!state.cards || !state.cards.length) { container.innerHTML = ''; return; }
+
+  nightActions = {};
+  // Find roles that have abilities in current game
+  const activeRoles = [];
+  state.cards.forEach(c => {
+    if (ROLE_ABILITIES[c.roleName]) {
+      activeRoles.push({ num: c.number, roleName: c.roleName, ...ROLE_ABILITIES[c.roleName] });
+    }
+  });
+
+  // Group: mafia shot first, then others
+  const mafiaShot = activeRoles.filter(r => r.type === 'kill' && state.cards.find(c => c.number === r.num)?.role === 'mafia');
+  const others = activeRoles.filter(r => !(r.type === 'kill' && state.cards.find(c => c.number === r.num)?.role === 'mafia'));
+
+  // Always show mafia shot as one group
+  let html = `<div class="mod-night-item" style="border-color:rgba(255,85,85,.2)">
+    <div class="mod-night-label" style="color:#ff5555">💀 شات مافیا</div>
+    <div class="mod-night-target">
+      <span>هدف:</span>
+      <input type="number" id="nightInput_mafiaShot" min="1" max="${state.cards.length}" placeholder="—" class="mod-night-input" inputmode="numeric">
+      <button class="mod-btn mod-btn-start" onclick="registerNightAction('mafiaShot')" style="padding:6px 14px">ثبت</button>
+    </div>
+    <div class="mod-night-result" id="nightResult_mafiaShot"></div>
+  </div>`;
+
+  // Each role with ability
+  others.forEach(r => {
+    const key = `role_${r.num}`;
+    html += `<div class="mod-night-item" style="border-color:${r.color}22">
+      <div class="mod-night-label" style="color:${r.color}">${r.icon} #${toFarsiNum(r.num)} ${r.roleName} — ${r.action}</div>
+      <div class="mod-night-target">
+        <span>هدف:</span>
+        <input type="number" id="nightInput_${key}" min="1" max="${state.cards.length}" placeholder="—" class="mod-night-input" inputmode="numeric">
+        <button class="mod-btn" onclick="registerNightAction('${key}')" style="padding:6px 14px;background:${r.color}22;border-color:${r.color}44;color:${r.color}">ثبت</button>
+      </div>
+      <div class="mod-night-result" id="nightResult_${key}"></div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
 }
 
-function nightSave() {
-  const input = document.getElementById("nightSaveInput");
+function registerNightAction(key) {
+  const input = document.getElementById("nightInput_" + key);
   const num = parseInt(input.value);
   if (!num || num < 1 || num > state.cards.length) { showToast("⚠️ شماره نامعتبر"); return; }
-  nightSaveTarget = num;
-  document.getElementById("nightSaveResult").innerHTML = `💊 سیو: بازیکن <strong style="color:#4ade80">${toFarsiNum(num)}</strong>`;
+  nightActions[key] = num;
+  const resultEl = document.getElementById("nightResult_" + key);
+  resultEl.innerHTML = `✓ ثبت شد: بازیکن <strong>${toFarsiNum(num)}</strong>`;
+  resultEl.style.color = '#4ade80';
   haptic('medium');
 }
 
 function resolveNight() {
   const result = document.getElementById("nightFinalResult");
-  if (!nightShotTarget) {
-    result.innerHTML = '<span style="color:var(--dim)">شاتی ثبت نشده</span>';
+  if (Object.keys(nightActions).length === 0) {
+    result.innerHTML = '<span style="color:var(--dim)">هیچ اقدامی ثبت نشده</span>';
     return;
   }
-  if (nightShotTarget === nightSaveTarget) {
-    result.innerHTML = `🛡️ بازیکن <strong style="color:#4ade80">${toFarsiNum(nightShotTarget)}</strong> شات شد ولی <strong style="color:#4ade80">سیو شد!</strong> — کسی نمرد`;
-    haptic('light');
-  } else {
-    result.innerHTML = `☠️ بازیکن <strong style="color:var(--accent)">${toFarsiNum(nightShotTarget)}</strong> کشته شد!`;
-    haptic('heavy');
-    playAlarm();
+
+  let lines = [];
+  const shot = nightActions['mafiaShot'];
+  let savedTargets = [];
+  let killedTargets = [];
+  let guardedTargets = [];
+
+  // Collect saves, guards, shields
+  Object.entries(nightActions).forEach(([key, target]) => {
+    if (key === 'mafiaShot') return;
+    const numMatch = key.match(/role_(\d+)/);
+    if (!numMatch) return;
+    const playerNum = parseInt(numMatch[1]);
+    const card = state.cards.find(c => c.number === playerNum);
+    if (!card) return;
+    const ability = ROLE_ABILITIES[card.roleName];
+    if (!ability) return;
+
+    if (ability.type === 'save') savedTargets.push(target);
+    if (ability.type === 'guard' || ability.type === 'shield') guardedTargets.push(target);
+    if (ability.type === 'snipe') killedTargets.push({ target, by: card.roleName, num: playerNum });
+
+    lines.push(`${ability.icon} #${toFarsiNum(playerNum)} ${card.roleName}: ${ability.action} → بازیکن ${toFarsiNum(target)}`);
+  });
+
+  // Resolve mafia shot
+  if (shot) {
+    if (savedTargets.includes(shot)) {
+      lines.unshift(`🛡️ شات مافیا → بازیکن <strong style="color:#4ade80">${toFarsiNum(shot)}</strong> — <strong style="color:#4ade80">سیو شد!</strong>`);
+    } else if (guardedTargets.includes(shot)) {
+      lines.unshift(`🛡️ شات مافیا → بازیکن <strong style="color:#4ade80">${toFarsiNum(shot)}</strong> — <strong style="color:#4ade80">محافظت شد!</strong>`);
+    } else {
+      lines.unshift(`☠️ شات مافیا → بازیکن <strong style="color:var(--accent)">${toFarsiNum(shot)}</strong> — <strong style="color:var(--accent)">کشته شد!</strong>`);
+    }
   }
-  // Reset for next night
-  nightShotTarget = null;
-  nightSaveTarget = null;
-  document.getElementById("nightShotInput").value = "";
-  document.getElementById("nightSaveInput").value = "";
-  document.getElementById("nightShotResult").textContent = "";
-  document.getElementById("nightSaveResult").textContent = "";
+
+  // Resolve sniper kills
+  killedTargets.forEach(k => {
+    lines.push(`☠️ ${k.by} #${toFarsiNum(k.num)} → بازیکن <strong style="color:var(--accent)">${toFarsiNum(k.target)}</strong> — <strong style="color:var(--accent)">کشته شد!</strong>`);
+  });
+
+  result.innerHTML = lines.join('<br>');
+  haptic('heavy');
+  if (shot && !savedTargets.includes(shot) && !guardedTargets.includes(shot)) playAlarm();
+
+  // Reset
+  nightActions = {};
+  document.querySelectorAll('[id^="nightInput_"]').forEach(el => el.value = '');
+  document.querySelectorAll('[id^="nightResult_"]').forEach(el => el.textContent = '');
 }
 
 // ── Share Game Results ──
