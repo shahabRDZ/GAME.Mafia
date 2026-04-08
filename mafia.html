@@ -338,31 +338,12 @@
         </div>
       </div>
 
-      <!-- Night Actions -->
+      <!-- Night Actions (dynamic based on roles) -->
       <div class="mod-section">
         <div class="section-title" style="justify-content:center">🌙 اقدامات شب</div>
-        <div class="mod-night-actions">
-          <div class="mod-night-item">
-            <div class="mod-night-label">💀 شات مافیا</div>
-            <div class="mod-night-target">
-              <span>شماره بازیکن:</span>
-              <input type="number" id="nightShotInput" min="1" placeholder="—" class="mod-night-input">
-              <button class="mod-btn mod-btn-start" onclick="nightShot()" style="padding:6px 14px">ثبت شات</button>
-            </div>
-            <div class="mod-night-result" id="nightShotResult"></div>
-          </div>
-          <div class="mod-night-item">
-            <div class="mod-night-label">💊 سیو دکتر</div>
-            <div class="mod-night-target">
-              <span>شماره بازیکن:</span>
-              <input type="number" id="nightSaveInput" min="1" placeholder="—" class="mod-night-input">
-              <button class="mod-btn mod-btn-phase" onclick="nightSave()" style="padding:6px 14px">ثبت سیو</button>
-            </div>
-            <div class="mod-night-result" id="nightSaveResult"></div>
-          </div>
-          <button class="mod-btn mod-btn-start" onclick="resolveNight()" style="width:100%;margin-top:8px">🌅 نتیجه شب</button>
-          <div class="mod-night-result" id="nightFinalResult" style="font-size:1rem;margin-top:8px"></div>
-        </div>
+        <div class="mod-night-actions" id="nightActionsContainer"></div>
+        <button class="mod-btn mod-btn-start" onclick="resolveNight()" style="width:100%;margin-top:10px">🌅 نتیجه شب</button>
+        <div class="mod-night-result" id="nightFinalResult" style="font-size:0.95rem;margin-top:10px"></div>
       </div>
 
       <!-- Share -->
