@@ -180,11 +180,17 @@ function exitGameFullscreen() {
   document.getElementById("gameNavBtn").style.display = "block";
 }
 
+// ── Game Menu Toggle ──
+function toggleGameMenu() {
+  const menu = document.getElementById("gameMenu");
+  if (menu) menu.classList.toggle("show");
+}
+
 function showCurrentCard() {
   const card = state.cards[state.queueIdx];
   const total = state.cards.length;
   const done = state.queueIdx;
-  document.getElementById("fsProgLabel").textContent = `کارت ${toFarsiNum(done + 1)} از ${toFarsiNum(total)}`;
+  document.getElementById("fsProgLabel").textContent = `${toFarsiNum(done + 1)} / ${toFarsiNum(total)}`;
   document.getElementById("fsProgNums").textContent = `${toFarsiNum(total - done)} باقی‌مانده`;
   document.getElementById("fsProgressFill").style.width = `${(done / total) * 100}%`;
   const slot = document.getElementById("cardSlot");

@@ -219,31 +219,60 @@
 
   <!-- Game Screen -->
   <section class="screen" id="gameScreen" aria-label="بازی جاری" aria-labelledby="gameHeading">
+    <!-- Redesigned Top Bar -->
     <div class="fs-topbar">
-      <button class="fs-back" onclick="exitGameFullscreen()" aria-label="خروج از بازی">✕ خروج</button>
-      <div class="fs-progress-wrap">
-        <div class="fs-progress-text">
-          <span id="fsProgLabel">کارت ۱</span>
-          <span class="fp-nums" id="fsProgNums"></span>
-        </div>
-        <div class="fs-progress-track"><div class="fs-progress-fill" id="fsProgressFill" style="width:0%"></div></div>
+      <button class="fs-exit-btn" onclick="exitGameFullscreen()" aria-label="خروج از بازی">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="fs-info-center">
+        <span class="fs-scenario-name" id="gameGroupLabel">—</span>
+        <span class="fs-card-counter" id="fsProgLabel">۱ / ۱۰</span>
+      </div>
+      <button class="fs-menu-btn" onclick="toggleGameMenu()" aria-label="منو">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+    </div>
+
+    <!-- Progress + Stats Bar -->
+    <div class="fs-stats-bar">
+      <div class="fs-progress-track"><div class="fs-progress-fill" id="fsProgressFill" style="width:0%"></div></div>
+      <div class="fs-team-chips">
+        <div class="fs-chip fs-chip-total"><span id="statTotal">—</span> نفر</div>
+        <div class="fs-chip fs-chip-mafia"><span id="statMafia">—</span> مافیا</div>
+        <div class="fs-chip fs-chip-citizen"><span id="statCitizen">—</span> شهروند</div>
+        <div class="fs-chip fs-chip-remaining" id="fsProgNums">—</div>
       </div>
     </div>
-    <div class="game-info gc">
-      <div class="info-badge" id="gameHeading"><div class="dot"></div><span id="gameGroupLabel">—</span></div>
-      <div class="stats">
-        <div class="stat"><span class="stat-num" id="statTotal">—</span><span class="stat-label">نفر</span></div>
-        <div class="stat mafia"><span class="stat-num" id="statMafia">—</span><span class="stat-label">مافیا</span></div>
-        <div class="stat citizen"><span class="stat-num" id="statCitizen">—</span><span class="stat-label">شهروند</span></div>
-      </div>
+
+    <!-- Hidden game info (for compatibility) -->
+    <div class="game-info gc" id="gameHeading" style="display:none">
+      <div class="info-badge"><div class="dot"></div></div>
     </div>
-    <div class="game-actions">
+
+    <!-- Game Menu Dropdown -->
+    <div class="fs-game-menu" id="gameMenu">
+      <button class="fs-menu-item" onclick="revealAll();toggleGameMenu()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        مشاهده همه نقش‌ها
+      </button>
+      <button class="fs-menu-item" onclick="shuffleCards();toggleGameMenu()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+        بازنشانی کارت‌ها
+      </button>
+      <button class="fs-menu-item" onclick="newGame();toggleGameMenu()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        بازی جدید
+      </button>
+    </div>
+
+    <div class="game-actions" style="display:none">
       <button class="action-btn btn-back" id="btnBack" onclick="exitGameFullscreen()">◀ بازگشت</button>
-      <button class="action-btn btn-reveal-all" id="btnRevealAll" onclick="revealAll()" aria-label="مشاهده همه نقش‌ها">👁️ مشاهده همه</button>
-      <button class="action-btn btn-flip-back" id="btnFlipBack" onclick="flipAllBack()" aria-label="بستن کارت‌ها">🔄 بستن کارت‌ها</button>
-      <button class="action-btn btn-reset" id="btnShuffle" onclick="shuffleCards()" aria-label="بازنشانی کارت‌ها">🎲 بازنشانی</button>
-      <button class="action-btn btn-new-game" id="btnNewGame" onclick="newGame()" aria-label="بازی جدید">🆕 بازی جدید</button>
+      <button class="action-btn btn-reveal-all" id="btnRevealAll" onclick="revealAll()">👁️ مشاهده همه</button>
+      <button class="action-btn btn-flip-back" id="btnFlipBack" onclick="flipAllBack()">🔄 بستن کارت‌ها</button>
+      <button class="action-btn btn-reset" id="btnShuffle" onclick="shuffleCards()">🎲 بازنشانی</button>
+      <button class="action-btn btn-new-game" id="btnNewGame" onclick="newGame()">🆕 بازی جدید</button>
     </div>
+
     <div class="card-stage" id="cardStage" tabindex="0">
       <div id="cardSlot"></div>
     </div>
