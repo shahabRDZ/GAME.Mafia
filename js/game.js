@@ -563,7 +563,14 @@ let nearbyRoleCheckInterval = null;
 async function startNearbyGame() {
   if (!authToken) { showToast("⚠️ ابتدا وارد شوید"); openAuthModal('login'); return; }
 
-  // Get roles ready (same logic as digital)
+  // Nearby only supports 10, 12, 13 player games
+  if (!state.group || !state.count) { showToast("⚠️ سناریو و تعداد انتخاب کنید"); return; }
+  if (![10, 12, 13].includes(state.count) && !state.isCustom) {
+    showToast("⚠️ نزدیک‌یاب فقط برای ۱۰، ۱۲ و ۱۳ نفره");
+    return;
+  }
+
+  // Get roles
   let roles = [];
   if (state.isCustom) {
     const mc = customCardsList.filter(c => c.team === "mafia").length;
@@ -571,7 +578,6 @@ async function startNearbyGame() {
     if (customCardsList.length < 3 || mc < 1 || cc < 1) { showToast("⚠️ نقش‌ها ناکافی"); return; }
     roles = customCardsList.map(c => ({ name: c.name, team: c.team }));
   } else {
-    if (!state.group || !state.count) { showToast("⚠️ سناریو و تعداد انتخاب کنید"); return; }
     const groupData = ROLES_DATA[state.group] && ROLES_DATA[state.group][state.count];
     if (!groupData) { showToast("⚠️ سناریو پیدا نشد"); return; }
     groupData.mafia.forEach(n => roles.push({ name: n, team: "mafia" }));
@@ -583,8 +589,11 @@ async function startNearbyGame() {
   if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
 
   document.getElementById("nearbyOverlay").classList.add("show");
+  document.getElementById("nearbyScenarioInfo").textContent = `🎭 ${state.group} · ${toFarsiNum(state.count)} نفر (گرداننده + ${toFarsiNum(state.count - 1)} بازیکن)`;
   document.getElementById("nearbyStatus").textContent = "📍 در حال دریافت لوکیشن...";
   document.getElementById("nearbyPlayerList").innerHTML = "";
+  document.getElementById("nearbyPlayerList").style.display = "block";
+  document.getElementById("nearbyConfirmList").style.display = "none";
   document.getElementById("nearbyAssignBtn").style.display = "none";
   nearbySelectedIds = new Set();
 
@@ -697,8 +706,44 @@ async function assignNearbyRoles() {
 
   haptic('heavy');
   showToast(`🎉 نقش‌ها به ${toFarsiNum(finalIds.length)} نفر ارسال شد!`);
-  document.getElementById("nearbyStatus").textContent = "✅ نقش‌ها ارسال شد — بازیکنان نوتیفیکیشن دریافت می‌کنن";
+  document.getElementById("nearbyStatus").textContent = "منتظر تأیید بازیکنان...";
   document.getElementById("nearbyAssignBtn").style.display = "none";
+  document.getElementById("nearbyPlayerList").style.display = "none";
+
+  // Show confirmation list with red/green lights
+  const confirmList = document.getElementById("nearbyConfirmList");
+  confirmList.style.display = "block";
+  window._nearbyGameId = r.data.gameId;
+
+  // Start polling confirmations
+  if (window._confirmPoll) clearInterval(window._confirmPoll);
+  window._confirmPoll = setInterval(() => pollConfirmations(r.data.gameId), 2000);
+  pollConfirmations(r.data.gameId);
+}
+
+async function pollConfirmations(gameId) {
+  const r = await apiFetch("/api/nearby/confirmations/" + gameId, { _background: true });
+  if (!r.ok) return;
+  const list = document.getElementById("nearbyConfirmList");
+  const players = r.data;
+
+  list.innerHTML = players.map(p =>
+    `<div class="confirm-item">
+      <div class="confirm-light${p.confirmed ? ' confirmed' : ''}"></div>
+      ${renderAvatar(p.username, '1.8rem')}
+      <span class="confirm-name">#${toFarsiNum(p.playerNum)} ${escapeHtml(p.username)}</span>
+      <span class="confirm-status${p.confirmed ? ' done' : ''}">${p.confirmed ? '✓ دیده شد' : '⏳ منتظر'}</span>
+    </div>`
+  ).join('');
+
+  const allConfirmed = players.length > 0 && players.every(p => p.confirmed);
+  if (allConfirmed) {
+    clearInterval(window._confirmPoll);
+    document.getElementById("nearbyStatus").textContent = "✅ همه بازیکنان نقش خود را دیدند!";
+    document.getElementById("nearbyStatus").style.color = "#4ade80";
+    haptic('heavy');
+    showToast("✅ همه نقش‌ها تأیید شد — بازی شروع شده!");
+  }
 }
 
 function closeNearby() {
@@ -728,6 +773,22 @@ async function shareMyLocation() {
   );
 }
 
+// ── Player: flip card to confirm ──
+let nearbyGameId = null;
+let nearbyRoleData = null;
+
+function flipNearbyCard() {
+  const card = document.getElementById("nearbyCard");
+  if (card.classList.contains("flipped")) return; // already flipped
+  card.classList.add("flipped");
+  haptic('medium');
+
+  // Send confirmation to server
+  if (nearbyGameId) {
+    apiFetch("/api/nearby/confirm/" + nearbyGameId, { method: "POST", _background: true });
+  }
+}
+
 async function checkMyNearbyRole() {
   const r = await apiFetch("/api/nearby/my-role", { _background: true });
   if (!r.ok || !r.data.assigned) return;
@@ -749,11 +810,19 @@ async function checkMyNearbyRole() {
     sendLocalNotification('🎭 نقش شما آماده شد!', `${role.name} — الان ببینید!`);
   }
 
-  // Show role immediately — full screen
+  nearbyGameId = r.data.gameId;
+  nearbyRoleData = role;
+
+  // Setup card — back side shows player number, front shows role
   const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
   const teamNames = { mafia: "😈 مافیا", citizen: "😇 شهروند", independent: "🐺 مستقل" };
   const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
+  const teamBg = { mafia: "radial-gradient(ellipse at 50% 30%, #1a0000, #0a0000)", citizen: "radial-gradient(ellipse at 50% 30%, #001a10, #000a08)", independent: "radial-gradient(ellipse at 50% 30%, #1a0030, #0a0018)" };
 
+  // Card back
+  document.getElementById("nearbyCardNum").textContent = toFarsiNum(r.data.playerNum);
+
+  // Card front
   document.getElementById("nearbyRoleEmoji").textContent = ROLE_ICONS[role.name] || teamEmojis[role.team] || "🎭";
   document.getElementById("nearbyRoleName").textContent = role.name;
   document.getElementById("nearbyRoleName").style.color = teamColors[role.team] || "#fff";
@@ -762,19 +831,16 @@ async function checkMyNearbyRole() {
   const abilityInfo = ROLE_ABILITIES[role.name];
   document.getElementById("nearbyRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
   document.getElementById("nearbyRoleNum").textContent = `بازیکن شماره ${toFarsiNum(r.data.playerNum)}`;
+  document.getElementById("nearbyCardFront").style.background = teamBg[role.team] || "";
+  document.getElementById("nearbyCardFront").style.borderColor = teamColors[role.team] || "";
 
-  // Show overlay immediately on top of everything
+  // Reset card to back
+  document.getElementById("nearbyCard").classList.remove("flipped");
+
+  // Show overlay — card is face down, player taps to flip
   document.getElementById("nearbyRoleOverlay").classList.add("show");
 
-  // Bring app to front if in background (best effort)
-  if (document.hidden) {
-    document.addEventListener('visibilitychange', function once() {
-      document.removeEventListener('visibilitychange', once);
-      document.getElementById("nearbyRoleOverlay").classList.add("show");
-    });
-  }
-
-  showToast("🎭 نقش شما آماده شد!");
+  showToast("🎭 نقش شما آماده شد — لمس کنید!");
 }
 
 function generateHostQr(code) {

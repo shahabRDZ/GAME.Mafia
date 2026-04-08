@@ -684,6 +684,63 @@
 }
 .nearby-item.selected .nearby-check { border-color: #4ade80; background: #4ade80; color: #000; }
 
+/* ── Nearby Card Flip (Player) ── */
+.nearby-card-stage {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100dvh; padding: var(--space-md); cursor: pointer;
+}
+.nearby-card {
+  width: clamp(16rem, 70vw, 20rem); aspect-ratio: 9/16;
+  position: relative; perspective: 1200px;
+}
+.nearby-card-face {
+  position: absolute; inset: 0; border-radius: 1.5rem;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.nearby-card-back {
+  background: linear-gradient(145deg, #080810, #030306, #000);
+  border: 1.5px solid rgba(60,70,120,.15);
+  box-shadow: 0 12px 36px rgba(0,0,0,.8);
+  z-index: 2;
+}
+.nearby-card-front {
+  background: radial-gradient(ellipse at 50% 30%, #0f0f22, #060610);
+  border: 1.5px solid rgba(255,255,255,.1);
+  transform: rotateY(180deg); z-index: 1;
+  padding: var(--space-lg);
+}
+.nearby-card.flipped .nearby-card-back { transform: rotateY(180deg); }
+.nearby-card.flipped .nearby-card-front { transform: rotateY(0deg); }
+.nearby-card-num {
+  font-size: 5rem; font-weight: 900; color: var(--accent);
+  text-shadow: 0 0 30px var(--accent);
+}
+.nearby-card-hint {
+  font-size: 0.8rem; color: rgba(255,255,255,.3);
+  margin-top: var(--space-sm); letter-spacing: 1px;
+}
+
+/* ── Confirm status lights ── */
+.confirm-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.confirm-light {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ff4444; box-shadow: 0 0 6px #ff4444;
+  transition: all 0.3s ease; flex-shrink: 0;
+}
+.confirm-light.confirmed {
+  background: #4ade80; box-shadow: 0 0 8px #4ade80;
+}
+.confirm-name { flex: 1; font-size: var(--font-size-sm); color: rgba(255,255,255,.6); }
+.confirm-status { font-size: 0.7rem; color: var(--dim); }
+.confirm-status.done { color: #4ade80; }
+
 /* ── Digital Tap Area (NFC-like) ── */
 .digital-tap-area {
   position: relative; padding: 3rem 2rem;

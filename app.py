@@ -887,10 +887,39 @@ def assign_nearby_roles():
 def get_my_nearby_role():
     """Player checks if a role has been assigned to them."""
     user = db.session.get(User, int(get_jwt_identity()))
-    role_data = nearby_roles.pop(user.id, None)
+    role_data = nearby_roles.get(user.id)
     if not role_data:
         return jsonify({"assigned": False}), 200
+    # Don't pop — keep it so we can track confirmation status
     return jsonify({"assigned": True, **role_data}), 200
+
+@app.route("/api/nearby/confirm/<game_id>", methods=["POST"])
+@jwt_required()
+def confirm_nearby_role(game_id):
+    """Player confirms they've seen their role (card flipped)."""
+    user = db.session.get(User, int(get_jwt_identity()))
+    role_data = nearby_roles.get(user.id)
+    if not role_data or role_data.get("gameId") != game_id:
+        return jsonify({"error": "نقشی پیدا نشد"}), 404
+    role_data["confirmed"] = True
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/nearby/confirmations/<game_id>", methods=["GET"])
+@jwt_required()
+def get_confirmations(game_id):
+    """Host checks which players have confirmed (flipped their card)."""
+    results = []
+    for uid, data in nearby_roles.items():
+        if data.get("gameId") == game_id:
+            u = db.session.get(User, uid)
+            results.append({
+                "user_id": uid,
+                "username": u.username if u else "?",
+                "playerNum": data.get("playerNum", 0),
+                "confirmed": data.get("confirmed", False)
+            })
+    results.sort(key=lambda x: x["playerNum"])
+    return jsonify(results), 200
 
 
 # ══════════════════════════════════════════════════════════════════════════════
