@@ -740,6 +740,13 @@
 .confirm-name { flex: 1; font-size: var(--font-size-sm); color: rgba(255,255,255,.6); }
 .confirm-status { font-size: 0.7rem; color: var(--dim); }
 .confirm-status.done { color: #4ade80; }
+.confirm-resend {
+  background: none; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
+  font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition-fast); flex-shrink: 0;
+}
+.confirm-resend:active { transform: scale(0.9); background: rgba(255,255,255,.08); }
 
 /* ── Digital Tap Area (NFC-like) ── */
 .digital-tap-area {
