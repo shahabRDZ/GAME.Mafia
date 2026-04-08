@@ -285,6 +285,54 @@
         <button class="comp-btn comp-btn-reshuffle" onclick="shuffleCards()">🎲 بازنشانی</button>
         <button class="comp-btn comp-btn-new" onclick="newGame()">🆕 بازی جدید</button>
       </div>
+      <div style="margin-top:12px">
+        <button class="comp-btn comp-btn-review" onclick="openModeratorTools()" style="width:100%;background:linear-gradient(135deg,rgba(245,166,35,.15),rgba(245,166,35,.05));color:var(--accent2);border:1px solid rgba(245,166,35,.3)">🎙️ ابزار گرداننده</button>
+      </div>
+    </div>
+
+    <!-- Moderator Tools Panel -->
+    <div class="mod-panel" id="modPanel" style="display:none">
+      <!-- Day/Night Timer -->
+      <div class="mod-section">
+        <div class="mod-phase" id="modPhase">
+          <div class="mod-phase-icon" id="modPhaseIcon">☀️</div>
+          <div class="mod-phase-name" id="modPhaseName">روز</div>
+        </div>
+        <div class="mod-timer-display" id="modTimerDisplay">۰۰:۰۰</div>
+        <div class="mod-timer-controls">
+          <button class="mod-btn" onclick="setModTimer(60)">۱ دقیقه</button>
+          <button class="mod-btn" onclick="setModTimer(120)">۲ دقیقه</button>
+          <button class="mod-btn" onclick="setModTimer(180)">۳ دقیقه</button>
+          <button class="mod-btn" onclick="setModTimer(300)">۵ دقیقه</button>
+        </div>
+        <div class="mod-timer-actions">
+          <button class="mod-btn mod-btn-start" id="modTimerStartBtn" onclick="toggleModTimer()">شروع</button>
+          <button class="mod-btn" onclick="resetModTimer()">ریست</button>
+          <button class="mod-btn mod-btn-phase" onclick="togglePhase()">تغییر فاز</button>
+        </div>
+      </div>
+
+      <!-- Voting System -->
+      <div class="mod-section">
+        <div class="section-title" style="justify-content:center">🗳️ رأی‌گیری</div>
+        <div class="mod-vote-players" id="modVotePlayers"></div>
+        <div class="mod-vote-actions">
+          <button class="mod-btn mod-btn-start" onclick="startVoting()">شروع رأی‌گیری</button>
+          <button class="mod-btn" onclick="resetVotes()">ریست آرا</button>
+        </div>
+        <div class="mod-vote-result" id="modVoteResult"></div>
+      </div>
+
+      <!-- Share -->
+      <div class="mod-section">
+        <div class="section-title" style="justify-content:center">📤 اشتراک‌گذاری</div>
+        <div class="mod-share-actions">
+          <button class="mod-btn mod-btn-start" onclick="shareGameResult()">📋 کپی نتیجه بازی</button>
+          <button class="mod-btn" onclick="shareGameLink()">🔗 لینک بازی</button>
+        </div>
+      </div>
+
+      <button class="mod-btn" onclick="closeModPanel()" style="width:100%;margin-top:12px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)">بستن ابزار گرداننده</button>
     </div>
   </section>
 
