@@ -730,16 +730,11 @@ async function pollConfirmations(gameId) {
       <span class="confirm-status${p.confirmed ? ' done' : ''}">${p.confirmed ? '✓ دیده شد' : '⏳ منتظر'}</span>
       <button class="confirm-resend" onclick="resendToPlayer(${p.user_id})" title="ارسال مجدد">🔄</button>
     </div>`
-  ).join('');
-
-  // Resend all + Reset buttons
-  const btnsHtml = `<div style="display:flex;gap:8px;margin-top:12px">
+  ).join('') +
+  `<div style="display:flex;gap:8px;margin-top:12px">
     <button class="mod-btn" onclick="resendAllPlayers()" style="flex:1">🔄 ارسال مجدد به همه</button>
     <button class="mod-btn mod-btn-start" onclick="resetAndReshuffle()" style="flex:1">🎲 ریست و پخش مجدد</button>
   </div>`;
-  if (!list.querySelector('.confirm-buttons')) {
-    list.insertAdjacentHTML('beforeend', `<div class="confirm-buttons">${btnsHtml}</div>`);
-  }
 
   const allConfirmed = players.length > 0 && players.every(p => p.confirmed);
   if (allConfirmed) {
@@ -747,7 +742,12 @@ async function pollConfirmations(gameId) {
     document.getElementById("nearbyStatus").textContent = "✅ همه بازیکنان نقش خود را دیدند!";
     document.getElementById("nearbyStatus").style.color = "#4ade80";
     haptic('heavy');
-    showToast("✅ همه نقش‌ها تأیید شد — بازی شروع شده!");
+    showToast("✅ همه نقش‌ها تأیید شد!");
+
+    // Show moderator tools button
+    list.innerHTML += `<div style="margin-top:16px">
+      <button class="start-btn start-btn-nearby" onclick="closeNearby();openModeratorTools()" style="width:100%">🎙️ ابزار گرداننده</button>
+    </div>`;
   }
 }
 
@@ -791,6 +791,7 @@ async function resetAndReshuffle() {
   document.getElementById("nearbyStatus").style.color = "var(--accent2)";
   if (window._confirmPoll) clearInterval(window._confirmPoll);
   window._confirmPoll = setInterval(() => pollConfirmations(r.data.gameId), 2000);
+  pollConfirmations(r.data.gameId);
 }
 
 function closeNearby() {
@@ -826,7 +827,7 @@ let nearbyRoleData = null;
 
 function flipNearbyCard() {
   const card = document.getElementById("nearbyCard");
-  if (card.classList.contains("flipped")) return; // already flipped
+  if (card.classList.contains("flipped")) return;
   card.classList.add("flipped");
   haptic('medium');
 
@@ -834,6 +835,11 @@ function flipNearbyCard() {
   if (nearbyGameId) {
     apiFetch("/api/nearby/confirm/" + nearbyGameId, { method: "POST", _background: true });
   }
+}
+
+function closeNearbyRole() {
+  document.getElementById("nearbyRoleOverlay").classList.remove("show");
+  // Keep polling alive for resend/reshuffle
 }
 
 async function checkMyNearbyRole() {
