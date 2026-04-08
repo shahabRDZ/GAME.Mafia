@@ -196,7 +196,9 @@ function showCurrentCard() {
   const slot = document.getElementById("cardSlot");
   slot.innerHTML = `<div class="big-card-wrapper" style="animation: cardSlideUp 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards">${buildCard(card, false)}</div>`;
   const cardEl = slot.querySelector(".card");
-  cardEl.addEventListener("click", e => flipCurrentCard(e, card));
+  const handleTap = e => { e.preventDefault(); flipCurrentCard(e, card); };
+  cardEl.addEventListener("click", handleTap);
+  cardEl.style.touchAction = "manipulation";
   initSwipeGesture(slot.querySelector(".big-card-wrapper"), card);
 }
 
@@ -303,7 +305,7 @@ function flipCurrentCard(e, card) {
 function spawnLightningFlash() {
   const flash = document.createElement("div");
   flash.style.cssText = `
-    position: fixed; inset: 0; z-index: 200; pointer-events: none;
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; touch-action: none;
     background: radial-gradient(ellipse at 50% 50%, rgba(180,200,255,.2) 0%, rgba(100,120,255,.08) 40%, transparent 70%);
     animation: screenFlash 0.6s ease-out forwards;
   `;
@@ -322,7 +324,7 @@ function startAmbientLightning() {
   ambientLightningEl = document.createElement("div");
   ambientLightningEl.id = "ambientLightning";
   ambientLightningEl.style.cssText = `
-    position: fixed; inset: 0; z-index: 999; pointer-events: none;
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; touch-action: none;
   `;
   parent.appendChild(ambientLightningEl);
 
