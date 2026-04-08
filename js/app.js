@@ -79,21 +79,29 @@ setTimeout(showOnboarding, 800);
   } catch {}
 })();
 
-// Register Service Worker for fast loading
+// Register Service Worker — force update on every load
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    // Check for updates every 30 seconds
-    setInterval(() => reg.update(), 30000);
+    // Force immediate update check
+    reg.update();
+    // Check for updates every 15 seconds
+    setInterval(() => reg.update(), 15000);
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'activated') {
-          // New version available, reload
-          window.location.reload();
+        if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+          // Clear all caches then reload
+          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+            window.location.reload();
+          });
         }
       });
     });
   }).catch(() => {});
+  // Listen for controller change (another tab updated the SW)
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 }
 
 // ── Keyboard Navigation ──
