@@ -6,7 +6,7 @@ async function renderProfileScreen() {
   const searchSec = document.getElementById("searchSection");
 
   if (!currentUser) {
-    card.innerHTML = '<div class="custom-empty">برای مشاهده پروفایل وارد شوید</div>';
+    showEmptyState(card, '🎭', 'به شوشانگ خوش آمدید!', 'وارد شوید تا پروفایل، دوستان و آمار بازی‌هاتون رو ببینید', 'ورود / ثبت‌نام', "openAuthModal('login')");
     friendsSec.innerHTML = "";
     searchSec.innerHTML = "";
     return;
@@ -23,11 +23,40 @@ async function renderProfileScreen() {
       <div class="profile-stat losses"><span class="profile-stat-num">${toFarsiNum(u.chaos_losses || 0)}</span><span class="profile-stat-label">باخت کی‌اس</span></div>
       <div class="profile-stat"><span class="profile-stat-num">${toFarsiNum(u.total_games || 0)}</span><span class="profile-stat-label">بازی آفلاین</span></div>
     </div>
+    <div class="badge-row">${renderBadges(u)}</div>
     <div class="profile-edit-row">
       <input type="text" id="editBio" placeholder="بیو..." value="${escapeHtml(u.bio || '')}" maxlength="200" style="flex:1">
       <button class="chaos-btn secondary" onclick="updateBio()" style="padding:8px 16px;font-size:.8rem">ذخیره</button>
     </div>
   `;
+
+function renderBadges(u) {
+  const badges = [];
+  const wins = u.chaos_wins || 0;
+  const losses = u.chaos_losses || 0;
+  const games = u.total_games || 0;
+
+  // Always show some badges (locked or unlocked)
+  badges.push(games >= 1
+    ? { icon: '🎮', text: 'اولین بازی', cls: 'badge-green' }
+    : { icon: '🎮', text: 'اولین بازی', cls: 'badge-green', locked: true });
+  badges.push(games >= 10
+    ? { icon: '⭐', text: 'بازیکن حرفه‌ای', cls: 'badge-gold' }
+    : { icon: '⭐', text: '۱۰ بازی', cls: 'badge-gold', locked: true });
+  badges.push(wins >= 1
+    ? { icon: '🏆', text: 'اولین برد', cls: 'badge-blue' }
+    : { icon: '🏆', text: 'اولین برد', cls: 'badge-blue', locked: true });
+  badges.push(wins >= 5
+    ? { icon: '🔥', text: 'فاتح', cls: 'badge-red' }
+    : { icon: '🔥', text: '۵ برد', cls: 'badge-red', locked: true });
+  badges.push(games >= 50
+    ? { icon: '👑', text: 'افسانه‌ای', cls: 'badge-purple' }
+    : { icon: '👑', text: '۵۰ بازی', cls: 'badge-purple', locked: true });
+
+  return badges.map(b =>
+    `<div class="badge ${b.cls}${b.locked ? ' locked' : ''}">${b.icon} ${b.text}</div>`
+  ).join('');
+}
 
   // Friends
   friendsSec.innerHTML = '<div class="section-title">👥 دوستان</div><div id="friendsList"></div><div id="friendRequests"></div>';
@@ -55,7 +84,7 @@ async function updateBio() {
 async function loadFriends() {
   const r = await apiFetch("/api/friends");
   const el = document.getElementById("friendsList");
-  if (!r.ok || !r.data.length) { el.innerHTML = '<div class="custom-empty">هنوز دوستی ندارید</div>'; return; }
+  if (!r.ok || !r.data.length) { showEmptyState(el, '👥', 'هنوز دوستی ندارید', 'از بخش جستجو دوستان خود را پیدا کنید'); return; }
   el.innerHTML = r.data.map(f => `
     <div class="friend-item">
       ${renderAvatar(f.username, '2.2rem')}
