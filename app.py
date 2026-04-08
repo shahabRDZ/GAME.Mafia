@@ -723,6 +723,79 @@ def clear_games():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# DIGITAL ROLE DISTRIBUTION — in-memory rooms
+# ══════════════════════════════════════════════════════════════════════════════
+import random, string, json as pyjson, threading
+
+digital_rooms = {}  # code -> { roles: [...], assigned: 0, group: str, lock: Lock }
+digital_lock = threading.Lock()
+
+def gen_digital_code():
+    while True:
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        if code not in digital_rooms:
+            return code
+
+@app.route("/api/digital/create", methods=["POST"])
+def create_digital_room():
+    data = request.get_json()
+    roles = data.get("roles", [])
+    group = data.get("group", "")
+    if not roles or len(roles) < 3:
+        return jsonify({"error": "حداقل ۳ نقش لازم است"}), 400
+    # Shuffle roles
+    random.shuffle(roles)
+    code = gen_digital_code()
+    digital_rooms[code] = {
+        "roles": roles,  # list of {name, team, emoji}
+        "assigned": 0,
+        "total": len(roles),
+        "group": group,
+        "lock": threading.Lock()
+    }
+    return jsonify({"code": code, "total": len(roles)}), 201
+
+@app.route("/api/digital/info/<code>", methods=["GET"])
+def digital_room_info(code):
+    code = code.upper()
+    room = digital_rooms.get(code)
+    if not room:
+        return jsonify({"error": "اتاق پیدا نشد"}), 404
+    return jsonify({
+        "code": code, "group": room["group"],
+        "total": room["total"], "assigned": room["assigned"],
+        "remaining": room["total"] - room["assigned"]
+    }), 200
+
+@app.route("/api/digital/receive/<code>", methods=["POST"])
+def digital_receive_role(code):
+    code = code.upper()
+    room = digital_rooms.get(code)
+    if not room:
+        return jsonify({"error": "اتاق پیدا نشد"}), 404
+    with room["lock"]:
+        idx = room["assigned"]
+        if idx >= room["total"]:
+            return jsonify({"error": "همه نقش‌ها تقسیم شده"}), 410
+        role = room["roles"][idx]
+        room["assigned"] = idx + 1
+        player_num = idx + 1
+    return jsonify({"role": role, "playerNum": player_num, "remaining": room["total"] - room["assigned"]}), 200
+
+@app.route("/api/digital/status/<code>", methods=["GET"])
+def digital_room_status(code):
+    code = code.upper()
+    room = digital_rooms.get(code)
+    if not room:
+        return jsonify({"error": "اتاق پیدا نشد"}), 404
+    return jsonify({
+        "total": room["total"], "assigned": room["assigned"],
+        "remaining": room["total"] - room["assigned"],
+        "done": room["assigned"] >= room["total"]
+    }), 200
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # WEBSOCKET EVENTS
 # ══════════════════════════════════════════════════════════════════════════════
 

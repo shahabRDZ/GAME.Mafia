@@ -586,6 +586,73 @@
 .badge-purple { background: rgba(192,132,252,.1); color: #c084fc; border-color: rgba(192,132,252,.2); }
 .badge.locked { opacity: .3; filter: grayscale(1); }
 
+/* ── Digital Room ── */
+.digital-overlay {
+  display: none; position: fixed; inset: 0; z-index: 850;
+  background: rgba(0,0,0,.95); backdrop-filter: blur(12px);
+  align-items: center; justify-content: center; padding: var(--space-md);
+}
+.digital-overlay.show { display: flex; }
+.digital-box {
+  position: relative; max-width: 24rem; width: 100%;
+  background: linear-gradient(160deg, #0f0f22, #0a0a18);
+  border: 1px solid rgba(0,207,255,.15); border-radius: var(--radius-2xl);
+  padding: var(--space-xl); text-align: center;
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.digital-icon { font-size: 3rem; margin-bottom: var(--space-xs); }
+.digital-title { font-size: var(--font-size-xl); font-weight: 900; color: #00cfff; margin-bottom: var(--space-md); }
+.digital-code-label { font-size: var(--font-size-sm); color: var(--dim); }
+.digital-code {
+  font-size: 2.8rem; font-weight: 900; letter-spacing: 8px;
+  color: #00cfff; text-shadow: 0 0 20px rgba(0,207,255,.4);
+  margin: var(--space-xs) 0 var(--space-md);
+  font-family: monospace;
+}
+.digital-hint { font-size: 0.75rem; color: var(--dim); margin-bottom: var(--space-md); line-height: 1.6; }
+.digital-progress {
+  height: 4px; background: rgba(255,255,255,.07); border-radius: 2px;
+  overflow: hidden; margin-bottom: var(--space-xs);
+}
+.digital-progress-bar {
+  height: 100%; background: linear-gradient(90deg, #00cfff, #4ade80);
+  border-radius: 2px; transition: width 0.5s ease;
+}
+.digital-stats { font-size: var(--font-size-sm); color: rgba(255,255,255,.5); margin-bottom: var(--space-xs); }
+.digital-status { font-size: var(--font-size-sm); color: #4ade80; font-weight: 700; }
+
+/* Join form */
+.digital-join-form { margin-top: var(--space-md); }
+.digital-code-input {
+  width: 100%; padding: var(--space-md); margin-bottom: var(--space-sm);
+  background: rgba(255,255,255,.05); border: 2px solid rgba(0,207,255,.25);
+  border-radius: var(--radius-lg); color: #fff;
+  font-family: monospace; font-size: 1.8rem; font-weight: 900;
+  text-align: center; letter-spacing: 6px; outline: none;
+}
+.digital-code-input:focus { border-color: #00cfff; box-shadow: 0 0 0 4px rgba(0,207,255,.1); }
+
+/* Role reveal in digital */
+.digital-role-emoji { font-size: 4rem; margin-bottom: var(--space-sm); }
+.digital-role-name { font-size: 2rem; font-weight: 900; margin-bottom: var(--space-xs); }
+.digital-role-team { font-size: var(--font-size-md); margin-bottom: var(--space-md); }
+.digital-role-ability { font-size: var(--font-size-sm); color: var(--dim); padding: var(--space-sm); background: rgba(255,255,255,.04); border-radius: var(--radius-md); margin-bottom: var(--space-sm); }
+.digital-role-num { font-size: var(--font-size-sm); color: var(--dim); }
+
+/* Start buttons row */
+.start-btns-row { display: flex; gap: var(--space-sm); margin-top: var(--space-sm); }
+.start-btns-row .start-btn { flex: 1; }
+.start-btn-digital {
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, #00cfff, #0ea5e9);
+  border: none; border-radius: var(--radius-lg); color: #002233;
+  font-family: inherit; font-size: var(--font-size-md); font-weight: 900;
+  cursor: pointer; transition: all var(--transition-base);
+  min-height: var(--touch-min);
+}
+.start-btn-digital:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,207,255,.3); }
+.start-btn-digital:active { transform: scale(0.97); }
+
 /* ── Narrator Modal ── */
 .narrator-overlay {
   display: none; position: fixed; inset: 0; z-index: 850;

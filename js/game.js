@@ -462,6 +462,139 @@ function revealAll() {
 }
 
 function closeOverlay() { document.getElementById("revealOverlay").classList.remove("show"); }
+
+// ══════════════════════════════════════════
+// DIGITAL ROLE DISTRIBUTION
+// ══════════════════════════════════════════
+let digitalPollInterval = null;
+
+async function startDigitalGame() {
+  // Gather roles like startGame does
+  let roles = [];
+  if (state.isCustom) {
+    const name = document.getElementById("customName").value.trim() || "گروه دلخواه";
+    const mc = customCardsList.filter(c => c.team === "mafia").length;
+    const cc = customCardsList.filter(c => c.team === "citizen").length;
+    if (customCardsList.length < 3) { showToast("⚠️ حداقل ۳ کارت اضافه کنید"); return; }
+    if (mc < 1) { showToast("⚠️ حداقل یک کارت مافیا لازم است"); return; }
+    if (cc < 1) { showToast("⚠️ حداقل یک کارت شهروند لازم است"); return; }
+    state.group = name;
+    roles = customCardsList.map(c => ({ name: c.name, team: c.team }));
+  } else {
+    if (!state.group || !state.count) { showToast("⚠️ لطفاً گروه و تعداد را انتخاب کنید"); return; }
+    const groupData = ROLES_DATA[state.group] && ROLES_DATA[state.group][state.count];
+    if (!groupData) { showToast("⚠️ داده سناریو یافت نشد"); return; }
+    groupData.mafia.forEach(n => roles.push({ name: n, team: "mafia" }));
+    groupData.citizen.forEach(n => roles.push({ name: n, team: "citizen" }));
+  }
+
+  // Create room on server
+  try {
+    const r = await fetch(API + "/api/digital/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roles, group: state.group })
+    });
+    const data = await r.json();
+    if (!r.ok) { showToast("⚠️ " + (data.error || "خطا")); return; }
+
+    // Show host overlay with code
+    document.getElementById("digitalCode").textContent = data.code;
+    document.getElementById("digitalTotal").textContent = toFarsiNum(data.total);
+    document.getElementById("digitalAssigned").textContent = toFarsiNum(0);
+    document.getElementById("digitalProgressBar").style.width = "0%";
+    document.getElementById("digitalStatus").textContent = "در انتظار بازیکنان...";
+    document.getElementById("digitalOverlay").classList.add("show");
+
+    // Poll for status updates
+    if (digitalPollInterval) clearInterval(digitalPollInterval);
+    digitalPollInterval = setInterval(() => pollDigitalStatus(data.code), 2000);
+
+  } catch (e) {
+    showToast("⚠️ خطا در اتصال به سرور");
+  }
+}
+
+async function pollDigitalStatus(code) {
+  try {
+    const r = await fetch(API + "/api/digital/status/" + code);
+    const data = await r.json();
+    if (!r.ok) return;
+
+    document.getElementById("digitalAssigned").textContent = toFarsiNum(data.assigned);
+    const pct = data.total > 0 ? (data.assigned / data.total) * 100 : 0;
+    document.getElementById("digitalProgressBar").style.width = pct + "%";
+
+    if (data.done) {
+      document.getElementById("digitalStatus").textContent = "🎉 همه نقش‌ها تقسیم شد!";
+      document.getElementById("digitalStatus").style.color = "#4ade80";
+      clearInterval(digitalPollInterval);
+      digitalPollInterval = null;
+      haptic('heavy');
+    } else {
+      document.getElementById("digitalStatus").textContent = `${toFarsiNum(data.remaining)} نقش باقی‌مانده`;
+    }
+  } catch {}
+}
+
+function closeDigitalRoom() {
+  document.getElementById("digitalOverlay").classList.remove("show");
+  if (digitalPollInterval) { clearInterval(digitalPollInterval); digitalPollInterval = null; }
+}
+
+// ── Player side: join and receive ──
+function openDigitalPlayer() {
+  document.getElementById("digitalJoinPhase").style.display = "block";
+  document.getElementById("digitalRolePhase").style.display = "none";
+  document.getElementById("digitalJoinCode").value = "";
+  document.getElementById("digitalPlayerOverlay").classList.add("show");
+  setTimeout(() => document.getElementById("digitalJoinCode").focus(), 300);
+}
+
+function closeDigitalPlayer() {
+  document.getElementById("digitalPlayerOverlay").classList.remove("show");
+}
+
+async function joinDigitalRoom() {
+  const code = document.getElementById("digitalJoinCode").value.trim().toUpperCase();
+  if (code.length < 3) { showToast("⚠️ کد اتاق را وارد کنید"); return; }
+
+  try {
+    const r = await fetch(API + "/api/digital/receive/" + code, { method: "POST" });
+    const data = await r.json();
+
+    if (!r.ok) {
+      showToast("⚠️ " + (data.error || "خطا"));
+      return;
+    }
+
+    const role = data.role;
+    haptic('heavy');
+
+    // Show role
+    const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
+    const teamNames = { mafia: "😈 مافیا", citizen: "😇 شهروند", independent: "🐺 مستقل" };
+    const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
+
+    document.getElementById("digitalRoleEmoji").textContent = ROLE_ICONS[role.name] || teamEmojis[role.team] || "🎭";
+    document.getElementById("digitalRoleName").textContent = role.name;
+    document.getElementById("digitalRoleName").style.color = teamColors[role.team] || "#fff";
+    document.getElementById("digitalRoleTeam").textContent = teamNames[role.team] || role.team;
+    document.getElementById("digitalRoleTeam").style.color = teamColors[role.team] || "#fff";
+
+    // Find ability
+    const abilityInfo = ROLE_ABILITIES[role.name];
+    document.getElementById("digitalRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
+    document.getElementById("digitalRoleNum").textContent = `بازیکن شماره ${toFarsiNum(data.playerNum)}`;
+
+    // Switch to reveal phase
+    document.getElementById("digitalJoinPhase").style.display = "none";
+    document.getElementById("digitalRolePhase").style.display = "block";
+
+  } catch (e) {
+    showToast("⚠️ خطا در اتصال");
+  }
+}
 function flipAllBack() { shuffleCards(); }
 function goBack() { exitGameFullscreen(); }
 
