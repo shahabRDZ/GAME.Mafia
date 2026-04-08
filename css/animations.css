@@ -131,6 +131,33 @@
     50% { opacity: .3; }
   }
 
+  /* ── Lightning flash on card flip ── */
+  @keyframes lightningFlash {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    10% { opacity: 0.2; }
+    15% { opacity: 0.9; }
+    20% { opacity: 0.1; }
+    30% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0; }
+  }
+  @keyframes lightningGlow {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    10% { opacity: 0.3; }
+    15% { opacity: 0.8; }
+    25% { opacity: 0.4; }
+    100% { opacity: 0; }
+  }
+  @keyframes screenFlash {
+    0% { opacity: 0; }
+    5% { opacity: 0.15; }
+    10% { opacity: 0; }
+    15% { opacity: 0.1; }
+    100% { opacity: 0; }
+  }
+
 } /* end prefers-reduced-motion: no-preference */
 
 /* Fallback keyframes for reduced-motion (simple opacity-only fades) */
