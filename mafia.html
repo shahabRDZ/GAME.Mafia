@@ -316,10 +316,11 @@
         </div>
         <div class="mod-timer-display" id="modTimerDisplay">۰۰:۰۰</div>
         <div class="mod-timer-controls">
+          <button class="mod-btn" onclick="setModTimer(30)">۳۰ ثانیه</button>
+          <button class="mod-btn" onclick="setModTimer(45)">۴۵ ثانیه</button>
           <button class="mod-btn" onclick="setModTimer(60)">۱ دقیقه</button>
           <button class="mod-btn" onclick="setModTimer(120)">۲ دقیقه</button>
           <button class="mod-btn" onclick="setModTimer(180)">۳ دقیقه</button>
-          <button class="mod-btn" onclick="setModTimer(300)">۵ دقیقه</button>
         </div>
         <div class="mod-timer-actions">
           <button class="mod-btn mod-btn-start" id="modTimerStartBtn" onclick="toggleModTimer()">شروع</button>
@@ -328,15 +329,40 @@
         </div>
       </div>
 
-      <!-- Voting System -->
+      <!-- Warning System (3 warnings = elimination) -->
       <div class="mod-section">
-        <div class="section-title" style="justify-content:center">🗳️ رأی‌گیری</div>
-        <div class="mod-vote-players" id="modVotePlayers"></div>
+        <div class="section-title" style="justify-content:center">⚠️ اخطار <span style="font-size:0.7rem;color:var(--dim);font-weight:400">(۳ اخطار = اخراج)</span></div>
+        <div class="mod-vote-players" id="modWarningPlayers"></div>
         <div class="mod-vote-actions">
-          <button class="mod-btn mod-btn-start" onclick="startVoting()">شروع رأی‌گیری</button>
-          <button class="mod-btn" onclick="resetVotes()">ریست آرا</button>
+          <button class="mod-btn" onclick="resetWarnings()">ریست اخطارها</button>
         </div>
-        <div class="mod-vote-result" id="modVoteResult"></div>
+      </div>
+
+      <!-- Night Actions -->
+      <div class="mod-section">
+        <div class="section-title" style="justify-content:center">🌙 اقدامات شب</div>
+        <div class="mod-night-actions">
+          <div class="mod-night-item">
+            <div class="mod-night-label">💀 شات مافیا</div>
+            <div class="mod-night-target">
+              <span>شماره بازیکن:</span>
+              <input type="number" id="nightShotInput" min="1" placeholder="—" class="mod-night-input">
+              <button class="mod-btn mod-btn-start" onclick="nightShot()" style="padding:6px 14px">ثبت شات</button>
+            </div>
+            <div class="mod-night-result" id="nightShotResult"></div>
+          </div>
+          <div class="mod-night-item">
+            <div class="mod-night-label">💊 سیو دکتر</div>
+            <div class="mod-night-target">
+              <span>شماره بازیکن:</span>
+              <input type="number" id="nightSaveInput" min="1" placeholder="—" class="mod-night-input">
+              <button class="mod-btn mod-btn-phase" onclick="nightSave()" style="padding:6px 14px">ثبت سیو</button>
+            </div>
+            <div class="mod-night-result" id="nightSaveResult"></div>
+          </div>
+          <button class="mod-btn mod-btn-start" onclick="resolveNight()" style="width:100%;margin-top:8px">🌅 نتیجه شب</button>
+          <div class="mod-night-result" id="nightFinalResult" style="font-size:1rem;margin-top:8px"></div>
+        </div>
       </div>
 
       <!-- Share -->

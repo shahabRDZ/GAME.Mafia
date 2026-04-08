@@ -841,6 +841,37 @@
   color: var(--accent2); min-height: 1.5rem;
 }
 
+/* Night actions */
+.mod-night-actions { display: flex; flex-direction: column; gap: var(--space-sm); }
+.mod-night-item {
+  padding: var(--space-sm); background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-md);
+}
+.mod-night-label { font-weight: 700; font-size: var(--font-size-sm); margin-bottom: var(--space-xs); }
+.mod-night-target {
+  display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap;
+  font-size: var(--font-size-sm); color: var(--dim);
+}
+.mod-night-input {
+  width: 3.5rem; padding: 6px 8px; text-align: center;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--radius-sm); color: #fff; font-family: inherit;
+  font-size: var(--font-size-md); font-weight: 900;
+}
+.mod-night-input:focus { border-color: var(--accent); outline: none; }
+.mod-night-result {
+  margin-top: var(--space-xs); font-size: var(--font-size-sm);
+  font-weight: 700; text-align: center; min-height: 1.2rem;
+}
+
+/* Warning card states */
+.mod-vote-card .warn-dots { display: flex; gap: 3px; justify-content: center; }
+.warn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,.12); transition: all var(--transition-fast);
+}
+.warn-dot.active { background: var(--accent); box-shadow: 0 0 6px rgba(233,69,96,.4); }
+
 /* ── Form Validation States ── */
 .input-error {
   border-color: var(--accent) !important;
