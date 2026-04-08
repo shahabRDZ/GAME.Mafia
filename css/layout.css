@@ -37,9 +37,12 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
 
 /* ── Glassmorphism card ── */
 .gc {
-  background: var(--glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--gb); border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .gc { background: rgba(10, 5, 8, 0.92); }
 }
 
 /* ── Nav ── */

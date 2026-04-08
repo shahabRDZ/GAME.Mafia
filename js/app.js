@@ -11,6 +11,49 @@ document.getElementById("revealOverlay").addEventListener("click", function (e) 
 document.getElementById("authModal").addEventListener("click", function (e) { if (e.target === this) closeAuthModal(); });
 document.getElementById("scenarioOverlay").addEventListener("click", function (e) { if (e.target === this) closeScenarioOverlay(); });
 
+// ── Swipe-to-dismiss for modals/overlays ──
+function initSwipeDismiss(boxSelector, closeFn) {
+  const box = document.querySelector(boxSelector);
+  if (!box) return;
+  let startY = 0, currentY = 0, isDragging = false;
+  box.addEventListener("touchstart", e => {
+    if (box.scrollTop > 5) return;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+    box.style.transition = "none";
+  }, { passive: true });
+  box.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy < 0) { currentY = 0; return; }
+    currentY = dy;
+    box.style.transform = `translateY(${dy * 0.6}px)`;
+    box.style.opacity = Math.max(0.4, 1 - dy / 500);
+  }, { passive: true });
+  box.addEventListener("touchend", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    box.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+    if (currentY > 100) {
+      box.style.transform = "translateY(100vh)";
+      box.style.opacity = "0";
+      if (typeof haptic === 'function') haptic('light');
+      setTimeout(() => {
+        closeFn();
+        box.style.transform = "";
+        box.style.opacity = "";
+      }, 300);
+    } else {
+      box.style.transform = "";
+      box.style.opacity = "";
+    }
+    currentY = 0;
+  }, { passive: true });
+}
+initSwipeDismiss(".reveal-box", closeOverlay);
+initSwipeDismiss(".modal-box", closeAuthModal);
+initSwipeDismiss(".scenario-box", closeScenarioOverlay);
+
 // Initialize
 applyLang();
 initAuth();
