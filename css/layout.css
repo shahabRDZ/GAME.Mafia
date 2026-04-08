@@ -31,7 +31,7 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
 }
 .logo-sub {
   font-size: var(--font-size-sm); color: var(--dim);
-  letter-spacing: 6px; margin-block-start: var(--space-2xs);
+  letter-spacing: 3px; margin-block-start: var(--space-2xs);
   text-transform: uppercase;
 }
 
@@ -73,6 +73,8 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
 .game-fullscreen {
   position: fixed; inset: 0; z-index: var(--z-overlay);
   background: var(--dark); display: flex; flex-direction: column; overflow: hidden;
+  padding-top: var(--safe-top); padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left); padding-right: var(--safe-right);
 }
 .game-fullscreen .game-info, .game-fullscreen .game-actions { display: none; }
 .game-fullscreen .card-stage {
@@ -169,8 +171,8 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
   .modal-box { padding: var(--space-lg) var(--space-md); }
   .nav { gap: var(--space-2xs); }
   .nav-btn { padding-inline: var(--space-md); font-size: 0.8rem; }
-  .logo-sub { letter-spacing: 3px; font-size: 0.72rem; }
-  .site-footer { font-size: 0.72rem; }
+  .logo-sub { letter-spacing: 2px; font-size: 0.76rem; }
+  .site-footer { font-size: 0.76rem; }
 }
 
 /* Tablets (≤768px) */
