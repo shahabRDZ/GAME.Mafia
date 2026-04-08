@@ -219,7 +219,7 @@ function initSwipeGesture(wrapper, card) {
   wrapper.addEventListener("touchmove", e => {
     if (!isDragging) return;
     const cardEl = wrapper.querySelector(".card");
-    if (!cardEl || !cardEl.classList.contains("flipped")) return;
+    if (!cardEl || !cardRevealed) return;
     const dx = e.touches[0].clientX - startX;
     const dy = Math.abs(e.touches[0].clientY - startY);
     if (dy > Math.abs(dx)) return; // vertical scroll
@@ -233,10 +233,12 @@ function initSwipeGesture(wrapper, card) {
     isDragging = false;
     wrapper.style.transition = "transform 0.3s ease, opacity 0.3s ease";
     const cardEl = wrapper.querySelector(".card");
-    if (cardEl && cardEl.classList.contains("flipped") && Math.abs(currentX) > threshold) {
+    if (cardEl && cardRevealed && Math.abs(currentX) > threshold) {
       haptic('light');
       wrapper.style.transform = `translateX(${currentX > 0 ? 300 : -300}px) rotate(${currentX > 0 ? 15 : -15}deg)`;
       wrapper.style.opacity = "0";
+      cardRevealed = false;
+      stopAmbientLightning();
       setTimeout(() => {
         if (state.queueIdx + 1 >= state.cards.length) { showCompletion(); }
         else { state.queueIdx++; showCurrentCard(); }
@@ -258,38 +260,30 @@ function haptic(style = 'light') {
   } catch {}
 }
 
-let isFlipping = false;
+let cardRevealed = false;
 
 function flipCurrentCard(e, card) {
   const cardEl = document.querySelector("#cardSlot .card");
   if (!cardEl) return;
 
-  // If already flipped, go to next card
-  if (cardEl.classList.contains("flipped")) {
+  // Card is showing role — go to next
+  if (cardRevealed) {
+    cardRevealed = false;
     stopAmbientLightning();
     if (state.queueIdx + 1 >= state.cards.length) { showCompletion(); }
     else { nextCard(); }
     return;
   }
 
-  // Prevent double-tap during flip animation
-  if (isFlipping) return;
-  isFlipping = true;
-
-  // Lightning + flip
-  cardEl.classList.add("lightning-active");
-  haptic('heavy');
+  // Flip the card to show role
+  cardEl.classList.add("flipped");
+  cardRevealed = true;
+  haptic('medium');
   spawnLightningFlash();
-  setTimeout(() => {
-    cardEl.classList.remove("lightning-active");
-    cardEl.classList.add("flipped");
-    isFlipping = false;
-    haptic('medium');
-    startAmbientLightning();
-  }, 350);
+  startAmbientLightning();
   state.seen.add(card.number);
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
-  setTimeout(() => showFunnyText(card), 850);
+  setTimeout(() => showFunnyText(card), 500);
   setTimeout(() => {
     const front = cardEl.querySelector(".card-front");
     if (front) {
@@ -298,7 +292,7 @@ function flipCurrentCard(e, card) {
       hint.textContent = 'لمس کنید — نفر بعدی';
       front.appendChild(hint);
     }
-  }, 700);
+  }, 600);
 }
 
 // ── Screen-wide lightning flash ──
@@ -381,7 +375,7 @@ function stopAmbientLightning() {
 }
 
 function nextCard() {
-  isFlipping = false;
+  cardRevealed = false;
   const funny = document.querySelector(".funny-container");
   if (funny) funny.remove();
   const slot = document.getElementById("cardSlot");
