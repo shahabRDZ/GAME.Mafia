@@ -678,6 +678,13 @@
 .comp-btn-review:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,200,100,.3); }
 .comp-btn-reshuffle { background: rgba(255,255,255,.06); color: var(--dim); border: 1px solid rgba(255,255,255,.1); }
 .comp-btn-reshuffle:hover { background: rgba(255,255,255,.1); transform: translateY(-2px); }
+.comp-btn-new { background: linear-gradient(135deg, var(--accent), #c0392b); color: #fff; border: 1px solid rgba(233,69,96,.4); }
+.comp-btn-new:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(233,69,96,.3); }
+@media (max-width: 30em) {
+  .completion-actions { flex-direction: column; }
+  .comp-btn { width: 100%; }
+  .completion-banner { max-width: 90vw; margin-inline: auto; }
+}
 
 /* ── Form Validation States ── */
 .input-error {
