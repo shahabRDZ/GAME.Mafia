@@ -238,6 +238,23 @@ main { padding-bottom: 5rem; }
   color: var(--accent2); font-weight: 700;
 }
 
+/* ── Narrator display in game ── */
+.fs-narrator {
+  display: none; text-align: center;
+  padding: 0 var(--space-md) var(--space-xs);
+}
+.game-fullscreen .fs-narrator { display: block; }
+.fs-narrator-label {
+  font-size: 0.65rem; color: var(--dim); letter-spacing: 1px;
+}
+.fs-narrator-name {
+  font-size: var(--font-size-sm); font-weight: 900;
+  color: var(--accent2);
+  background: linear-gradient(90deg, var(--accent2), #e67e22);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* ── Footer ── */
 .site-footer {
   text-align: center;

@@ -249,6 +249,12 @@
       </button>
     </div>
 
+    <!-- Narrator Banner -->
+    <div class="fs-narrator" id="fsNarrator" style="display:none">
+      <span class="fs-narrator-label">به روایت</span>
+      <span class="fs-narrator-name" id="fsNarratorName"></span>
+    </div>
+
     <!-- Progress + Stats Bar -->
     <div class="fs-stats-bar">
       <div class="fs-progress-track"><div class="fs-progress-fill" id="fsProgressFill" style="width:0%"></div></div>
@@ -469,6 +475,20 @@
   <span>ساخته شده توسط</span>
   <a href="https://shahabrdz.dev/" target="_blank" rel="noopener">shahabrdz.dev</a>
 </footer>
+
+<!-- Narrator Modal -->
+<div class="narrator-overlay" id="narratorModal">
+  <div class="narrator-box">
+    <div class="narrator-glow"></div>
+    <div class="narrator-icon">🎙️</div>
+    <div class="narrator-title">بازی به روایت</div>
+    <div class="narrator-input-wrap">
+      <input type="text" id="narratorNameInput" value="گرداننده شوشانگ" maxlength="30" autocomplete="off" class="narrator-input" placeholder="نام گرداننده..." onkeydown="if(event.key==='Enter')confirmNarrator()">
+    </div>
+    <div class="narrator-scenario-info" id="narratorScenarioInfo"></div>
+    <button class="narrator-btn" onclick="confirmNarrator()">شروع پخش نقش</button>
+  </div>
+</div>
 
 <!-- Onboarding Modal -->
 <div class="onboard-overlay" id="onboardModal">
