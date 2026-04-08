@@ -428,10 +428,20 @@ function buildCard(card, flipped = false) {
 }
 
 function revealAll() {
+  if (!authToken) {
+    showToast("⚠️ برای بازبینی نقش‌ها وارد حساب شوید");
+    exitGameFullscreen();
+    openAuthModal('login');
+    return;
+  }
+
   const mafias = state.cards.filter(c => c.role === "mafia").sort((a, b) => a.number - b.number);
   const citizens = state.cards.filter(c => c.role === "citizen").sort((a, b) => a.number - b.number);
   const independents = state.cards.filter(c => c.role === "independent").sort((a, b) => a.number - b.number);
-  let html = `<div class="summary-grid">
+
+  const savedBadge = currentUser ? '<div style="text-align:center;margin-bottom:12px"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:50px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:#4ade80;font-size:0.78rem;font-weight:700">✓ ذخیره شده در تاریخچه</span></div>' : '';
+
+  let html = savedBadge + `<div class="summary-grid">
     <div class="summary-col mafia-col">
       <h4>😈 مافیا (${toFarsiNum(mafias.length)} نفر)</h4>
       <ul class="summary-list mafia-list">
