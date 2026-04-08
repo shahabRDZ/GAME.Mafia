@@ -553,6 +553,196 @@ function showNfcRoleReveal(data) {
   document.getElementById("digitalPlayerOverlay").classList.add("show");
 }
 
+// ══════════════════════════════════════════
+// NEARBY PLAYERS — Location-based
+// ══════════════════════════════════════════
+let nearbySearchInterval = null;
+let nearbySelectedIds = new Set();
+let nearbyRoleCheckInterval = null;
+
+async function startNearbyGame() {
+  if (!authToken) { showToast("⚠️ ابتدا وارد شوید"); openAuthModal('login'); return; }
+
+  // Get roles ready (same logic as digital)
+  let roles = [];
+  if (state.isCustom) {
+    const mc = customCardsList.filter(c => c.team === "mafia").length;
+    const cc = customCardsList.filter(c => c.team === "citizen").length;
+    if (customCardsList.length < 3 || mc < 1 || cc < 1) { showToast("⚠️ نقش‌ها ناکافی"); return; }
+    roles = customCardsList.map(c => ({ name: c.name, team: c.team }));
+  } else {
+    if (!state.group || !state.count) { showToast("⚠️ سناریو و تعداد انتخاب کنید"); return; }
+    const groupData = ROLES_DATA[state.group] && ROLES_DATA[state.group][state.count];
+    if (!groupData) { showToast("⚠️ سناریو پیدا نشد"); return; }
+    groupData.mafia.forEach(n => roles.push({ name: n, team: "mafia" }));
+    groupData.citizen.forEach(n => roles.push({ name: n, team: "citizen" }));
+  }
+  window._nearbyRoles = roles;
+
+  // Request location
+  if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
+
+  document.getElementById("nearbyOverlay").classList.add("show");
+  document.getElementById("nearbyStatus").textContent = "📍 در حال دریافت لوکیشن...";
+  document.getElementById("nearbyPlayerList").innerHTML = "";
+  document.getElementById("nearbyAssignBtn").style.display = "none";
+  nearbySelectedIds = new Set();
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      // Register own location
+      await apiFetch("/api/nearby/register", {
+        method: "POST", body: JSON.stringify({ lat, lng })
+      });
+
+      // Search nearby
+      searchNearby(lat, lng);
+      nearbySearchInterval = setInterval(() => searchNearby(lat, lng), 5000);
+    },
+    () => {
+      document.getElementById("nearbyStatus").textContent = "❌ دسترسی به لوکیشن رد شد";
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+async function searchNearby(lat, lng) {
+  const r = await apiFetch("/api/nearby/find", {
+    method: "POST", body: JSON.stringify({ lat, lng, radius: 200 })
+  });
+  if (!r.ok) return;
+  const players = r.data;
+  const list = document.getElementById("nearbyPlayerList");
+
+  if (!players.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim)">هنوز کسی پیدا نشده...<br><span style="font-size:0.72rem">بازیکنان باید اپ رو باز کنن و لوکیشن بدن</span></div>';
+    document.getElementById("nearbyStatus").textContent = "🔍 در حال جستجو...";
+    return;
+  }
+
+  document.getElementById("nearbyStatus").textContent = `${toFarsiNum(players.length)} نفر پیدا شد`;
+
+  list.innerHTML = players.map(p => {
+    const sel = nearbySelectedIds.has(p.user_id);
+    return `<div class="nearby-item${sel ? ' selected' : ''}" onclick="toggleNearbyPlayer(${p.user_id}, this)">
+      ${renderAvatar(p.username, '2rem')}
+      <span class="nearby-name">${escapeHtml(p.username)}</span>
+      <span class="nearby-dist">${toFarsiNum(p.distance)} متر</span>
+      <span class="nearby-check">${sel ? '✓' : ''}</span>
+    </div>`;
+  }).join('');
+
+  updateNearbyAssignBtn();
+}
+
+function toggleNearbyPlayer(uid, el) {
+  if (nearbySelectedIds.has(uid)) {
+    nearbySelectedIds.delete(uid);
+    el.classList.remove("selected");
+    el.querySelector(".nearby-check").textContent = "";
+  } else {
+    nearbySelectedIds.add(uid);
+    el.classList.add("selected");
+    el.querySelector(".nearby-check").textContent = "✓";
+  }
+  haptic('light');
+  updateNearbyAssignBtn();
+}
+
+function updateNearbyAssignBtn() {
+  const btn = document.getElementById("nearbyAssignBtn");
+  const roles = window._nearbyRoles || [];
+  if (nearbySelectedIds.size > 0 && nearbySelectedIds.size <= roles.length) {
+    btn.style.display = "block";
+    btn.textContent = `🎲 پخش نقش به ${toFarsiNum(nearbySelectedIds.size)} نفر`;
+  } else {
+    btn.style.display = "none";
+  }
+}
+
+async function assignNearbyRoles() {
+  const roles = window._nearbyRoles || [];
+  const playerIds = [...nearbySelectedIds];
+  if (playerIds.length > roles.length) {
+    showToast(`⚠️ ${toFarsiNum(roles.length)} نقش برای ${toFarsiNum(playerIds.length)} نفر کافی نیست`);
+    return;
+  }
+  // Take only needed roles
+  const selectedRoles = roles.slice(0, playerIds.length);
+
+  const r = await apiFetch("/api/nearby/assign", {
+    method: "POST",
+    body: JSON.stringify({ player_ids: playerIds, roles: selectedRoles })
+  });
+
+  if (!r.ok) { showToast("⚠️ " + (r.data?.error || "خطا")); return; }
+
+  haptic('heavy');
+  showToast(`🎉 نقش‌ها به ${toFarsiNum(playerIds.length)} نفر ارسال شد!`);
+  document.getElementById("nearbyStatus").textContent = "✅ نقش‌ها ارسال شد — بازیکنان نوتیفیکیشن دریافت می‌کنن";
+  document.getElementById("nearbyAssignBtn").style.display = "none";
+}
+
+function closeNearby() {
+  document.getElementById("nearbyOverlay").classList.remove("show");
+  if (nearbySearchInterval) { clearInterval(nearbySearchInterval); nearbySearchInterval = null; }
+}
+
+// ── Player side: share location + poll for role ──
+async function shareMyLocation() {
+  if (!authToken) { showToast("⚠️ ابتدا وارد شوید"); return; }
+  if (!navigator.geolocation) { showToast("⚠️ لوکیشن ندارید"); return; }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      await apiFetch("/api/nearby/register", {
+        method: "POST",
+        body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+      });
+      showToast("📍 لوکیشن ثبت شد — منتظر نقش باشید");
+
+      // Start polling for role
+      if (nearbyRoleCheckInterval) clearInterval(nearbyRoleCheckInterval);
+      nearbyRoleCheckInterval = setInterval(checkMyNearbyRole, 3000);
+    },
+    () => showToast("❌ دسترسی لوکیشن رد شد"),
+    { enableHighAccuracy: true }
+  );
+}
+
+async function checkMyNearbyRole() {
+  const r = await apiFetch("/api/nearby/my-role");
+  if (!r.ok || !r.data.assigned) return;
+
+  clearInterval(nearbyRoleCheckInterval);
+  nearbyRoleCheckInterval = null;
+
+  const role = r.data.role;
+  haptic('heavy');
+  if (navigator.vibrate) navigator.vibrate([100, 50, 200]);
+
+  // Send notification
+  if (typeof sendLocalNotification === 'function') {
+    sendLocalNotification('🎭 نقش شما آماده شد!', `${role.name} — لمس کنید`);
+  }
+
+  // Show role
+  const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
+  const teamNames = { mafia: "😈 مافیا", citizen: "😇 شهروند", independent: "🐺 مستقل" };
+  document.getElementById("nearbyRoleEmoji").textContent = ROLE_ICONS[role.name] || "🎭";
+  document.getElementById("nearbyRoleName").textContent = role.name;
+  document.getElementById("nearbyRoleName").style.color = teamColors[role.team] || "#fff";
+  document.getElementById("nearbyRoleTeam").textContent = teamNames[role.team] || role.team;
+  document.getElementById("nearbyRoleTeam").style.color = teamColors[role.team] || "#fff";
+  const abilityInfo = ROLE_ABILITIES[role.name];
+  document.getElementById("nearbyRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
+  document.getElementById("nearbyRoleNum").textContent = `بازیکن شماره ${toFarsiNum(r.data.playerNum)}`;
+  document.getElementById("nearbyRoleOverlay").classList.add("show");
+}
+
 function generateHostQr(code) {
   // Simple QR using ZXing on server or a tiny inline generator
   const container = document.getElementById("digitalQrContainer");

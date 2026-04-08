@@ -802,6 +802,98 @@ def digital_room_status(code):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# NEARBY PLAYERS — Location-based role distribution
+# ══════════════════════════════════════════════════════════════════════════════
+import math, time as _time
+
+nearby_players = {}  # user_id -> {username, lat, lng, ts, sid}
+nearby_roles = {}    # user_id -> {role, playerNum, gameId}
+
+def haversine(lat1, lng1, lat2, lng2):
+    """Distance in meters between two GPS points."""
+    R = 6371000
+    p = math.pi / 180
+    a = 0.5 - math.cos((lat2-lat1)*p)/2 + math.cos(lat1*p)*math.cos(lat2*p)*(1-math.cos((lng2-lng1)*p))/2
+    return 2 * R * math.asin(math.sqrt(a))
+
+@app.route("/api/nearby/register", methods=["POST"])
+@jwt_required()
+def register_nearby():
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    lat = data.get("lat")
+    lng = data.get("lng")
+    if lat is None or lng is None:
+        return jsonify({"error": "لوکیشن نامعتبر"}), 400
+    nearby_players[user.id] = {
+        "username": user.username,
+        "lat": float(lat), "lng": float(lng),
+        "ts": _time.time(),
+        "user_id": user.id
+    }
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/nearby/find", methods=["POST"])
+@jwt_required()
+def find_nearby():
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    my_lat = float(data.get("lat", 0))
+    my_lng = float(data.get("lng", 0))
+    radius = float(data.get("radius", 200))  # meters
+    now = _time.time()
+    # Clean stale entries (older than 5 min)
+    stale = [uid for uid, p in nearby_players.items() if now - p["ts"] > 300]
+    for uid in stale:
+        nearby_players.pop(uid, None)
+    # Find nearby
+    results = []
+    for uid, p in nearby_players.items():
+        if uid == user.id:
+            continue
+        dist = haversine(my_lat, my_lng, p["lat"], p["lng"])
+        if dist <= radius:
+            results.append({
+                "user_id": uid, "username": p["username"],
+                "distance": round(dist)
+            })
+    results.sort(key=lambda x: x["distance"])
+    return jsonify(results), 200
+
+@app.route("/api/nearby/assign", methods=["POST"])
+@jwt_required()
+def assign_nearby_roles():
+    """Host assigns roles to selected nearby players."""
+    data = request.get_json()
+    player_ids = data.get("player_ids", [])
+    roles = data.get("roles", [])
+    if not player_ids or not roles:
+        return jsonify({"error": "بازیکنان یا نقش‌ها خالی است"}), 400
+    if len(player_ids) != len(roles):
+        return jsonify({"error": "تعداد بازیکنان و نقش‌ها برابر نیست"}), 400
+    # Shuffle roles
+    random.shuffle(roles)
+    game_id = str(int(_time.time() * 1000))
+    for i, uid in enumerate(player_ids):
+        nearby_roles[uid] = {
+            "role": roles[i],
+            "playerNum": i + 1,
+            "gameId": game_id
+        }
+    return jsonify({"ok": True, "gameId": game_id, "count": len(player_ids)}), 200
+
+@app.route("/api/nearby/my-role", methods=["GET"])
+@jwt_required()
+def get_my_nearby_role():
+    """Player checks if a role has been assigned to them."""
+    user = db.session.get(User, int(get_jwt_identity()))
+    role_data = nearby_roles.pop(user.id, None)
+    if not role_data:
+        return jsonify({"assigned": False}), 200
+    return jsonify({"assigned": True, **role_data}), 200
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # WEBSOCKET EVENTS
 # ══════════════════════════════════════════════════════════════════════════════
 
