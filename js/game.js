@@ -467,6 +467,91 @@ function closeOverlay() { document.getElementById("revealOverlay").classList.rem
 // DIGITAL ROLE DISTRIBUTION
 // ══════════════════════════════════════════
 let digitalPollInterval = null;
+let nfcWriter = null;
+let nfcReader = null;
+
+// ── Web NFC: Host pushes URL, Player auto-reads ──
+async function startNfcBroadcast(code) {
+  if (!('NDEFReader' in window)) return false;
+  try {
+    nfcWriter = new NDEFReader();
+    const url = `${window.location.origin}?nfc=${code}`;
+    await nfcWriter.write({
+      records: [{ recordType: "url", data: url }]
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function startNfcScan() {
+  if (!('NDEFReader' in window)) return false;
+  try {
+    nfcReader = new NDEFReader();
+    await nfcReader.scan();
+    nfcReader.addEventListener("reading", ({ message }) => {
+      for (const record of message.records) {
+        if (record.recordType === "url") {
+          const text = new TextDecoder().decode(record.data);
+          const match = text.match(/[?&]nfc=([A-Z0-9]{5})/);
+          if (match) {
+            haptic('heavy');
+            if (navigator.vibrate) navigator.vibrate([50, 30, 100, 30, 50]);
+            autoJoinDigital(match[1]);
+            return;
+          }
+        }
+        if (record.recordType === "text") {
+          const text = new TextDecoder().decode(record.data);
+          if (/^[A-Z0-9]{5}$/.test(text)) {
+            haptic('heavy');
+            if (navigator.vibrate) navigator.vibrate([50, 30, 100, 30, 50]);
+            autoJoinDigital(text);
+            return;
+          }
+        }
+      }
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function autoJoinDigital(code) {
+  try {
+    const r = await fetch(API + "/api/digital/receive/" + code, { method: "POST" });
+    const data = await r.json();
+    if (!r.ok) { showToast("⚠️ " + (data.error || "خطا")); return; }
+
+    haptic('heavy');
+    showNfcRoleReveal(data);
+  } catch {
+    showToast("⚠️ خطا در دریافت نقش");
+  }
+}
+
+function showNfcRoleReveal(data) {
+  const role = data.role;
+  const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
+  const teamNames = { mafia: "😈 مافیا", citizen: "😇 شهروند", independent: "🐺 مستقل" };
+  const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
+
+  document.getElementById("digitalRoleEmoji").textContent = ROLE_ICONS[role.name] || teamEmojis[role.team] || "🎭";
+  document.getElementById("digitalRoleName").textContent = role.name;
+  document.getElementById("digitalRoleName").style.color = teamColors[role.team] || "#fff";
+  document.getElementById("digitalRoleTeam").textContent = teamNames[role.team] || role.team;
+  document.getElementById("digitalRoleTeam").style.color = teamColors[role.team] || "#fff";
+  const abilityInfo = ROLE_ABILITIES[role.name];
+  document.getElementById("digitalRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
+  document.getElementById("digitalRoleNum").textContent = `بازیکن شماره ${toFarsiNum(data.playerNum)}`;
+
+  document.getElementById("digitalJoinPhase").style.display = "none";
+  document.getElementById("digitalTapPhase").style.display = "none";
+  document.getElementById("digitalRolePhase").style.display = "block";
+  document.getElementById("digitalPlayerOverlay").classList.add("show");
+}
 
 async function startDigitalGame() {
   // Gather roles like startGame does
@@ -505,6 +590,12 @@ async function startDigitalGame() {
     document.getElementById("digitalProgressBar").style.width = "0%";
     document.getElementById("digitalStatus").textContent = "در انتظار بازیکنان...";
     document.getElementById("digitalOverlay").classList.add("show");
+
+    // Try NFC broadcast (Android Chrome only)
+    const nfcOk = await startNfcBroadcast(data.code);
+    if (nfcOk) {
+      document.getElementById("digitalStatus").textContent = "📡 NFC فعال — بازیکنان گوشی را نزدیک کنند";
+    }
 
     // Poll for status updates
     if (digitalPollInterval) clearInterval(digitalPollInterval);
@@ -545,13 +636,20 @@ function closeDigitalRoom() {
 // ── Player side: join and receive ──
 let digitalConnectedCode = null;
 
-function openDigitalPlayer() {
+async function openDigitalPlayer() {
   document.getElementById("digitalJoinPhase").style.display = "block";
   document.getElementById("digitalTapPhase").style.display = "none";
   document.getElementById("digitalRolePhase").style.display = "none";
   document.getElementById("digitalJoinCode").value = "";
   digitalConnectedCode = null;
   document.getElementById("digitalPlayerOverlay").classList.add("show");
+
+  // Try NFC scan — if available, auto-receive on tap
+  const nfcOk = await startNfcScan();
+  if (nfcOk) {
+    showToast("📡 NFC فعال — گوشی را نزدیک گرداننده بگیرید");
+  }
+
   setTimeout(() => document.getElementById("digitalJoinCode").focus(), 300);
 }
 
