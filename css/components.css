@@ -655,19 +655,22 @@
 
 /* ── Completion banner ── */
 .completion-banner {
-  display: none; margin-block-end: var(--space-md); padding: 1.375rem var(--space-md);
-  border-radius: 1.25rem; text-align: center;
-  background: linear-gradient(135deg, rgba(0,200,100,.08), rgba(0,150,80,.04));
-  border: 1px solid rgba(0,200,100,.25); animation: fadeIn .5s ease;
+  display: none; margin: auto var(--space-md); padding: var(--space-xl) var(--space-lg);
+  border-radius: var(--radius-2xl); text-align: center;
+  background: rgba(0,200,100,.06);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0,200,100,.2);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 0 60px rgba(0,200,100,.1), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .completion-banner.show { display: block; }
-.completion-icon { font-size: 2.6rem; margin-block-end: var(--space-xs); }
-.completion-title { font-size: var(--font-size-lg); font-weight: 900; color: #44ff99; margin-block-end: var(--space-2xs); text-shadow: 0 0 20px rgba(0,255,100,.4); }
-.completion-sub { font-size: 0.8rem; color: var(--dim); margin-block-end: var(--space-md); }
+.completion-icon { font-size: 3.5rem; margin-block-end: var(--space-sm); animation: funBounce 1.5s ease-in-out infinite; }
+.completion-title { font-size: var(--font-size-xl); font-weight: 900; color: #44ff99; margin-block-end: var(--space-xs); text-shadow: 0 0 20px rgba(0,255,100,.4); }
+.completion-sub { font-size: var(--font-size-sm); color: var(--dim); margin-block-end: var(--space-lg); }
 .completion-actions { display: flex; gap: var(--space-sm); justify-content: center; flex-wrap: wrap; }
 .comp-btn {
-  padding: 0.6875rem 1.375rem; border: none; border-radius: var(--radius-md); cursor: pointer;
-  font-family: inherit; font-size: 0.9rem; font-weight: 700;
+  padding: var(--space-sm) var(--space-lg); border: none; border-radius: var(--radius-lg); cursor: pointer;
+  font-family: inherit; font-size: var(--font-size-base); font-weight: 700;
   transition: all var(--transition-base); min-height: var(--touch-min);
 }
 .comp-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
