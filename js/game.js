@@ -595,7 +595,7 @@ async function startNearbyGame() {
 
       // Register own location
       await apiFetch("/api/nearby/register", {
-        method: "POST", body: JSON.stringify({ lat, lng })
+        method: "POST", body: JSON.stringify({ lat, lng }), _background: true
       });
 
       // Search nearby
@@ -611,7 +611,7 @@ async function startNearbyGame() {
 
 async function searchNearby(lat, lng) {
   const r = await apiFetch("/api/nearby/find", {
-    method: "POST", body: JSON.stringify({ lat, lng, radius: 200 })
+    method: "POST", body: JSON.stringify({ lat, lng, radius: 200 }), _background: true
   });
   if (!r.ok) return;
   const players = r.data;
@@ -714,7 +714,7 @@ async function shareMyLocation() {
 }
 
 async function checkMyNearbyRole() {
-  const r = await apiFetch("/api/nearby/my-role");
+  const r = await apiFetch("/api/nearby/my-role", { _background: true });
   if (!r.ok || !r.data.assigned) return;
 
   clearInterval(nearbyRoleCheckInterval);
