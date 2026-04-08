@@ -718,9 +718,19 @@
   font-size: 5rem; font-weight: 900; color: var(--accent);
   text-shadow: 0 0 30px var(--accent);
 }
+.nearby-card-warning {
+  font-size: 1.1rem; font-weight: 900; color: var(--accent2);
+  margin-top: var(--space-md); letter-spacing: 0.5px;
+}
 .nearby-card-hint {
-  font-size: 0.8rem; color: rgba(255,255,255,.3);
-  margin-top: var(--space-sm); letter-spacing: 1px;
+  font-size: 0.85rem; color: rgba(255,255,255,.4);
+  margin-top: var(--space-xs); line-height: 1.7;
+  text-align: center;
+}
+.nearby-card-tap {
+  font-size: 0.75rem; color: rgba(255,255,255,.2);
+  margin-top: var(--space-md); letter-spacing: 2px;
+  animation: funPulse 1.5s ease-in-out infinite;
 }
 
 /* ── Confirm status lights ── */
