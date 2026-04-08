@@ -81,16 +81,16 @@ function setBtnLoading(btn, loading) {
   btn.classList.toggle('btn-loading', loading);
 }
 
-// ── Empty State ──
-function showEmptyState(container, icon, title, desc) {
-  const tpl = document.getElementById('emptyStateTemplate');
-  if (!tpl || !container) return;
-  const clone = tpl.content.cloneNode(true);
-  clone.querySelector('.empty-state-icon').textContent = icon;
-  clone.querySelector('.empty-state-title').textContent = title;
-  clone.querySelector('.empty-state-desc').textContent = desc;
-  container.innerHTML = '';
-  container.appendChild(clone);
+// ── Empty State with CTA ──
+function showEmptyState(container, icon, title, desc, ctaText, ctaAction) {
+  if (!container) return;
+  container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon">${icon}</div>
+      <div class="empty-state-title">${title}</div>
+      <div class="empty-state-desc">${desc}</div>
+      ${ctaText ? `<button class="empty-state-cta" onclick="${ctaAction}">${ctaText}</button>` : ''}
+    </div>`;
 }
 
 // ── Toast Queue ──

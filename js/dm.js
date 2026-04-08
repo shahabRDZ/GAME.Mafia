@@ -18,7 +18,7 @@ async function loadConversations() {
   const el = document.getElementById("dmConvoList");
   if (!el) return;
   if (!r.ok || !r.data.length) {
-    el.innerHTML = '<div class="custom-empty">هنوز پیامی ندارید<br><span style="font-size:.72rem;color:var(--dim)">از پروفایل روی دوستانتان پیام بدهید</span></div>';
+    showEmptyState(el, '💬', 'هنوز پیامی ندارید', 'از بخش پروفایل با دوستانتان چت کنید', 'رفتن به پروفایل', "showScreen('profile')");
     return;
   }
   el.innerHTML = r.data.map(c => `

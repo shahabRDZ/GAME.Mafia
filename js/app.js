@@ -58,6 +58,17 @@ initSwipeDismiss(".scenario-box", closeScenarioOverlay);
 applyLang();
 initAuth();
 
+// ── Onboarding for first-time users ──
+function showOnboarding() {
+  if (localStorage.getItem('shushang_onboarded')) return;
+  document.getElementById('onboardModal').classList.add('show');
+}
+function closeOnboarding() {
+  document.getElementById('onboardModal').classList.remove('show');
+  localStorage.setItem('shushang_onboarded', '1');
+}
+setTimeout(showOnboarding, 800);
+
 // Track visit (every page load)
 (async function trackVisit() {
   try {
