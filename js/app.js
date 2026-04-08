@@ -77,6 +77,18 @@ function toggleTheme() {
 applyLang();
 initAuth();
 
+// Auto-join digital room if opened via NFC URL (?nfc=CODE)
+(function checkNfcUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const nfcCode = params.get('nfc');
+  if (nfcCode && /^[A-Z0-9]{5}$/.test(nfcCode)) {
+    // Remove param from URL
+    window.history.replaceState({}, '', window.location.pathname);
+    // Auto-receive role
+    setTimeout(() => autoJoinDigital(nfcCode), 500);
+  }
+})();
+
 // ── Onboarding for first-time users ──
 function showOnboarding() {
   if (localStorage.getItem('shushang_onboarded')) return;
