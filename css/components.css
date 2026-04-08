@@ -686,6 +686,44 @@
   .completion-banner { max-width: 90vw; margin-inline: auto; }
 }
 
+/* ── Leaderboard ── */
+.lb-tabs {
+  display: flex; gap: var(--space-xs); margin-bottom: var(--space-md);
+}
+.lb-tab {
+  flex: 1; padding: var(--space-xs);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-full); color: var(--dim);
+  font-family: inherit; font-size: var(--font-size-sm); font-weight: 700;
+  cursor: pointer; transition: all var(--transition-fast);
+  min-height: var(--touch-min);
+}
+.lb-tab.active { background: rgba(245,166,35,.15); border-color: var(--accent2); color: var(--accent2); }
+.lb-tab:active { transform: scale(0.97); }
+
+.lb-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  transition: background var(--transition-fast);
+}
+.lb-item:last-child { border-bottom: none; }
+.lb-rank {
+  width: 2rem; text-align: center; font-weight: 900;
+  font-size: var(--font-size-lg); color: var(--dim);
+}
+.lb-rank.gold { color: #fbbf24; text-shadow: 0 0 8px rgba(251,191,36,.4); }
+.lb-rank.silver { color: #94a3b8; text-shadow: 0 0 8px rgba(148,163,184,.3); }
+.lb-rank.bronze { color: #f97316; text-shadow: 0 0 8px rgba(249,115,22,.3); }
+.lb-info { flex: 1; }
+.lb-name { font-weight: 700; font-size: var(--font-size-base); }
+.lb-stat { font-size: 0.72rem; color: var(--dim); }
+.lb-value {
+  font-weight: 900; font-size: var(--font-size-lg);
+  color: var(--accent2); min-width: 2.5rem; text-align: center;
+}
+.lb-me { background: rgba(245,166,35,.06); border-radius: var(--radius-md); }
+
 /* ── PWA Install Banner ── */
 .pwa-banner {
   position: fixed; bottom: 4.5rem; left: 50%; transform: translateX(-50%);

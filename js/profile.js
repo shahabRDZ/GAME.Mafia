@@ -160,3 +160,36 @@ function inviteFriendToRoom(userId) {
   if (!chaosState.roomCode) { showToast("⚠️ ابتدا اتاق بسازید"); return; }
   showToast("📋 کد اتاق: " + chaosState.roomCode);
 }
+
+// ── Leaderboard ──
+async function loadLeaderboard(type = 'wins') {
+  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.lb-tab[onclick*="${type}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  const list = document.getElementById('leaderboardList');
+  showSkeleton(list, 5);
+
+  const r = await apiFetch(`/api/leaderboard?type=${type}`);
+  if (!r.ok || !r.data || !r.data.length) {
+    showEmptyState(list, '🏆', 'هنوز رتبه‌بندی وجود نداره', 'بازی کنید تا در رتبه‌بندی قرار بگیرید');
+    return;
+  }
+
+  list.innerHTML = r.data.map((u, i) => {
+    const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const rankIcon = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : toFarsiNum(i + 1);
+    const isMe = currentUser && currentUser.id === u.id;
+    const value = type === 'wins' ? (u.chaos_wins || 0) : (u.total_games || 0);
+    const statLabel = type === 'wins' ? 'برد' : 'بازی';
+    return `<div class="lb-item${isMe ? ' lb-me' : ''}">
+      <div class="lb-rank ${rankClass}">${rankIcon}</div>
+      ${renderAvatar(u.username, '2rem')}
+      <div class="lb-info">
+        <div class="lb-name">${escapeHtml(u.username)}${isMe ? ' (شما)' : ''}</div>
+        <div class="lb-stat">${toFarsiNum(u.total_games || 0)} بازی · ${toFarsiNum(u.chaos_wins || 0)} برد</div>
+      </div>
+      <div class="lb-value">${toFarsiNum(value)}<div style="font-size:0.6rem;color:var(--dim)">${statLabel}</div></div>
+    </div>`;
+  }).join('');
+}

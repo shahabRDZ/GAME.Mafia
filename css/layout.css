@@ -35,6 +35,17 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
   text-transform: uppercase;
 }
 
+/* ── Hero feature chips ── */
+.hero-features {
+  display: flex; gap: var(--space-xs); justify-content: center;
+  flex-wrap: wrap; margin-top: var(--space-sm);
+}
+.hero-chip {
+  padding: 4px 12px; border-radius: var(--radius-full);
+  font-size: 0.7rem; font-weight: 600; color: var(--dim);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+}
+
 /* ── Glassmorphism card ── */
 .gc {
   background: rgba(255,255,255,0.06);
