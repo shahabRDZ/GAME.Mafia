@@ -15,16 +15,21 @@
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="مافیا شوشانگ - بازی آنلاین مافیا">
-<meta property="og:description" content="بازی آنلاین مافیا با دوستان - نقش‌بندی، چت صوتی و بازی گروهی">
+<meta property="og:title" content="شوشانگ — بازی مافیا آنلاین و حضوری">
+<meta property="og:description" content="بازی مافیا با دوستات! پخش نقش، تایمر شب/روز، رأی‌گیری، چت و ۵ سناریو مختلف">
 <meta property="og:image" content="icon-512.png">
 <meta property="og:locale" content="fa_IR">
+<meta property="og:url" content="https://web-production-43621.up.railway.app/">
+<meta property="og:site_name" content="شوشانگ">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="مافیا شوشانگ">
-<meta name="twitter:description" content="بازی آنلاین مافیا با دوستان">
+<meta name="twitter:title" content="شوشانگ — بازی مافیا">
+<meta name="twitter:description" content="بازی مافیا با دوستات! پخش نقش، تایمر، رأی‌گیری و ۵ سناریو">
 <meta name="twitter:image" content="icon-512.png">
+
+<!-- Color scheme -->
+<meta name="color-scheme" content="dark">
 
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -420,6 +425,13 @@
     <span class="vc-num" id="visitCount">—</span>
     <span class="vc-label">بازدید</span>
   </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div class="pwa-banner" id="pwaBanner" style="display:none">
+  <span>📱 شوشانگ رو نصب کن!</span>
+  <button class="pwa-install-btn" id="pwaInstallBtn" onclick="installPWA()">نصب</button>
+  <button class="pwa-dismiss-btn" onclick="dismissPWA()">بعداً</button>
 </div>
 
 <!-- Footer -->

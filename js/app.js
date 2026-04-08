@@ -104,6 +104,31 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ── PWA Install Prompt ──
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('pwa_dismissed')) {
+    setTimeout(() => {
+      document.getElementById('pwaBanner').style.display = 'flex';
+    }, 5000);
+  }
+});
+function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(result => {
+    if (result.outcome === 'accepted') showToast('✅ نصب شد!');
+    document.getElementById('pwaBanner').style.display = 'none';
+    deferredInstallPrompt = null;
+  });
+}
+function dismissPWA() {
+  document.getElementById('pwaBanner').style.display = 'none';
+  localStorage.setItem('pwa_dismissed', '1');
+}
+
 // ── Keyboard Navigation ──
 document.addEventListener('keydown', (e) => {
   // ESC to close modals
