@@ -835,6 +835,11 @@ function flipNearbyCard() {
   if (nearbyGameId) {
     apiFetch("/api/nearby/confirm/" + nearbyGameId, { method: "POST", _background: true });
   }
+
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    document.getElementById("nearbyRoleOverlay").classList.remove("show");
+  }, 5000);
 }
 
 function closeNearbyRole() {
