@@ -96,7 +96,10 @@ function renderAuthBar() {
   document.getElementById("registerBtn").style.display = li ? "none" : "inline-block";
   document.getElementById("logoutBtn").style.display = li ? "inline-block" : "none";
   if (li) {
-    document.getElementById("userAvatar").textContent = currentUser.username[0].toUpperCase();
+    const avatarEl = document.getElementById("userAvatar");
+    const [c1, c2] = getAvatarColor(currentUser.username);
+    avatarEl.textContent = currentUser.username[0].toUpperCase();
+    avatarEl.style.background = `linear-gradient(135deg,${c1},${c2})`;
     document.getElementById("usernameDisplay").textContent = currentUser.username;
     document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
     // Show admin button

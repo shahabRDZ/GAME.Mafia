@@ -30,6 +30,40 @@ function escapeHtml(text) {
   return d.innerHTML;
 }
 
+// ── Colorful Avatar System ──
+const AVATAR_COLORS = [
+  ['#e94560','#c0392b'], ['#f5a623','#e67e22'], ['#4ade80','#22c55e'],
+  ['#00cfff','#0ea5e9'], ['#c084fc','#9333ea'], ['#fb7185','#e11d48'],
+  ['#fbbf24','#d97706'], ['#34d399','#059669'], ['#60a5fa','#3b82f6'],
+  ['#a78bfa','#7c3aed']
+];
+
+function getAvatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function renderAvatar(name, size = '2.25rem') {
+  const initial = (name || '?').charAt(0).toUpperCase();
+  const [c1, c2] = getAvatarColor(name);
+  return `<div class="user-avatar" style="width:${size};height:${size};background:linear-gradient(135deg,${c1},${c2})">${initial}</div>`;
+}
+
+// ── Skeleton Loader ──
+function showSkeleton(container, count = 3) {
+  if (!container) return;
+  container.innerHTML = Array.from({length: count}, () =>
+    `<div class="skeleton-row">
+      <div class="skeleton skeleton-avatar"></div>
+      <div style="flex:1">
+        <div class="skeleton skeleton-text medium"></div>
+        <div class="skeleton skeleton-text short"></div>
+      </div>
+    </div>`
+  ).join('');
+}
+
 // ── Loading State ──
 function showLoading() {
   const el = document.getElementById('loadingOverlay');

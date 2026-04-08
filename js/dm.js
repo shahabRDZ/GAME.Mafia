@@ -23,7 +23,7 @@ async function loadConversations() {
   }
   el.innerHTML = r.data.map(c => `
     <div class="dm-convo-item" onclick="openDMChat(${c.user_id},${JSON.stringify(c.username)},${JSON.stringify(c.avatar || '🎭')})">
-      <span class="dm-convo-avatar">${escapeHtml(c.avatar || '🎭')}</span>
+      ${renderAvatar(c.username, '2.5rem')}
       <div class="dm-convo-info">
         <div class="dm-convo-name">${escapeHtml(c.username)} ${c.online ? '<span class="friend-online">●</span>' : ''}</div>
         <div class="dm-convo-last">${escapeHtml(c.last_message)}</div>
@@ -46,7 +46,7 @@ async function openDMChat(userId, username, avatar) {
   chatView.innerHTML = `
     <div class="dm-chat-header">
       <button class="dm-back-btn" onclick="closeDMChat()">◀</button>
-      <span class="dm-chat-avatar">${escapeHtml(avatar)}</span>
+      ${renderAvatar(username, '2rem')}
       <span class="dm-chat-name">${escapeHtml(username)}</span>
     </div>
     <div class="dm-messages" id="dmMessages"><div class="custom-empty">در حال بارگذاری...</div></div>
