@@ -437,7 +437,7 @@ function openModeratorTools() {
   document.getElementById("cardStage").style.display = "none";
   const panel = document.getElementById("modPanel");
   panel.style.display = "block";
-  renderVotePlayers();
+  renderWarningPlayers();
   resetModTimer();
 }
 
@@ -531,35 +531,92 @@ function togglePhase() {
   haptic('light');
 }
 
-// ── Voting System ──
-function renderVotePlayers() {
-  const container = document.getElementById("modVotePlayers");
+// ── Warning System (3 warnings = elimination) ──
+let modWarnings = {};
+
+function renderWarningPlayers() {
+  const container = document.getElementById("modWarningPlayers");
   if (!state.cards || !state.cards.length) return;
-  modVotes = {};
-  state.cards.forEach(c => { modVotes[c.number] = 0; });
-  container.innerHTML = state.cards.sort((a, b) => a.number - b.number).map(c =>
-    `<div class="mod-vote-card" id="voteCard${c.number}" onclick="addVote(${c.number})">
+  if (Object.keys(modWarnings).length === 0) {
+    state.cards.forEach(c => { modWarnings[c.number] = 0; });
+  }
+  container.innerHTML = state.cards.sort((a, b) => a.number - b.number).map(c => {
+    const w = modWarnings[c.number] || 0;
+    const eliminated = w >= 3;
+    return `<div class="mod-vote-card${eliminated ? ' eliminated' : ''}" onclick="${eliminated ? '' : `addWarning(${c.number})`}">
       <span class="vote-num">${toFarsiNum(c.number)}</span>
-      <span class="vote-count" id="voteCount${c.number}">۰</span>
-    </div>`
-  ).join('');
-  document.getElementById("modVoteResult").textContent = '';
+      <div class="warn-dots">
+        <div class="warn-dot${w >= 1 ? ' active' : ''}"></div>
+        <div class="warn-dot${w >= 2 ? ' active' : ''}"></div>
+        <div class="warn-dot${w >= 3 ? ' active' : ''}"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function addVote(num) {
-  modVotes[num] = (modVotes[num] || 0) + 1;
-  document.getElementById("voteCount" + num).textContent = toFarsiNum(modVotes[num]);
-  document.getElementById("voteCard" + num).classList.add("voted");
-  haptic('light');
+function addWarning(num) {
+  modWarnings[num] = (modWarnings[num] || 0) + 1;
+  haptic('medium');
+  if (modWarnings[num] >= 3) {
+    haptic('heavy');
+    playAlarm();
+    showToast(`🚫 بازیکن ${toFarsiNum(num)} اخراج شد!`);
+  } else {
+    showToast(`⚠️ اخطار ${toFarsiNum(modWarnings[num])} به بازیکن ${toFarsiNum(num)}`);
+  }
+  renderWarningPlayers();
 }
 
-function startVoting() {
-  resetVotes();
-  showToast("🗳️ رأی‌گیری شروع شد — روی شماره بازیکن بزنید");
+function resetWarnings() {
+  modWarnings = {};
+  state.cards.forEach(c => { modWarnings[c.number] = 0; });
+  renderWarningPlayers();
+  showToast("اخطارها ریست شد");
 }
 
-function resetVotes() {
-  renderVotePlayers();
+// ── Night Actions (Shot + Doctor Save) ──
+let nightShotTarget = null;
+let nightSaveTarget = null;
+
+function nightShot() {
+  const input = document.getElementById("nightShotInput");
+  const num = parseInt(input.value);
+  if (!num || num < 1 || num > state.cards.length) { showToast("⚠️ شماره نامعتبر"); return; }
+  nightShotTarget = num;
+  document.getElementById("nightShotResult").innerHTML = `💀 شات: بازیکن <strong style="color:var(--accent)">${toFarsiNum(num)}</strong>`;
+  haptic('medium');
+}
+
+function nightSave() {
+  const input = document.getElementById("nightSaveInput");
+  const num = parseInt(input.value);
+  if (!num || num < 1 || num > state.cards.length) { showToast("⚠️ شماره نامعتبر"); return; }
+  nightSaveTarget = num;
+  document.getElementById("nightSaveResult").innerHTML = `💊 سیو: بازیکن <strong style="color:#4ade80">${toFarsiNum(num)}</strong>`;
+  haptic('medium');
+}
+
+function resolveNight() {
+  const result = document.getElementById("nightFinalResult");
+  if (!nightShotTarget) {
+    result.innerHTML = '<span style="color:var(--dim)">شاتی ثبت نشده</span>';
+    return;
+  }
+  if (nightShotTarget === nightSaveTarget) {
+    result.innerHTML = `🛡️ بازیکن <strong style="color:#4ade80">${toFarsiNum(nightShotTarget)}</strong> شات شد ولی <strong style="color:#4ade80">سیو شد!</strong> — کسی نمرد`;
+    haptic('light');
+  } else {
+    result.innerHTML = `☠️ بازیکن <strong style="color:var(--accent)">${toFarsiNum(nightShotTarget)}</strong> کشته شد!`;
+    haptic('heavy');
+    playAlarm();
+  }
+  // Reset for next night
+  nightShotTarget = null;
+  nightSaveTarget = null;
+  document.getElementById("nightShotInput").value = "";
+  document.getElementById("nightSaveInput").value = "";
+  document.getElementById("nightShotResult").textContent = "";
+  document.getElementById("nightSaveResult").textContent = "";
 }
 
 // ── Share Game Results ──
