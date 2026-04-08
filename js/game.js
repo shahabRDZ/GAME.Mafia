@@ -557,7 +557,7 @@ function closeDigitalPlayer() {
 
 async function joinDigitalRoom() {
   const code = document.getElementById("digitalJoinCode").value.trim().toUpperCase();
-  if (code.length < 3) { showToast("⚠️ کد اتاق را وارد کنید"); return; }
+  if (code.length !== 5) { showToast("⚠️ کد اتاق باید ۵ حرفی باشد"); return; }
 
   try {
     const r = await fetch(API + "/api/digital/receive/" + code, { method: "POST" });
@@ -951,8 +951,9 @@ function newGame() {
   customCardsList = [];
   selectedTeam = "mafia";
   document.getElementById("gameNavBtn").style.display = "none";
-  document.getElementById("startBtn").style.display = "none";
-  const csb = document.getElementById("customStartBtn"); if (csb) csb.style.display = "none";
+  // Hide both button rows
+  const sr = document.getElementById("startBtnRow"); if (sr) sr.style.display = "none";
+  const cr = document.getElementById("customStartRow"); if (cr) cr.style.display = "none";
   document.getElementById("countCard").style.display = "none";
   document.getElementById("customForm").classList.remove("show");
   document.querySelectorAll(".group-btn,.count-btn").forEach(b => b.classList.remove("selected"));

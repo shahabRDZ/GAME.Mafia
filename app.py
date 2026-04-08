@@ -731,6 +731,11 @@ digital_rooms = {}  # code -> { roles: [...], assigned: 0, group: str, lock: Loc
 digital_lock = threading.Lock()
 
 def gen_digital_code():
+    # Clean rooms older than 1 hour
+    now = __import__('time').time()
+    stale = [c for c, r in digital_rooms.items() if now - r.get("created", 0) > 3600]
+    for c in stale:
+        digital_rooms.pop(c, None)
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
         if code not in digital_rooms:
@@ -747,11 +752,12 @@ def create_digital_room():
     random.shuffle(roles)
     code = gen_digital_code()
     digital_rooms[code] = {
-        "roles": roles,  # list of {name, team, emoji}
+        "roles": roles,
         "assigned": 0,
         "total": len(roles),
         "group": group,
-        "lock": threading.Lock()
+        "lock": threading.Lock(),
+        "created": __import__('time').time()
     }
     return jsonify({"code": code, "total": len(roles)}), 201
 
