@@ -89,7 +89,7 @@
 /* ── Floating particles on card back ── */
 .card-particles {
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  border-radius: inherit; overflow: hidden;
+  border-radius: inherit; overflow: hidden; touch-action: none;
 }
 .card-particle {
   position: absolute; width: 3px; height: 3px; border-radius: 50%;
@@ -115,7 +115,7 @@
   animation: lightningFlash 0.6s ease-out forwards;
 }
 .card.lightning-active::before {
-  content: ''; position: absolute; inset: -8px; border-radius: 2rem; z-index: 5;
+  content: ''; position: absolute; inset: -8px; border-radius: 2rem; z-index: -1;
   pointer-events: none;
   box-shadow: 0 0 40px rgba(140,160,255,.5), 0 0 80px rgba(100,120,255,.3), 0 0 120px rgba(80,100,255,.15);
   animation: lightningGlow 0.6s ease-out forwards;
