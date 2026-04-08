@@ -653,6 +653,56 @@
 .start-btn-digital:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,207,255,.3); }
 .start-btn-digital:active { transform: scale(0.97); }
 
+/* ── Digital Tap Area (NFC-like) ── */
+.digital-tap-area {
+  position: relative; padding: 3rem 2rem;
+  border: 2px dashed rgba(0,207,255,.3); border-radius: var(--radius-2xl);
+  background: rgba(0,207,255,.03); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-sm);
+  transition: all 0.2s ease; overflow: hidden;
+  min-height: 220px; justify-content: center;
+  margin-bottom: var(--space-md);
+}
+.digital-tap-area:active {
+  background: rgba(0,207,255,.12); border-color: #00cfff;
+  transform: scale(0.97);
+}
+.digital-tap-icon {
+  font-size: 4rem; animation: funFloat 2.5s ease-in-out infinite;
+}
+.digital-tap-text {
+  font-size: var(--font-size-base); color: rgba(255,255,255,.6);
+  text-align: center; line-height: 1.8;
+}
+.digital-tap-text strong { color: #00cfff; }
+.digital-tap-hint {
+  font-size: 0.7rem; color: var(--dim);
+  padding: 4px 14px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+}
+.digital-tap-ripple {
+  position: absolute; width: 200px; height: 200px; border-radius: 50%;
+  border: 2px solid rgba(0,207,255,.15);
+  animation: tapRipple 2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes tapRipple {
+  0% { transform: scale(0.5); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.digital-tap-area.receiving {
+  border-color: #4ade80; background: rgba(74,222,128,.08);
+  animation: tapPulse 0.3s ease;
+}
+@keyframes tapPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.digital-room-info {
+  text-align: center; font-size: var(--font-size-sm); color: var(--dim);
+}
+
 /* ── Narrator Modal ── */
 .narrator-overlay {
   display: none; position: fixed; inset: 0; z-index: 850;

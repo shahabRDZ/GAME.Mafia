@@ -511,22 +511,33 @@
 <div class="digital-overlay" id="digitalPlayerOverlay">
   <div class="digital-box">
     <button class="modal-close-btn" onclick="closeDigitalPlayer()" aria-label="بستن">✕</button>
-    <!-- Join phase -->
+    <!-- Phase 1: Enter code -->
     <div id="digitalJoinPhase">
-      <div class="digital-icon">🎭</div>
-      <div class="digital-title">دریافت نقش</div>
+      <div class="digital-icon">📱</div>
+      <div class="digital-title">ورود به اتاق</div>
       <div class="digital-join-form">
-        <input type="text" id="digitalJoinCode" maxlength="5" placeholder="کد ۵ رقمی" class="digital-code-input" autocomplete="off" inputmode="text" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')joinDigitalRoom()">
-        <button class="start-btn start-btn-digital" onclick="joinDigitalRoom()" style="width:100%">دریافت نقش</button>
+        <input type="text" id="digitalJoinCode" maxlength="5" placeholder="کد ۵ رقمی" class="digital-code-input" autocomplete="off" inputmode="text" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')connectToRoom()">
+        <button class="start-btn start-btn-digital" onclick="connectToRoom()" style="width:100%">اتصال</button>
       </div>
     </div>
-    <!-- Role reveal phase -->
+    <!-- Phase 2: Tap to receive (feels like NFC) -->
+    <div id="digitalTapPhase" style="display:none">
+      <div class="digital-tap-area" id="digitalTapArea" onclick="tapToReceiveRole()">
+        <div class="digital-tap-icon">📱</div>
+        <div class="digital-tap-ripple"></div>
+        <div class="digital-tap-text">گوشی خود را نزدیک گرداننده بگیرید<br>و صفحه را <strong>لمس</strong> کنید</div>
+        <div class="digital-tap-hint">هر لمس = یک نقش</div>
+      </div>
+      <div class="digital-room-info" id="digitalRoomInfo"></div>
+    </div>
+    <!-- Phase 3: Role reveal -->
     <div id="digitalRolePhase" style="display:none">
       <div class="digital-role-emoji" id="digitalRoleEmoji"></div>
       <div class="digital-role-name" id="digitalRoleName"></div>
       <div class="digital-role-team" id="digitalRoleTeam"></div>
       <div class="digital-role-ability" id="digitalRoleAbility"></div>
       <div class="digital-role-num" id="digitalRoleNum"></div>
+      <button class="mod-btn" onclick="backToTapPhase()" style="margin-top:20px;width:100%">بازیکن بعدی</button>
     </div>
   </div>
 </div>

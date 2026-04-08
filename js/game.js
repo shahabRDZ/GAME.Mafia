@@ -543,35 +543,65 @@ function closeDigitalRoom() {
 }
 
 // ── Player side: join and receive ──
+let digitalConnectedCode = null;
+
 function openDigitalPlayer() {
   document.getElementById("digitalJoinPhase").style.display = "block";
+  document.getElementById("digitalTapPhase").style.display = "none";
   document.getElementById("digitalRolePhase").style.display = "none";
   document.getElementById("digitalJoinCode").value = "";
+  digitalConnectedCode = null;
   document.getElementById("digitalPlayerOverlay").classList.add("show");
   setTimeout(() => document.getElementById("digitalJoinCode").focus(), 300);
 }
 
 function closeDigitalPlayer() {
   document.getElementById("digitalPlayerOverlay").classList.remove("show");
+  digitalConnectedCode = null;
 }
 
-async function joinDigitalRoom() {
+// Phase 1: Connect to room (enter code once)
+async function connectToRoom() {
   const code = document.getElementById("digitalJoinCode").value.trim().toUpperCase();
   if (code.length !== 5) { showToast("⚠️ کد اتاق باید ۵ حرفی باشد"); return; }
 
   try {
-    const r = await fetch(API + "/api/digital/receive/" + code, { method: "POST" });
+    const r = await fetch(API + "/api/digital/info/" + code);
+    const data = await r.json();
+    if (!r.ok) { showToast("⚠️ " + (data.error || "اتاق پیدا نشد")); return; }
+
+    digitalConnectedCode = code;
+    document.getElementById("digitalJoinPhase").style.display = "none";
+    document.getElementById("digitalTapPhase").style.display = "block";
+    document.getElementById("digitalRoomInfo").innerHTML =
+      `🎭 ${data.group} · 👥 ${toFarsiNum(data.total)} نفر · ${toFarsiNum(data.remaining)} باقی‌مانده`;
+    haptic('light');
+  } catch {
+    showToast("⚠️ خطا در اتصال");
+  }
+}
+
+// Phase 2: Tap to receive role (one tap = one role)
+async function tapToReceiveRole() {
+  if (!digitalConnectedCode) return;
+  const tapArea = document.getElementById("digitalTapArea");
+  tapArea.classList.add("receiving");
+
+  try {
+    const r = await fetch(API + "/api/digital/receive/" + digitalConnectedCode, { method: "POST" });
     const data = await r.json();
 
     if (!r.ok) {
       showToast("⚠️ " + (data.error || "خطا"));
+      tapArea.classList.remove("receiving");
       return;
     }
 
-    const role = data.role;
+    // Heavy vibration — feels like NFC transfer
     haptic('heavy');
+    if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
 
-    // Show role
+    const role = data.role;
     const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
     const teamNames = { mafia: "😈 مافیا", citizen: "😇 شهروند", independent: "🐺 مستقل" };
     const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
@@ -581,19 +611,36 @@ async function joinDigitalRoom() {
     document.getElementById("digitalRoleName").style.color = teamColors[role.team] || "#fff";
     document.getElementById("digitalRoleTeam").textContent = teamNames[role.team] || role.team;
     document.getElementById("digitalRoleTeam").style.color = teamColors[role.team] || "#fff";
-
-    // Find ability
     const abilityInfo = ROLE_ABILITIES[role.name];
     document.getElementById("digitalRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
     document.getElementById("digitalRoleNum").textContent = `بازیکن شماره ${toFarsiNum(data.playerNum)}`;
 
-    // Switch to reveal phase
-    document.getElementById("digitalJoinPhase").style.display = "none";
+    // Switch to role reveal
+    document.getElementById("digitalTapPhase").style.display = "none";
     document.getElementById("digitalRolePhase").style.display = "block";
 
-  } catch (e) {
-    showToast("⚠️ خطا در اتصال");
+  } catch {
+    showToast("⚠️ خطا در دریافت نقش");
+    tapArea.classList.remove("receiving");
   }
+}
+
+// Back to tap phase for next player
+function backToTapPhase() {
+  document.getElementById("digitalRolePhase").style.display = "none";
+  document.getElementById("digitalTapPhase").style.display = "block";
+  // Update remaining count
+  fetch(API + "/api/digital/info/" + digitalConnectedCode)
+    .then(r => r.json())
+    .then(data => {
+      if (data.remaining <= 0) {
+        document.getElementById("digitalRoomInfo").innerHTML = "🎉 همه نقش‌ها تقسیم شد!";
+        document.getElementById("digitalTapArea").style.display = "none";
+      } else {
+        document.getElementById("digitalRoomInfo").innerHTML =
+          `🎭 ${data.group} · ${toFarsiNum(data.remaining)} نقش باقی‌مانده`;
+      }
+    }).catch(() => {});
 }
 function flipAllBack() { shuffleCards(); }
 function goBack() { exitGameFullscreen(); }
