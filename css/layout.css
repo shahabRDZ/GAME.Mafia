@@ -282,6 +282,14 @@ main { padding-bottom: 5rem; }
 }
 .site-footer a:hover { color: var(--accent); }
 .site-footer a:hover::after { transform: scaleX(1); background: var(--accent); }
+.footer-visit {
+  display: flex; align-items: center; gap: var(--space-xs);
+  font-size: var(--font-size-sm); color: var(--dim);
+}
+.app-version {
+  font-size: 0.65rem; color: rgba(255,255,255,.15);
+  letter-spacing: 1px; font-family: monospace;
+}
 
 /* ── Responsive — Mobile first ── */
 
