@@ -653,6 +653,37 @@
 .start-btn-digital:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,207,255,.3); }
 .start-btn-digital:active { transform: scale(0.97); }
 
+/* ── Nearby button ── */
+.start-btn-nearby {
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  border: none; border-radius: var(--radius-lg); color: #002211;
+  font-family: inherit; font-size: var(--font-size-md); font-weight: 900;
+  cursor: pointer; transition: all var(--transition-base);
+  min-height: var(--touch-min);
+}
+.start-btn-nearby:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,222,128,.3); }
+.start-btn-nearby:active { transform: scale(0.97); }
+
+/* Nearby player item */
+.nearby-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-sm); margin-bottom: var(--space-xs);
+  background: rgba(255,255,255,.04); border: 2px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-md); cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.nearby-item.selected { border-color: #4ade80; background: rgba(74,222,128,.08); }
+.nearby-item .nearby-name { flex: 1; font-weight: 700; font-size: var(--font-size-base); }
+.nearby-item .nearby-dist { font-size: 0.72rem; color: var(--dim); }
+.nearby-item .nearby-check {
+  width: 1.4rem; height: 1.4rem; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15); display: flex;
+  align-items: center; justify-content: center; font-size: 0.7rem;
+  transition: all var(--transition-fast);
+}
+.nearby-item.selected .nearby-check { border-color: #4ade80; background: #4ade80; color: #000; }
+
 /* ── Digital Tap Area (NFC-like) ── */
 .digital-tap-area {
   position: relative; padding: 3rem 2rem;
