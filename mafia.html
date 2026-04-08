@@ -498,21 +498,32 @@
     <button class="modal-close-btn" onclick="closeNearby()" aria-label="بستن">✕</button>
     <div class="digital-icon">📍</div>
     <div class="digital-title" style="color:#4ade80">بازیکنان نزدیک</div>
+    <div id="nearbyScenarioInfo" style="font-size:0.8rem;color:var(--accent2);margin-bottom:8px;text-align:center"></div>
     <div id="nearbyStatus" style="font-size:0.8rem;color:var(--dim);margin-bottom:12px">در حال جستجو...</div>
     <div id="nearbyPlayerList"></div>
     <button class="start-btn start-btn-nearby" id="nearbyAssignBtn" onclick="assignNearbyRoles()" style="width:100%;margin-top:12px;display:none">🎲 پخش رندوم نقش‌ها</button>
+    <!-- After assignment: live status of confirmations -->
+    <div id="nearbyConfirmList" style="display:none;margin-top:12px"></div>
   </div>
 </div>
 
-<!-- Nearby Role Received Overlay (Player side) -->
+<!-- Nearby Role Received Overlay (Player side — card flip) -->
 <div class="digital-overlay" id="nearbyRoleOverlay">
-  <div class="digital-box" style="border-color:rgba(74,222,128,.2)">
-    <div class="digital-role-emoji" id="nearbyRoleEmoji"></div>
-    <div class="digital-role-name" id="nearbyRoleName"></div>
-    <div class="digital-role-team" id="nearbyRoleTeam"></div>
-    <div class="digital-role-ability" id="nearbyRoleAbility"></div>
-    <div class="digital-role-num" id="nearbyRoleNum"></div>
-    <button class="mod-btn" onclick="document.getElementById('nearbyRoleOverlay').classList.remove('show')" style="margin-top:16px;width:100%">بستن</button>
+  <div class="nearby-card-stage" onclick="flipNearbyCard()">
+    <!-- Card with flip -->
+    <div class="nearby-card" id="nearbyCard">
+      <div class="nearby-card-face nearby-card-back">
+        <div class="nearby-card-num" id="nearbyCardNum">?</div>
+        <div class="nearby-card-hint">لمس کنید تا نقشتان را ببینید</div>
+      </div>
+      <div class="nearby-card-face nearby-card-front" id="nearbyCardFront">
+        <div class="digital-role-emoji" id="nearbyRoleEmoji"></div>
+        <div class="digital-role-name" id="nearbyRoleName"></div>
+        <div class="digital-role-team" id="nearbyRoleTeam"></div>
+        <div class="digital-role-ability" id="nearbyRoleAbility"></div>
+        <div class="digital-role-num" id="nearbyRoleNum"></div>
+      </div>
+    </div>
   </div>
 </div>
 
