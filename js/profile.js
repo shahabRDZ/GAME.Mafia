@@ -14,7 +14,7 @@ async function renderProfileScreen() {
 
   const u = currentUser;
   card.innerHTML = `
-    <div class="profile-avatar-big">${u.avatar || '🎭'}</div>
+    ${renderAvatar(u.username, '3.5rem')}
     <div class="profile-username">${escapeHtml(u.username)}</div>
     <div class="profile-id">ID: ${u.id}</div>
     <div class="profile-bio">${escapeHtml(u.bio || 'بیو ندارید')}</div>
@@ -30,7 +30,8 @@ async function renderProfileScreen() {
   `;
 
   // Friends
-  friendsSec.innerHTML = '<div class="section-title">👥 دوستان</div><div id="friendsList"><div class="custom-empty">در حال بارگذاری...</div></div><div id="friendRequests"></div>';
+  friendsSec.innerHTML = '<div class="section-title">👥 دوستان</div><div id="friendsList"></div><div id="friendRequests"></div>';
+  showSkeleton(document.getElementById("friendsList"));
   loadFriends();
   loadFriendRequests();
 
@@ -57,7 +58,7 @@ async function loadFriends() {
   if (!r.ok || !r.data.length) { el.innerHTML = '<div class="custom-empty">هنوز دوستی ندارید</div>'; return; }
   el.innerHTML = r.data.map(f => `
     <div class="friend-item">
-      <span class="friend-avatar">${f.avatar || '🎭'}</span>
+      ${renderAvatar(f.username, '2.2rem')}
       <div class="friend-info">
         <div class="friend-name">${escapeHtml(f.username)}</div>
         <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
@@ -77,7 +78,7 @@ async function loadFriendRequests() {
   el.innerHTML = '<div class="section-title" style="margin-top:14px">📩 درخواست‌های دوستی</div>' +
     r.data.map(f => `
     <div class="friend-item">
-      <span class="friend-avatar">${f.avatar || '🎭'}</span>
+      ${renderAvatar(f.username, '2.2rem')}
       <div class="friend-info"><div class="friend-name">${escapeHtml(f.username)}</div></div>
       <div class="friend-actions">
         <button class="friend-btn friend-btn-accept" onclick="acceptFriendUI(${f.friendship_id})">قبول</button>
@@ -94,7 +95,7 @@ async function searchUsersUI() {
   if (!r.ok || !r.data.length) { el.innerHTML = '<div class="custom-empty">کاربری یافت نشد</div>'; return; }
   el.innerHTML = r.data.map(u => `
     <div class="search-result-item">
-      <span class="friend-avatar">${u.avatar || '🎭'}</span>
+      ${renderAvatar(u.username, '2.2rem')}
       <div class="friend-info">
         <div class="friend-name">${escapeHtml(u.username)}</div>
         <div class="friend-status ${u.online ? 'friend-online' : 'friend-offline'}">${u.online ? '● آنلاین' : '○ آفلاین'}</div>

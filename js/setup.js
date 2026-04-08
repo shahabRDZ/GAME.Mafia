@@ -140,6 +140,20 @@ function syncCatalogFromList() {
   updateCatalogCounts();
 }
 
+// ── Step Indicator ──
+function updateStepIndicator(step) {
+  const items = document.querySelectorAll(".step-item");
+  const lines = document.querySelectorAll(".step-line");
+  items.forEach((item, i) => {
+    item.classList.remove("active", "done");
+    if (i + 1 < step) item.classList.add("done");
+    else if (i + 1 === step) item.classList.add("active");
+  });
+  lines.forEach((line, i) => {
+    line.classList.toggle("done", i + 1 < step);
+  });
+}
+
 // ── Setup Flow ──
 function selectGroup(group) {
   state.group = group;
@@ -150,6 +164,8 @@ function selectGroup(group) {
   const cf = document.getElementById("customForm");
   const cc = document.getElementById("countCard");
   const sb = document.getElementById("startBtn");
+
+  updateStepIndicator(2);
 
   if (state.isCustom) {
     cf.classList.add("show");
@@ -183,6 +199,7 @@ function selectCount(count) {
   state.citizenCount = ROLE_MAP[count].citizen;
   document.querySelectorAll(".count-btn").forEach(b => b.classList.remove("selected"));
   document.querySelector(`[data-count="${count}"]`).classList.add("selected");
+  updateStepIndicator(3);
   const sb = document.getElementById("startBtn");
   sb.style.display = "block";
   sb.classList.remove("start-btn-pop");

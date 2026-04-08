@@ -1,3 +1,69 @@
+/* ── Step Indicator ── */
+.step-indicator {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-block-end: var(--space-lg); padding: var(--space-sm) 0;
+}
+.step-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  position: relative; z-index: 1;
+}
+.step-num {
+  width: 2rem; height: 2rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 900;
+  background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12);
+  color: var(--dim); transition: all var(--transition-base);
+}
+.step-label {
+  font-size: 0.68rem; color: var(--dim);
+  transition: color var(--transition-base);
+}
+.step-line {
+  flex: 1; max-width: 4rem; height: 2px;
+  background: rgba(255,255,255,.08); margin: 0 var(--space-xs);
+  margin-bottom: 1.2rem;
+  transition: background var(--transition-base);
+}
+.step-item.active .step-num {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff; box-shadow: 0 0 12px rgba(233,69,96,.4);
+}
+.step-item.active .step-label { color: var(--accent); }
+.step-item.done .step-num {
+  background: rgba(74,222,128,.2); border-color: #4ade80;
+  color: #4ade80;
+}
+.step-item.done .step-label { color: #4ade80; }
+.step-line.done { background: #4ade80; }
+
+/* ── Colorful Avatar ── */
+.user-avatar {
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 0.9rem; color: #fff;
+  flex-shrink: 0; text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  letter-spacing: 0;
+}
+.user-avatar.large { width: 3.5rem; height: 3.5rem; font-size: 1.4rem; }
+
+/* ── Skeleton Loading ── */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+.skeleton-card { height: 5rem; margin-block-end: var(--space-sm); }
+.skeleton-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; }
+.skeleton-text { height: 0.9rem; margin-block-end: var(--space-xs); }
+.skeleton-text.short { width: 40%; }
+.skeleton-text.medium { width: 65%; }
+.skeleton-row {
+  display: flex; gap: var(--space-sm); align-items: center;
+  padding: var(--space-sm); margin-block-end: var(--space-xs);
+}
+
 /* ── Scenario Overlay ── */
 .scenario-overlay {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 600;
