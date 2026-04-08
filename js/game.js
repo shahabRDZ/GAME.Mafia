@@ -553,6 +553,16 @@ function showNfcRoleReveal(data) {
   document.getElementById("digitalPlayerOverlay").classList.add("show");
 }
 
+function generateHostQr(code) {
+  // Simple QR using ZXing on server or a tiny inline generator
+  const container = document.getElementById("digitalQrContainer");
+  if (!container) return;
+  const url = `${window.location.origin}?nfc=${code}`;
+  // Use a simple img tag with Google Charts QR API (works offline if cached)
+  container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}" alt="QR" style="width:120px;height:120px;border-radius:8px;margin:8px auto;display:block;background:#fff;padding:4px">
+    <div style="font-size:0.68rem;color:var(--dim)">آیفون: QR اسکن کنید</div>`;
+}
+
 async function startDigitalGame() {
   // Gather roles like startGame does
   let roles = [];
@@ -591,10 +601,19 @@ async function startDigitalGame() {
     document.getElementById("digitalStatus").textContent = "در انتظار بازیکنان...";
     document.getElementById("digitalOverlay").classList.add("show");
 
+    // Generate QR for iOS fallback
+    try {
+      const qrUrl = `${window.location.origin}?nfc=${data.code}`;
+      const qrContainer = document.getElementById("digitalQrContainer");
+      const writer = new (await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm')).default;
+    } catch {}
+    // Simple QR using canvas
+    generateHostQr(data.code);
+
     // Try NFC broadcast (Android Chrome only)
     const nfcOk = await startNfcBroadcast(data.code);
     if (nfcOk) {
-      document.getElementById("digitalStatus").textContent = "📡 NFC فعال — بازیکنان گوشی را نزدیک کنند";
+      document.getElementById("digitalNfcStatus").querySelector('div:nth-child(2)').textContent = "📡 NFC فعال — گوشی بازیکن را نزدیک کنید";
     }
 
     // Poll for status updates
@@ -647,7 +666,13 @@ async function openDigitalPlayer() {
   // Try NFC scan — if available, auto-receive on tap
   const nfcOk = await startNfcScan();
   if (nfcOk) {
-    showToast("📡 NFC فعال — گوشی را نزدیک گرداننده بگیرید");
+    document.getElementById("digitalPlayerNfcHint").textContent = "✅ NFC فعال — نزدیک کنید";
+    document.getElementById("digitalPlayerNfcHint").style.color = "#4ade80";
+  } else {
+    document.getElementById("digitalPlayerNfcText").innerHTML = "NFC در دسترس نیست<br>از <strong>کد</strong> یا <strong>QR</strong> استفاده کنید";
+    document.getElementById("digitalPlayerNfcHint").textContent = "آیفون / مرورگر قدیمی";
+    document.getElementById("digitalNfcScanArea").style.borderColor = "rgba(255,255,255,.1)";
+    document.getElementById("digitalNfcScanArea").style.opacity = "0.5";
   }
 
   setTimeout(() => document.getElementById("digitalJoinCode").focus(), 300);
