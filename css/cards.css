@@ -1,22 +1,22 @@
 /* ── Single card stage ── */
 .card-stage {
   display: flex; flex-direction: column; align-items: center;
-  padding-block: 2.5rem var(--space-lg);
-  min-height: 30rem; justify-content: center;
+  padding-block: 0 var(--space-md);
+  min-height: 100dvh; justify-content: center;
 }
 
 /* ── Card wrapper — large, centered ── */
 .big-card-wrapper {
   perspective: 1200px; cursor: pointer;
-  width: clamp(16.875rem, 50vw, 20.625rem);
-  aspect-ratio: 2/3;
+  width: clamp(17rem, 55vw, 22rem);
+  aspect-ratio: 9/16;
 }
 .big-card-wrapper .card { width: 100%; height: 100%; border-radius: 1.75rem; }
 .big-card-wrapper .card-back .card-number { font-size: 5.5rem; }
 .big-card-wrapper .card-back .tap-hint { font-size: 0.8rem; margin-block-start: var(--space-sm); letter-spacing: 3px; }
-.big-card-wrapper .char-wrap { width: 7.5rem; height: 9.25rem; }
-.big-card-wrapper .card-role-name { font-size: var(--font-size-lg); margin-block-start: var(--space-sm); letter-spacing: 1px; }
-.big-card-wrapper .char-shadow { width: 4.5rem; height: 0.75rem; }
+.big-card-wrapper .char-wrap { width: 8.5rem; height: 10.5rem; }
+.big-card-wrapper .card-role-name { font-size: var(--font-size-xl); margin-block-start: var(--space-md); letter-spacing: 1px; font-weight: 900; }
+.big-card-wrapper .char-shadow { width: 5rem; height: 0.85rem; }
 .big-card-wrapper .card-face { border-radius: 1.75rem; }
 
 /* ── Tap hint on flipped card ── */
@@ -155,6 +155,6 @@
 
 /* ── Card responsive ── */
 @media (max-width: 30em) {
-  .card-stage { min-height: 24rem; padding-block: var(--space-lg) var(--space-md); }
-  .big-card-wrapper { width: 85vw; max-width: 18rem; }
+  .card-stage { min-height: 85dvh; padding-block: 0 var(--space-sm); }
+  .big-card-wrapper { width: 80vw; max-width: 20rem; }
 }
