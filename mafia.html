@@ -98,6 +98,12 @@
   <header>
     <div class="logo" id="logoTitle">شوشانگ</div>
     <div class="logo-sub">SHUSHANG · GAME</div>
+    <div class="hero-features">
+      <span class="hero-chip">🎭 ۵ سناریو</span>
+      <span class="hero-chip">⏱️ تایمر شب/روز</span>
+      <span class="hero-chip">🗳️ رأی‌گیری</span>
+      <span class="hero-chip">⚡ آنلاین</span>
+    </div>
   </header>
 
   <!-- Auth Bar -->
@@ -128,6 +134,10 @@
     <button class="bnav-btn" id="navHistory" onclick="showScreen('history')">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       <span>تاریخچه</span>
+    </button>
+    <button class="bnav-btn" id="navLeaderboard" onclick="showScreen('leaderboard')">
+      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5C6 4 6 9 6 9zM18 9h1.5a2.5 2.5 0 000-5C18 4 18 9 18 9z"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+      <span>رتبه‌بندی</span>
     </button>
     <button class="bnav-btn" id="navDM" onclick="showScreen('dm')">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -408,6 +418,18 @@
     <div class="setup-card gc" style="padding:20px">
       <div class="section-title" id="dmHeading">💬 پیام‌ها</div>
       <div id="dmContent"></div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Screen -->
+  <section class="screen" id="leaderboardScreen" aria-label="رتبه‌بندی">
+    <div class="setup-card gc" style="padding:20px">
+      <div class="section-title">🏆 رتبه‌بندی بازیکنان</div>
+      <div class="lb-tabs">
+        <button class="lb-tab active" onclick="loadLeaderboard('wins')">بیشترین برد</button>
+        <button class="lb-tab" onclick="loadLeaderboard('games')">بیشترین بازی</button>
+      </div>
+      <div id="leaderboardList"></div>
     </div>
   </section>
 

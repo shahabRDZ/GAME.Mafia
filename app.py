@@ -662,6 +662,22 @@ def api_remove_player(code, player_id):
 # GAME HISTORY ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
 
+@app.route("/api/leaderboard", methods=["GET"])
+@jwt_required(optional=True)
+def get_leaderboard():
+    lb_type = request.args.get("type", "wins")
+    if lb_type == "wins":
+        users = User.query.order_by(User.chaos_wins.desc()).limit(20).all()
+    else:
+        users = User.query.all()
+        users.sort(key=lambda u: len(u.games), reverse=True)
+        users = users[:20]
+    return jsonify([{
+        "id": u.id, "username": u.username,
+        "chaos_wins": u.chaos_wins, "chaos_losses": u.chaos_losses,
+        "total_games": len(u.games)
+    } for u in users]), 200
+
 @app.route("/api/games", methods=["GET"])
 @jwt_required()
 def get_games():

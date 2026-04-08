@@ -18,7 +18,7 @@ function showScreen(name) {
   const navMap = {
     setup: "navNewGame", game: "gameNavBtn", history: "navHistory",
     dm: "navDM", profile: "navProfile", admin: "navAdmin",
-    chaos: "navNewGame", lab: "navNewGame"
+    chaos: "navNewGame", lab: "navNewGame", leaderboard: "navLeaderboard"
   };
   const navBtn = document.getElementById(navMap[name]);
   if (navBtn) navBtn.classList.add("active");
@@ -32,4 +32,5 @@ function showScreen(name) {
   if (name === "chaos" && authToken) initSocket();
   if (name === "lab" && authToken) initSocket();
   if (name === "admin") renderAdminScreen();
+  if (name === "leaderboard") loadLeaderboard('wins');
 }
