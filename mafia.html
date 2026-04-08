@@ -493,9 +493,18 @@
     <div class="digital-phase" id="digitalPhase">
       <div class="digital-icon">📱</div>
       <div class="digital-title">پخش دیجیتال نقش</div>
-      <div class="digital-code-label">کد اتاق:</div>
-      <div class="digital-code" id="digitalCode">—</div>
-      <div class="digital-hint">بازیکنان این کد رو وارد کنن و دکمه «دریافت نقش» رو بزنن</div>
+      <div class="digital-nfc-status" id="digitalNfcStatus">
+        <div class="digital-tap-icon" style="font-size:3rem">📡</div>
+        <div style="font-size:1rem;color:#00cfff;font-weight:900;margin:8px 0">گوشی بازیکن را نزدیک کنید</div>
+        <div style="font-size:0.75rem;color:var(--dim)">اندروید: نزدیک کردن گوشی · آیفون: کد یا QR</div>
+      </div>
+      <div class="digital-code-section" id="digitalCodeSection">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:12px 0">
+          <span style="font-size:0.75rem;color:var(--dim)">کد:</span>
+          <span class="digital-code" id="digitalCode" style="font-size:1.6rem;letter-spacing:5px;margin:0">—</span>
+        </div>
+        <div id="digitalQrContainer" style="text-align:center"></div>
+      </div>
       <div class="digital-progress">
         <div class="digital-progress-bar" id="digitalProgressBar" style="width:0%"></div>
       </div>
@@ -511,21 +520,26 @@
 <div class="digital-overlay" id="digitalPlayerOverlay">
   <div class="digital-box">
     <button class="modal-close-btn" onclick="closeDigitalPlayer()" aria-label="بستن">✕</button>
-    <!-- Phase 1: Enter code -->
+    <!-- Phase 1: NFC scan + code fallback -->
     <div id="digitalJoinPhase">
-      <div class="digital-icon">📱</div>
-      <div class="digital-title">ورود به اتاق</div>
+      <div class="digital-tap-area" id="digitalNfcScanArea">
+        <div class="digital-tap-icon">📱</div>
+        <div class="digital-tap-ripple"></div>
+        <div class="digital-tap-text" id="digitalPlayerNfcText">گوشی خود را نزدیک گرداننده بگیرید<br><strong>نقش خودکار دریافت می‌شود</strong></div>
+        <div class="digital-tap-hint" id="digitalPlayerNfcHint">اندروید · NFC</div>
+      </div>
+      <div style="text-align:center;color:var(--dim);font-size:0.75rem;margin:12px 0">— یا —</div>
       <div class="digital-join-form">
-        <input type="text" id="digitalJoinCode" maxlength="5" placeholder="کد ۵ رقمی" class="digital-code-input" autocomplete="off" inputmode="text" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')connectToRoom()">
-        <button class="start-btn start-btn-digital" onclick="connectToRoom()" style="width:100%">اتصال</button>
+        <input type="text" id="digitalJoinCode" maxlength="5" placeholder="کد ۵ رقمی" class="digital-code-input" autocomplete="off" inputmode="text" style="text-transform:uppercase;font-size:1.4rem" onkeydown="if(event.key==='Enter')connectToRoom()">
+        <button class="start-btn start-btn-digital" onclick="connectToRoom()" style="width:100%">ورود با کد</button>
       </div>
     </div>
-    <!-- Phase 2: Tap to receive (feels like NFC) -->
+    <!-- Phase 2: Tap to receive (after code entry) -->
     <div id="digitalTapPhase" style="display:none">
       <div class="digital-tap-area" id="digitalTapArea" onclick="tapToReceiveRole()">
         <div class="digital-tap-icon">📱</div>
         <div class="digital-tap-ripple"></div>
-        <div class="digital-tap-text">گوشی خود را نزدیک گرداننده بگیرید<br>و صفحه را <strong>لمس</strong> کنید</div>
+        <div class="digital-tap-text">صفحه را <strong>لمس</strong> کنید</div>
         <div class="digital-tap-hint">هر لمس = یک نقش</div>
       </div>
       <div class="digital-room-info" id="digitalRoomInfo"></div>
