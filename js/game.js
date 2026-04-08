@@ -256,29 +256,37 @@ function haptic(style = 'light') {
   } catch {}
 }
 
+let isFlipping = false;
+
 function flipCurrentCard(e, card) {
   const cardEl = document.querySelector("#cardSlot .card");
   if (!cardEl) return;
+
+  // If already flipped, go to next card
   if (cardEl.classList.contains("flipped")) {
     stopAmbientLightning();
     if (state.queueIdx + 1 >= state.cards.length) { showCompletion(); }
     else { nextCard(); }
     return;
   }
-  // Lightning effect before flip
+
+  // Prevent double-tap during flip animation
+  if (isFlipping) return;
+  isFlipping = true;
+
+  // Lightning + flip
   cardEl.classList.add("lightning-active");
   haptic('heavy');
   spawnLightningFlash();
   setTimeout(() => {
     cardEl.classList.remove("lightning-active");
     cardEl.classList.add("flipped");
+    isFlipping = false;
     haptic('medium');
-    // Start ambient lightning loop on background
     startAmbientLightning();
   }, 350);
   state.seen.add(card.number);
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
-  // Show funny text after flip
   setTimeout(() => showFunnyText(card), 850);
   setTimeout(() => {
     const front = cardEl.querySelector(".card-front");
@@ -371,11 +379,16 @@ function stopAmbientLightning() {
 }
 
 function nextCard() {
+  isFlipping = false;
   const funny = document.querySelector(".funny-container");
   if (funny) funny.remove();
   const slot = document.getElementById("cardSlot");
   const wrapper = slot.querySelector(".big-card-wrapper");
-  if (wrapper) { wrapper.classList.remove("card-entering"); wrapper.classList.add("card-exiting"); }
+  if (wrapper) {
+    wrapper.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+    wrapper.style.transform = "translateY(-40px) scale(0.9)";
+    wrapper.style.opacity = "0";
+  }
   setTimeout(() => { state.queueIdx++; showCurrentCard(); }, 300);
 }
 
