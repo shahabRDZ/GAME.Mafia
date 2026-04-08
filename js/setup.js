@@ -163,7 +163,10 @@ function selectGroup(group) {
 
   const cf = document.getElementById("customForm");
   const cc = document.getElementById("countCard");
-  const sb = document.getElementById("startBtn");
+
+  // Hide both button rows
+  const sr = document.getElementById("startBtnRow"); if (sr) sr.style.display = "none";
+  const csr = document.getElementById("customStartRow"); if (csr) csr.style.display = "none";
 
   updateStepIndicator(2);
 
@@ -176,12 +179,11 @@ function selectGroup(group) {
     buildCatalog();
     renderRoleCatalog();
     renderCustomCardsList();
-    sb.style.display = "none";
   } else {
     cf.classList.remove("show");
     cc.style.display = "block";
     state.count = null;
-    sb.style.display = "none";
+    customCardsList = [];
     const counts = Object.keys(ROLES_DATA[group]).map(Number);
     document.getElementById("countGrid").innerHTML = counts.map(c => `
       <button class="count-btn" onclick="selectCount(${c})" data-count="${c}">
@@ -270,9 +272,9 @@ function updateStartBtn() {
   const mc = customCardsList.filter(c => c.team === "mafia").length;
   const cc = customCardsList.filter(c => c.team === "citizen").length;
   const show = customCardsList.length >= 3 && mc >= 1 && cc >= 1;
-  // Show row with both buttons
+  // Only manage custom row here — startBtnRow is managed by selectCount()
   const startRow = document.getElementById("startBtnRow");
-  if (startRow) startRow.style.display = show && !state.isCustom ? "flex" : "none";
+  if (startRow && state.isCustom) startRow.style.display = "none";
   const customRow = document.getElementById("customStartRow");
   if (customRow) customRow.style.display = show && state.isCustom ? "flex" : "none";
 }
