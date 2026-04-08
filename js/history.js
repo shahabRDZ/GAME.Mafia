@@ -69,14 +69,16 @@ async function renderHistory() {
 async function clearHistory() {
   if (!confirm(t("clearConfirm"))) return;
   if (authToken) {
-    await apiFetch("/api/games", { method: "DELETE" });
-    if (currentUser) {
-      currentUser.total_games = 0;
-      document.getElementById("gamesCountDisplay").textContent = "۰ بازی ثبت‌شده";
+    // Keep last 10 games for logged-in users
+    const r = await apiFetch("/api/games", { method: "DELETE", body: JSON.stringify({ keep_last: 10 }) });
+    if (currentUser && r.ok) {
+      currentUser.total_games = r.data.remaining || 0;
+      document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
     }
+    showToast("🗑️ تاریخچه پاک شد (۱۰ بازی اخیر حفظ شد)");
   } else {
     localStorage.removeItem("mafiaHistory");
+    showToast("🗑️ تاریخچه پاک شد");
   }
   renderHistory();
-  showToast("🗑️ تاریخچه پاک شد");
 }
