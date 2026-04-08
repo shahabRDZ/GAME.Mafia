@@ -196,58 +196,8 @@ function showCurrentCard() {
   const slot = document.getElementById("cardSlot");
   slot.innerHTML = `<div class="big-card-wrapper" style="animation: cardSlideUp 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards">${buildCard(card, false)}</div>`;
   const cardEl = slot.querySelector(".card");
-  const handleTap = e => { e.preventDefault(); flipCurrentCard(e, card); };
-  cardEl.addEventListener("click", handleTap);
+  cardEl.addEventListener("click", e => flipCurrentCard(e, card));
   cardEl.style.touchAction = "manipulation";
-  initSwipeGesture(slot.querySelector(".big-card-wrapper"), card);
-}
-
-// ── Swipe gesture for cards ──
-function initSwipeGesture(wrapper, card) {
-  if (!wrapper) return;
-  let startX = 0, startY = 0, currentX = 0, isDragging = false;
-  const threshold = 60;
-
-  wrapper.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    currentX = 0;
-    isDragging = true;
-    wrapper.style.transition = "none";
-  }, { passive: true });
-
-  wrapper.addEventListener("touchmove", e => {
-    if (!isDragging) return;
-    const cardEl = wrapper.querySelector(".card");
-    if (!cardEl || !cardRevealed) return;
-    const dx = e.touches[0].clientX - startX;
-    const dy = Math.abs(e.touches[0].clientY - startY);
-    if (dy > Math.abs(dx)) return; // vertical scroll
-    currentX = dx;
-    wrapper.style.transform = `translateX(${dx * 0.5}px) rotate(${dx * 0.04}deg)`;
-    wrapper.style.opacity = Math.max(0.5, 1 - Math.abs(dx) / 400);
-  }, { passive: true });
-
-  wrapper.addEventListener("touchend", () => {
-    if (!isDragging) return;
-    isDragging = false;
-    wrapper.style.transition = "transform 0.3s ease, opacity 0.3s ease";
-    const cardEl = wrapper.querySelector(".card");
-    if (cardEl && cardRevealed && Math.abs(currentX) > threshold) {
-      haptic('light');
-      wrapper.style.transform = `translateX(${currentX > 0 ? 300 : -300}px) rotate(${currentX > 0 ? 15 : -15}deg)`;
-      wrapper.style.opacity = "0";
-      cardRevealed = false;
-      stopAmbientLightning();
-      setTimeout(() => {
-        if (state.queueIdx + 1 >= state.cards.length) { showCompletion(); }
-        else { state.queueIdx++; showCurrentCard(); }
-      }, 250);
-    } else {
-      wrapper.style.transform = "";
-      wrapper.style.opacity = "";
-    }
-  }, { passive: true });
 }
 
 // ── Haptic feedback helper ──
