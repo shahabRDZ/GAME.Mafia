@@ -256,12 +256,19 @@ function flipCurrentCard(e, card) {
     else { nextCard(); }
     return;
   }
-  cardEl.classList.add("flipped");
-  haptic('medium');
+  // Lightning effect before flip
+  cardEl.classList.add("lightning-active");
+  haptic('heavy');
+  spawnLightningFlash();
+  setTimeout(() => {
+    cardEl.classList.remove("lightning-active");
+    cardEl.classList.add("flipped");
+    haptic('medium');
+  }, 350);
   state.seen.add(card.number);
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
   // Show funny text after flip
-  setTimeout(() => showFunnyText(card), 500);
+  setTimeout(() => showFunnyText(card), 850);
   setTimeout(() => {
     const front = cardEl.querySelector(".card-front");
     if (front) {
@@ -270,7 +277,19 @@ function flipCurrentCard(e, card) {
       hint.textContent = "بکشید یا لمس کنید — نفر بعدی";
       front.appendChild(hint);
     }
-  }, 600);
+  }, 950);
+}
+
+// ── Screen-wide lightning flash ──
+function spawnLightningFlash() {
+  const flash = document.createElement("div");
+  flash.style.cssText = `
+    position: fixed; inset: 0; z-index: 200; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 50%, rgba(180,200,255,.2) 0%, rgba(100,120,255,.08) 40%, transparent 70%);
+    animation: screenFlash 0.6s ease-out forwards;
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 700);
 }
 
 function nextCard() {
