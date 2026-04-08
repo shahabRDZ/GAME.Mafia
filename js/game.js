@@ -1,5 +1,36 @@
 /* ── Game Logic ── */
 
+// ── Narrator System ──
+let narratorName = 'گرداننده شوشانگ';
+
+function showNarratorModal() {
+  const modal = document.getElementById("narratorModal");
+  const input = document.getElementById("narratorNameInput");
+  const info = document.getElementById("narratorScenarioInfo");
+
+  // Load saved name
+  const saved = localStorage.getItem('shushang_narrator');
+  if (saved) { input.value = saved; narratorName = saved; }
+
+  // Show scenario info
+  info.innerHTML = `
+    <span class="narrator-scenario-chip">🎭 ${state.group}</span>
+    <span class="narrator-scenario-chip">👥 ${toFarsiNum(state.count)} نفر</span>
+    <span class="narrator-scenario-chip">😈 ${toFarsiNum(state.mafiaCount)} مافیا</span>
+  `;
+
+  modal.classList.add("show");
+  setTimeout(() => input.select(), 300);
+}
+
+function confirmNarrator() {
+  const input = document.getElementById("narratorNameInput");
+  narratorName = input.value.trim() || 'گرداننده شوشانگ';
+  localStorage.setItem('shushang_narrator', narratorName);
+  document.getElementById("narratorModal").classList.remove("show");
+  actualStartGame();
+}
+
 async function startGame() {
   if (state.isCustom) {
     const name = document.getElementById("customName").value.trim() || "گروه دلخواه";
@@ -16,6 +47,11 @@ async function startGame() {
     state.customCards = [...customCardsList];
   }
   if (!state.group || !state.count) { showToast("⚠️ لطفاً گروه و تعداد را انتخاب کنید"); return; }
+  // Show narrator modal before starting
+  showNarratorModal();
+}
+
+async function actualStartGame() {
   generateCards();
   renderGame();
   await saveGame();
@@ -160,6 +196,13 @@ function renderGame() {
   document.getElementById("statTotal").textContent = toFarsiNum(state.count);
   document.getElementById("statMafia").textContent = toFarsiNum(state.mafiaCount);
   document.getElementById("statCitizen").textContent = toFarsiNum(state.citizenCount);
+  // Show narrator name
+  const narratorEl = document.getElementById("fsNarrator");
+  const narratorNameEl = document.getElementById("fsNarratorName");
+  if (narratorEl && narratorNameEl) {
+    narratorNameEl.textContent = narratorName;
+    narratorEl.style.display = "block";
+  }
   document.getElementById("completionBanner").classList.remove("show");
   document.getElementById("cardStage").style.display = "flex";
   document.getElementById("gameScreen").classList.add("game-fullscreen");
