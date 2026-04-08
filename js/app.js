@@ -54,6 +54,25 @@ initSwipeDismiss(".reveal-box", closeOverlay);
 initSwipeDismiss(".modal-box", closeAuthModal);
 initSwipeDismiss(".scenario-box", closeScenarioOverlay);
 
+// ── Theme Toggle ──
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const newTheme = current === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('shushang_theme', newTheme);
+  document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+}
+// Load saved theme
+(function loadTheme() {
+  const saved = localStorage.getItem('shushang_theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
 // Initialize
 applyLang();
 initAuth();
@@ -127,6 +146,42 @@ function installPWA() {
 function dismissPWA() {
   document.getElementById('pwaBanner').style.display = 'none';
   localStorage.setItem('pwa_dismissed', '1');
+}
+
+// ── Push Notifications ──
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  const result = await Notification.requestPermission();
+  return result === 'granted';
+}
+
+function sendLocalNotification(title, body, icon = '/icon-192.png') {
+  if (Notification.permission !== 'granted') return;
+  try {
+    new Notification(title, { body, icon, badge: '/icon-192.png', tag: 'shushang' });
+  } catch {
+    // Fallback for mobile: use SW notification
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, { body, icon, badge: '/icon-192.png', tag: 'shushang' });
+      });
+    }
+  }
+}
+
+// Ask for notification permission after first game
+function promptNotifications() {
+  if (Notification.permission !== 'default') return;
+  if (!localStorage.getItem('notif_asked')) {
+    localStorage.setItem('notif_asked', '1');
+    setTimeout(() => {
+      requestNotificationPermission().then(granted => {
+        if (granted) showToast('🔔 نوتیفیکیشن فعال شد!');
+      });
+    }, 3000);
+  }
 }
 
 // ── Keyboard Navigation ──

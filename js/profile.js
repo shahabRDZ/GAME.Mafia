@@ -19,9 +19,14 @@ async function renderProfileScreen() {
     <div class="profile-id">ID: ${u.id}</div>
     <div class="profile-bio">${escapeHtml(u.bio || 'بیو ندارید')}</div>
     <div class="profile-stats">
-      <div class="profile-stat wins"><span class="profile-stat-num">${toFarsiNum(u.chaos_wins || 0)}</span><span class="profile-stat-label">برد کی‌اس</span></div>
-      <div class="profile-stat losses"><span class="profile-stat-num">${toFarsiNum(u.chaos_losses || 0)}</span><span class="profile-stat-label">باخت کی‌اس</span></div>
-      <div class="profile-stat"><span class="profile-stat-num">${toFarsiNum(u.total_games || 0)}</span><span class="profile-stat-label">بازی آفلاین</span></div>
+      <div class="profile-stat wins"><span class="profile-stat-num">${toFarsiNum(u.chaos_wins || 0)}</span><span class="profile-stat-label">برد</span></div>
+      <div class="profile-stat losses"><span class="profile-stat-num">${toFarsiNum(u.chaos_losses || 0)}</span><span class="profile-stat-label">باخت</span></div>
+      <div class="profile-stat"><span class="profile-stat-num">${toFarsiNum(u.total_games || 0)}</span><span class="profile-stat-label">کل بازی</span></div>
+      <div class="profile-stat"><span class="profile-stat-num">${getWinRate(u)}٪</span><span class="profile-stat-label">درصد برد</span></div>
+    </div>
+    <div class="profile-extra-stats">
+      <div class="extra-stat"><span class="extra-stat-icon">📅</span> عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div>
+      <div class="extra-stat"><span class="extra-stat-icon">🎯</span> تجربه: ${getExperienceLevel(u)}</div>
     </div>
     <div class="badge-row">${renderBadges(u)}</div>
     <div class="profile-edit-row">
@@ -29,6 +34,21 @@ async function renderProfileScreen() {
       <button class="chaos-btn secondary" onclick="updateBio()" style="padding:8px 16px;font-size:.8rem">ذخیره</button>
     </div>
   `;
+
+function getExperienceLevel(u) {
+  const total = (u.total_games || 0) + (u.chaos_wins || 0) + (u.chaos_losses || 0);
+  if (total >= 100) return '🏆 افسانه‌ای';
+  if (total >= 50) return '⭐ حرفه‌ای';
+  if (total >= 20) return '🎯 باتجربه';
+  if (total >= 5) return '🎮 بازیکن';
+  return '🌱 تازه‌کار';
+}
+
+function getWinRate(u) {
+  const total = (u.chaos_wins || 0) + (u.chaos_losses || 0);
+  if (total === 0) return toFarsiNum(0);
+  return toFarsiNum(Math.round((u.chaos_wins / total) * 100));
+}
 
 function renderBadges(u) {
   const badges = [];

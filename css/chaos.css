@@ -172,6 +172,14 @@
 .profile-stat-label { font-size: var(--font-size-xs); color: var(--dim); }
 .profile-stat.wins .profile-stat-num { color: #44ff99; }
 .profile-stat.losses .profile-stat-num { color: #ff5555; }
+.profile-extra-stats {
+  display: flex; flex-direction: column; gap: var(--space-xs);
+  margin: var(--space-sm) 0; padding: var(--space-sm);
+  background: rgba(255,255,255,.03); border-radius: var(--radius-md);
+  font-size: var(--font-size-sm); color: var(--dim);
+}
+.extra-stat { display: flex; align-items: center; gap: var(--space-xs); }
+.extra-stat-icon { font-size: 1rem; }
 .profile-edit-row {
   display: flex; gap: var(--space-xs); margin-block-start: var(--space-md);
   justify-content: center; flex-wrap: wrap;

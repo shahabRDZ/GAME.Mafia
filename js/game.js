@@ -343,6 +343,7 @@ function showCompletion() {
   document.getElementById("cardStage").style.display = "none";
   document.getElementById("completionBanner").classList.add("show");
   document.getElementById("fsProgressFill").style.width = "100%";
+  if (typeof promptNotifications === 'function') promptNotifications();
 }
 
 function buildCard(card, flipped = false) {
@@ -474,10 +475,35 @@ function toggleModTimer() {
         modTimerRunning = false;
         document.getElementById("modTimerStartBtn").textContent = "شروع";
         haptic('heavy');
+        playAlarm();
         showToast("⏰ زمان تمام شد!");
+        sendLocalNotification('شوشانگ', '⏰ زمان تمام شد!');
       }
     }, 1000);
   }
+}
+
+// ── Alarm Sound (Web Audio API) ──
+function playAlarm() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const freqs = [880, 0, 880, 0, 880, 0, 1100];
+    const dur = 0.15;
+    freqs.forEach((freq, i) => {
+      if (freq === 0) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime + i * dur);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * dur + dur * 0.9);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * dur);
+      osc.stop(ctx.currentTime + i * dur + dur);
+    });
+    setTimeout(() => ctx.close(), 2000);
+  } catch {}
 }
 
 function resetModTimer() {

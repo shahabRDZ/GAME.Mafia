@@ -73,21 +73,29 @@
   --z-toast: 9999;
 }
 
-/* ── Light scheme adjustments (optional future use) ── */
-@media (prefers-color-scheme: light) {
-  :root {
-    /* Keep dark theme by default — only override if site adds [data-theme="auto"] */
-  }
-  [data-theme="auto"] {
-    --dark: #f0f0f5;
-    --dark2: #e8e5ea;
-    --dark3: #ddd8dc;
-    --glass: rgba(0,0,0,0.04);
-    --gb: rgba(0,0,0,0.07);
-    --text: #1a1a2e;
-    --dim: rgba(0,0,0,0.45);
-  }
+/* ── Light theme ── */
+[data-theme="light"] {
+  --dark: #f0f0f5;
+  --dark2: #e8e5ea;
+  --dark3: #ddd8dc;
+  --glass: rgba(0,0,0,0.04);
+  --gb: rgba(0,0,0,0.08);
+  --text: #1a1a2e;
+  --dim: rgba(0,0,0,0.45);
+  --accent: #c0392b;
+  --accent2: #d97706;
 }
+[data-theme="light"] body { background: #f0f0f5; }
+[data-theme="light"] .atmo-glow,
+[data-theme="light"] .atmo-fog { opacity: 0.3; }
+[data-theme="light"] .bottom-nav { background: rgba(240,240,245,.95); border-top-color: rgba(0,0,0,.08); }
+[data-theme="light"] .bnav-btn { color: rgba(0,0,0,.4); }
+[data-theme="light"] .bnav-btn.active { color: var(--accent); }
+[data-theme="light"] .card-back { background: linear-gradient(145deg, #e8e5ea, #ddd8dc, #d0cdd2); border-color: rgba(0,0,0,.1); }
+[data-theme="light"] .card-number { color: var(--accent); text-shadow: none; filter: none; }
+[data-theme="light"] .fs-game-menu { background: rgba(240,240,245,.97); }
+[data-theme="light"] .mod-panel { background: rgba(0,0,0,.03); }
+[data-theme="light"] .toast { background: rgba(240,240,245,.97); color: #1a1a2e; }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
