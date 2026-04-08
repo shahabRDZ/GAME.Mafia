@@ -664,36 +664,31 @@ function toggleNearbyPlayer(uid, el) {
 function updateNearbyAssignBtn() {
   const btn = document.getElementById("nearbyAssignBtn");
   const roles = window._nearbyRoles || [];
-  const requiredPlayers = roles.length - 1; // minus host
+  const requiredPlayers = roles.length; // all roles go to players, host is just moderator
   const selected = nearbySelectedIds.size;
 
-  if (selected > 0) {
-    btn.style.display = "block";
-    if (selected < requiredPlayers) {
-      btn.textContent = `⏳ ${toFarsiNum(selected)} از ${toFarsiNum(requiredPlayers)} نفر — ${toFarsiNum(requiredPlayers - selected)} نفر مونده`;
-      btn.disabled = true;
-      btn.style.opacity = "0.5";
-    } else {
-      btn.textContent = `🎲 پخش رندوم نقش به ${toFarsiNum(requiredPlayers)} نفر`;
-      btn.disabled = false;
-      btn.style.opacity = "1";
-    }
+  btn.style.display = "block";
+  if (selected < requiredPlayers) {
+    btn.textContent = `⏳ ${toFarsiNum(selected)} از ${toFarsiNum(requiredPlayers)} نفر — ${toFarsiNum(requiredPlayers - selected)} نفر مونده`;
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
   } else {
-    btn.style.display = "none";
+    btn.textContent = `🎲 پخش رندوم نقش به ${toFarsiNum(requiredPlayers)} نفر`;
+    btn.disabled = false;
+    btn.style.opacity = "1";
   }
 }
 
 async function assignNearbyRoles() {
   const roles = window._nearbyRoles || [];
   const playerIds = [...nearbySelectedIds];
-  const requiredPlayers = roles.length - 1; // minus host
+  const requiredPlayers = roles.length;
 
   if (playerIds.length < requiredPlayers) {
-    showToast(`⚠️ ${toFarsiNum(requiredPlayers)} بازیکن لازمه — ${toFarsiNum(playerIds.length)} نفر انتخاب شده`);
+    showToast(`⚠️ لیست ${toFarsiNum(requiredPlayers)} نفره تکمیل نشده — ${toFarsiNum(requiredPlayers - playerIds.length)} نفر مونده`);
     return;
   }
 
-  // Take exactly requiredPlayers
   const finalIds = playerIds.slice(0, requiredPlayers);
   const selectedRoles = roles.slice(0, requiredPlayers);
 
