@@ -686,6 +686,97 @@
   .completion-banner { max-width: 90vw; margin-inline: auto; }
 }
 
+/* ── Moderator Tools ── */
+.mod-panel {
+  margin: var(--space-md); padding: var(--space-md);
+  background: rgba(255,255,255,.04); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius-xl);
+  animation: popIn 0.3s ease;
+}
+.mod-section {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.mod-section:last-of-type { border-bottom: none; }
+
+/* Phase indicator */
+.mod-phase {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+.mod-phase-icon { font-size: 2.5rem; transition: all 0.5s ease; }
+.mod-phase-name {
+  font-size: var(--font-size-xl); font-weight: 900;
+  transition: color 0.5s ease;
+}
+.mod-phase.night .mod-phase-icon { filter: brightness(0.7); }
+.mod-phase.night .mod-phase-name { color: #60a5fa; }
+
+/* Timer */
+.mod-timer-display {
+  text-align: center; font-size: 3.5rem; font-weight: 900;
+  font-variant-numeric: tabular-nums; color: var(--accent2);
+  margin: var(--space-xs) 0; letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(245,166,35,.3);
+}
+.mod-timer-display.warning { color: var(--accent); text-shadow: 0 0 20px rgba(233,69,96,.4); animation: funPulse 1s ease-in-out infinite; }
+
+.mod-timer-controls, .mod-timer-actions, .mod-share-actions {
+  display: flex; gap: var(--space-xs); justify-content: center;
+  flex-wrap: wrap; margin-top: var(--space-xs);
+}
+
+/* Mod buttons */
+.mod-btn {
+  padding: var(--space-xs) var(--space-md);
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-full); color: rgba(255,255,255,.7);
+  font-family: inherit; font-size: var(--font-size-sm); font-weight: 700;
+  cursor: pointer; transition: all var(--transition-fast);
+  min-height: var(--touch-min);
+}
+.mod-btn:active { transform: scale(0.95); }
+.mod-btn-start {
+  background: linear-gradient(135deg, var(--accent), #c0392b);
+  border-color: var(--accent); color: #fff;
+}
+.mod-btn-phase {
+  background: rgba(96,165,250,.12); border-color: rgba(96,165,250,.25); color: #60a5fa;
+}
+
+/* Vote players */
+.mod-vote-players {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+  gap: var(--space-xs); margin: var(--space-sm) 0;
+}
+.mod-vote-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: var(--space-xs); border-radius: var(--radius-md);
+  background: rgba(255,255,255,.04); border: 2px solid rgba(255,255,255,.08);
+  cursor: pointer; transition: all var(--transition-fast);
+  min-height: var(--touch-min);
+}
+.mod-vote-card .vote-num { font-size: 1.2rem; font-weight: 900; color: var(--dim); }
+.mod-vote-card .vote-count { font-size: 0.7rem; color: var(--accent2); font-weight: 700; }
+.mod-vote-card.voted {
+  border-color: var(--accent); background: rgba(233,69,96,.1);
+}
+.mod-vote-card.voted .vote-num { color: var(--accent); }
+.mod-vote-card.eliminated {
+  border-color: rgba(233,69,96,.5); background: rgba(233,69,96,.2);
+  position: relative;
+}
+.mod-vote-card.eliminated::after {
+  content: '✕'; position: absolute; font-size: 1.5rem; color: var(--accent);
+  font-weight: 900;
+}
+
+.mod-vote-result {
+  text-align: center; padding: var(--space-sm);
+  font-size: var(--font-size-sm); font-weight: 700;
+  color: var(--accent2); min-height: 1.5rem;
+}
+
 /* ── Form Validation States ── */
 .input-error {
   border-color: var(--accent) !important;

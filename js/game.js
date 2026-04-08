@@ -421,6 +421,156 @@ function closeOverlay() { document.getElementById("revealOverlay").classList.rem
 function flipAllBack() { shuffleCards(); }
 function goBack() { exitGameFullscreen(); }
 
+// ══════════════════════════════════════════
+// MODERATOR TOOLS
+// ══════════════════════════════════════════
+
+let modTimerInterval = null;
+let modTimerSeconds = 0;
+let modTimerRunning = false;
+let modIsNight = false;
+let modVotes = {};
+
+function openModeratorTools() {
+  document.getElementById("completionBanner").classList.remove("show");
+  document.getElementById("cardStage").style.display = "none";
+  const panel = document.getElementById("modPanel");
+  panel.style.display = "block";
+  renderVotePlayers();
+  resetModTimer();
+}
+
+function closeModPanel() {
+  document.getElementById("modPanel").style.display = "none";
+  document.getElementById("completionBanner").classList.add("show");
+  if (modTimerInterval) { clearInterval(modTimerInterval); modTimerInterval = null; }
+}
+
+// ── Day/Night Timer ──
+function setModTimer(seconds) {
+  modTimerSeconds = seconds;
+  modTimerRunning = false;
+  if (modTimerInterval) { clearInterval(modTimerInterval); modTimerInterval = null; }
+  updateTimerDisplay();
+  document.getElementById("modTimerStartBtn").textContent = "شروع";
+}
+
+function toggleModTimer() {
+  if (modTimerRunning) {
+    clearInterval(modTimerInterval);
+    modTimerInterval = null;
+    modTimerRunning = false;
+    document.getElementById("modTimerStartBtn").textContent = "ادامه";
+  } else {
+    if (modTimerSeconds <= 0) return;
+    modTimerRunning = true;
+    document.getElementById("modTimerStartBtn").textContent = "توقف";
+    modTimerInterval = setInterval(() => {
+      modTimerSeconds--;
+      updateTimerDisplay();
+      if (modTimerSeconds <= 0) {
+        clearInterval(modTimerInterval);
+        modTimerInterval = null;
+        modTimerRunning = false;
+        document.getElementById("modTimerStartBtn").textContent = "شروع";
+        haptic('heavy');
+        showToast("⏰ زمان تمام شد!");
+      }
+    }, 1000);
+  }
+}
+
+function resetModTimer() {
+  if (modTimerInterval) { clearInterval(modTimerInterval); modTimerInterval = null; }
+  modTimerSeconds = 0;
+  modTimerRunning = false;
+  updateTimerDisplay();
+  document.getElementById("modTimerStartBtn").textContent = "شروع";
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(modTimerSeconds / 60);
+  const s = modTimerSeconds % 60;
+  const display = document.getElementById("modTimerDisplay");
+  display.textContent = toFarsiNum(String(m).padStart(2, '0')) + ':' + toFarsiNum(String(s).padStart(2, '0'));
+  display.classList.toggle("warning", modTimerSeconds <= 10 && modTimerSeconds > 0);
+}
+
+function togglePhase() {
+  modIsNight = !modIsNight;
+  const phase = document.getElementById("modPhase");
+  document.getElementById("modPhaseIcon").textContent = modIsNight ? '🌙' : '☀️';
+  document.getElementById("modPhaseName").textContent = modIsNight ? 'شب' : 'روز';
+  phase.classList.toggle("night", modIsNight);
+  haptic('light');
+}
+
+// ── Voting System ──
+function renderVotePlayers() {
+  const container = document.getElementById("modVotePlayers");
+  if (!state.cards || !state.cards.length) return;
+  modVotes = {};
+  state.cards.forEach(c => { modVotes[c.number] = 0; });
+  container.innerHTML = state.cards.sort((a, b) => a.number - b.number).map(c =>
+    `<div class="mod-vote-card" id="voteCard${c.number}" onclick="addVote(${c.number})">
+      <span class="vote-num">${toFarsiNum(c.number)}</span>
+      <span class="vote-count" id="voteCount${c.number}">۰</span>
+    </div>`
+  ).join('');
+  document.getElementById("modVoteResult").textContent = '';
+}
+
+function addVote(num) {
+  modVotes[num] = (modVotes[num] || 0) + 1;
+  document.getElementById("voteCount" + num).textContent = toFarsiNum(modVotes[num]);
+  document.getElementById("voteCard" + num).classList.add("voted");
+  haptic('light');
+}
+
+function startVoting() {
+  resetVotes();
+  showToast("🗳️ رأی‌گیری شروع شد — روی شماره بازیکن بزنید");
+}
+
+function resetVotes() {
+  renderVotePlayers();
+}
+
+// ── Share Game Results ──
+function shareGameResult() {
+  if (!state.cards || !state.cards.length) return;
+  const mafias = state.cards.filter(c => c.role === "mafia").sort((a, b) => a.number - b.number);
+  const citizens = state.cards.filter(c => c.role === "citizen").sort((a, b) => a.number - b.number);
+  const independents = state.cards.filter(c => c.role === "independent").sort((a, b) => a.number - b.number);
+
+  let text = `🎭 نتیجه بازی مافیا شوشانگ\n`;
+  text += `📋 سناریو: ${state.group} | ${state.count} نفر\n\n`;
+  text += `😈 مافیا (${mafias.length} نفر):\n`;
+  mafias.forEach(c => { text += `  ${ROLE_ICONS[c.roleName] || '🔴'} #${c.number} ${c.roleName}\n`; });
+  text += `\n😇 شهروند (${citizens.length} نفر):\n`;
+  citizens.forEach(c => { text += `  ${ROLE_ICONS[c.roleName] || '🟢'} #${c.number} ${c.roleName}\n`; });
+  if (independents.length) {
+    text += `\n🐺 مستقل (${independents.length} نفر):\n`;
+    independents.forEach(c => { text += `  ${ROLE_ICONS[c.roleName] || '🟣'} #${c.number} ${c.roleName}\n`; });
+  }
+  text += `\n🔗 shahabrdz.dev/mafia`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'نتیجه بازی مافیا', text: text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast("📋 نتیجه بازی کپی شد!"));
+  }
+}
+
+function shareGameLink() {
+  const url = window.location.origin;
+  if (navigator.share) {
+    navigator.share({ title: 'مافیا شوشانگ', text: 'بیا مافیا بازی کنیم!', url: url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast("🔗 لینک کپی شد!"));
+  }
+}
+
 function newGame() {
   state = { group: null, count: null, mafiaCount: null, citizenCount: null, cards: [], flipped: new Set(), seen: new Set(), isCustom: false, customCards: [] };
   customCardsList = [];
