@@ -733,8 +733,18 @@ async function pollConfirmations(gameId) {
       ${renderAvatar(p.username, '1.8rem')}
       <span class="confirm-name">#${toFarsiNum(p.playerNum)} ${escapeHtml(p.username)}</span>
       <span class="confirm-status${p.confirmed ? ' done' : ''}">${p.confirmed ? '✓ دیده شد' : '⏳ منتظر'}</span>
+      <button class="confirm-resend" onclick="resendToPlayer(${p.user_id})" title="ارسال مجدد">🔄</button>
     </div>`
   ).join('');
+
+  // Resend all + Reset buttons
+  const btnsHtml = `<div style="display:flex;gap:8px;margin-top:12px">
+    <button class="mod-btn" onclick="resendAllPlayers()" style="flex:1">🔄 ارسال مجدد به همه</button>
+    <button class="mod-btn mod-btn-start" onclick="resetAndReshuffle()" style="flex:1">🎲 ریست و پخش مجدد</button>
+  </div>`;
+  if (!list.querySelector('.confirm-buttons')) {
+    list.insertAdjacentHTML('beforeend', `<div class="confirm-buttons">${btnsHtml}</div>`);
+  }
 
   const allConfirmed = players.length > 0 && players.every(p => p.confirmed);
   if (allConfirmed) {
@@ -744,6 +754,48 @@ async function pollConfirmations(gameId) {
     haptic('heavy');
     showToast("✅ همه نقش‌ها تأیید شد — بازی شروع شده!");
   }
+}
+
+async function resendToPlayer(userId) {
+  const r = await apiFetch("/api/nearby/resend/" + userId, { method: "POST", _background: true });
+  if (r.ok) {
+    haptic('light');
+    showToast("🔄 ارسال مجدد شد");
+  } else {
+    showToast("⚠️ خطا در ارسال مجدد");
+  }
+}
+
+async function resendAllPlayers() {
+  const gameId = window._nearbyGameId;
+  if (!gameId) return;
+  const r = await apiFetch("/api/nearby/confirmations/" + gameId, { _background: true });
+  if (!r.ok) return;
+  for (const p of r.data) {
+    await apiFetch("/api/nearby/resend/" + p.user_id, { method: "POST", _background: true });
+  }
+  haptic('medium');
+  showToast("🔄 به همه ارسال مجدد شد");
+}
+
+async function resetAndReshuffle() {
+  const gameId = window._nearbyGameId;
+  if (!gameId) { showToast("⚠️ بازی فعالی نیست"); return; }
+
+  const r = await apiFetch("/api/nearby/reassign", {
+    method: "POST", body: JSON.stringify({ gameId })
+  });
+  if (!r.ok) { showToast("⚠️ " + (r.data?.error || "خطا")); return; }
+
+  haptic('heavy');
+  showToast("🎲 نقش‌ها مجدداً پخش شد!");
+
+  // Update game ID and restart polling
+  window._nearbyGameId = r.data.gameId;
+  document.getElementById("nearbyStatus").textContent = "🎲 نقش‌ها مجدد پخش شد — منتظر تأیید...";
+  document.getElementById("nearbyStatus").style.color = "var(--accent2)";
+  if (window._confirmPoll) clearInterval(window._confirmPoll);
+  window._confirmPoll = setInterval(() => pollConfirmations(r.data.gameId), 2000);
 }
 
 function closeNearby() {
@@ -793,9 +845,17 @@ async function checkMyNearbyRole() {
   const r = await apiFetch("/api/nearby/my-role", { _background: true });
   if (!r.ok || !r.data.assigned) return;
 
-  clearInterval(nearbyRoleCheckInterval);
-  nearbyRoleCheckInterval = null;
+  // If already confirmed this game, skip (wait for new game)
+  if (r.data.gameId === nearbyGameId && document.getElementById("nearbyCard")?.classList.contains("flipped")) {
+    // Check if resend — confirmation was reset
+    if (!r.data.confirmed) {
+      // Resend! Reset card for re-viewing
+      document.getElementById("nearbyCard").classList.remove("flipped");
+    }
+    return;
+  }
 
+  // New role or first time — don't stop polling (allow resend)
   const role = r.data.role;
 
   // Strong vibration pattern

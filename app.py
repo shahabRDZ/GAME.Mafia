@@ -891,7 +891,7 @@ def get_my_nearby_role():
     if not role_data:
         return jsonify({"assigned": False}), 200
     # Don't pop — keep it so we can track confirmation status
-    return jsonify({"assigned": True, **role_data}), 200
+    return jsonify({"assigned": True, "confirmed": role_data.get("confirmed", False), **role_data}), 200
 
 @app.route("/api/nearby/confirm/<game_id>", methods=["POST"])
 @jwt_required()
@@ -903,6 +903,46 @@ def confirm_nearby_role(game_id):
         return jsonify({"error": "نقشی پیدا نشد"}), 404
     role_data["confirmed"] = True
     return jsonify({"ok": True}), 200
+
+@app.route("/api/nearby/resend/<int:user_id>", methods=["POST"])
+@jwt_required()
+def resend_nearby_role(user_id):
+    """Host resends role notification to a specific player."""
+    role_data = nearby_roles.get(user_id)
+    if not role_data:
+        return jsonify({"error": "نقشی برای این بازیکن وجود ندارد"}), 404
+    # Reset confirmation so player sees it again
+    role_data["confirmed"] = False
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/nearby/reassign", methods=["POST"])
+@jwt_required()
+def reassign_nearby_roles():
+    """Host reshuffles and reassigns roles to same players."""
+    data = request.get_json()
+    game_id = data.get("gameId")
+    if not game_id:
+        return jsonify({"error": "شناسه بازی نامعتبر"}), 400
+    # Find all players in this game
+    player_ids = []
+    roles_list = []
+    for uid, rd in nearby_roles.items():
+        if rd.get("gameId") == game_id:
+            player_ids.append(uid)
+            roles_list.append(rd["role"])
+    if not player_ids:
+        return jsonify({"error": "بازیکنی پیدا نشد"}), 404
+    # Reshuffle
+    random.shuffle(roles_list)
+    new_game_id = str(int(_time.time() * 1000))
+    for i, uid in enumerate(player_ids):
+        nearby_roles[uid] = {
+            "role": roles_list[i],
+            "playerNum": i + 1,
+            "gameId": new_game_id,
+            "confirmed": False
+        }
+    return jsonify({"ok": True, "gameId": new_game_id, "count": len(player_ids)}), 200
 
 @app.route("/api/nearby/confirmations/<game_id>", methods=["GET"])
 @jwt_required()
