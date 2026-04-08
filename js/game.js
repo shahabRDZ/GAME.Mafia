@@ -147,6 +147,7 @@ function generateCards() {
 }
 
 function shuffleCards() {
+  stopAmbientLightning();
   generateCards();
   document.getElementById("completionBanner").classList.remove("show");
   document.getElementById("cardStage").style.display = "flex";
@@ -170,6 +171,7 @@ function renderGame() {
 }
 
 function exitGameFullscreen() {
+  stopAmbientLightning();
   const gs = document.getElementById("gameScreen");
   gs.classList.remove("game-fullscreen", "active");
   document.querySelector(".container").style.display = "block";
@@ -252,6 +254,7 @@ function flipCurrentCard(e, card) {
   const cardEl = document.querySelector("#cardSlot .card");
   if (!cardEl) return;
   if (cardEl.classList.contains("flipped")) {
+    stopAmbientLightning();
     if (state.queueIdx + 1 >= state.cards.length) { showCompletion(); }
     else { nextCard(); }
     return;
@@ -264,6 +267,8 @@ function flipCurrentCard(e, card) {
     cardEl.classList.remove("lightning-active");
     cardEl.classList.add("flipped");
     haptic('medium');
+    // Start ambient lightning loop on background
+    startAmbientLightning();
   }, 350);
   state.seen.add(card.number);
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
@@ -292,6 +297,59 @@ function spawnLightningFlash() {
   setTimeout(() => flash.remove(), 700);
 }
 
+// ── Ambient lightning loop while card is revealed ──
+let ambientLightningTimer = null;
+let ambientLightningEl = null;
+
+function startAmbientLightning() {
+  stopAmbientLightning();
+  // Create persistent ambient container
+  ambientLightningEl = document.createElement("div");
+  ambientLightningEl.id = "ambientLightning";
+  ambientLightningEl.style.cssText = `
+    position: fixed; inset: 0; z-index: 50; pointer-events: none;
+  `;
+  document.body.appendChild(ambientLightningEl);
+
+  function strike() {
+    if (!ambientLightningEl) return;
+    // Random position for each bolt
+    const x = 10 + Math.random() * 80;
+    const y = 10 + Math.random() * 80;
+    const angle = -20 + Math.random() * 40;
+    const bolt = document.createElement("div");
+    bolt.style.cssText = `
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(${170 + angle}deg, transparent ${y - 2}%, rgba(140,160,255,.5) ${y}%, transparent ${y + 1.5}%),
+        linear-gradient(${185 + angle}deg, transparent ${y + 5}%, rgba(180,200,255,.3) ${y + 5.5}%, transparent ${y + 7}%);
+      animation: lightningFlash 0.5s ease-out forwards;
+    `;
+    const glow = document.createElement("div");
+    glow.style.cssText = `
+      position: absolute; pointer-events: none;
+      width: 200px; height: 200px;
+      left: ${x}%; top: ${y}%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(140,170,255,.15) 0%, transparent 70%);
+      animation: lightningGlow 0.5s ease-out forwards;
+    `;
+    ambientLightningEl.appendChild(bolt);
+    ambientLightningEl.appendChild(glow);
+    setTimeout(() => { bolt.remove(); glow.remove(); }, 600);
+
+    // Schedule next strike randomly (800ms - 2500ms)
+    ambientLightningTimer = setTimeout(strike, 800 + Math.random() * 1700);
+  }
+  // First strike after short delay
+  ambientLightningTimer = setTimeout(strike, 400);
+}
+
+function stopAmbientLightning() {
+  if (ambientLightningTimer) { clearTimeout(ambientLightningTimer); ambientLightningTimer = null; }
+  if (ambientLightningEl) { ambientLightningEl.remove(); ambientLightningEl = null; }
+}
+
 function nextCard() {
   const funny = document.querySelector(".funny-container");
   if (funny) funny.remove();
@@ -302,6 +360,7 @@ function nextCard() {
 }
 
 function showCompletion() {
+  stopAmbientLightning();
   document.getElementById("cardStage").style.display = "none";
   document.getElementById("completionBanner").classList.add("show");
   document.getElementById("fsProgressFill").style.width = "100%";
