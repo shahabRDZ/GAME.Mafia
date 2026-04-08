@@ -285,7 +285,7 @@ function flipCurrentCard(e, card) {
     if (front) {
       const hint = document.createElement("div");
       hint.className = "tap-hint-next";
-      hint.innerHTML = '<span class="swipe-arrow">👈</span> بکشید یا لمس کنید';
+      hint.textContent = 'لمس کنید — نفر بعدی';
       front.appendChild(hint);
     }
   }, 700);
@@ -407,7 +407,7 @@ function buildCard(card, flipped = false) {
       <div class="card-face card-back">
         ${particles}
         <div class="card-number">${toFarsiNum(card.number)}</div>
-        <div class="tap-hint"><span class="tap-hint-arrow">👆</span> لمس کنید</div>
+        <div class="tap-hint">لمس کنید</div>
       </div>
       <div class="card-face card-front ${card.role}">
         ${sparks}
