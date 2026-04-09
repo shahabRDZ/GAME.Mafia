@@ -156,7 +156,7 @@
       <span>تاریخچه</span>
     </button>
     <button class="bnav-btn" id="navDigitalReceive" onclick="openHostList()">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="3"/><path d="M12 8v4M12 16h.01"/></svg>
       <span>دریافت نقش</span>
     </button>
     <button class="bnav-btn" id="navRules" onclick="showScreen('rules')">
@@ -529,17 +529,22 @@
   <span class="app-version">v2.5.0</span>
 </footer>
 
-<!-- Nearby Players Overlay -->
+<!-- Host: Waiting for players -->
 <div class="digital-overlay" id="nearbyOverlay">
   <div class="digital-box" style="border-color:rgba(74,222,128,.2);max-width:26rem">
     <button class="modal-close-btn" onclick="closeNearby()" aria-label="بستن">✕</button>
-    <div class="digital-icon">📍</div>
-    <div class="digital-title" style="color:#4ade80">بازیکنان نزدیک</div>
-    <div id="nearbyScenarioInfo" style="font-size:0.8rem;color:var(--accent2);margin-bottom:8px;text-align:center"></div>
-    <div id="nearbyStatus" style="font-size:0.8rem;color:var(--dim);margin-bottom:12px">در حال جستجو...</div>
+    <div class="digital-icon">🎙️</div>
+    <div class="digital-title" style="color:#4ade80">در جستجوی پلیر</div>
+    <div id="nearbyScenarioInfo" style="font-size:0.8rem;color:var(--accent2);margin-bottom:4px;text-align:center"></div>
+    <div class="nearby-instructions">
+      <p>📱 از بازیکنان بخواهید:</p>
+      <p>۱. وارد سایت شوشانگ بشن</p>
+      <p>۲. دکمه <strong>«دریافت نقش»</strong> رو بزنن</p>
+      <p>۳. اسم گرداننده <strong id="nearbyHostName">—</strong> رو انتخاب کنن</p>
+    </div>
+    <div id="nearbyStatus" style="font-size:0.8rem;color:var(--dim);margin-bottom:12px;text-align:center"></div>
     <div id="nearbyPlayerList"></div>
     <button class="start-btn start-btn-nearby" id="nearbyAssignBtn" onclick="assignNearbyRoles()" style="width:100%;margin-top:12px;display:none">🎲 پخش رندوم نقش‌ها</button>
-    <!-- After assignment: live status of confirmations -->
     <div id="nearbyConfirmList" style="display:none;margin-top:12px"></div>
   </div>
 </div>
@@ -568,14 +573,27 @@
 </div>
 
 
-<!-- Host List Overlay (Player picks a host) -->
+<!-- Player: Enter name → Pick host → Wait for role -->
 <div class="digital-overlay" id="hostListOverlay">
   <div class="digital-box" style="border-color:rgba(0,207,255,.2);max-width:24rem">
     <button class="modal-close-btn" onclick="closeHostList()" aria-label="بستن">✕</button>
-    <div class="digital-icon">📱</div>
-    <div class="digital-title" style="color:#00cfff">انتخاب گرداننده</div>
-    <div class="host-list-hint" id="hostListHint">در حال جستجوی گرداننده‌های نزدیک...</div>
-    <div id="hostListContent"></div>
+    <!-- Phase 1: Enter name -->
+    <div id="playerNamePhase">
+      <div class="digital-icon">🎭</div>
+      <div class="digital-title" style="color:#00cfff">دریافت نقش دیجیتال</div>
+      <div style="font-size:0.82rem;color:var(--dim);margin-bottom:16px;text-align:center">اسمتون رو وارد کنید تا گرداننده ببینه</div>
+      <div class="narrator-input-wrap">
+        <input type="text" id="playerNameInput" maxlength="20" placeholder="اسم شما..." class="narrator-input" style="font-size:1.1rem" autocomplete="off" onkeydown="if(event.key==='Enter')submitPlayerName()">
+      </div>
+      <button class="start-btn start-btn-nearby" onclick="submitPlayerName()" style="width:100%;margin-top:12px">ادامه</button>
+    </div>
+    <!-- Phase 2: Pick host -->
+    <div id="hostPickPhase" style="display:none">
+      <div class="digital-icon">📱</div>
+      <div class="digital-title" style="color:#00cfff">انتخاب گرداننده</div>
+      <div class="host-list-hint" id="hostListHint">در حال جستجو...</div>
+      <div id="hostListContent"></div>
+    </div>
   </div>
 </div>
 
