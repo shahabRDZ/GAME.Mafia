@@ -435,6 +435,7 @@ async function evLoadMy() {
     html+='<div class="ev-my-label host">🎙️ ایونت‌های شما</div>';
     r.data.hosted.forEach(e=>{
       html+=evCard(e);
+      html+=`<div style="padding:0 12px;margin-top:-8px;margin-bottom:8px"><button onclick="event.stopPropagation();evDeleteEvent(${e.id})" style="background:#e94560;color:#fff;border:none;padding:6px 16px;border-radius:8px;font-size:.78rem;cursor:pointer">🗑️ حذف ایونت</button></div>`;
       if(e.reservations?.length){
         html+='<div style="padding:4px 12px;margin-top:-6px;margin-bottom:10px">';
         e.reservations.forEach(rv=>{
@@ -453,6 +454,13 @@ async function evLoadMy() {
   }
   if(!html)html='<div style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">ایونتی ندارید</div>';
   el.innerHTML=html;
+}
+
+async function evDeleteEvent(eid) {
+  if(!confirm('آیا مطمئنید که می‌خواهید این ایونت را حذف کنید؟')) return;
+  const r=await evFetch(`/api/events/${eid}`,{method:'DELETE'});
+  if(r.ok){alert('✅ ایونت حذف شد');evLoadMy();}
+  else alert('⚠️ '+(r.data?.error||'خطا در حذف'));
 }
 
 async function evManageRes(eid,uid,status) {
