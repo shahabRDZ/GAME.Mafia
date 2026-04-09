@@ -69,13 +69,13 @@ async function submitAuth() {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    // Remember me
-    const remember = document.getElementById("rememberMe")?.checked;
-    if (remember) {
-      localStorage.setItem("mafiaToken", authToken);
-    } else {
-      sessionStorage.setItem("mafiaToken", authToken);
+    // Always save to localStorage (remember me default)
+    const rememberEl = document.getElementById("rememberMe");
+    const remember = rememberEl ? rememberEl.checked : true;
+    localStorage.setItem("mafiaToken", authToken);
+    if (!remember) {
       localStorage.removeItem("mafiaToken");
+      sessionStorage.setItem("mafiaToken", authToken);
     }
     closeAuthModal();
     renderAuthBar();
