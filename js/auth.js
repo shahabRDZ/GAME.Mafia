@@ -2,9 +2,22 @@
 
 async function initAuth() {
   if (!authToken) return;
-  const r = await apiFetch("/api/auth/me");
-  if (r.ok) { currentUser = r.data; renderAuthBar(); }
-  else { authToken = null; localStorage.removeItem("mafiaToken"); }
+  try {
+    const r = await apiFetch("/api/auth/me", { _background: true });
+    if (r.ok) {
+      currentUser = r.data;
+      renderAuthBar();
+    } else {
+      // Only clear if 401/403, not network error
+      if (r.data?.msg === "Token has expired" || r.data?.msg === "Signature verification failed") {
+        authToken = null;
+        localStorage.removeItem("mafiaToken");
+        sessionStorage.removeItem("mafiaToken");
+      }
+    }
+  } catch {
+    // Network error — keep token, don't logout
+  }
 }
 
 function openAuthModal(mode) {
