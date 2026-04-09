@@ -86,9 +86,20 @@
       <div class="modal-field"><label>رمز عبور</label>
         <input type="password" id="regPassword" placeholder="حداقل ۶ کاراکتر" autocomplete="new-password" required minlength="6"></div>
     </div>
+    <div id="rememberMeRow" class="remember-row">
+      <label class="remember-label"><input type="checkbox" id="rememberMe" checked> مرا بخاطر بسپار</label>
+      <a class="forgot-link" id="forgotLink" onclick="showForgotPassword()">رمز عبور را فراموش کردم</a>
+    </div>
     <div class="modal-error" id="authError"></div>
     <button class="modal-submit" id="authSubmitBtn" onclick="submitAuth()">ورود</button>
     <div class="modal-switch" id="authSwitch">حساب ندارید؟ <a onclick="switchAuthMode()">ثبت‌نام کنید</a></div>
+    <!-- Forgot Password -->
+    <div id="forgotFields" style="display:none">
+      <div class="modal-field"><label>ایمیل حساب</label>
+        <input type="email" id="forgotEmail" placeholder="example@email.com" autocomplete="email" inputmode="email"></div>
+      <button class="modal-submit" onclick="sendResetEmail()">ارسال رمز جدید</button>
+      <div class="modal-switch"><a onclick="hideForgotPassword()">بازگشت به ورود</a></div>
+    </div>
   </div>
 </div>
 

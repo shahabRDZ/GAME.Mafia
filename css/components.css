@@ -527,6 +527,14 @@
   min-width: var(--touch-min); min-height: var(--touch-min);
 }
 .modal-close-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+.remember-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: var(--space-sm) 0; font-size: 0.78rem;
+}
+.remember-label { display: flex; align-items: center; gap: 6px; color: var(--dim); cursor: pointer; }
+.remember-label input { accent-color: var(--accent); }
+.forgot-link { color: var(--accent2); cursor: pointer; font-size: 0.72rem; text-decoration: none; }
+.forgot-link:hover { text-decoration: underline; }
 .modal-close-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 .modal-error { color: #ff6b6b; font-size: 0.8rem; text-align: center; margin-block-start: var(--space-xs); min-height: 1rem; }
 
