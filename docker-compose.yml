@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-mafia}:${POSTGRES_PASSWORD:-mafia123}@db:5432/${POSTGRES_DB:-mafiadb}
-      JWT_SECRET: ${JWT_SECRET:-change-this-in-production-please}
+      JWT_SECRET: ${JWT_SECRET:-ShowShung-mafia-jwt-secret-2026-stable-key-do-not-change}
     ports:
       - "${WEB_PORT:-5001}:5000"
     depends_on:
