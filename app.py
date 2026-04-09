@@ -123,6 +123,7 @@ class GameEvent(db.Model):
     address = db.Column(db.String(300), default="")
     lat = db.Column(db.Float, nullable=True)
     lng = db.Column(db.Float, nullable=True)
+    price = db.Column(db.String(50), default="")
     scenario = db.Column(db.String(50), default="")
     player_count = db.Column(db.Integer, default=10)
     event_date = db.Column(db.String(20), default="")
@@ -144,6 +145,7 @@ class GameEvent(db.Model):
             "country": self.country, "city": self.city,
             "location_name": self.location_name,
             "address": self.address or "",
+            "price": self.price or "",
             "lat": self.lat, "lng": self.lng,
             "scenario": self.scenario, "player_count": self.player_count,
             "event_date": self.event_date, "start_time": self.start_time,
@@ -4238,6 +4240,7 @@ def create_event():
         address=data.get("address", "").strip()[:300],
         lat=float(data["lat"]) if data.get("lat") else None,
         lng=float(data["lng"]) if data.get("lng") else None,
+        price=data.get("price", "").strip()[:50],
         scenario=data.get("scenario", ""),
         player_count=int(data.get("player_count", 10)),
         event_date=data.get("event_date", ""),
@@ -4453,8 +4456,10 @@ for attempt in range(10):
                 # Event table new columns
                 for col in ["event_name VARCHAR(100) DEFAULT ''", "host_display_name VARCHAR(50) DEFAULT ''",
                     "address VARCHAR(300) DEFAULT ''", "lat FLOAT", "lng FLOAT"]:
-                    try: db.session.execute(db.text(f"ALTER TABLE game_events ADD COLUMN IF NOT EXISTS {col}"))
+                    try: db.session.execute(db.text(f"ALTER TABLE game_events ADD COLUMN IF NOT EXISTS {col}")); db.session.commit()
                     except: db.session.rollback()
+                try: db.session.execute(db.text("ALTER TABLE game_events ADD COLUMN IF NOT EXISTS price VARCHAR(50) DEFAULT ''")); db.session.commit()
+                except: db.session.rollback()
                 # Recreate lab tables to ensure all columns exist
                 db.session.execute(db.text("DROP TABLE IF EXISTS lab_messages CASCADE"))
                 db.session.execute(db.text("DROP TABLE IF EXISTS lab_players CASCADE"))
