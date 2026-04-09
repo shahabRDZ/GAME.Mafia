@@ -25,7 +25,8 @@ RUN groupadd -r appuser && useradd -r -g appuser -s /sbin/nologin appuser
 COPY manifest.json icon-192.png icon-512.png icon.svg sw.js ./
 COPY css/ css/
 COPY js/ js/
-COPY mafia.html admin.html app.py ./
+COPY mafia.html admin.html events.html ev.html app.py ./
+COPY img/ img/
 
 # Switch to non-root user
 USER appuser
