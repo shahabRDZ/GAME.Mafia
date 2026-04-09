@@ -799,24 +799,30 @@ function closeNearby() {
   if (nearbySearchInterval) { clearInterval(nearbySearchInterval); nearbySearchInterval = null; }
 }
 
-// ── Player side: share location + poll for role ──
+// ── Player side: confirm + share location + poll for role ──
+function confirmDigitalReceive() {
+  if (!authToken) { showToast("⚠️ ابتدا وارد حساب شوید"); openAuthModal('login'); return; }
+  if (!confirm("آیا مایل هستید نقش دیجیتال دریافت کنید؟\n\nلوکیشن شما برای گرداننده ارسال می‌شود تا نقش‌ها پخش شود.")) return;
+  shareMyLocation();
+}
+
 async function shareMyLocation() {
-  if (!authToken) { showToast("⚠️ ابتدا وارد شوید"); return; }
-  if (!navigator.geolocation) { showToast("⚠️ لوکیشن ندارید"); return; }
+  if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
+  showToast("📍 در حال دریافت لوکیشن...");
 
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       await apiFetch("/api/nearby/register", {
         method: "POST",
-        body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude }), _background: true
       });
-      showToast("📍 لوکیشن ثبت شد — منتظر نقش باشید");
+      showToast("✅ آماده دریافت نقش — منتظر گرداننده باشید");
 
       // Start polling for role — every 2 seconds
       if (nearbyRoleCheckInterval) clearInterval(nearbyRoleCheckInterval);
       nearbyRoleCheckInterval = setInterval(checkMyNearbyRole, 2000);
     },
-    () => showToast("❌ دسترسی لوکیشن رد شد"),
+    () => showToast("❌ دسترسی لوکیشن رد شد — از تنظیمات فعال کنید"),
     { enableHighAccuracy: true }
   );
 }
