@@ -4,383 +4,1248 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>پنل مدیریت — شوشانگ</title>
-<link rel="stylesheet" href="css/variables.css">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; padding:0; margin:0; }
-.admin-wrap { max-width:960px; margin:0 auto; padding:16px; }
-
-/* Header */
-.admin-header { display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.06); margin-bottom:20px; }
-.admin-title { font-size:1.2rem; font-weight:900; color:#e94560; }
-.admin-nav { display:flex; gap:6px; flex-wrap:wrap; }
-.admin-tab { padding:7px 14px; border-radius:50px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03);
-  color:rgba(255,255,255,.5); font-family:inherit; font-size:.75rem; font-weight:700; cursor:pointer; transition:all .2s; }
-.admin-tab.active { background:rgba(233,69,96,.15); border-color:#e94560; color:#e94560; }
-.admin-tab:hover { border-color:rgba(255,255,255,.2); color:#fff; }
-
-/* Login */
-.admin-login { max-width:360px; margin:80px auto; padding:30px; background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.08); border-radius:20px; }
-.admin-login h2 { text-align:center; font-size:1.1rem; color:#f5a623; margin-bottom:20px; }
-.a-field { margin-bottom:14px; }
-.a-field label { display:block; font-size:.72rem; color:rgba(255,255,255,.35); margin-bottom:5px; }
-.a-field input { width:100%; padding:11px 14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
-  border-radius:10px; color:#fff; font-family:inherit; font-size:.9rem; outline:none; }
-.a-field input:focus { border-color:#e94560; }
-.a-submit { width:100%; padding:12px; background:linear-gradient(135deg,#e94560,#c0392b); border:none;
-  border-radius:12px; color:#fff; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
-.a-error { color:#ff6b6b; font-size:.75rem; text-align:center; margin-top:8px; }
-
-/* Stats */
-.stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
-.s-card { padding:16px 10px; border-radius:14px; text-align:center; background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.06); }
-.s-card .n { font-size:1.6rem; font-weight:900; display:block; color:#f5a623; }
-.s-card .l { font-size:.65rem; color:rgba(255,255,255,.35); }
-.s-card.red .n { color:#e94560; }
-.s-card.green .n { color:#4ade80; }
-.s-card.blue .n { color:#60a5fa; }
-
-/* Section */
-.section { display:none; }
-.section.active { display:block; }
-.section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-.section-head h2 { font-size:1rem; color:#f5a623; }
-
-/* Search */
-.a-search { padding:8px 14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
-  border-radius:10px; color:#fff; font-family:inherit; font-size:.82rem; outline:none; width:180px; }
-
-/* User row */
-.u-row { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px;
-  background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.04); margin-bottom:6px; transition:all .2s; }
-.u-row:hover { background:rgba(255,255,255,.05); }
-.u-row.banned { opacity:.5; border-color:rgba(233,69,96,.2); }
-.u-avatar { font-size:1.4rem; flex-shrink:0; }
-.u-info { flex:1; min-width:0; }
-.u-name { font-weight:700; font-size:.85rem; }
-.u-email { font-size:.68rem; color:rgba(255,255,255,.3); }
-.u-meta { font-size:.65rem; color:rgba(255,255,255,.25); margin-top:2px; }
-.u-actions { display:flex; gap:4px; flex-wrap:wrap; flex-shrink:0; }
-.btn-s { padding:5px 10px; border-radius:8px; border:none; cursor:pointer;
-  font-family:inherit; font-size:.68rem; font-weight:700; transition:all .15s; }
-.btn-s:active { transform:scale(.95); }
-.btn-edit { background:rgba(96,165,250,.12); color:#60a5fa; }
-.btn-ban { background:rgba(233,69,96,.12); color:#e94560; }
-.btn-unban { background:rgba(74,222,128,.12); color:#4ade80; }
-.btn-pw { background:rgba(245,166,35,.12); color:#f5a623; }
-.btn-del { background:rgba(233,69,96,.08); color:rgba(233,69,96,.6); }
-.btn-games { background:rgba(255,255,255,.06); color:rgba(255,255,255,.4); }
-.online-dot { color:#4ade80; } .offline-dot { color:rgba(255,255,255,.15); }
-.ban-badge { font-size:.6rem; background:rgba(233,69,96,.2); color:#e94560; padding:2px 6px; border-radius:4px; margin-right:4px; }
-
-/* Messages */
-.msg-form { display:flex; gap:8px; margin-bottom:16px; }
-.msg-form input { flex:1; padding:10px 14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
-  border-radius:10px; color:#fff; font-family:inherit; font-size:.85rem; outline:none; }
-.msg-form button { padding:10px 18px; background:#e94560; border:none; border-radius:10px; color:#fff;
-  font-family:inherit; font-size:.82rem; font-weight:700; cursor:pointer; white-space:nowrap; }
-.msg-item { padding:10px 14px; background:rgba(255,255,255,.02); border-radius:10px; margin-bottom:6px;
-  font-size:.82rem; color:rgba(255,255,255,.6); }
-.msg-time { font-size:.65rem; color:rgba(255,255,255,.2); }
-
-/* Log */
-.log-item { padding:8px 12px; font-size:.75rem; color:rgba(255,255,255,.4);
-  border-bottom:1px solid rgba(255,255,255,.03); }
-.log-item .log-action { color:rgba(255,255,255,.6); } .log-item .log-target { color:#f5a623; }
-
-/* Modal */
-.a-modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:999; align-items:center; justify-content:center; }
-.a-modal-bg.show { display:flex; }
-.a-modal { background:#0d0d1c; border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:24px; max-width:380px; width:90%; }
-.a-modal h3 { font-size:1rem; color:#f5a623; margin-bottom:16px; }
-.a-modal .a-field { margin-bottom:10px; }
-.a-modal-actions { display:flex; gap:8px; margin-top:14px; }
-.a-modal-actions button { flex:1; padding:10px; border:none; border-radius:10px; font-family:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
-.a-btn-save { background:#e94560; color:#fff; }
-.a-btn-cancel { background:rgba(255,255,255,.06); color:rgba(255,255,255,.5); }
-
-/* Export */
-.export-btn { padding:8px 16px; background:rgba(74,222,128,.12); border:1px solid rgba(74,222,128,.2);
-  border-radius:10px; color:#4ade80; font-family:inherit; font-size:.78rem; font-weight:700; cursor:pointer; }
-
-@media(max-width:600px) {
-  .stats-grid { grid-template-columns:repeat(3,1fr); }
-  .u-row { flex-wrap:wrap; }
-  .u-actions { width:100%; justify-content:flex-end; margin-top:6px; }
-  .admin-nav { gap:4px; } .admin-tab { font-size:.68rem; padding:6px 10px; }
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--card:#0d0d1a;--card-border:rgba(255,255,255,.06);
+  --red:#e94560;--gold:#f5a623;--green:#4ade80;--blue:#60a5fa;
+  --text:#eaeaf5;--text-dim:rgba(255,255,255,.4);--text-muted:rgba(255,255,255,.2);
+  --sidebar-w:260px;--header-h:60px;
+  --glass:rgba(255,255,255,.03);--glass-border:rgba(255,255,255,.08);
+  --radius:14px;--radius-sm:10px;
 }
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:'Vazirmatn',sans-serif;color:var(--text);overflow-x:hidden;min-height:100vh}
+a{color:inherit;text-decoration:none}
+input,select,textarea,button{font-family:inherit;outline:none}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+#loginScreen.hidden{display:none}
+.login-box{width:380px;max-width:92vw;padding:40px 32px;background:var(--card);border:1px solid var(--glass-border);border-radius:24px;text-align:center}
+.login-box .logo{font-size:2rem;margin-bottom:8px}
+.login-box h1{font-size:1.1rem;color:var(--gold);margin-bottom:4px;font-weight:800}
+.login-box .subtitle{font-size:.75rem;color:var(--text-dim);margin-bottom:28px}
+.login-field{margin-bottom:14px;text-align:right}
+.login-field label{display:block;font-size:.72rem;color:var(--text-dim);margin-bottom:5px;font-weight:600}
+.login-field input{width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:#fff;font-size:.9rem;transition:border .2s}
+.login-field input:focus{border-color:var(--red)}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--red),#c0392b);border:none;border-radius:12px;color:#fff;font-size:.92rem;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s;margin-top:6px}
+.login-btn:hover{opacity:.9}.login-btn:active{transform:scale(.97)}
+.login-error{color:#ff6b6b;font-size:.75rem;margin-top:10px;min-height:1.2em}
+
+/* ===== LAYOUT ===== */
+.app{display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;right:0;width:var(--sidebar-w);height:100vh;background:var(--card);border-left:1px solid var(--card-border);z-index:100;display:flex;flex-direction:column;transition:transform .3s ease}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:12px}
+.sidebar-header .logo-icon{font-size:1.6rem}
+.sidebar-header .logo-text{font-size:1rem;font-weight:900;color:var(--red)}
+.sidebar-header .logo-sub{font-size:.65rem;color:var(--text-muted);display:block}
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text-dim);transition:all .2s;margin-bottom:2px;border:1px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-item.active{background:rgba(233,69,96,.1);border-color:rgba(233,69,96,.2);color:var(--red)}
+.nav-item .nav-icon{font-size:1.1rem;width:24px;text-align:center;flex-shrink:0}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--card-border);font-size:.68rem;color:var(--text-muted)}
+.sidebar-footer a{color:var(--red);cursor:pointer}
+
+/* Main content */
+.main{margin-right:var(--sidebar-w);flex:1;min-height:100vh}
+.main-header{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--card-border);background:rgba(0,0,0,.5);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50}
+.main-header .page-title{font-size:1rem;font-weight:800;color:var(--text)}
+.main-header .header-actions{display:flex;align-items:center;gap:12px}
+.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:4px}
+.main-content{padding:24px 28px}
+
+/* ===== GLASS CARD ===== */
+.g-card{background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;backdrop-filter:blur(6px)}
+.g-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.g-card-title{font-size:.88rem;font-weight:700;color:var(--gold)}
+
+/* ===== STAT CARDS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{padding:20px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--glass-border);text-align:center;transition:transform .2s,border-color .2s}
+.stat-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.12)}
+.stat-card .stat-value{font-size:1.8rem;font-weight:900;display:block;margin-bottom:4px}
+.stat-card .stat-label{font-size:.68rem;color:var(--text-dim);font-weight:500}
+.stat-card.c-gold .stat-value{color:var(--gold)}
+.stat-card.c-green .stat-value{color:var(--green)}
+.stat-card.c-blue .stat-value{color:var(--blue)}
+.stat-card.c-red .stat-value{color:var(--red)}
+.stat-card.c-default .stat-value{color:var(--text)}
+
+/* ===== CHARTS ===== */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-container{background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px}
+.chart-title{font-size:.82rem;font-weight:700;color:var(--text-dim);margin-bottom:16px}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:140px;padding-top:10px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;min-height:2px;transition:height .6s ease}
+.bar-label{font-size:.55rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bar-value{font-size:.58rem;color:var(--text-dim);font-weight:600}
+
+/* ===== ACTIVITY FEED ===== */
+.activity-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.feed-item:last-child{border:none}
+.feed-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.feed-text{font-size:.78rem;color:var(--text-dim);flex:1}
+.feed-time{font-size:.65rem;color:var(--text-muted)}
+
+/* ===== TOOLBAR ===== */
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar-search{padding:9px 16px;background:rgba(255,255,255,.04);border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:#fff;font-size:.82rem;width:220px;transition:border .2s}
+.toolbar-search:focus{border-color:var(--blue)}
+.filter-btn{padding:7px 14px;border-radius:50px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text-dim);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s}
+.filter-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text)}
+.filter-btn.active{background:rgba(233,69,96,.12);border-color:rgba(233,69,96,.3);color:var(--red)}
+.action-btn{padding:8px 16px;border-radius:var(--radius-sm);border:none;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.action-btn:active{transform:scale(.96)}
+.btn-primary{background:var(--red);color:#fff}
+.btn-success{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.2)}
+.btn-warning{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+.btn-danger{background:rgba(233,69,96,.1);color:var(--red);border:1px solid rgba(233,69,96,.15)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text-dim);border:1px solid var(--glass-border)}
+.btn-blue{background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.2)}
+.btn-sm{padding:5px 10px;font-size:.7rem;border-radius:8px}
+
+/* ===== USER ROWS ===== */
+.user-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--glass-border);margin-bottom:6px;transition:all .2s}
+.user-row:hover{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.02)}
+.user-row.banned{opacity:.55;border-color:rgba(233,69,96,.15)}
+.user-avatar{font-size:1.5rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border-radius:12px;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.user-id{font-size:.6rem;color:var(--text-muted);font-weight:400}
+.online-indicator{width:8px;height:8px;border-radius:50%;display:inline-block}
+.online-indicator.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.online-indicator.off{background:rgba(255,255,255,.1)}
+.user-email{font-size:.7rem;color:var(--text-muted);margin-top:1px}
+.user-meta{font-size:.67rem;color:var(--text-muted);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+.user-meta span{display:inline-flex;align-items:center;gap:3px}
+.user-actions{display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0}
+.ban-badge{font-size:.58rem;background:rgba(233,69,96,.2);color:var(--red);padding:2px 7px;border-radius:4px;font-weight:700}
+
+/* ===== PAGINATION ===== */
+.pagination{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:16px}
+.page-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text-dim);font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.page-btn:hover{border-color:rgba(255,255,255,.15)}
+.page-btn.active{background:rgba(233,69,96,.15);border-color:var(--red);color:var(--red)}
+.page-btn:disabled{opacity:.3;cursor:default}
+
+/* ===== ROOM CARDS ===== */
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.room-card{padding:16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--glass-border);border-top:3px solid var(--blue);transition:transform .2s}
+.room-card:hover{transform:translateY(-1px)}
+.room-card.type-chaos{border-top-color:var(--red)}
+.room-card.type-lab{border-top-color:var(--blue)}
+.room-code{font-size:.9rem;font-weight:800;margin-bottom:6px}
+.room-detail{font-size:.72rem;color:var(--text-dim);margin-bottom:3px}
+.room-detail b{color:var(--text)}
+
+/* ===== EVENT CARDS ===== */
+.event-card{padding:16px 18px;border-radius:var(--radius);background:var(--card);border:1px solid var(--glass-border);margin-bottom:8px;transition:all .2s;border-right:4px solid var(--text-muted)}
+.event-card:hover{border-color:rgba(255,255,255,.1)}
+.event-card.status-pending{border-right-color:var(--gold)}
+.event-card.status-open{border-right-color:var(--green)}
+.event-card.status-full{border-right-color:var(--blue)}
+.event-card.status-rejected{border-right-color:var(--red)}
+.event-card.status-cancelled{border-right-color:#666}
+.event-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.event-info{flex:1}
+.event-name{font-weight:800;font-size:.9rem;margin-bottom:4px}
+.event-detail{font-size:.72rem;color:var(--text-dim);margin-bottom:2px}
+.event-actions{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:.65rem;font-weight:700}
+.badge-pending{background:rgba(245,166,35,.12);color:var(--gold)}
+.badge-open{background:rgba(74,222,128,.12);color:var(--green)}
+.badge-full{background:rgba(96,165,250,.12);color:var(--blue)}
+.badge-rejected{background:rgba(233,69,96,.12);color:var(--red)}
+.badge-cancelled{background:rgba(255,255,255,.05);color:#888}
+.reservations-toggle{font-size:.7rem;color:var(--blue);cursor:pointer;margin-top:6px;display:inline-block}
+.reservations-list{margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.02);border-radius:8px;font-size:.72rem;color:var(--text-dim);display:none}
+.reservations-list.show{display:block}
+
+/* ===== MESSAGES ===== */
+.msg-card{padding:14px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--glass-border);margin-bottom:6px}
+.msg-content{font-size:.82rem;color:var(--text);margin-bottom:4px}
+.msg-meta{font-size:.65rem;color:var(--text-muted);display:flex;gap:10px}
+
+/* ===== COMMENTS ===== */
+.comment-card{padding:14px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--glass-border);margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.comment-body{flex:1}
+.comment-text{font-size:.82rem;color:var(--text);margin-bottom:4px}
+.comment-meta{font-size:.65rem;color:var(--text-muted)}
+
+/* ===== LOGS ===== */
+.log-row{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:10px;font-size:.78rem}
+.log-action{color:var(--text);font-weight:600}
+.log-target{color:var(--gold)}
+.log-admin{color:var(--blue);font-size:.68rem}
+.log-time{color:var(--text-muted);font-size:.65rem;margin-right:auto}
+
+/* ===== SETTINGS ===== */
+.setting-group{margin-bottom:20px}
+.setting-group h3{font-size:.85rem;color:var(--gold);margin-bottom:10px;font-weight:700}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.02);border-radius:var(--radius-sm);margin-bottom:4px}
+.setting-label{font-size:.8rem;color:var(--text-dim)}
+.setting-value{font-size:.82rem;font-weight:600}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;max-width:440px;width:92%;max-height:80vh;overflow-y:auto;animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-box h3{font-size:1rem;color:var(--gold);margin-bottom:18px;font-weight:800}
+.form-field{margin-bottom:12px}
+.form-field label{display:block;font-size:.72rem;color:var(--text-dim);margin-bottom:5px;font-weight:600}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:#fff;font-size:.85rem;transition:border .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--red)}
+.form-field textarea{resize:vertical;min-height:60px}
+.form-field select{cursor:pointer}
+.form-field select option{background:#1a1a2e;color:#fff}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.modal-actions button{flex:1;padding:11px;border:none;border-radius:var(--radius-sm);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s}
+.modal-actions button:active{transform:scale(.97)}
+
+/* ===== TOAST ===== */
+#toastContainer{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{padding:12px 24px;border-radius:12px;font-size:.82rem;font-weight:600;color:#fff;pointer-events:auto;animation:toastIn .3s ease,toastOut .3s ease 2.7s;opacity:0;animation-fill-mode:forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+.toast.success{background:rgba(74,222,128,.9)}
+.toast.error{background:rgba(233,69,96,.9)}
+.toast.info{background:rgba(96,165,250,.9)}
+
+/* ===== CONFIRM DIALOG ===== */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:none;align-items:center;justify-content:center}
+.confirm-overlay.show{display:flex}
+.confirm-box{background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:28px;max-width:360px;width:90%;text-align:center}
+.confirm-box p{font-size:.9rem;margin-bottom:20px;color:var(--text);line-height:1.7}
+.confirm-actions{display:flex;gap:8px}
+.confirm-actions button{flex:1;padding:11px;border:none;border-radius:var(--radius-sm);font-size:.85rem;font-weight:700;cursor:pointer}
+
+/* ===== SECTION VISIBILITY ===== */
+.section-panel{display:none;animation:fadeIn .3s ease}
+.section-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ===== MOBILE ===== */
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90}
+.sidebar-backdrop.show{display:block}
+
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-row,.activity-row{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-backdrop.show{display:block}
+  .main{margin-right:0}
+  .hamburger{display:block}
+  .main-content{padding:16px}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-card{padding:14px 10px}
+  .stat-card .stat-value{font-size:1.3rem}
+  .user-row{flex-wrap:wrap}
+  .user-actions{width:100%;justify-content:flex-start;margin-top:8px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .toolbar-search{width:100%}
+  .toolbar .filter-group{display:flex;gap:4px;flex-wrap:wrap}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .rooms-grid{grid-template-columns:1fr}
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.85rem}
+.empty-state .empty-icon{font-size:2.5rem;margin-bottom:8px;opacity:.4}
+
+/* ===== LOADING ===== */
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--glass-border);border-top-color:var(--red);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-center{display:flex;justify-content:center;padding:40px}
 </style>
 </head>
 <body>
-<div class="admin-wrap">
-  <!-- Login -->
-  <div id="loginBox" class="admin-login">
-    <h2>⚙️ ورود پنل مدیریت</h2>
-    <div class="a-field"><label>نام کاربری</label><input type="text" id="aUser" placeholder="admin"></div>
-    <div class="a-field"><label>رمز عبور</label><input type="password" id="aPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <button class="a-submit" onclick="doLogin()">ورود</button>
-    <div class="a-error" id="aErr"></div>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">🎭</div>
+    <h1>پنل مدیریت شوشانگ</h1>
+    <div class="subtitle">برای ورود اطلاعات ادمین خود را وارد کنید</div>
+    <div class="login-field"><label>نام کاربری</label><input type="text" id="loginUser" placeholder="admin"></div>
+    <div class="login-field"><label>رمز عبور</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <button class="login-btn" id="loginBtn">ورود به پنل</button>
+    <div class="login-error" id="loginError"></div>
   </div>
+</div>
 
-  <!-- Dashboard -->
-  <div id="dashboard" style="display:none">
-    <div class="admin-header">
-      <span class="admin-title">⚙️ پنل شوشانگ</span>
-      <div class="admin-nav">
-        <button class="admin-tab active" onclick="showTab('users')">👥 کاربران</button>
-        <button class="admin-tab" onclick="showTab('events')">🏠 ایونت</button>
-        <button class="admin-tab" onclick="showTab('messages')">📨 پیام</button>
-        <button class="admin-tab" onclick="showTab('logs')">📋 لاگ</button>
-        <a href="/" class="admin-tab" style="text-decoration:none">◀ سایت</a>
-      </div>
-    </div>
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toastContainer"></div>
 
-    <div class="stats-grid" id="statsGrid"></div>
-
-    <!-- Users Section -->
-    <div class="section active" id="sec-users">
-      <div class="section-head">
-        <h2>👥 کاربران</h2>
-        <div style="display:flex;gap:6px;align-items:center">
-          <input type="text" class="a-search" id="searchInput" placeholder="جستجو..." oninput="filterUsers()">
-          <button class="export-btn" onclick="exportCsv()">📥 CSV</button>
-          <button class="btn-s btn-pw" onclick="loadData()">🔄</button>
-        </div>
-      </div>
-      <div id="usersList"></div>
-    </div>
-
-    <!-- Messages Section -->
-    <!-- Events Section -->
-    <div class="section" id="sec-events">
-      <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">🏠 مدیریت ایونت‌ها</h2>
-      <div id="adminEventList"></div>
-    </div>
-
-    <div class="section" id="sec-messages">
-      <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">📨 پیام سیستمی</h2>
-      <div class="msg-form">
-        <input type="text" id="msgInput" placeholder="متن پیام به همه کاربران...">
-        <button onclick="sendBroadcast()">ارسال</button>
-      </div>
-      <div id="msgList"></div>
-    </div>
-
-    <!-- Logs Section -->
-    <div class="section" id="sec-logs">
-      <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">📋 لاگ فعالیت ادمین</h2>
-      <div id="logList"></div>
+<!-- ===== CONFIRM DIALOG ===== -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmText"></p>
+    <div class="confirm-actions">
+      <button class="btn-primary" id="confirmYes">تایید</button>
+      <button style="background:rgba(255,255,255,.06);color:var(--text-dim)" id="confirmNo">لغو</button>
     </div>
   </div>
 </div>
 
-<!-- Edit Modal -->
-<div class="a-modal-bg" id="editModal">
-  <div class="a-modal">
+<!-- ===== SIDEBAR BACKDROP (mobile) ===== -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- ===== APP SHELL ===== -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon">🎭</span>
+      <div>
+        <span class="logo-text">شوشانگ</span>
+        <span class="logo-sub">پنل مدیریت</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-section="dashboard"><span class="nav-icon">📊</span>داشبورد</div>
+      <div class="nav-item" data-section="users"><span class="nav-icon">👥</span>کاربران</div>
+      <div class="nav-item" data-section="rooms"><span class="nav-icon">🎮</span>اتاق‌ها</div>
+      <div class="nav-item" data-section="events"><span class="nav-icon">📅</span>رویدادها</div>
+      <div class="nav-item" data-section="messages"><span class="nav-icon">📨</span>پیام‌ها</div>
+      <div class="nav-item" data-section="comments"><span class="nav-icon">💬</span>کامنت‌ها</div>
+      <div class="nav-item" data-section="logs"><span class="nav-icon">📋</span>لاگ‌ها</div>
+      <div class="nav-item" data-section="settings"><span class="nav-icon">⚙️</span>تنظیمات</div>
+    </nav>
+    <div class="sidebar-footer">
+      شوشانگ v2.0 &nbsp;·&nbsp; <a href="/">بازگشت به سایت</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="main-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" id="hamburgerBtn">☰</button>
+        <span class="page-title" id="pageTitle">📊 داشبورد</span>
+      </div>
+      <div class="header-actions">
+        <span id="adminName" style="font-size:.75rem;color:var(--text-dim)"></span>
+        <button class="action-btn btn-danger btn-sm" onclick="doLogout()">خروج</button>
+      </div>
+    </header>
+
+    <div class="main-content">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div class="section-panel active" id="sec-dashboard">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="charts-row" id="chartsRow">
+          <div class="chart-container">
+            <div class="chart-title">📈 ثبت‌نام ۱۴ روز اخیر</div>
+            <div class="bar-chart" id="chartRegistrations"></div>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">🎮 بازی‌ها ۱۴ روز اخیر</div>
+            <div class="bar-chart" id="chartGames"></div>
+          </div>
+        </div>
+        <div class="activity-row">
+          <div class="g-card">
+            <div class="g-card-header"><span class="g-card-title">🕐 آخرین فعالیت‌ها</span></div>
+            <div id="recentFeed"></div>
+          </div>
+          <div class="g-card">
+            <div class="g-card-header"><span class="g-card-title">🎮 اتاق‌های فعال</span></div>
+            <div id="activeRoomsSummary"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== USERS ===== -->
+      <div class="section-panel" id="sec-users">
+        <div class="toolbar">
+          <input type="text" class="toolbar-search" id="userSearch" placeholder="جستجوی کاربر...">
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter="all" onclick="setUserFilter('all',this)">همه</button>
+            <button class="filter-btn" data-filter="online" onclick="setUserFilter('online',this)">آنلاین</button>
+            <button class="filter-btn" data-filter="banned" onclick="setUserFilter('banned',this)">بن‌شده</button>
+          </div>
+          <div style="margin-right:auto"></div>
+          <button class="action-btn btn-success btn-sm" onclick="exportCsv()">📥 خروجی CSV</button>
+          <button class="action-btn btn-ghost btn-sm" onclick="loadUsers()">🔄</button>
+        </div>
+        <div id="usersList"></div>
+        <div class="pagination" id="usersPagination"></div>
+      </div>
+
+      <!-- ===== ROOMS ===== -->
+      <div class="section-panel" id="sec-rooms">
+        <div class="toolbar">
+          <button class="filter-btn active" data-rtab="active" onclick="setRoomTab('active',this)">فعال</button>
+          <button class="filter-btn" data-rtab="all" onclick="setRoomTab('all',this)">همه</button>
+        </div>
+        <div class="rooms-grid" id="roomsGrid"></div>
+      </div>
+
+      <!-- ===== EVENTS ===== -->
+      <div class="section-panel" id="sec-events">
+        <div class="toolbar">
+          <button class="filter-btn active" data-ef="all" onclick="setEventFilter('all',this)">همه</button>
+          <button class="filter-btn" data-ef="pending" onclick="setEventFilter('pending',this)">در انتظار</button>
+          <button class="filter-btn" data-ef="open" onclick="setEventFilter('open',this)">فعال</button>
+          <button class="filter-btn" data-ef="full" onclick="setEventFilter('full',this)">تکمیل</button>
+          <button class="filter-btn" data-ef="rejected" onclick="setEventFilter('rejected',this)">رد شده</button>
+          <button class="filter-btn" data-ef="cancelled" onclick="setEventFilter('cancelled',this)">لغو</button>
+        </div>
+        <div id="eventsList"></div>
+      </div>
+
+      <!-- ===== MESSAGES ===== -->
+      <div class="section-panel" id="sec-messages">
+        <div class="g-card" style="margin-bottom:16px">
+          <div class="g-card-header"><span class="g-card-title">📢 پیام به همه کاربران</span></div>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="toolbar-search" style="flex:1;width:auto" id="broadcastInput" placeholder="متن پیام...">
+            <button class="action-btn btn-primary" onclick="sendBroadcast()">ارسال</button>
+          </div>
+        </div>
+        <div class="g-card" style="margin-bottom:16px">
+          <div class="g-card-header"><span class="g-card-title">📨 پیام به کاربر خاص</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" class="toolbar-search" style="width:140px" id="dmUserId" placeholder="شناسه یا نام کاربر">
+            <input type="text" class="toolbar-search" style="flex:1;width:auto" id="dmContent" placeholder="متن پیام...">
+            <button class="action-btn btn-blue" onclick="sendTargetedDM()">ارسال DM</button>
+          </div>
+        </div>
+        <div class="g-card">
+          <div class="g-card-header"><span class="g-card-title">📜 تاریخچه پیام‌ها</span></div>
+          <div id="messagesList"></div>
+        </div>
+      </div>
+
+      <!-- ===== COMMENTS ===== -->
+      <div class="section-panel" id="sec-comments">
+        <div id="commentsList"></div>
+      </div>
+
+      <!-- ===== LOGS ===== -->
+      <div class="section-panel" id="sec-logs">
+        <div class="toolbar">
+          <input type="text" class="toolbar-search" id="logSearch" placeholder="فیلتر لاگ...">
+        </div>
+        <div class="g-card">
+          <div id="logsList"></div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="section-panel" id="sec-settings">
+        <div class="g-card" style="max-width:500px">
+          <div class="g-card-header"><span class="g-card-title">⚙️ تنظیمات سیستم</span></div>
+          <div id="settingsContent"></div>
+          <div style="margin-top:20px">
+            <button class="action-btn btn-danger" onclick="doLogout()">🚪 خروج از پنل</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal-box">
     <h3>✏️ ویرایش کاربر</h3>
-    <input type="hidden" id="editUid">
-    <div class="a-field"><label>نام کاربری</label><input type="text" id="editName"></div>
-    <div class="a-field"><label>ایمیل</label><input type="text" id="editEmail"></div>
-    <div class="a-field"><label>بیو</label><input type="text" id="editBio"></div>
-    <div class="a-modal-actions">
-      <button class="a-btn-save" onclick="saveEdit()">ذخیره</button>
-      <button class="a-btn-cancel" onclick="closeEdit()">لغو</button>
+    <input type="hidden" id="editUserId">
+    <div class="form-field"><label>نام کاربری</label><input type="text" id="editUserName"></div>
+    <div class="form-field"><label>ایمیل</label><input type="text" id="editUserEmail"></div>
+    <div class="form-field"><label>بیو</label><textarea id="editUserBio"></textarea></div>
+    <div class="form-field"><label>آواتار (ایموجی)</label><input type="text" id="editUserAvatar"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveUserEdit()">ذخیره</button>
+      <button style="background:rgba(255,255,255,.06);color:var(--text-dim)" onclick="closeModal('editUserModal')">لغو</button>
     </div>
   </div>
 </div>
 
 <!-- Games Modal -->
-<div class="a-modal-bg" id="gamesModal">
-  <div class="a-modal" style="max-width:480px">
+<div class="modal-overlay" id="gamesModal">
+  <div class="modal-box" style="max-width:520px">
     <h3>🎮 تاریخچه بازی</h3>
-    <div id="gamesContent" style="max-height:300px;overflow-y:auto"></div>
-    <div class="a-modal-actions"><button class="a-btn-cancel" onclick="document.getElementById('gamesModal').classList.remove('show')">بستن</button></div>
+    <div id="gamesContent" style="max-height:350px;overflow-y:auto"></div>
+    <div class="modal-actions"><button style="background:rgba(255,255,255,.06);color:var(--text-dim)" onclick="closeModal('gamesModal')">بستن</button></div>
+  </div>
+</div>
+
+<!-- DM Modal -->
+<div class="modal-overlay" id="dmModal">
+  <div class="modal-box">
+    <h3>📨 ارسال پیام مستقیم</h3>
+    <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:12px">به: <b id="dmTargetName" style="color:var(--gold)"></b></div>
+    <input type="hidden" id="dmTargetId">
+    <div class="form-field"><label>متن پیام</label><textarea id="dmModalContent" rows="3"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="sendDMFromModal()">ارسال</button>
+      <button style="background:rgba(255,255,255,.06);color:var(--text-dim)" onclick="closeModal('dmModal')">لغو</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Event Modal -->
+<div class="modal-overlay" id="editEventModal">
+  <div class="modal-box">
+    <h3>✏️ ویرایش رویداد</h3>
+    <input type="hidden" id="editEventId">
+    <div class="form-field"><label>نام رویداد</label><input type="text" id="editEventName"></div>
+    <div class="form-field"><label>مکان</label><input type="text" id="editEventLocation"></div>
+    <div class="form-field"><label>سناریو</label><input type="text" id="editEventScenario"></div>
+    <div class="form-field"><label>تاریخ</label><input type="text" id="editEventDate" placeholder="1404/01/20"></div>
+    <div class="form-field"><label>ساعت</label><input type="text" id="editEventTime" placeholder="18:00"></div>
+    <div class="form-field"><label>حداکثر بازیکن</label><input type="number" id="editEventMaxPlayers"></div>
+    <div class="form-field"><label>قیمت (تومان)</label><input type="number" id="editEventPrice"></div>
+    <div class="form-field"><label>وضعیت</label>
+      <select id="editEventStatus">
+        <option value="pending">در انتظار</option>
+        <option value="open">فعال</option>
+        <option value="full">تکمیل</option>
+        <option value="rejected">رد شده</option>
+        <option value="cancelled">لغو</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveEventEdit()">ذخیره</button>
+      <button style="background:rgba(255,255,255,.06);color:var(--text-dim)" onclick="closeModal('editEventModal')">لغو</button>
+    </div>
   </div>
 </div>
 
 <script>
+/* =========================================
+   ADMIN PANEL — ShowShung (شوشانگ)
+   ========================================= */
+
 const API = "";
-let token = null, allUsers = [];
+let token = null;
+let currentAdmin = "";
+
+/* ---------- STATE ---------- */
+let allUsers = [];
+let userFilter = "all";
+let userPage = 1;
+const USERS_PER_PAGE = 20;
+
+let allRooms = { chaos: [], lab: [] };
+let roomTab = "active";
+
+let allEvents = [];
+let eventFilter = "all";
+
+let allLogs = [];
+let allComments = [];
+
+let statsRefreshInterval = null;
+
+/* ==========================================
+   AUTH
+   ========================================== */
+document.getElementById("loginPass").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+document.getElementById("loginBtn").addEventListener("click", doLogin);
 
 async function doLogin() {
-  const id = document.getElementById("aUser").value.trim();
-  const pw = document.getElementById("aPass").value;
-  const err = document.getElementById("aErr");
-  err.textContent = "";
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+  if (!user || !pass) { errEl.textContent = "نام کاربری و رمز عبور را وارد کنید"; return; }
   try {
-    const r = await fetch(API+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({identifier:id,password:pw})});
+    const r = await fetch(API + "/api/auth/login", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifier: user, password: pass })
+    });
     const d = await r.json();
-    if (!r.ok) { err.textContent = d.error||"خطا"; return; }
+    if (!r.ok) { errEl.textContent = d.error || "خطا در ورود"; return; }
     token = d.token;
-    const c = await fetch(API+"/api/admin/stats",{headers:{"Authorization":"Bearer "+token}});
-    if (c.status===403) { err.textContent="⛔ دسترسی ادمین ندارید"; token=null; return; }
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("dashboard").style.display="block";
-    loadData();
-  } catch { err.textContent="خطای شبکه"; }
+    const check = await fetch(API + "/api/admin/stats", { headers: { "Authorization": "Bearer " + token } });
+    if (check.status === 403) { errEl.textContent = "دسترسی ادمین ندارید"; token = null; return; }
+    currentAdmin = user;
+    document.getElementById("adminName").textContent = "👤 " + user;
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("appShell").style.display = "flex";
+    loadDashboard();
+    statsRefreshInterval = setInterval(loadDashboardStats, 30000);
+  } catch (e) { errEl.textContent = "خطای شبکه"; }
 }
 
-const hdr = ()=>({headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"}});
-
-async function loadData() {
-  // Stats
-  const sr = await fetch(API+"/api/admin/stats",hdr()); const s = await sr.json();
-  document.getElementById("statsGrid").innerHTML = `
-    <div class="s-card"><span class="n">${s.total_users}</span><span class="l">کاربران</span></div>
-    <div class="s-card green"><span class="n">${s.online_now}</span><span class="l">آنلاین</span></div>
-    <div class="s-card blue"><span class="n">${s.new_today}</span><span class="l">امروز</span></div>
-    <div class="s-card"><span class="n">${s.total_visits}</span><span class="l">بازدید</span></div>
-    <div class="s-card"><span class="n">${s.total_games}</span><span class="l">بازی</span></div>
-    <div class="s-card"><span class="n">${s.total_chaos_rooms}</span><span class="l">اتاق</span></div>
-    <div class="s-card red"><span class="n">${s.banned_users}</span><span class="l">بن شده</span></div>`;
-  // Users
-  const ur = await fetch(API+"/api/admin/users",hdr()); allUsers = await ur.json();
-  renderUsers(allUsers);
-  // Messages
-  const mr = await fetch(API+"/api/admin/messages",hdr()); const msgs = await mr.json();
-  document.getElementById("msgList").innerHTML = msgs.map(m=>`<div class="msg-item">${m.content} <span class="msg-time">${m.created_at} · ${m.target?'کاربر #'+m.target:'همه'}</span></div>`).join("")||'<div style="color:rgba(255,255,255,.2);text-align:center;padding:20px">پیامی نیست</div>';
-  // Logs
-  const lr = await fetch(API+"/api/admin/logs",hdr()); const logs = await lr.json();
-  document.getElementById("logList").innerHTML = logs.map(l=>`<div class="log-item"><span class="log-action">${l.action}</span> ${l.target?`<span class="log-target">${l.target}</span>`:''} <span class="msg-time">${l.created_at}</span></div>`).join("")||'<div style="color:rgba(255,255,255,.2);text-align:center;padding:20px">لاگی نیست</div>';
-  // Events
-  loadAdminEvents();
+function doLogout() {
+  token = null;
+  currentAdmin = "";
+  if (statsRefreshInterval) clearInterval(statsRefreshInterval);
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("appShell").style.display = "none";
+  document.getElementById("loginPass").value = "";
 }
 
-function renderUsers(users) {
-  document.getElementById("usersList").innerHTML = users.map(u=>`
-    <div class="u-row${u.banned?' banned':''}" data-name="${u.username.toLowerCase()}">
-      <span class="u-avatar">${u.avatar||'🎭'}</span>
-      <div class="u-info">
-        <div class="u-name">${u.banned?'<span class="ban-badge">BAN</span>':''}${u.username} <span style="font-size:.6rem;color:rgba(255,255,255,.2)">#${u.id}</span>
-          ${u.online?'<span class="online-dot"> ●</span>':'<span class="offline-dot"> ○</span>'}</div>
-        <div class="u-email">${u.email}</div>
-        <div class="u-meta">رمز: <b style="color:#f5a623">${u.password}</b> · ثبت‌نام: ${u.created_at} · ورود: ${u.last_login} · بازی: ${u.total_games} · ${u.chaos_wins}W/${u.chaos_losses}L</div>
+const hdr = () => ({ headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" } });
+
+/* ==========================================
+   TOAST
+   ========================================== */
+function toast(msg, type = "success") {
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = "toast " + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+/* ==========================================
+   CONFIRM
+   ========================================== */
+function confirmAction(text) {
+  return new Promise(resolve => {
+    document.getElementById("confirmText").textContent = text;
+    const ov = document.getElementById("confirmOverlay");
+    ov.classList.add("show");
+    const yes = document.getElementById("confirmYes");
+    const no = document.getElementById("confirmNo");
+    function cleanup() { ov.classList.remove("show"); yes.replaceWith(yes.cloneNode(true)); no.replaceWith(no.cloneNode(true)); }
+    document.getElementById("confirmYes").addEventListener("click", () => { cleanup(); resolve(true); });
+    document.getElementById("confirmNo").addEventListener("click", () => { cleanup(); resolve(false); });
+  });
+}
+
+/* ==========================================
+   MODAL HELPERS
+   ========================================== */
+function openModal(id) { document.getElementById(id).classList.add("show"); }
+function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+
+/* ==========================================
+   SIDEBAR NAVIGATION
+   ========================================== */
+const sectionTitles = {
+  dashboard: "📊 داشبورد", users: "👥 کاربران", rooms: "🎮 اتاق‌ها",
+  events: "📅 رویدادها", messages: "📨 پیام‌ها", comments: "💬 کامنت‌ها",
+  logs: "📋 لاگ‌ها", settings: "⚙️ تنظیمات"
+};
+
+document.querySelectorAll(".nav-item").forEach(item => {
+  item.addEventListener("click", () => {
+    const section = item.dataset.section;
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    item.classList.add("active");
+    document.querySelectorAll(".section-panel").forEach(s => s.classList.remove("active"));
+    document.getElementById("sec-" + section).classList.add("active");
+    document.getElementById("pageTitle").textContent = sectionTitles[section] || section;
+    closeSidebar();
+    if (section === "dashboard") loadDashboard();
+    else if (section === "users") loadUsers();
+    else if (section === "rooms") loadRooms();
+    else if (section === "events") loadEvents();
+    else if (section === "messages") loadMessages();
+    else if (section === "comments") loadComments();
+    else if (section === "logs") loadLogs();
+    else if (section === "settings") loadSettings();
+  });
+});
+
+/* Mobile sidebar */
+document.getElementById("hamburgerBtn").addEventListener("click", () => {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sidebarBackdrop").classList.toggle("show");
+});
+document.getElementById("sidebarBackdrop").addEventListener("click", closeSidebar);
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebarBackdrop").classList.remove("show");
+}
+
+/* ==========================================
+   DASHBOARD
+   ========================================== */
+async function loadDashboard() {
+  await Promise.all([loadDashboardStats(), loadCharts(), loadRecentFeed(), loadActiveRoomsSummary()]);
+}
+
+async function loadDashboardStats() {
+  try {
+    const r = await fetch(API + "/api/admin/stats", hdr());
+    const s = await r.json();
+    document.getElementById("statsGrid").innerHTML = `
+      <div class="stat-card c-gold"><span class="stat-value">${s.total_users || 0}</span><span class="stat-label">کل کاربران</span></div>
+      <div class="stat-card c-green"><span class="stat-value">${s.online_now || 0}</span><span class="stat-label">آنلاین</span></div>
+      <div class="stat-card c-blue"><span class="stat-value">${s.new_today || 0}</span><span class="stat-label">ثبت‌نام امروز</span></div>
+      <div class="stat-card c-default"><span class="stat-value">${s.total_visits || 0}</span><span class="stat-label">بازدید کل</span></div>
+      <div class="stat-card c-default"><span class="stat-value">${s.total_games || 0}</span><span class="stat-label">کل بازی‌ها</span></div>
+      <div class="stat-card c-red"><span class="stat-value">${s.total_chaos_rooms || 0}</span><span class="stat-label">اتاق آشوب</span></div>
+      <div class="stat-card c-blue"><span class="stat-value">${s.total_lab_rooms || 0}</span><span class="stat-label">اتاق لابراتوار</span></div>
+      <div class="stat-card c-red"><span class="stat-value">${s.banned_users || 0}</span><span class="stat-label">بن شده</span></div>`;
+  } catch (e) { console.error("Stats error", e); }
+}
+
+async function loadCharts() {
+  try {
+    const r = await fetch(API + "/api/admin/chart-stats", hdr());
+    if (!r.ok) {
+      document.getElementById("chartsRow").style.display = "none";
+      return;
+    }
+    const data = await r.json();
+    document.getElementById("chartsRow").style.display = "";
+    renderBarChart("chartRegistrations", data.registrations || [], "var(--green)");
+    renderBarChart("chartGames", data.games || [], "var(--blue)");
+  } catch (e) { document.getElementById("chartsRow").style.display = "none"; }
+}
+
+function renderBarChart(containerId, items, color) {
+  const el = document.getElementById(containerId);
+  if (!items.length) { el.innerHTML = '<div class="empty-state">داده‌ای موجود نیست</div>'; return; }
+  const maxVal = Math.max(...items.map(i => i.value), 1);
+  el.innerHTML = items.map(item => {
+    const pct = (item.value / maxVal) * 100;
+    return `<div class="bar-col">
+      <span class="bar-value">${item.value}</span>
+      <div class="bar-fill" style="height:${Math.max(pct, 2)}%;background:${color}"></div>
+      <span class="bar-label">${item.label}</span>
+    </div>`;
+  }).join("");
+}
+
+async function loadRecentFeed() {
+  try {
+    const r = await fetch(API + "/api/admin/logs", hdr());
+    const logs = await r.json();
+    const recent = logs.slice(0, 5);
+    document.getElementById("recentFeed").innerHTML = recent.length ? recent.map(l => `
+      <div class="feed-item">
+        <div class="feed-dot" style="background:var(--gold)"></div>
+        <div class="feed-text">${esc(l.action)}${l.target ? ' — <span style="color:var(--gold)">' + esc(l.target) + '</span>' : ''}</div>
+        <div class="feed-time">${esc(l.created_at || '')}</div>
+      </div>`).join("") : '<div class="empty-state">فعالیتی ثبت نشده</div>';
+  } catch (e) { document.getElementById("recentFeed").innerHTML = '<div class="empty-state">خطا در بارگذاری</div>'; }
+}
+
+async function loadActiveRoomsSummary() {
+  try {
+    const r = await fetch(API + "/api/admin/rooms", hdr());
+    const data = await r.json();
+    const chaos = (data.chaos || []).filter(r => r.status === "playing" || r.status === "waiting");
+    const lab = (data.lab || []).filter(r => r.status === "playing" || r.status === "waiting");
+    const all = [...chaos.map(r => ({ ...r, type: "chaos" })), ...lab.map(r => ({ ...r, type: "lab" }))];
+    document.getElementById("activeRoomsSummary").innerHTML = all.length ? all.slice(0, 5).map(r => `
+      <div class="feed-item">
+        <div class="feed-dot" style="background:${r.type === 'chaos' ? 'var(--red)' : 'var(--blue)'}"></div>
+        <div class="feed-text">${esc(r.code || r.id || '?')} · ${r.type === 'chaos' ? 'آشوب' : 'لابراتوار'} · ${r.players_count || 0} نفر</div>
+        <div class="feed-time">${esc(r.status || '')}</div>
+      </div>`).join("") : '<div class="empty-state">اتاق فعالی وجود ندارد</div>';
+  } catch (e) { document.getElementById("activeRoomsSummary").innerHTML = '<div class="empty-state">خطا</div>'; }
+}
+
+/* ==========================================
+   USERS
+   ========================================== */
+document.getElementById("userSearch").addEventListener("input", () => { userPage = 1; renderUsers(); });
+
+async function loadUsers() {
+  try {
+    const r = await fetch(API + "/api/admin/users", hdr());
+    allUsers = await r.json();
+    userPage = 1;
+    renderUsers();
+  } catch (e) { toast("خطا در بارگذاری کاربران", "error"); }
+}
+
+function setUserFilter(f, btn) {
+  userFilter = f;
+  userPage = 1;
+  document.querySelectorAll('#sec-users .filter-btn').forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderUsers();
+}
+
+function getFilteredUsers() {
+  const q = document.getElementById("userSearch").value.trim().toLowerCase();
+  let list = allUsers;
+  if (userFilter === "online") list = list.filter(u => u.online);
+  else if (userFilter === "banned") list = list.filter(u => u.banned);
+  if (q) list = list.filter(u => (u.username || "").toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q) || String(u.id).includes(q));
+  return list;
+}
+
+function renderUsers() {
+  const filtered = getFilteredUsers();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / USERS_PER_PAGE));
+  if (userPage > totalPages) userPage = totalPages;
+  const start = (userPage - 1) * USERS_PER_PAGE;
+  const pageUsers = filtered.slice(start, start + USERS_PER_PAGE);
+
+  document.getElementById("usersList").innerHTML = pageUsers.length ? pageUsers.map(u => {
+    const uJson = JSON.stringify(u).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+    return `<div class="user-row${u.banned ? ' banned' : ''}">
+      <div class="user-avatar">${esc(u.avatar || '🎭')}</div>
+      <div class="user-info">
+        <div class="user-name">
+          ${u.banned ? '<span class="ban-badge">BAN</span>' : ''}
+          ${esc(u.username)} <span class="user-id">#${u.id}</span>
+          <span class="online-indicator ${u.online ? 'on' : 'off'}"></span>
+        </div>
+        <div class="user-email">${esc(u.email || '')}</div>
+        <div class="user-meta">
+          <span>📅 ثبت‌نام: ${esc(u.created_at || '-')}</span>
+          <span>🔑 ورود: ${esc(u.last_login || '-')}</span>
+          <span>🎮 ${u.total_games || 0} بازی</span>
+          <span>✅ ${u.chaos_wins || 0}W / ❌ ${u.chaos_losses || 0}L</span>
+        </div>
       </div>
-      <div class="u-actions">
-        <button class="btn-s btn-edit" onclick='openEdit(${JSON.stringify(u)})'>✏️</button>
-        <button class="btn-s ${u.banned?'btn-unban':'btn-ban'}" onclick="toggleBan(${u.id})">${u.banned?'آنبن':'بن'}</button>
-        <button class="btn-s btn-pw" onclick="resetPw(${u.id})">رمز</button>
-        <button class="btn-s btn-games" onclick="viewGames(${u.id})">بازی</button>
-        <button class="btn-s btn-del" onclick="delUser(${u.id},'${u.username}')">حذف</button>
-      </div>
-    </div>`).join("");
-}
-
-function filterUsers() {
-  const q = document.getElementById("searchInput").value.trim().toLowerCase();
-  renderUsers(q?allUsers.filter(u=>u.username.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)):allUsers);
-}
-
-function showTab(name) {
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
-  document.getElementById("sec-"+name).classList.add("active");
-  event.target.classList.add("active");
-  if (name === 'events') loadAdminEvents();
-}
-
-// Edit
-function openEdit(u) {
-  document.getElementById("editUid").value=u.id;
-  document.getElementById("editName").value=u.username;
-  document.getElementById("editEmail").value=u.email;
-  document.getElementById("editBio").value=u.bio||"";
-  document.getElementById("editModal").classList.add("show");
-}
-function closeEdit() { document.getElementById("editModal").classList.remove("show"); }
-async function saveEdit() {
-  const uid=document.getElementById("editUid").value;
-  await fetch(API+`/api/admin/users/${uid}/edit`,{method:"PUT",...hdr(),body:JSON.stringify({
-    username:document.getElementById("editName").value,
-    email:document.getElementById("editEmail").value,
-    bio:document.getElementById("editBio").value
-  })});
-  closeEdit(); loadData(); alert("✅ ذخیره شد");
-}
-
-// Ban
-async function toggleBan(uid) {
-  const r=await fetch(API+`/api/admin/users/${uid}/ban`,{method:"PUT",...hdr()});
-  const d=await r.json();
-  alert(d.banned?"🚫 بن شد":"✅ آنبن شد");
-  loadData();
-}
-
-// Reset password
-async function resetPw(uid) {
-  const pw=prompt("رمز جدید:","123456"); if(!pw)return;
-  await fetch(API+`/api/admin/users/${uid}/reset-password`,{method:"PUT",...hdr(),body:JSON.stringify({password:pw})});
-  alert("✅ رمز تغییر کرد"); loadData();
-}
-
-// Delete
-async function delUser(uid,name) {
-  if(!confirm(`"${name}" حذف شود؟`))return;
-  await fetch(API+`/api/admin/users/${uid}`,{method:"DELETE",...hdr()});
-  alert("✅ حذف شد"); loadData();
-}
-
-// View games
-async function viewGames(uid) {
-  const r=await fetch(API+`/api/admin/users/${uid}/games`,hdr());
-  const games=await r.json();
-  document.getElementById("gamesContent").innerHTML = games.length?
-    games.map(g=>`<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem">${g.group} · ${g.count} نفر · ${g.date}</div>`).join(""):
-    '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.2)">بازی ثبت نشده</div>';
-  document.getElementById("gamesModal").classList.add("show");
-}
-
-// Broadcast
-async function sendBroadcast() {
-  const input=document.getElementById("msgInput");
-  const content=input.value.trim(); if(!content)return;
-  await fetch(API+"/api/admin/broadcast",{method:"POST",...hdr(),body:JSON.stringify({content})});
-  input.value=""; alert("✅ ارسال شد"); loadData();
-}
-
-// Export CSV
-function exportCsv() { window.open(API+"/api/admin/export-csv?token="+token); }
-
-// Events
-async function loadAdminEvents() {
-  const r=await fetch(API+"/api/admin/events",hdr()); const events=await r.json();
-  const el=document.getElementById("adminEventList");
-  if(!events.length){el.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,.2)">ایونتی نیست</div>';return;}
-  el.innerHTML=events.map(e=>{
-    const statusColor={pending:'#f5a623',open:'#4ade80',full:'#60a5fa',rejected:'#e94560',cancelled:'#666'}[e.status]||'#666';
-    const statusText={pending:'⏳ منتظر تأیید',open:'✅ فعال',full:'🔵 تکمیل',rejected:'❌ رد شده',cancelled:'⬛ لغو'}[e.status]||e.status;
-    return `<div class="u-row" style="border-right:3px solid ${statusColor}">
-      <div class="u-info" style="flex:1">
-        <div class="u-name">📍 ${e.location_name}</div>
-        <div class="u-email">🌍 ${e.country}, ${e.city} · 🎭 ${e.scenario} · 👥 ${e.reserved_count}/${e.max_players}</div>
-        <div class="u-meta">📅 ${e.event_date} · ⏰ ${e.start_time} · 🎙️ ${e.host_name} · <span style="color:${statusColor}">${statusText}</span></div>
-      </div>
-      <div class="u-actions">
-        ${e.status==='pending'?`<button class="btn-s btn-unban" onclick="approveEvent(${e.id})">تأیید</button><button class="btn-s btn-ban" onclick="rejectEvent(${e.id})">رد</button>`:''}
-        <button class="btn-s btn-del" onclick="deleteAdminEvent(${e.id})">حذف</button>
+      <div class="user-actions">
+        <button class="action-btn btn-blue btn-sm" onclick='openEditUser(${uJson})'>✏️</button>
+        <button class="action-btn ${u.banned ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleBan(${u.id})">${u.banned ? 'آنبن' : 'بن'}</button>
+        <button class="action-btn btn-warning btn-sm" onclick="resetPassword(${u.id})">رمز</button>
+        <button class="action-btn btn-ghost btn-sm" onclick="openDMModal(${u.id},'${esc(u.username)}')">DM</button>
+        <button class="action-btn btn-ghost btn-sm" onclick="viewGames(${u.id})">بازی</button>
+        <button class="action-btn btn-danger btn-sm" onclick="deleteUser(${u.id},'${esc(u.username)}')">حذف</button>
       </div>
     </div>`;
-  }).join('');
+  }).join("") : '<div class="empty-state"><div class="empty-icon">👥</div>کاربری یافت نشد</div>';
+
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const el = document.getElementById("usersPagination");
+  if (totalPages <= 1) { el.innerHTML = ""; return; }
+  let html = `<button class="page-btn" onclick="goPage(${userPage - 1})" ${userPage === 1 ? 'disabled' : ''}>‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - userPage) > 1) {
+      if (i === 3 || i === totalPages - 2) html += '<span style="color:var(--text-muted);padding:0 4px">...</span>';
+      continue;
+    }
+    html += `<button class="page-btn${i === userPage ? ' active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${userPage + 1})" ${userPage === totalPages ? 'disabled' : ''}>›</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(getFilteredUsers().length / USERS_PER_PAGE);
+  if (p < 1 || p > totalPages) return;
+  userPage = p;
+  renderUsers();
+  document.getElementById("sec-users").scrollIntoView({ behavior: "smooth" });
+}
+
+/* User actions */
+function openEditUser(u) {
+  document.getElementById("editUserId").value = u.id;
+  document.getElementById("editUserName").value = u.username || "";
+  document.getElementById("editUserEmail").value = u.email || "";
+  document.getElementById("editUserBio").value = u.bio || "";
+  document.getElementById("editUserAvatar").value = u.avatar || "";
+  openModal("editUserModal");
+}
+
+async function saveUserEdit() {
+  const uid = document.getElementById("editUserId").value;
+  try {
+    const r = await fetch(API + `/api/admin/users/${uid}/edit`, {
+      method: "PUT", ...hdr(),
+      body: JSON.stringify({
+        username: document.getElementById("editUserName").value,
+        email: document.getElementById("editUserEmail").value,
+        bio: document.getElementById("editUserBio").value
+      })
+    });
+    if (r.ok) { toast("کاربر ویرایش شد"); closeModal("editUserModal"); loadUsers(); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || "خطا در ویرایش", "error"); }
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+async function toggleBan(uid) {
+  try {
+    const r = await fetch(API + `/api/admin/users/${uid}/ban`, { method: "PUT", ...hdr() });
+    const d = await r.json();
+    toast(d.banned ? "کاربر بن شد" : "کاربر آنبن شد");
+    loadUsers();
+  } catch (e) { toast("خطا", "error"); }
+}
+
+async function resetPassword(uid) {
+  const pw = prompt("رمز عبور جدید:", "123456");
+  if (!pw) return;
+  try {
+    const r = await fetch(API + `/api/admin/users/${uid}/reset-password`, { method: "PUT", ...hdr(), body: JSON.stringify({ password: pw }) });
+    if (r.ok) toast("رمز عبور تغییر کرد");
+    else toast("خطا در تغییر رمز", "error");
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+async function deleteUser(uid, name) {
+  const ok = await confirmAction(`آیا کاربر "${name}" حذف شود؟ این عمل قابل بازگشت نیست.`);
+  if (!ok) return;
+  try {
+    const r = await fetch(API + `/api/admin/users/${uid}`, { method: "DELETE", ...hdr() });
+    if (r.ok) { toast("کاربر حذف شد"); loadUsers(); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || "خطا", "error"); }
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+async function viewGames(uid) {
+  try {
+    const r = await fetch(API + `/api/admin/users/${uid}/games`, hdr());
+    const games = await r.json();
+    document.getElementById("gamesContent").innerHTML = games.length ?
+      games.map(g => `<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem;color:var(--text-dim)">
+        ${esc(g.group || '')} · ${g.count || 0} نفر · ${esc(g.date || '')}</div>`).join("") :
+      '<div class="empty-state">بازی‌ای ثبت نشده</div>';
+    openModal("gamesModal");
+  } catch (e) { toast("خطا", "error"); }
+}
+
+function openDMModal(uid, name) {
+  document.getElementById("dmTargetId").value = uid;
+  document.getElementById("dmTargetName").textContent = name;
+  document.getElementById("dmModalContent").value = "";
+  openModal("dmModal");
+}
+
+async function sendDMFromModal() {
+  const uid = document.getElementById("dmTargetId").value;
+  const content = document.getElementById("dmModalContent").value.trim();
+  if (!content) { toast("متن پیام خالی است", "error"); return; }
+  try {
+    const r = await fetch(API + `/api/admin/dm/${uid}`, { method: "POST", ...hdr(), body: JSON.stringify({ content }) });
+    if (r.ok) { toast("پیام ارسال شد"); closeModal("dmModal"); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || "خطا", "error"); }
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+function exportCsv() { window.open(API + "/api/admin/export-csv?token=" + token); }
+
+/* ==========================================
+   ROOMS
+   ========================================== */
+async function loadRooms() {
+  try {
+    const r = await fetch(API + "/api/admin/rooms", hdr());
+    allRooms = await r.json();
+    renderRooms();
+  } catch (e) { toast("خطا در بارگذاری اتاق‌ها", "error"); }
+}
+
+function setRoomTab(tab, btn) {
+  roomTab = tab;
+  document.querySelectorAll('#sec-rooms .filter-btn').forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderRooms();
+}
+
+function renderRooms() {
+  const chaos = (allRooms.chaos || []).map(r => ({ ...r, _type: "chaos" }));
+  const lab = (allRooms.lab || []).map(r => ({ ...r, _type: "lab" }));
+  let rooms = [...chaos, ...lab];
+  if (roomTab === "active") rooms = rooms.filter(r => r.status === "waiting" || r.status === "playing");
+  document.getElementById("roomsGrid").innerHTML = rooms.length ? rooms.map(r => `
+    <div class="room-card type-${r._type}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="room-code">${r._type === 'chaos' ? '🔴' : '🔵'} ${esc(r.code || r.id || '?')}</div>
+        <button class="action-btn btn-danger btn-sm" onclick="deleteRoom('${r._type}','${r.id}')">حذف</button>
+      </div>
+      <div class="room-detail">نوع: <b>${r._type === 'chaos' ? 'آشوب' : 'لابراتوار'}</b></div>
+      <div class="room-detail">میزبان: <b>${esc(r.host || r.host_name || '-')}</b></div>
+      <div class="room-detail">بازیکنان: <b>${r.players_count || r.player_count || 0}</b></div>
+      <div class="room-detail">وضعیت: <b>${esc(r.status || '-')}</b></div>
+      <div class="room-detail">فاز: <b>${esc(r.phase || '-')}</b> · روز: <b>${r.day || 0}</b></div>
+    </div>`).join("") : '<div class="empty-state"><div class="empty-icon">🎮</div>اتاقی وجود ندارد</div>';
+}
+
+async function deleteRoom(type, rid) {
+  const ok = await confirmAction("آیا این اتاق حذف شود؟");
+  if (!ok) return;
+  try {
+    const r = await fetch(API + `/api/admin/rooms/${type}/${rid}`, { method: "DELETE", ...hdr() });
+    if (r.ok) { toast("اتاق حذف شد"); loadRooms(); }
+    else toast("خطا در حذف اتاق", "error");
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+/* ==========================================
+   EVENTS
+   ========================================== */
+async function loadEvents() {
+  try {
+    const r = await fetch(API + "/api/admin/events", hdr());
+    allEvents = await r.json();
+    renderEvents();
+  } catch (e) { toast("خطا در بارگذاری رویدادها", "error"); }
+}
+
+function setEventFilter(f, btn) {
+  eventFilter = f;
+  document.querySelectorAll('#sec-events .filter-btn').forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderEvents();
+}
+
+function renderEvents() {
+  let events = allEvents;
+  if (eventFilter !== "all") events = events.filter(e => e.status === eventFilter);
+
+  document.getElementById("eventsList").innerHTML = events.length ? events.map(e => {
+    const statusClass = "status-" + (e.status || "");
+    const badgeClass = "badge-" + (e.status || "");
+    const statusLabels = { pending: "در انتظار", open: "فعال", full: "تکمیل", rejected: "رد شده", cancelled: "لغو" };
+    const reservations = e.reservations || [];
+
+    return `<div class="event-card ${statusClass}">
+      <div class="event-top">
+        <div class="event-info">
+          <div class="event-name">${esc(e.event_name || e.location_name || 'بدون نام')}</div>
+          <div class="event-detail">📍 ${esc(e.location_name || '-')} · 🎭 ${esc(e.scenario || '-')}</div>
+          <div class="event-detail">👥 ${e.reserved_count || 0}/${e.max_players || 0} · 📅 ${esc(e.event_date || '-')} · ⏰ ${esc(e.start_time || '-')}</div>
+          <div class="event-detail">🎙️ ${esc(e.host_name || '-')} · 💰 ${e.price || 0} تومان · <span class="status-badge ${badgeClass}">${statusLabels[e.status] || e.status}</span></div>
+          ${reservations.length ? `<span class="reservations-toggle" onclick="this.nextElementSibling.classList.toggle('show')">📋 مشاهده رزروها (${reservations.length})</span>
+          <div class="reservations-list">${reservations.map(r => `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)">${esc(r.username || r.user_name || 'کاربر #' + (r.user_id || '?'))} ${r.status ? '· ' + esc(r.status) : ''}</div>`).join("")}</div>` : ''}
+        </div>
+        <div class="event-actions">
+          ${e.status === 'pending' ? `<button class="action-btn btn-success btn-sm" onclick="approveEvent(${e.id})">تایید</button><button class="action-btn btn-danger btn-sm" onclick="rejectEvent(${e.id})">رد</button>` : ''}
+          <button class="action-btn btn-blue btn-sm" onclick='openEditEvent(${JSON.stringify(e).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>✏️</button>
+          <button class="action-btn btn-danger btn-sm" onclick="deleteEvent(${e.id})">حذف</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("") : '<div class="empty-state"><div class="empty-icon">📅</div>رویدادی وجود ندارد</div>';
 }
 
 async function approveEvent(eid) {
-  await fetch(API+`/api/admin/events/${eid}/approve`,{method:"PUT",...hdr()});
-  alert("✅ تأیید شد"); loadAdminEvents();
-}
-async function rejectEvent(eid) {
-  await fetch(API+`/api/admin/events/${eid}/reject`,{method:"PUT",...hdr()});
-  alert("❌ رد شد"); loadAdminEvents();
-}
-async function deleteAdminEvent(eid) {
-  if(!confirm("حذف شود؟"))return;
-  const r = await fetch(API+`/api/events/${eid}`,{method:"DELETE",...hdr()});
-  if(r.ok){alert("✅ حذف شد"); loadAdminEvents();}
-  else{const d=await r.json().catch(()=>({})); alert("⚠️ خطا: "+(d.error||r.status));}
+  try {
+    const r = await fetch(API + `/api/admin/events/${eid}/approve`, { method: "PUT", ...hdr() });
+    if (r.ok) { toast("رویداد تایید شد"); loadEvents(); }
+    else toast("خطا", "error");
+  } catch (e) { toast("خطای شبکه", "error"); }
 }
 
-// Enter to login
-document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!token)doLogin();});
+async function rejectEvent(eid) {
+  const ok = await confirmAction("آیا این رویداد رد شود؟");
+  if (!ok) return;
+  try {
+    const r = await fetch(API + `/api/admin/events/${eid}/reject`, { method: "PUT", ...hdr() });
+    if (r.ok) { toast("رویداد رد شد"); loadEvents(); }
+    else toast("خطا", "error");
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+function openEditEvent(e) {
+  document.getElementById("editEventId").value = e.id;
+  document.getElementById("editEventName").value = e.event_name || "";
+  document.getElementById("editEventLocation").value = e.location_name || "";
+  document.getElementById("editEventScenario").value = e.scenario || "";
+  document.getElementById("editEventDate").value = e.event_date || "";
+  document.getElementById("editEventTime").value = e.start_time || "";
+  document.getElementById("editEventMaxPlayers").value = e.max_players || "";
+  document.getElementById("editEventPrice").value = e.price || "";
+  document.getElementById("editEventStatus").value = e.status || "pending";
+  openModal("editEventModal");
+}
+
+async function saveEventEdit() {
+  const eid = document.getElementById("editEventId").value;
+  try {
+    const r = await fetch(API + `/api/admin/events/${eid}/edit`, {
+      method: "PUT", ...hdr(),
+      body: JSON.stringify({
+        event_name: document.getElementById("editEventName").value,
+        location_name: document.getElementById("editEventLocation").value,
+        scenario: document.getElementById("editEventScenario").value,
+        event_date: document.getElementById("editEventDate").value,
+        start_time: document.getElementById("editEventTime").value,
+        max_players: parseInt(document.getElementById("editEventMaxPlayers").value) || 0,
+        price: parseInt(document.getElementById("editEventPrice").value) || 0,
+        status: document.getElementById("editEventStatus").value
+      })
+    });
+    if (r.ok) { toast("رویداد ویرایش شد"); closeModal("editEventModal"); loadEvents(); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || "خطا", "error"); }
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+async function deleteEvent(eid) {
+  const ok = await confirmAction("آیا این رویداد حذف شود؟ این عمل قابل بازگشت نیست.");
+  if (!ok) return;
+  try {
+    const r = await fetch(API + `/api/events/${eid}`, { method: "DELETE", ...hdr() });
+    if (r.ok) { toast("رویداد حذف شد"); loadEvents(); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || "خطا در حذف", "error"); }
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+/* ==========================================
+   MESSAGES
+   ========================================== */
+async function loadMessages() {
+  try {
+    const r = await fetch(API + "/api/admin/messages", hdr());
+    const msgs = await r.json();
+    document.getElementById("messagesList").innerHTML = msgs.length ? msgs.map(m => `
+      <div class="msg-card">
+        <div class="msg-content">${esc(m.content || '')}</div>
+        <div class="msg-meta">
+          <span>${m.target ? 'به کاربر #' + m.target : '📢 همه کاربران'}</span>
+          <span>${esc(m.created_at || '')}</span>
+          ${m.admin ? '<span>توسط: ' + esc(m.admin) + '</span>' : ''}
+        </div>
+      </div>`).join("") : '<div class="empty-state">پیامی ثبت نشده</div>';
+  } catch (e) { toast("خطا در بارگذاری پیام‌ها", "error"); }
+}
+
+async function sendBroadcast() {
+  const input = document.getElementById("broadcastInput");
+  const content = input.value.trim();
+  if (!content) { toast("متن پیام خالی است", "error"); return; }
+  try {
+    const r = await fetch(API + "/api/admin/broadcast", { method: "POST", ...hdr(), body: JSON.stringify({ content }) });
+    if (r.ok) { toast("پیام ارسال شد"); input.value = ""; loadMessages(); }
+    else toast("خطا در ارسال", "error");
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+async function sendTargetedDM() {
+  const userIdInput = document.getElementById("dmUserId").value.trim();
+  const content = document.getElementById("dmContent").value.trim();
+  if (!userIdInput || !content) { toast("شناسه کاربر و متن پیام را وارد کنید", "error"); return; }
+  let uid = userIdInput;
+  if (isNaN(uid)) {
+    const found = allUsers.find(u => u.username.toLowerCase() === uid.toLowerCase());
+    if (!found) { toast("کاربر یافت نشد", "error"); return; }
+    uid = found.id;
+  }
+  try {
+    const r = await fetch(API + `/api/admin/dm/${uid}`, { method: "POST", ...hdr(), body: JSON.stringify({ content }) });
+    if (r.ok) { toast("پیام ارسال شد"); document.getElementById("dmContent").value = ""; document.getElementById("dmUserId").value = ""; loadMessages(); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || "خطا", "error"); }
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+/* ==========================================
+   COMMENTS
+   ========================================== */
+async function loadComments() {
+  try {
+    const r = await fetch(API + "/api/admin/events", hdr());
+    const events = await r.json();
+    allComments = [];
+    events.forEach(ev => {
+      if (ev.comments && ev.comments.length) {
+        ev.comments.forEach(c => {
+          allComments.push({ ...c, event_name: ev.event_name || ev.location_name || 'رویداد #' + ev.id });
+        });
+      }
+    });
+    renderComments();
+  } catch (e) { toast("خطا در بارگذاری کامنت‌ها", "error"); }
+}
+
+function renderComments() {
+  document.getElementById("commentsList").innerHTML = allComments.length ? allComments.map(c => `
+    <div class="comment-card">
+      <div class="comment-body">
+        <div class="comment-text">${esc(c.text || c.content || '')}</div>
+        <div class="comment-meta">
+          👤 ${esc(c.username || c.user_name || 'ناشناس')} · 📅 ${esc(c.event_name)} · 🕐 ${esc(c.created_at || c.date || '')}
+        </div>
+      </div>
+      <button class="action-btn btn-danger btn-sm" onclick="deleteComment(${c.id})">حذف</button>
+    </div>`).join("") : '<div class="empty-state"><div class="empty-icon">💬</div>کامنتی وجود ندارد</div>';
+}
+
+async function deleteComment(cid) {
+  const ok = await confirmAction("آیا این کامنت حذف شود؟");
+  if (!ok) return;
+  try {
+    const r = await fetch(API + `/api/admin/comments/${cid}`, { method: "DELETE", ...hdr() });
+    if (r.ok) { toast("کامنت حذف شد"); loadComments(); }
+    else toast("خطا در حذف کامنت", "error");
+  } catch (e) { toast("خطای شبکه", "error"); }
+}
+
+/* ==========================================
+   LOGS
+   ========================================== */
+document.getElementById("logSearch").addEventListener("input", renderLogs);
+
+async function loadLogs() {
+  try {
+    const r = await fetch(API + "/api/admin/logs", hdr());
+    allLogs = await r.json();
+    renderLogs();
+  } catch (e) { toast("خطا در بارگذاری لاگ‌ها", "error"); }
+}
+
+function renderLogs() {
+  const q = document.getElementById("logSearch").value.trim().toLowerCase();
+  let logs = allLogs;
+  if (q) logs = logs.filter(l => (l.action || "").toLowerCase().includes(q) || (l.target || "").toLowerCase().includes(q) || (l.admin || "").toLowerCase().includes(q));
+  document.getElementById("logsList").innerHTML = logs.length ? logs.map(l => `
+    <div class="log-row">
+      <span class="log-action">${esc(l.action || '')}</span>
+      ${l.target ? '<span class="log-target">' + esc(l.target) + '</span>' : ''}
+      <span class="log-time">${esc(l.created_at || '')}</span>
+      ${l.admin ? '<span class="log-admin">' + esc(l.admin) + '</span>' : ''}
+    </div>`).join("") : '<div class="empty-state">لاگی ثبت نشده</div>';
+}
+
+/* ==========================================
+   SETTINGS
+   ========================================== */
+async function loadSettings() {
+  let statsInfo = {};
+  try {
+    const r = await fetch(API + "/api/admin/stats", hdr());
+    statsInfo = await r.json();
+  } catch (e) {}
+  document.getElementById("settingsContent").innerHTML = `
+    <div class="setting-group">
+      <h3>اطلاعات ادمین</h3>
+      <div class="setting-item"><span class="setting-label">نام کاربری</span><span class="setting-value">${esc(currentAdmin)}</span></div>
+    </div>
+    <div class="setting-group">
+      <h3>اطلاعات سیستم</h3>
+      <div class="setting-item"><span class="setting-label">کل کاربران</span><span class="setting-value">${statsInfo.total_users || 0}</span></div>
+      <div class="setting-item"><span class="setting-label">کاربران بن‌شده</span><span class="setting-value">${statsInfo.banned_users || 0}</span></div>
+      <div class="setting-item"><span class="setting-label">نسخه اپلیکیشن</span><span class="setting-value">2.0</span></div>
+    </div>
+    ${statsInfo.admin_usernames ? `<div class="setting-group">
+      <h3>لیست ادمین‌ها</h3>
+      ${(statsInfo.admin_usernames || []).map(a => `<div class="setting-item"><span class="setting-label">${esc(a)}</span><span class="setting-value">👑</span></div>`).join("")}
+    </div>` : ''}`;
+}
+
+/* ==========================================
+   UTILITIES
+   ========================================== */
+function esc(str) {
+  if (str == null) return "";
+  const d = document.createElement("div");
+  d.textContent = String(str);
+  return d.innerHTML;
+}
 </script>
 </body>
 </html>
