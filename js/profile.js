@@ -17,6 +17,11 @@ async function renderProfileScreen() {
     ${renderAvatar(u.username, '3.5rem')}
     <div class="profile-username">${escapeHtml(u.username)}</div>
     <div class="profile-id">ID: ${u.id}</div>
+    <div class="profile-xp-bar">
+      <div class="xp-level">${getXpLevel(u.xp || 0)}</div>
+      <div class="xp-bar"><div class="xp-fill" style="width:${getXpPercent(u.xp || 0)}%"></div></div>
+      <div class="xp-text">${toFarsiNum(u.xp || 0)} XP</div>
+    </div>
     <div class="profile-bio">${escapeHtml(u.bio || 'بیو ندارید')}</div>
     <div class="profile-stats">
       <div class="profile-stat wins"><span class="profile-stat-num">${toFarsiNum(u.chaos_wins || 0)}</span><span class="profile-stat-label">برد</span></div>
@@ -29,11 +34,46 @@ async function renderProfileScreen() {
       <div class="extra-stat"><span class="extra-stat-icon">🎯</span> تجربه: ${getExperienceLevel(u)}</div>
     </div>
     <div class="badge-row">${renderBadges(u)}</div>
+    <div class="profile-avatar-select">
+      <div class="avatar-label">آواتار:</div>
+      <div class="avatar-options">${['🎭','😈','😇','🐺','👑','🎯','🛡️','⚕️','🕵️','🔮','🦹','🎪'].map(e =>
+        `<button class="avatar-opt${(u.avatar||'🎭')===e?' active':''}" onclick="changeAvatar('${e}')">${e}</button>`
+      ).join('')}</div>
+    </div>
     <div class="profile-edit-row">
       <input type="text" id="editBio" placeholder="بیو..." value="${escapeHtml(u.bio || '')}" maxlength="200" style="flex:1">
       <button class="chaos-btn secondary" onclick="updateBio()" style="padding:8px 16px;font-size:.8rem">ذخیره</button>
     </div>
   `;
+
+function getXpLevel(xp) {
+  if (xp >= 500) return '🏆 افسانه‌ای';
+  if (xp >= 250) return '⭐ حرفه‌ای';
+  if (xp >= 100) return '🎯 باتجربه';
+  if (xp >= 30) return '🎮 بازیکن';
+  return '🌱 تازه‌کار';
+}
+function getXpPercent(xp) {
+  const levels = [0, 30, 100, 250, 500];
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (xp >= levels[i]) {
+      const next = levels[i + 1] || levels[i] * 2;
+      return Math.min(100, ((xp - levels[i]) / (next - levels[i])) * 100);
+    }
+  }
+  return 0;
+}
+
+async function changeAvatar(emoji) {
+  const r = await apiFetch("/api/profile", { method: "PUT", body: JSON.stringify({ avatar: emoji }) });
+  if (r.ok) {
+    currentUser.avatar = emoji;
+    currentUser.avatar_emoji = emoji;
+    showToast("✅ آواتار تغییر کرد");
+    renderProfileScreen();
+    renderAuthBar();
+  }
+}
 
 function getExperienceLevel(u) {
   const total = (u.total_games || 0) + (u.chaos_wins || 0) + (u.chaos_losses || 0);

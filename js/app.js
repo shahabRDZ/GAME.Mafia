@@ -148,6 +148,35 @@ function toggleTheme() {
 applyLang();
 initAuth();
 
+// ── System Messages — check and show to user ──
+async function checkSystemMessages() {
+  if (!authToken) return;
+  try {
+    const r = await apiFetch("/api/system-messages", { _background: true });
+    if (!r.ok || !r.data || !r.data.length) return;
+    r.data.forEach(msg => {
+      showSystemBanner(msg);
+    });
+  } catch {}
+}
+function showSystemBanner(msg) {
+  const existing = document.getElementById("sysmsg-" + msg.id);
+  if (existing) return;
+  const el = document.createElement("div");
+  el.id = "sysmsg-" + msg.id;
+  el.className = "sys-msg-banner";
+  el.innerHTML = `<span class="sys-msg-text">📢 ${msg.content}</span><button class="sys-msg-close" onclick="dismissSysMsg(${msg.id},this.parentElement)">✕</button>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.classList.add("show"), 50);
+}
+async function dismissSysMsg(id, el) {
+  el.classList.remove("show");
+  setTimeout(() => el.remove(), 300);
+  await apiFetch("/api/system-messages/" + id + "/read", { method: "POST", _background: true });
+}
+setTimeout(checkSystemMessages, 3000);
+setInterval(checkSystemMessages, 30000);
+
 // Auto-join digital room if opened via NFC URL (?nfc=CODE)
 (function checkNfcUrl() {
   const params = new URLSearchParams(window.location.search);
