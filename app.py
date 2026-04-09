@@ -4265,7 +4265,9 @@ def update_event(eid):
 def delete_event(eid):
     user = db.session.get(User, int(get_jwt_identity()))
     event = db.session.get(GameEvent, eid)
-    if not event or event.host_id != user.id:
+    if not event:
+        return jsonify({"error": "ایونت پیدا نشد"}), 404
+    if event.host_id != user.id and not is_admin():
         return jsonify({"error": "دسترسی ندارید"}), 403
     EventReservation.query.filter_by(event_id=eid).delete()
     db.session.delete(event)
