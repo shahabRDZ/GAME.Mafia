@@ -82,14 +82,17 @@ async function submitAuth() {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    // Always save to localStorage (remember me default)
-    const rememberEl = document.getElementById("rememberMe");
-    const remember = rememberEl ? rememberEl.checked : true;
+    // Always save to localStorage
     localStorage.setItem("mafiaToken", authToken);
-    if (!remember) {
-      localStorage.removeItem("mafiaToken");
-      sessionStorage.setItem("mafiaToken", authToken);
-    }
+    // Register device fingerprint
+    try {
+      const fp = getDeviceFingerprint();
+      fetch(API + "/api/auth/register-device", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + authToken },
+        body: JSON.stringify({ fingerprint: fp })
+      });
+    } catch {}
     closeAuthModal();
     renderAuthBar();
     showToast("👋 خوش آمدید " + currentUser.username);

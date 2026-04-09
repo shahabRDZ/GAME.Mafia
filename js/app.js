@@ -144,9 +144,58 @@ function toggleTheme() {
   }
 })();
 
+// ── Auto-login by device fingerprint ──
+async function autoLoginByDevice() {
+  if (authToken) return; // already logged in
+  try {
+    const fp = getDeviceFingerprint();
+    const r = await fetch(API + "/api/auth/device-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fingerprint: fp })
+    });
+    const data = await r.json();
+    if (r.ok && data.token) {
+      authToken = data.token;
+      currentUser = data.user;
+      localStorage.setItem("mafiaToken", authToken);
+      renderAuthBar();
+    }
+  } catch {}
+}
+
+function getDeviceFingerprint() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillText('shushang', 2, 2);
+  const canvasHash = canvas.toDataURL().slice(-50);
+
+  const data = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height,
+    screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || 0,
+    canvasHash
+  ].join('|');
+
+  // Simple hash
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash) + data.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'fp_' + Math.abs(hash).toString(36);
+}
+
 // Initialize
 applyLang();
-initAuth();
+initAuth().then(() => {
+  if (!currentUser) autoLoginByDevice();
+});
 
 // ── System Messages — check and show to user ──
 async function checkSystemMessages() {

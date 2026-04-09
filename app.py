@@ -71,6 +71,7 @@ class User(db.Model):
     is_banned = db.Column(db.Boolean, default=False)
     last_login = db.Column(db.DateTime, nullable=True)
     xp = db.Column(db.Integer, default=0)
+    device_fingerprint = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     games = db.relationship("Game", backref="user", lazy=True, cascade="all, delete-orphan")
 
@@ -368,6 +369,33 @@ def register():
     db.session.commit()
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()}), 201
+
+@app.route("/api/auth/register-device", methods=["POST"])
+@jwt_required()
+def register_device():
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    fp = data.get("fingerprint", "")
+    if fp and user:
+        user.device_fingerprint = fp
+        db.session.commit()
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/auth/device-login", methods=["POST"])
+def device_login():
+    data = request.get_json()
+    fp = data.get("fingerprint", "")
+    if not fp:
+        return jsonify({"error": "no fingerprint"}), 400
+    user = User.query.filter_by(device_fingerprint=fp).first()
+    if not user:
+        return jsonify({"error": "device not registered"}), 404
+    try:
+        if user.is_banned:
+            return jsonify({"error": "banned"}), 403
+    except: pass
+    token = create_access_token(identity=str(user.id))
+    return jsonify({"token": token, "user": user.to_dict()}), 200
 
 @app.route("/api/auth/forgot-password", methods=["POST"])
 def forgot_password():
@@ -4453,6 +4481,7 @@ for attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS device_fingerprint VARCHAR(100)"))
                 # Event table new columns
                 for col in ["event_name VARCHAR(100) DEFAULT ''", "host_display_name VARCHAR(50) DEFAULT ''",
                     "address VARCHAR(300) DEFAULT ''", "lat FLOAT", "lng FLOAT"]:
