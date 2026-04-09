@@ -111,6 +111,53 @@ class SiteStats(db.Model):
     value = db.Column(db.Integer, default=0)
 
 
+class GameEvent(db.Model):
+    __tablename__ = "game_events"
+    id = db.Column(db.Integer, primary_key=True)
+    host_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    country = db.Column(db.String(50), nullable=False)
+    city = db.Column(db.String(50), nullable=False)
+    location_name = db.Column(db.String(150), nullable=False)
+    scenario = db.Column(db.String(50), default="")
+    player_count = db.Column(db.Integer, default=10)
+    event_date = db.Column(db.String(20), nullable=False)  # YYYY-MM-DD
+    start_time = db.Column(db.String(10), nullable=False)  # HH:MM
+    end_time = db.Column(db.String(10), default="")
+    description = db.Column(db.String(500), default="")
+    max_players = db.Column(db.Integer, default=10)
+    status = db.Column(db.String(20), default="open")  # open, full, closed, cancelled
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    host = db.relationship("User", foreign_keys=[host_id])
+
+    def to_dict(self):
+        reservations = EventReservation.query.filter_by(event_id=self.id).all()
+        return {
+            "id": self.id, "host_id": self.host_id,
+            "host_name": self.host.username if self.host else "?",
+            "country": self.country, "city": self.city,
+            "location_name": self.location_name,
+            "scenario": self.scenario, "player_count": self.player_count,
+            "event_date": self.event_date, "start_time": self.start_time,
+            "end_time": self.end_time, "description": self.description,
+            "max_players": self.max_players, "status": self.status,
+            "reserved_count": len(reservations),
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M"),
+            "reservations": [{"user_id": r.user_id, "username": r.user.username if r.user else "?",
+                "status": r.status} for r in reservations]
+        }
+
+
+class EventReservation(db.Model):
+    __tablename__ = "event_reservations"
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey("game_events.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    status = db.Column(db.String(20), default="pending")  # pending, accepted, rejected
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user = db.relationship("User", foreign_keys=[user_id])
+    event = db.relationship("GameEvent", foreign_keys=[event_id])
+
+
 class AdminLog(db.Model):
     __tablename__ = "admin_logs"
     id = db.Column(db.Integer, primary_key=True)
@@ -4064,6 +4111,138 @@ def admin_reset_password(uid):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════════════════
+# EVENTS — Location-based game meetups
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.route("/api/events", methods=["POST"])
+@jwt_required()
+def create_event():
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    required = ["country", "city", "location_name", "event_date", "start_time"]
+    for field in required:
+        if not data.get(field):
+            return jsonify({"error": f"{field} الزامی است"}), 400
+    event = GameEvent(
+        host_id=user.id,
+        country=data["country"].strip(),
+        city=data["city"].strip(),
+        location_name=data["location_name"].strip(),
+        scenario=data.get("scenario", ""),
+        player_count=int(data.get("player_count", 10)),
+        event_date=data["event_date"],
+        start_time=data["start_time"],
+        end_time=data.get("end_time", ""),
+        description=data.get("description", "")[:500],
+        max_players=int(data.get("max_players", 10))
+    )
+    db.session.add(event)
+    db.session.commit()
+    return jsonify(event.to_dict()), 201
+
+@app.route("/api/events", methods=["GET"])
+def list_events():
+    country = request.args.get("country", "").strip()
+    city = request.args.get("city", "").strip()
+    q = GameEvent.query.filter(GameEvent.status.in_(["open", "full"]))
+    if country:
+        q = q.filter(GameEvent.country.ilike(f"%{country}%"))
+    if city:
+        q = q.filter(GameEvent.city.ilike(f"%{city}%"))
+    events = q.order_by(GameEvent.event_date.asc(), GameEvent.start_time.asc()).limit(50).all()
+    return jsonify([e.to_dict() for e in events]), 200
+
+@app.route("/api/events/<int:eid>", methods=["GET"])
+def get_event(eid):
+    event = db.session.get(GameEvent, eid)
+    if not event:
+        return jsonify({"error": "ایونت پیدا نشد"}), 404
+    return jsonify(event.to_dict()), 200
+
+@app.route("/api/events/<int:eid>", methods=["PUT"])
+@jwt_required()
+def update_event(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    event = db.session.get(GameEvent, eid)
+    if not event or event.host_id != user.id:
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    data = request.get_json()
+    for field in ["country", "city", "location_name", "scenario", "event_date", "start_time", "end_time", "description", "max_players", "status"]:
+        if field in data:
+            setattr(event, field, data[field])
+    db.session.commit()
+    return jsonify(event.to_dict()), 200
+
+@app.route("/api/events/<int:eid>", methods=["DELETE"])
+@jwt_required()
+def delete_event(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    event = db.session.get(GameEvent, eid)
+    if not event or event.host_id != user.id:
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    EventReservation.query.filter_by(event_id=eid).delete()
+    db.session.delete(event)
+    db.session.commit()
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/events/<int:eid>/reserve", methods=["POST"])
+@jwt_required()
+def reserve_event(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    event = db.session.get(GameEvent, eid)
+    if not event:
+        return jsonify({"error": "ایونت پیدا نشد"}), 404
+    if event.host_id == user.id:
+        return jsonify({"error": "گرداننده نمی‌تواند رزرو کند"}), 400
+    existing = EventReservation.query.filter_by(event_id=eid, user_id=user.id).first()
+    if existing:
+        return jsonify({"error": "قبلاً رزرو کرده‌اید"}), 400
+    count = EventReservation.query.filter_by(event_id=eid).count()
+    if count >= event.max_players:
+        event.status = "full"
+        db.session.commit()
+        return jsonify({"error": "ظرفیت تکمیل شده"}), 400
+    res = EventReservation(event_id=eid, user_id=user.id)
+    db.session.add(res)
+    if count + 1 >= event.max_players:
+        event.status = "full"
+    db.session.commit()
+    return jsonify({"ok": True, "status": res.status}), 201
+
+@app.route("/api/events/<int:eid>/reservations/<int:rid>", methods=["PUT"])
+@jwt_required()
+def manage_reservation(eid, rid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    event = db.session.get(GameEvent, eid)
+    if not event or event.host_id != user.id:
+        return jsonify({"error": "فقط گرداننده می‌تواند"}), 403
+    # Support by ID or by user_id
+    if rid == 0:
+        uid = data.get("user_id")
+        res = EventReservation.query.filter_by(event_id=eid, user_id=uid).first() if uid else None
+    else:
+        res = db.session.get(EventReservation, rid)
+    if not res or res.event_id != eid:
+        return jsonify({"error": "رزرو پیدا نشد"}), 404
+    data = request.get_json()
+    res.status = data.get("status", res.status)
+    db.session.commit()
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/events/my", methods=["GET"])
+@jwt_required()
+def my_events():
+    user = db.session.get(User, int(get_jwt_identity()))
+    hosted = GameEvent.query.filter_by(host_id=user.id).order_by(GameEvent.created_at.desc()).all()
+    reserved = EventReservation.query.filter_by(user_id=user.id).all()
+    reserved_events = [r.event.to_dict() for r in reserved if r.event]
+    return jsonify({
+        "hosted": [e.to_dict() for e in hosted],
+        "reserved": reserved_events
+    }), 200
+
+
 # ── Error Handlers ──
 @app.errorhandler(404)
 def page_not_found(e):

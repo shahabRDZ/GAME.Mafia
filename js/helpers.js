@@ -151,6 +151,142 @@ function showRulesTab(tab, btn) {
   el.innerHTML = rules[tab] || '';
 }
 
+// ── Events ──
+function showEventTab(tab, btn) {
+  document.querySelectorAll('.event-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.event-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('event' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+  if (btn) btn.classList.add('active');
+  if (tab === 'browse') filterEvents();
+  if (tab === 'my') loadMyEvents();
+}
+
+async function filterEvents() {
+  const country = document.getElementById('eventCountryFilter')?.value || '';
+  const city = document.getElementById('eventCityFilter')?.value || '';
+  const list = document.getElementById('eventList');
+  if (!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim)">در حال بارگذاری...</div>';
+
+  try {
+    const params = new URLSearchParams();
+    if (country) params.set('country', country);
+    if (city) params.set('city', city);
+    const r = await fetch(API + '/api/events?' + params.toString());
+    const events = await r.json();
+
+    if (!events.length) {
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--dim)">🏠 ایونتی پیدا نشد<br><span style="font-size:0.72rem">اولین ایونت رو خودت بساز!</span></div>';
+      return;
+    }
+    list.innerHTML = events.map(e => renderEventCard(e)).join('');
+  } catch {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--accent)">خطا در بارگذاری</div>';
+  }
+}
+
+function renderEventCard(e) {
+  const badgeClass = e.status === 'open' ? 'badge-open' : 'badge-full';
+  const badgeText = e.status === 'open' ? 'باز' : e.status === 'full' ? 'تکمیل' : e.status;
+  const canReserve = e.status === 'open' && authToken && currentUser && e.host_id !== currentUser.id;
+  return `<div class="event-card">
+    <div class="event-card-header">
+      <div class="event-card-title">📍 ${escapeHtml(e.location_name)}</div>
+      <span class="event-card-badge ${badgeClass}">${badgeText}</span>
+    </div>
+    <div class="event-card-info">
+      <span>🌍 ${escapeHtml(e.country)}, ${escapeHtml(e.city)}</span>
+      <span>🎭 ${escapeHtml(e.scenario || '—')}</span>
+      <span>👥 ${toFarsiNum(e.reserved_count)}/${toFarsiNum(e.max_players)}</span><br>
+      <span>📅 ${e.event_date}</span>
+      <span>⏰ ${e.start_time}${e.end_time ? ' — ' + e.end_time : ''}</span>
+    </div>
+    ${e.description ? `<div style="font-size:0.75rem;color:var(--dim);margin-top:6px">${escapeHtml(e.description)}</div>` : ''}
+    <div class="event-card-footer">
+      <span class="event-card-host">🎙️ ${escapeHtml(e.host_name)}</span>
+      ${canReserve ? `<button class="event-reserve-btn" onclick="reserveEvent(${e.id})">رزرو</button>` :
+        e.status === 'full' ? '<span style="font-size:0.72rem;color:var(--accent)">ظرفیت تکمیل</span>' : ''}
+    </div>
+  </div>`;
+}
+
+async function createEvent() {
+  if (!authToken) { showToast('⚠️ ابتدا وارد شوید'); openAuthModal('login'); return; }
+  const data = {
+    country: document.getElementById('evCountry').value,
+    city: document.getElementById('evCity').value.trim(),
+    location_name: document.getElementById('evLocation').value.trim(),
+    scenario: document.getElementById('evScenario').value,
+    player_count: parseInt(document.getElementById('evPlayerCount').value),
+    max_players: parseInt(document.getElementById('evPlayerCount').value),
+    event_date: document.getElementById('evDate').value,
+    start_time: document.getElementById('evStartTime').value,
+    end_time: document.getElementById('evEndTime').value,
+    description: document.getElementById('evDescription').value.trim()
+  };
+  if (!data.city || !data.location_name || !data.event_date || !data.start_time) {
+    showToast('⚠️ شهر، لوکیشن، تاریخ و ساعت الزامی است'); return;
+  }
+  const r = await apiFetch('/api/events', { method: 'POST', body: JSON.stringify(data) });
+  if (r.ok) {
+    showToast('✅ ایونت ثبت شد!');
+    showEventTab('browse', document.querySelector('.event-tab'));
+  } else {
+    showToast('⚠️ ' + (r.data?.error || 'خطا'));
+  }
+}
+
+async function reserveEvent(eid) {
+  const r = await apiFetch('/api/events/' + eid + '/reserve', { method: 'POST' });
+  if (r.ok) { showToast('✅ رزرو شد — منتظر تأیید گرداننده باشید'); filterEvents(); }
+  else showToast('⚠️ ' + (r.data?.error || 'خطا'));
+}
+
+async function loadMyEvents() {
+  if (!authToken) { document.getElementById('myEventsList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim)">ابتدا وارد شوید</div>'; return; }
+  const r = await apiFetch('/api/events/my', { _background: true });
+  if (!r.ok) return;
+  const el = document.getElementById('myEventsList');
+  let html = '';
+  if (r.data.hosted.length) {
+    html += '<div style="font-size:0.82rem;color:var(--accent2);font-weight:700;margin-bottom:8px">🎙️ ایونت‌های شما</div>';
+    html += r.data.hosted.map(e => renderEventCard(e) + renderReservationList(e)).join('');
+  }
+  if (r.data.reserved.length) {
+    html += '<div style="font-size:0.82rem;color:#60a5fa;font-weight:700;margin:12px 0 8px">📋 رزروهای شما</div>';
+    html += r.data.reserved.map(e => renderEventCard(e)).join('');
+  }
+  if (!html) html = '<div style="text-align:center;padding:20px;color:var(--dim)">ایونتی ندارید</div>';
+  el.innerHTML = html;
+}
+
+function renderReservationList(e) {
+  if (!e.reservations || !e.reservations.length) return '';
+  return '<div style="padding:8px;font-size:0.75rem">' +
+    e.reservations.map(r =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <span>${escapeHtml(r.username)}</span>
+        <span style="flex:1"></span>
+        <span style="color:${r.status==='accepted'?'#4ade80':r.status==='rejected'?'#e94560':'var(--dim)'}">${r.status==='pending'?'⏳ منتظر':r.status==='accepted'?'✅ تأیید':'❌ رد'}</span>
+        ${r.status==='pending'?`<button class="btn-s btn-edit" onclick="manageReservation(${e.id},${r.user_id},'accepted')">✓</button><button class="btn-s btn-ban" onclick="manageReservation(${e.id},${r.user_id},'rejected')">✕</button>`:''}
+      </div>`
+    ).join('') + '</div>';
+}
+
+async function manageReservation(eid, uid, status) {
+  // Find reservation ID — use uid to match
+  const r = await apiFetch('/api/events/' + eid);
+  if (!r.ok) return;
+  const res = r.data.reservations.find(rv => rv.user_id === uid);
+  if (!res) return;
+  // We need the reservation ID, but API uses user_id, let's update
+  await apiFetch(`/api/events/${eid}/reservations/0`, {
+    method: 'PUT', body: JSON.stringify({ status, user_id: uid })
+  });
+  showToast(status === 'accepted' ? '✅ تأیید شد' : '❌ رد شد');
+  loadMyEvents();
+}
+
 // ── Toast Queue ──
 const toastQueue = [];
 let toastActive = false;

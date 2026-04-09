@@ -156,9 +156,9 @@
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4l2-8 2 16 2-8h4"/></svg>
       <span>بازی جاری</span>
     </button>
-    <button class="bnav-btn" id="navHistory" onclick="showScreen('history')">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      <span>تاریخچه</span>
+    <button class="bnav-btn" id="navEvents" onclick="showScreen('events')">
+      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>ایونت</span>
     </button>
     <button class="bnav-btn" id="navDM" onclick="showScreen('dm')">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -487,6 +487,60 @@
     </div>
   </section>
 
+  <!-- Events Screen -->
+  <section class="screen" id="eventsScreen" aria-label="ایونت‌ها">
+    <div class="setup-card gc" style="padding:16px">
+      <div class="section-title">🏠 ایونت‌های بازی مافیا</div>
+      <!-- Filter -->
+      <div class="event-filters">
+        <select id="eventCountryFilter" onchange="filterEvents()" class="event-select">
+          <option value="">همه کشورها</option>
+          <option value="ایران">🇮🇷 ایران</option>
+          <option value="ترکیه">🇹🇷 ترکیه</option>
+          <option value="امارات">🇦🇪 امارات</option>
+          <option value="آلمان">🇩🇪 آلمان</option>
+          <option value="کانادا">🇨🇦 کانادا</option>
+        </select>
+        <input type="text" id="eventCityFilter" placeholder="شهر..." class="event-city-input" oninput="filterEvents()">
+      </div>
+      <!-- Actions -->
+      <div class="event-actions-bar">
+        <button class="event-tab active" onclick="showEventTab('browse',this)">🔍 جستجو</button>
+        <button class="event-tab" onclick="showEventTab('create',this)">➕ ایونت جدید</button>
+        <button class="event-tab" onclick="showEventTab('my',this)">📋 ایونت‌های من</button>
+      </div>
+      <!-- Browse -->
+      <div id="eventBrowse" class="event-section active">
+        <div id="eventList"></div>
+      </div>
+      <!-- Create -->
+      <div id="eventCreate" class="event-section" style="display:none">
+        <div class="event-form">
+          <div class="ef-row">
+            <select id="evCountry" class="event-select"><option value="ایران">🇮🇷 ایران</option><option value="ترکیه">🇹🇷 ترکیه</option><option value="امارات">🇦🇪 امارات</option><option value="آلمان">🇩🇪 آلمان</option><option value="کانادا">🇨🇦 کانادا</option></select>
+            <input type="text" id="evCity" placeholder="شهر (مثلاً استانبول)" class="ef-input">
+          </div>
+          <input type="text" id="evLocation" placeholder="📍 نام لوکیشن (مثلاً کافه فلان)" class="ef-input" style="width:100%">
+          <div class="ef-row">
+            <select id="evScenario" class="event-select"><option value="بازپرس">🔍 بازپرس</option><option value="تکاور">⚔️ تکاور</option><option value="نماینده">🏛️ نماینده</option><option value="مذاکره">🤝 مذاکره</option><option value="دلخواه">✏️ دلخواه</option></select>
+            <select id="evPlayerCount" class="event-select"><option value="10">۱۰ نفر</option><option value="12">۱۲ نفر</option><option value="13">۱۳ نفر</option></select>
+          </div>
+          <div class="ef-row">
+            <input type="date" id="evDate" class="ef-input">
+            <input type="time" id="evStartTime" class="ef-input">
+            <input type="time" id="evEndTime" class="ef-input" placeholder="پایان">
+          </div>
+          <textarea id="evDescription" placeholder="توضیحات (اختیاری)..." class="ef-textarea" rows="2"></textarea>
+          <button class="start-btn start-btn-nearby" onclick="createEvent()" style="width:100%">🏠 ثبت ایونت</button>
+        </div>
+      </div>
+      <!-- My Events -->
+      <div id="eventMy" class="event-section" style="display:none">
+        <div id="myEventsList"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- Profile Screen -->
   <section class="screen" id="profileScreen" aria-label="پروفایل کاربر">
     <div class="profile-card gc" id="profileCard"></div>
@@ -494,13 +548,6 @@
     <div class="search-section gc" id="searchSection"></div>
   </section>
   </main>
-
-  <!-- Visit Counter -->
-  <div class="visit-counter" id="visitCounter">
-    <span class="vc-icon">👁️</span>
-    <span class="vc-num" id="visitCount">—</span>
-    <span class="vc-label">بازدید</span>
-  </div>
 </div>
 
 <!-- PWA Install Banner -->
@@ -512,11 +559,6 @@
 
 <!-- Footer -->
 <footer class="site-footer">
-  <div class="footer-visit">
-    <span class="vc-icon">👁️</span>
-    <span class="vc-num" id="visitCount">—</span>
-    <span class="vc-label">بازدید</span>
-  </div>
   <span>ساخته شده توسط</span>
   <a href="https://shahabrdz.dev/" target="_blank" rel="noopener">shahabrdz.dev</a>
   <span class="app-version">v2.5.0</span>
