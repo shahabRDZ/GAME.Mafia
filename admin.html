@@ -277,6 +277,7 @@ function showTab(name) {
   document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
   document.getElementById("sec-"+name).classList.add("active");
   event.target.classList.add("active");
+  if (name === 'events') loadAdminEvents();
 }
 
 // Edit
