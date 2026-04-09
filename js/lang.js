@@ -33,7 +33,7 @@ const LANG = {
   en: {
     dir: "ltr",
     ui: {
-      title: "SHUSHANG", newGame: "New Game", currentGame: "Current Game", history: "History",
+      title: "ShowShung", newGame: "New Game", currentGame: "Current Game", history: "History",
       login: "Login", register: "Register", logout: "Logout",
       guestMsg: "Login to save history", gamesRecorded: "games recorded",
       selectGroup: "🎯 Select Scenario", selectCount: "👥 Number of Players",
@@ -62,7 +62,7 @@ const LANG = {
   tr: {
     dir: "ltr",
     ui: {
-      title: "SHUSHANG", newGame: "Yeni Oyun", currentGame: "Devam Eden", history: "Geçmiş",
+      title: "ShowShung", newGame: "Yeni Oyun", currentGame: "Devam Eden", history: "Geçmiş",
       login: "Giriş", register: "Kayıt Ol", logout: "Çıkış",
       guestMsg: "Geçmişi kaydetmek için giriş yapın", gamesRecorded: "oyun kaydedildi",
       selectGroup: "🎯 Senaryo Seç", selectCount: "👥 Oyuncu Sayısı",

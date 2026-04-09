@@ -9,8 +9,8 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 # Stage 2: Production image
 FROM python:3.12-slim
 
-LABEL maintainer="shushang-mafia"
-LABEL description="Shushang - Persian online Mafia party game"
+LABEL maintainer="ShowShung-mafia"
+LABEL description="ShowShung - Persian online Mafia party game"
 LABEL version="1.0"
 
 WORKDIR /app

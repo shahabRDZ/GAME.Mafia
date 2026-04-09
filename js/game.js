@@ -9,7 +9,7 @@ function showNarratorModal() {
   const info = document.getElementById("narratorScenarioInfo");
 
   // Load saved name
-  const saved = localStorage.getItem('shushang_narrator');
+  const saved = localStorage.getItem('ShowShung_narrator');
   if (saved) { input.value = saved; narratorName = saved; }
 
   // Show scenario info
@@ -26,7 +26,7 @@ function showNarratorModal() {
 function confirmNarrator() {
   const input = document.getElementById("narratorNameInput");
   narratorName = input.value.trim() || 'گرداننده شوشانگ';
-  localStorage.setItem('shushang_narrator', narratorName);
+  localStorage.setItem('ShowShung_narrator', narratorName);
   document.getElementById("narratorModal").classList.remove("show");
 
   if (window._nearbyNarratorMode) {
@@ -600,7 +600,7 @@ function showNearbyNarratorModal() {
   const input = document.getElementById("narratorNameInput");
   const info = document.getElementById("narratorScenarioInfo");
 
-  const saved = localStorage.getItem('shushang_narrator');
+  const saved = localStorage.getItem('ShowShung_narrator');
   if (saved) { input.value = saved; narratorName = saved; }
 
   info.innerHTML = `

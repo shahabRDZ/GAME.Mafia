@@ -1,6 +1,6 @@
 const CACHE_VERSION = 'v83';
-const STATIC_CACHE = `shushang-static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `shushang-dynamic-${CACHE_VERSION}`;
+const STATIC_CACHE = `ShowShung-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `ShowShung-dynamic-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
   '/',
