@@ -155,13 +155,9 @@
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       <span>تاریخچه</span>
     </button>
-    <button class="bnav-btn" id="navDigitalJoin" onclick="openDigitalPlayer()">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-      <span>دریافت نقش</span>
-    </button>
-    <button class="bnav-btn" id="navShareLocation" onclick="shareMyLocation()">
+    <button class="bnav-btn" id="navDigitalReceive" onclick="confirmDigitalReceive()">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span>لوکیشن بده</span>
+      <span>دریافت نقش</span>
     </button>
     <button class="bnav-btn" id="navRules" onclick="showScreen('rules')">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
@@ -255,8 +251,7 @@
         </div>
         <div class="start-btns-row" id="customStartRow" style="display:none">
         <button class="start-btn start-btn-animated" onclick="startGame()" id="customStartBtn">🎮 سنتی</button>
-        <button class="start-btn start-btn-digital" onclick="startDigitalGame()">📱 دیجیتال</button>
-        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📍 نزدیک‌یاب</button>
+        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📱 حرفه‌ای</button>
       </div>
       </div>
     </div>
@@ -266,8 +261,7 @@
       <div class="count-grid" id="countGrid"></div>
       <div class="start-btns-row" id="startBtnRow" style="display:none">
         <button class="start-btn start-btn-animated" onclick="startGame()" id="startBtn">🎮 سنتی</button>
-        <button class="start-btn start-btn-digital" onclick="startDigitalGame()">📱 دیجیتال</button>
-        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📍 نزدیک‌یاب</button>
+        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📱 حرفه‌ای</button>
       </div>
     </div>
   </section>
@@ -573,75 +567,6 @@
   </div>
 </div>
 
-<!-- Digital Room Overlay (Host shows code, tracks progress) -->
-<div class="digital-overlay" id="digitalOverlay">
-  <div class="digital-box">
-    <button class="modal-close-btn" onclick="closeDigitalRoom()" aria-label="بستن">✕</button>
-    <div class="digital-phase" id="digitalPhase">
-      <div class="digital-icon">📱</div>
-      <div class="digital-title">پخش دیجیتال نقش</div>
-      <div class="digital-nfc-status" id="digitalNfcStatus">
-        <div class="digital-tap-icon" style="font-size:3rem">📡</div>
-        <div style="font-size:1rem;color:#00cfff;font-weight:900;margin:8px 0">گوشی بازیکن را نزدیک کنید</div>
-        <div style="font-size:0.75rem;color:var(--dim)">اندروید: نزدیک کردن گوشی · آیفون: کد یا QR</div>
-      </div>
-      <div class="digital-code-section" id="digitalCodeSection">
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:12px 0">
-          <span style="font-size:0.75rem;color:var(--dim)">کد:</span>
-          <span class="digital-code" id="digitalCode" style="font-size:1.6rem;letter-spacing:5px;margin:0">—</span>
-        </div>
-        <div id="digitalQrContainer" style="text-align:center"></div>
-      </div>
-      <div class="digital-progress">
-        <div class="digital-progress-bar" id="digitalProgressBar" style="width:0%"></div>
-      </div>
-      <div class="digital-stats">
-        <span id="digitalAssigned">۰</span> از <span id="digitalTotal">۰</span> نقش تقسیم شد
-      </div>
-      <div class="digital-status" id="digitalStatus">در انتظار بازیکنان...</div>
-    </div>
-  </div>
-</div>
-
-<!-- Digital Player: Join room and receive role -->
-<div class="digital-overlay" id="digitalPlayerOverlay">
-  <div class="digital-box">
-    <button class="modal-close-btn" onclick="closeDigitalPlayer()" aria-label="بستن">✕</button>
-    <!-- Phase 1: NFC scan + code fallback -->
-    <div id="digitalJoinPhase">
-      <div class="digital-tap-area" id="digitalNfcScanArea">
-        <div class="digital-tap-icon">📱</div>
-        <div class="digital-tap-ripple"></div>
-        <div class="digital-tap-text" id="digitalPlayerNfcText">گوشی خود را نزدیک گرداننده بگیرید<br><strong>نقش خودکار دریافت می‌شود</strong></div>
-        <div class="digital-tap-hint" id="digitalPlayerNfcHint">اندروید · NFC</div>
-      </div>
-      <div style="text-align:center;color:var(--dim);font-size:0.75rem;margin:12px 0">— یا —</div>
-      <div class="digital-join-form">
-        <input type="text" id="digitalJoinCode" maxlength="5" placeholder="کد ۵ رقمی" class="digital-code-input" autocomplete="off" inputmode="text" style="text-transform:uppercase;font-size:1.4rem" onkeydown="if(event.key==='Enter')connectToRoom()">
-        <button class="start-btn start-btn-digital" onclick="connectToRoom()" style="width:100%">ورود با کد</button>
-      </div>
-    </div>
-    <!-- Phase 2: Tap to receive (after code entry) -->
-    <div id="digitalTapPhase" style="display:none">
-      <div class="digital-tap-area" id="digitalTapArea" onclick="tapToReceiveRole()">
-        <div class="digital-tap-icon">📱</div>
-        <div class="digital-tap-ripple"></div>
-        <div class="digital-tap-text">صفحه را <strong>لمس</strong> کنید</div>
-        <div class="digital-tap-hint">هر لمس = یک نقش</div>
-      </div>
-      <div class="digital-room-info" id="digitalRoomInfo"></div>
-    </div>
-    <!-- Phase 3: Role reveal -->
-    <div id="digitalRolePhase" style="display:none">
-      <div class="digital-role-emoji" id="digitalRoleEmoji"></div>
-      <div class="digital-role-name" id="digitalRoleName"></div>
-      <div class="digital-role-team" id="digitalRoleTeam"></div>
-      <div class="digital-role-ability" id="digitalRoleAbility"></div>
-      <div class="digital-role-num" id="digitalRoleNum"></div>
-      <button class="mod-btn" onclick="backToTapPhase()" style="margin-top:20px;width:100%">بازیکن بعدی</button>
-    </div>
-  </div>
-</div>
 
 <!-- Narrator Modal -->
 <div class="narrator-overlay" id="narratorModal">
