@@ -31,11 +31,13 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
 
 /* Filters */
 .ev-filters { display:flex; gap:8px; padding:0 16px 12px; }
-.ev-filters select, .ev-filters input { flex:1; padding:10px 12px; background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08); border-radius:12px; color:#fff; font-family:inherit;
-  font-size:.82rem; outline:none; }
+.ev-filters select { flex:1; padding:12px 14px; background:rgba(74,222,128,.04);
+  border:1.5px solid rgba(74,222,128,.15); border-radius:14px; color:#fff; font-family:inherit;
+  font-size:.85rem; outline:none; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234ade80' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:left 12px center; padding-left:32px; }
 .ev-filters select option { background:#0d0d1c; }
-.ev-filters input:focus, .ev-filters select:focus { border-color:#4ade80; }
+.ev-filters select:focus { border-color:#4ade80; box-shadow:0 0 0 3px rgba(74,222,128,.1); }
 
 /* Content */
 .ev-content { padding:0 16px 100px; }
@@ -115,15 +117,12 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
 <!-- Browse -->
 <div class="ev-section active" id="evSec-browse">
   <div class="ev-filters">
-    <select id="evFilterCountry" onchange="evLoadEvents()">
-      <option value="">همه کشورها</option>
-      <option value="ایران">🇮🇷 ایران</option>
-      <option value="ترکیه">🇹🇷 ترکیه</option>
-      <option value="امارات">🇦🇪 امارات</option>
-      <option value="آلمان">🇩🇪 آلمان</option>
-      <option value="کانادا">🇨🇦 کانادا</option>
+    <select id="evFilterCountry" onchange="updateFilterCities();evLoadEvents()">
+      <option value="">🌍 همه کشورها</option>
     </select>
-    <input type="text" id="evFilterCity" placeholder="شهر..." oninput="evLoadEvents()">
+    <select id="evFilterCity" onchange="evLoadEvents()">
+      <option value="">🏙️ همه شهرها</option>
+    </select>
   </div>
   <div class="ev-content" id="evBrowseList"></div>
 </div>
@@ -133,8 +132,8 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
   <div class="ev-content">
     <div class="ev-form">
       <div class="ev-form-row">
-        <select id="evFCountry"><option value="ایران">🇮🇷 ایران</option><option value="ترکیه">🇹🇷 ترکیه</option><option value="امارات">🇦🇪 امارات</option><option value="آلمان">🇩🇪 آلمان</option><option value="کانادا">🇨🇦 کانادا</option></select>
-        <input type="text" id="evFCity" placeholder="شهر">
+        <select id="evFCountry" onchange="updateFormCities()"></select>
+        <select id="evFCity"></select>
       </div>
       <input type="text" id="evFLocation" placeholder="📍 نام لوکیشن (کافه، رستوران...)">
       <div class="ev-form-row">
@@ -162,6 +161,7 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
   <a href="/">◀ بازگشت به شوشانگ</a>
 </div>
 
+<script src="js/countries.js"></script>
 <script>
 const API = "";
 let evToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
@@ -184,7 +184,7 @@ function evShowTab(name, btn) {
 
 async function evLoadEvents() {
   const country = document.getElementById('evFilterCountry').value;
-  const city = document.getElementById('evFilterCity').value;
+  const city = document.getElementById('evFilterCity')?.value || '';
   const el = document.getElementById('evBrowseList');
   el.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">در حال بارگذاری...</div>';
   const params = new URLSearchParams();
@@ -222,7 +222,7 @@ async function evCreate() {
   if(!evToken){alert('ابتدا وارد شوید');window.location='/';return;}
   const data={
     country:document.getElementById('evFCountry').value,
-    city:document.getElementById('evFCity').value.trim(),
+    city:document.getElementById('evFCity').value,
     location_name:document.getElementById('evFLocation').value.trim(),
     scenario:document.getElementById('evFScenario').value,
     player_count:parseInt(document.getElementById('evFCount').value),
@@ -281,7 +281,24 @@ async function evManageRes(eid,uid,status) {
   evLoadMy();
 }
 
-// Init
+// Init — populate country dropdowns
+function initCountryDropdowns() {
+  const opts = '<option value="">🌍 همه کشورها</option>' + getCountryOptions();
+  document.getElementById('evFilterCountry').innerHTML = opts;
+  document.getElementById('evFCountry').innerHTML = getCountryOptions();
+  updateFormCities();
+}
+function updateFilterCities() {
+  const country = document.getElementById('evFilterCountry').value;
+  const cityEl = document.getElementById('evFilterCity');
+  if (!country) { cityEl.innerHTML = '<option value="">🏙️ همه شهرها</option>'; return; }
+  cityEl.innerHTML = '<option value="">🏙️ همه شهرها</option>' + getCityOptions(country);
+}
+function updateFormCities() {
+  const country = document.getElementById('evFCountry').value;
+  document.getElementById('evFCity').innerHTML = getCityOptions(country);
+}
+initCountryDropdowns();
 evLoadEvents();
 </script>
 </body>
