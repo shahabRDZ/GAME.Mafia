@@ -251,6 +251,40 @@ def admin_reject_event(eid):
     return jsonify({"ok": True}), 200
 
 
+@bp.route("/api/admin/events/<int:eid>", methods=["DELETE"])
+@jwt_required()
+@admin_required
+def admin_delete_event(eid):
+    event = db.session.get(GameEvent, eid)
+    if not event:
+        return jsonify({"error": "ایونت پیدا نشد"}), 404
+    EventComment.query.filter_by(event_id=eid).delete()
+    EventReservation.query.filter_by(event_id=eid).delete()
+    db.session.delete(event)
+    db.session.commit()
+    log_admin_action("حذف ایونت", f"#{eid}")
+    return jsonify({"ok": True}), 200
+
+
+@bp.route("/api/admin/comments", methods=["GET"])
+@jwt_required()
+@admin_required
+def admin_get_comments():
+    comments = EventComment.query.order_by(EventComment.created_at.desc()).limit(100).all()
+    result = []
+    for c in comments:
+        user = db.session.get(User, c.user_id)
+        event = db.session.get(GameEvent, c.event_id)
+        result.append({
+            "id": c.id, "text": c.text,
+            "username": user.username if user else "?",
+            "event_name": event.location_name if event else "?",
+            "event_id": c.event_id,
+            "created_at": c.created_at.strftime("%Y-%m-%d %H:%M")
+        })
+    return jsonify(result), 200
+
+
 @bp.route("/api/admin/comments/<int:cid>", methods=["DELETE"])
 @jwt_required()
 @admin_required
@@ -259,6 +293,7 @@ def admin_delete_comment(cid):
     if comment:
         db.session.delete(comment)
         db.session.commit()
+        log_admin_action("حذف کامنت", f"#{cid}")
     return jsonify({"ok": True}), 200
 
 
