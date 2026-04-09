@@ -211,44 +211,30 @@ function renderEventCard(e) {
   </div>`;
 }
 
-async function createEvent() {
-  alert('createEvent called! authToken=' + (authToken ? 'YES' : 'NO'));
-  if (!authToken) { alert('لاگین نیستید!'); openAuthModal('login'); return; }
-  const evCity = document.getElementById('evCity');
-  const evLocation = document.getElementById('evLocation');
-  const evDate = document.getElementById('evDate');
-  const evStartTime = document.getElementById('evStartTime');
-
-  alert('city=' + (evCity?.value || 'NULL') + ' loc=' + (evLocation?.value || 'NULL') + ' date=' + (evDate?.value || 'NULL') + ' time=' + (evStartTime?.value || 'NULL'));
-
+async function createGameEvent() {
+  if (!authToken) { showToast('⚠️ ابتدا وارد شوید'); openAuthModal('login'); return; }
   const data = {
     country: document.getElementById('evCountry')?.value || '',
-    city: evCity?.value?.trim() || '',
-    location_name: evLocation?.value?.trim() || '',
+    city: document.getElementById('evCity')?.value?.trim() || '',
+    location_name: document.getElementById('evLocation')?.value?.trim() || '',
     scenario: document.getElementById('evScenario')?.value || '',
     player_count: parseInt(document.getElementById('evPlayerCount')?.value || 10),
     max_players: parseInt(document.getElementById('evPlayerCount')?.value || 10),
-    event_date: evDate?.value || '',
-    start_time: evStartTime?.value || '',
+    event_date: document.getElementById('evDate')?.value || '',
+    start_time: document.getElementById('evStartTime')?.value || '',
     end_time: document.getElementById('evEndTime')?.value || '',
     description: document.getElementById('evDescription')?.value?.trim() || ''
   };
   if (!data.city || !data.location_name || !data.event_date || !data.start_time) {
-    alert('فیلد خالی! city=' + data.city + ' loc=' + data.location_name + ' date=' + data.event_date + ' time=' + data.start_time);
+    showToast('⚠️ شهر، لوکیشن، تاریخ و ساعت الزامی است');
     return;
   }
-  try {
-    alert('sending to API...');
-    const r = await apiFetch('/api/events', { method: 'POST', body: JSON.stringify(data) });
-    alert('API response ok=' + r.ok + ' data=' + JSON.stringify(r.data).substring(0,100));
-    if (r.ok) {
-      showToast('✅ ایونت ثبت شد!');
-      showEventTab('browse', document.querySelector('.event-tab'));
-    } else {
-      alert('API error: ' + JSON.stringify(r.data));
-    }
-  } catch(err) {
-    alert('Exception: ' + err.message);
+  const r = await apiFetch('/api/events', { method: 'POST', body: JSON.stringify(data) });
+  if (r.ok) {
+    showToast('✅ ایونت ثبت شد!');
+    showEventTab('browse', document.querySelector('.event-tab'));
+  } else {
+    showToast('⚠️ ' + (r.data?.error || 'خطا در ثبت'));
   }
 }
 

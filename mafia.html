@@ -531,13 +531,7 @@
             <input type="text" id="evEndTime" class="ef-input" placeholder="پایان" onfocus="this.type='time'">
           </div>
           <textarea id="evDescription" placeholder="توضیحات (اختیاری)..." class="ef-textarea" rows="2"></textarea>
-          <button type="button" id="submitEventBtn" style="width:100%;padding:14px;background:#4ade80;border:none;border-radius:12px;color:#002211;font-family:inherit;font-size:1rem;font-weight:900;cursor:pointer;margin-top:8px;position:relative;z-index:10">🏠 ثبت ایونت</button>
-          <script>
-          document.getElementById('submitEventBtn').addEventListener('click', function() {
-            if (typeof createEvent !== 'function') { alert('createEvent تعریف نشده!'); return; }
-            createEvent().catch(function(e) { alert('خطا: ' + e.message); });
-          });
-          </script>
+          <button class="start-btn start-btn-nearby" onclick="createGameEvent()" style="width:100%">🏠 ثبت ایونت</button>
         </div>
       </div>
       <!-- My Events -->
