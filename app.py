@@ -4324,6 +4324,7 @@ def delete_event(eid):
         return jsonify({"error": "ایونت پیدا نشد"}), 404
     if event.host_id != user.id and not is_admin():
         return jsonify({"error": "دسترسی ندارید"}), 403
+    EventComment.query.filter_by(event_id=eid).delete()
     EventReservation.query.filter_by(event_id=eid).delete()
     db.session.delete(event)
     db.session.commit()
