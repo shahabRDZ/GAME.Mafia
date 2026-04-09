@@ -297,8 +297,8 @@ def index():
 def admin_panel():
     return app.send_static_file("admin.html")
 
-@app.route("/events")
-@app.route("/events/")
+@app.route("/event")
+@app.route("/event/")
 def events_page():
     return open(os.path.join(BASE_DIR, "events.html"), encoding="utf-8").read(), 200, {"Content-Type": "text/html; charset=utf-8"}
 
