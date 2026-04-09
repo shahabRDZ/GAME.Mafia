@@ -297,8 +297,7 @@ def index():
 def admin_panel():
     return app.send_static_file("admin.html")
 
-@app.route("/event")
-@app.route("/event/")
+@app.route("/mafia-events")
 def events_page():
     return app.send_static_file("ev.html")
 
