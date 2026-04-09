@@ -1078,6 +1078,48 @@
 .event-reserve-btn:active { transform: scale(0.95); }
 .event-reserve-btn.disabled { opacity: .4; cursor: not-allowed; }
 
+/* ── Event Banner (main page) ── */
+.event-banner {
+  display:block; margin-top:var(--space-md); border-radius:var(--radius-xl);
+  overflow:hidden; position:relative; text-decoration:none;
+  background:linear-gradient(135deg, #0a0000 0%, #1a0000 40%, #0d0000 70%, #000 100%);
+  border:1px solid rgba(233,69,96,.2); cursor:pointer;
+  transition:all var(--transition-base);
+}
+.event-banner:hover { border-color:rgba(233,69,96,.4); }
+.event-banner:active { transform:scale(0.98); }
+.event-banner-fire {
+  position:absolute; bottom:0; left:0; right:0; height:50px;
+  background:linear-gradient(0deg, rgba(233,69,96,.12) 0%, rgba(245,166,35,.06) 40%, transparent 100%);
+  animation:heroFirePulse 3s ease-in-out infinite;
+}
+@keyframes heroFirePulse {
+  0%,100% { opacity:.5; } 50% { opacity:1; }
+}
+.event-banner-content {
+  display:flex; align-items:center; gap:var(--space-md);
+  padding:var(--space-md) var(--space-lg); position:relative; z-index:1;
+}
+.event-banner-mask {
+  font-size:2.5rem; flex-shrink:0;
+  filter:drop-shadow(0 0 16px rgba(233,69,96,.4));
+  animation:heroMaskFloat 2.5s ease-in-out infinite;
+}
+@keyframes heroMaskFloat {
+  0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); }
+}
+.event-banner-text { flex:1; }
+.eb-line1 { font-size:.72rem; color:rgba(255,255,255,.5); }
+.eb-line2 { font-size:1.15rem; font-weight:900; color:#fff;
+  text-shadow:0 0 12px rgba(233,69,96,.3); margin:2px 0; }
+.eb-line2 span { color:#e94560; }
+.eb-line3 { font-size:.68rem; color:rgba(255,255,255,.3); }
+.event-banner-cta {
+  text-align:center; padding:8px; position:relative; z-index:1;
+  font-size:.78rem; font-weight:700; color:#f5a623;
+  background:rgba(233,69,96,.08); border-top:1px solid rgba(233,69,96,.15);
+}
+
 /* ── Rules Page ── */
 .rules-tabs { display:flex; gap:var(--space-xs); margin-bottom:var(--space-md); flex-wrap:wrap; }
 .rules-content { font-size:var(--font-size-sm); color:rgba(255,255,255,.65); line-height:1.8; }
