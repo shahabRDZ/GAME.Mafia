@@ -300,7 +300,12 @@ def admin_panel():
 @app.route("/event")
 @app.route("/event/")
 def events_page():
-    return open(os.path.join(BASE_DIR, "events.html"), encoding="utf-8").read(), 200, {"Content-Type": "text/html; charset=utf-8"}
+    try:
+        filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.html")
+        with open(filepath, encoding="utf-8") as f:
+            return f.read(), 200, {"Content-Type": "text/html; charset=utf-8"}
+    except Exception as e:
+        return f"Error: {e}", 500
 
 
 # ── Visit Counter ────────────────────────────────────────────────────────────
