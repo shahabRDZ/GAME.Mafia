@@ -25,8 +25,17 @@ RUN groupadd -r appuser && useradd -r -g appuser -s /sbin/nologin appuser
 COPY manifest.json icon-192.png icon-512.png icon.svg sw.js ./
 COPY css/ css/
 COPY js/ js/
-COPY *.html app.py ./
 COPY img/ img/
+
+# Copy Python modules (architecture: config, models, routes, services, sockets, utils)
+COPY extensions.py ./
+COPY config/ config/
+COPY models/ models/
+COPY routes/ routes/
+COPY services/ services/
+COPY sockets/ sockets/
+COPY utils/ utils/
+COPY *.html app.py ./
 
 # Switch to non-root user
 USER appuser
