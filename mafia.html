@@ -531,7 +531,7 @@
             <input type="text" id="evEndTime" class="ef-input" placeholder="پایان" onfocus="this.type='time'">
           </div>
           <textarea id="evDescription" placeholder="توضیحات (اختیاری)..." class="ef-textarea" rows="2"></textarea>
-          <button type="button" style="width:100%;padding:14px;background:#4ade80;border:none;border-radius:12px;color:#002211;font-family:inherit;font-size:1rem;font-weight:900;cursor:pointer;margin-top:8px;position:relative;z-index:10" onclick="alert('دکمه کار میکنه!');createEvent()">🏠 ثبت ایونت</button>
+          <button type="button" style="width:100%;padding:14px;background:#4ade80;border:none;border-radius:12px;color:#002211;font-family:inherit;font-size:1rem;font-weight:900;cursor:pointer;margin-top:8px;position:relative;z-index:10" onclick="try{createEvent()}catch(e){alert('خطای createEvent: '+e.message+'\n'+e.stack)}">🏠 ثبت ایونت</button>
         </div>
       </div>
       <!-- My Events -->
