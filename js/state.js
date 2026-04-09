@@ -1,7 +1,7 @@
 /* ── Shared Application State ── */
 
 let currentUser = null;
-let authToken = localStorage.getItem("mafiaToken") || null;
+let authToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
 let authMode = "login";
 
 let state = {

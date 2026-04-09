@@ -69,7 +69,14 @@ async function submitAuth() {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    localStorage.setItem("mafiaToken", authToken);
+    // Remember me
+    const remember = document.getElementById("rememberMe")?.checked;
+    if (remember) {
+      localStorage.setItem("mafiaToken", authToken);
+    } else {
+      sessionStorage.setItem("mafiaToken", authToken);
+      localStorage.removeItem("mafiaToken");
+    }
     closeAuthModal();
     renderAuthBar();
     showToast("👋 خوش آمدید " + currentUser.username);
@@ -79,10 +86,43 @@ async function submitAuth() {
   }
 }
 
+// ── Forgot Password ──
+function showForgotPassword() {
+  document.getElementById("loginFields").style.display = "none";
+  document.getElementById("registerFields").style.display = "none";
+  document.getElementById("rememberMeRow").style.display = "none";
+  document.getElementById("authSubmitBtn").style.display = "none";
+  document.getElementById("authSwitch").style.display = "none";
+  document.getElementById("forgotFields").style.display = "block";
+  document.getElementById("forgotLink").style.display = "none";
+  document.getElementById("authTitle").innerHTML = "بازیابی <span>رمز عبور</span>";
+  document.getElementById("authError").textContent = "";
+}
+
+function hideForgotPassword() {
+  document.getElementById("forgotFields").style.display = "none";
+  document.getElementById("forgotLink").style.display = "inline";
+  updateAuthModalUI();
+}
+
+async function sendResetEmail() {
+  const email = document.getElementById("forgotEmail").value.trim();
+  if (!email) { document.getElementById("authError").textContent = "ایمیل را وارد کنید"; return; }
+  const r = await apiFetch("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+  if (r.ok) {
+    document.getElementById("authError").textContent = "";
+    showToast("✅ رمز جدید به ایمیل ارسال شد");
+    hideForgotPassword();
+  } else {
+    document.getElementById("authError").textContent = r.data?.error || "خطا";
+  }
+}
+
 function logout() {
   authToken = null;
   currentUser = null;
   localStorage.removeItem("mafiaToken");
+  sessionStorage.removeItem("mafiaToken");
   renderAuthBar();
   showToast("👋 خداحافظ!");
   if (document.getElementById("historyScreen").classList.contains("active")) renderHistory();

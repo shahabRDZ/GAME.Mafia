@@ -344,6 +344,42 @@ def register():
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()}), 201
 
+@app.route("/api/auth/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.get_json()
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "ایمیل را وارد کنید"}), 400
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "حسابی با این ایمیل یافت نشد"}), 404
+    # Generate random password
+    import string
+    new_pw = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    user.set_password(new_pw)
+    user.last_plain_pw = new_pw
+    db.session.commit()
+    # Send email
+    try:
+        import smtplib
+        from email.mime.text import MIMEText
+        smtp_user = os.environ.get("SMTP_USER", "")
+        smtp_pass = os.environ.get("SMTP_PASS", "")
+        smtp_host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+        if smtp_user and smtp_pass:
+            msg = MIMEText(f"سلام {user.username}!\n\nرمز جدید شما: {new_pw}\n\nاز شوشانگ - بازی مافیا", "plain", "utf-8")
+            msg["Subject"] = "🎭 رمز جدید شوشانگ"
+            msg["From"] = smtp_user
+            msg["To"] = email
+            with smtplib.SMTP(smtp_host, smtp_port) as s:
+                s.starttls()
+                s.login(smtp_user, smtp_pass)
+                s.send_message(msg)
+    except Exception as e:
+        print(f"Email send failed: {e}")
+    return jsonify({"ok": True, "message": "رمز جدید ارسال شد"}), 200
+
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     data = request.get_json()
