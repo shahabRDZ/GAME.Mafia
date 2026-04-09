@@ -117,7 +117,12 @@ class GameEvent(db.Model):
     host_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     country = db.Column(db.String(50), nullable=False)
     city = db.Column(db.String(50), nullable=False)
+    event_name = db.Column(db.String(100), default="")
+    host_display_name = db.Column(db.String(50), default="")
     location_name = db.Column(db.String(150), nullable=False)
+    address = db.Column(db.String(300), default="")
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
     scenario = db.Column(db.String(50), default="")
     player_count = db.Column(db.Integer, default=10)
     event_date = db.Column(db.String(20), nullable=False)  # YYYY-MM-DD
@@ -134,8 +139,12 @@ class GameEvent(db.Model):
         return {
             "id": self.id, "host_id": self.host_id,
             "host_name": self.host.username if self.host else "?",
+            "event_name": self.event_name or "",
+            "host_display_name": self.host_display_name or "",
             "country": self.country, "city": self.city,
             "location_name": self.location_name,
+            "address": self.address or "",
+            "lat": self.lat, "lng": self.lng,
             "scenario": self.scenario, "player_count": self.player_count,
             "event_date": self.event_date, "start_time": self.start_time,
             "end_time": self.end_time, "description": self.description,
@@ -156,6 +165,16 @@ class EventReservation(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user = db.relationship("User", foreign_keys=[user_id])
     event = db.relationship("GameEvent", foreign_keys=[event_id])
+
+
+class EventComment(db.Model):
+    __tablename__ = "event_comments"
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey("game_events.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content = db.Column(db.String(500), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user = db.relationship("User", foreign_keys=[user_id])
 
 
 class AdminLog(db.Model):
@@ -4211,9 +4230,14 @@ def create_event():
             return jsonify({"error": f"{field} الزامی است"}), 400
     event = GameEvent(
         host_id=user.id,
+        event_name=data.get("event_name", "").strip()[:100],
+        host_display_name=data.get("host_display_name", "").strip()[:50],
         country=data["country"].strip(),
         city=data["city"].strip(),
         location_name=data["location_name"].strip(),
+        address=data.get("address", "").strip()[:300],
+        lat=float(data["lat"]) if data.get("lat") else None,
+        lng=float(data["lng"]) if data.get("lng") else None,
         scenario=data.get("scenario", ""),
         player_count=int(data.get("player_count", 10)),
         event_date=data["event_date"],
@@ -4348,6 +4372,44 @@ def my_events():
     }), 200
 
 
+# ── Event Comments ──
+@app.route("/api/events/<int:eid>/comments", methods=["GET"])
+def get_event_comments(eid):
+    comments = EventComment.query.filter_by(event_id=eid).order_by(EventComment.created_at.desc()).all()
+    return jsonify([{
+        "id": c.id, "username": c.user.username if c.user else "?",
+        "content": c.content,
+        "created_at": c.created_at.strftime("%Y-%m-%d %H:%M")
+    } for c in comments]), 200
+
+@app.route("/api/events/<int:eid>/comments", methods=["POST"])
+@jwt_required()
+def add_event_comment(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    # Only users with accepted reservation can comment
+    res = EventReservation.query.filter_by(event_id=eid, user_id=user.id, status="accepted").first()
+    if not res:
+        return jsonify({"error": "فقط شرکت‌کنندگان تأیید شده می‌توانند نظر بدهند"}), 403
+    data = request.get_json()
+    content = (data.get("content") or "").strip()[:500]
+    if not content:
+        return jsonify({"error": "نظر خالی است"}), 400
+    comment = EventComment(event_id=eid, user_id=user.id, content=content)
+    db.session.add(comment)
+    db.session.commit()
+    return jsonify({"ok": True}), 201
+
+@app.route("/api/admin/comments/<int:cid>", methods=["DELETE"])
+@jwt_required()
+def admin_delete_comment(cid):
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    comment = db.session.get(EventComment, cid)
+    if comment:
+        db.session.delete(comment)
+        db.session.commit()
+    return jsonify({"ok": True}), 200
+
+
 # ── Error Handlers ──
 @app.errorhandler(404)
 def page_not_found(e):
@@ -4388,6 +4450,11 @@ for attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0"))
+                # Event table new columns
+                for col in ["event_name VARCHAR(100) DEFAULT ''", "host_display_name VARCHAR(50) DEFAULT ''",
+                    "address VARCHAR(300) DEFAULT ''", "lat FLOAT", "lng FLOAT"]:
+                    try: db.session.execute(db.text(f"ALTER TABLE game_events ADD COLUMN IF NOT EXISTS {col}"))
+                    except: db.session.rollback()
                 # Recreate lab tables to ensure all columns exist
                 db.session.execute(db.text("DROP TABLE IF EXISTS lab_messages CASCADE"))
                 db.session.execute(db.text("DROP TABLE IF EXISTS lab_players CASCADE"))
