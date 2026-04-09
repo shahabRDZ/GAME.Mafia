@@ -6,198 +6,334 @@
 <title>پنل مدیریت — شوشانگ</title>
 <link rel="stylesheet" href="css/variables.css">
 <style>
-body { background: #000; font-family: 'Vazirmatn', sans-serif; color: #eaeaf5; padding: 20px; }
-.admin-container { max-width: 900px; margin: 0 auto; }
-.admin-header { text-align: center; padding: 20px 0 30px; }
-.admin-header h1 { font-size: 1.5rem; color: #e94560; margin-bottom: 4px; }
-.admin-header p { font-size: .78rem; color: rgba(255,255,255,.38); }
+body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; padding:0; margin:0; }
+.admin-wrap { max-width:960px; margin:0 auto; padding:16px; }
+
+/* Header */
+.admin-header { display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.06); margin-bottom:20px; }
+.admin-title { font-size:1.2rem; font-weight:900; color:#e94560; }
+.admin-nav { display:flex; gap:6px; flex-wrap:wrap; }
+.admin-tab { padding:7px 14px; border-radius:50px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03);
+  color:rgba(255,255,255,.5); font-family:inherit; font-size:.75rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.admin-tab.active { background:rgba(233,69,96,.15); border-color:#e94560; color:#e94560; }
+.admin-tab:hover { border-color:rgba(255,255,255,.2); color:#fff; }
 
 /* Login */
-.admin-login { max-width: 360px; margin: 60px auto; padding: 30px; background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08); border-radius: 20px; }
-.admin-login h2 { text-align: center; font-size: 1.1rem; color: #f5a623; margin-bottom: 20px; }
-.admin-field { margin-bottom: 14px; }
-.admin-field label { display: block; font-size: .76rem; color: rgba(255,255,255,.38); margin-bottom: 6px; }
-.admin-field input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: #fff;
-  font-family: inherit; font-size: .9rem; outline: none; }
-.admin-field input:focus { border-color: #e94560; }
-.admin-submit { width: 100%; padding: 13px; background: linear-gradient(135deg, #e94560, #c0392b);
-  border: none; border-radius: 12px; color: #fff; font-family: inherit; font-size: .95rem;
-  font-weight: 700; cursor: pointer; margin-top: 6px; }
-.admin-error { color: #ff6b6b; font-size: .78rem; text-align: center; margin-top: 8px; }
+.admin-login { max-width:360px; margin:80px auto; padding:30px; background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08); border-radius:20px; }
+.admin-login h2 { text-align:center; font-size:1.1rem; color:#f5a623; margin-bottom:20px; }
+.a-field { margin-bottom:14px; }
+.a-field label { display:block; font-size:.72rem; color:rgba(255,255,255,.35); margin-bottom:5px; }
+.a-field input { width:100%; padding:11px 14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+  border-radius:10px; color:#fff; font-family:inherit; font-size:.9rem; outline:none; }
+.a-field input:focus { border-color:#e94560; }
+.a-submit { width:100%; padding:12px; background:linear-gradient(135deg,#e94560,#c0392b); border:none;
+  border-radius:12px; color:#fff; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+.a-error { color:#ff6b6b; font-size:.75rem; text-align:center; margin-top:8px; }
 
-/* Dashboard */
-.stats-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
-.stat-card { flex: 1; min-width: 100px; padding: 18px 12px; border-radius: 16px; text-align: center;
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
-.stat-card .num { font-size: 1.8rem; font-weight: 900; display: block; color: #f5a623; }
-.stat-card .lbl { font-size: .68rem; color: rgba(255,255,255,.38); }
+/* Stats */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
+.s-card { padding:16px 10px; border-radius:14px; text-align:center; background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06); }
+.s-card .n { font-size:1.6rem; font-weight:900; display:block; color:#f5a623; }
+.s-card .l { font-size:.65rem; color:rgba(255,255,255,.35); }
+.s-card.red .n { color:#e94560; }
+.s-card.green .n { color:#4ade80; }
+.s-card.blue .n { color:#60a5fa; }
 
-/* Users table */
-.users-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.users-header h2 { font-size: 1rem; color: #f5a623; }
-.search-input { padding: 8px 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 10px; color: #fff; font-family: inherit; font-size: .85rem; outline: none; width: 200px; }
-.user-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px;
-  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05); margin-bottom: 6px; }
-.user-avatar { font-size: 1.6rem; flex-shrink: 0; }
-.user-info { flex: 1; min-width: 0; }
-.user-name { font-weight: 700; font-size: .9rem; }
-.user-email { font-size: .72rem; color: rgba(255,255,255,.38); }
-.user-meta { font-size: .68rem; color: rgba(255,255,255,.3); margin-top: 3px; }
-.user-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.btn-sm { padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer;
-  font-family: inherit; font-size: .72rem; font-weight: 700; transition: all .2s; }
-.btn-warn { background: rgba(245,166,35,.15); color: #f5a623; }
-.btn-warn:hover { background: rgba(245,166,35,.25); }
-.btn-danger { background: rgba(233,69,96,.15); color: #e94560; }
-.btn-danger:hover { background: rgba(233,69,96,.25); }
-.btn-back { padding: 8px 18px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 10px; color: rgba(255,255,255,.6); cursor: pointer; font-family: inherit;
-  font-size: .82rem; text-decoration: none; display: inline-block; margin-bottom: 16px; }
-.btn-back:hover { background: rgba(255,255,255,.1); color: #fff; }
-.online-dot { color: #44ff99; }
-.offline-dot { color: rgba(255,255,255,.2); }
-.refresh-btn { padding: 6px 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px; color: rgba(255,255,255,.5); cursor: pointer; font-family: inherit; font-size: .75rem; }
+/* Section */
+.section { display:none; }
+.section.active { display:block; }
+.section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.section-head h2 { font-size:1rem; color:#f5a623; }
+
+/* Search */
+.a-search { padding:8px 14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+  border-radius:10px; color:#fff; font-family:inherit; font-size:.82rem; outline:none; width:180px; }
+
+/* User row */
+.u-row { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px;
+  background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.04); margin-bottom:6px; transition:all .2s; }
+.u-row:hover { background:rgba(255,255,255,.05); }
+.u-row.banned { opacity:.5; border-color:rgba(233,69,96,.2); }
+.u-avatar { font-size:1.4rem; flex-shrink:0; }
+.u-info { flex:1; min-width:0; }
+.u-name { font-weight:700; font-size:.85rem; }
+.u-email { font-size:.68rem; color:rgba(255,255,255,.3); }
+.u-meta { font-size:.65rem; color:rgba(255,255,255,.25); margin-top:2px; }
+.u-actions { display:flex; gap:4px; flex-wrap:wrap; flex-shrink:0; }
+.btn-s { padding:5px 10px; border-radius:8px; border:none; cursor:pointer;
+  font-family:inherit; font-size:.68rem; font-weight:700; transition:all .15s; }
+.btn-s:active { transform:scale(.95); }
+.btn-edit { background:rgba(96,165,250,.12); color:#60a5fa; }
+.btn-ban { background:rgba(233,69,96,.12); color:#e94560; }
+.btn-unban { background:rgba(74,222,128,.12); color:#4ade80; }
+.btn-pw { background:rgba(245,166,35,.12); color:#f5a623; }
+.btn-del { background:rgba(233,69,96,.08); color:rgba(233,69,96,.6); }
+.btn-games { background:rgba(255,255,255,.06); color:rgba(255,255,255,.4); }
+.online-dot { color:#4ade80; } .offline-dot { color:rgba(255,255,255,.15); }
+.ban-badge { font-size:.6rem; background:rgba(233,69,96,.2); color:#e94560; padding:2px 6px; border-radius:4px; margin-right:4px; }
+
+/* Messages */
+.msg-form { display:flex; gap:8px; margin-bottom:16px; }
+.msg-form input { flex:1; padding:10px 14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+  border-radius:10px; color:#fff; font-family:inherit; font-size:.85rem; outline:none; }
+.msg-form button { padding:10px 18px; background:#e94560; border:none; border-radius:10px; color:#fff;
+  font-family:inherit; font-size:.82rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+.msg-item { padding:10px 14px; background:rgba(255,255,255,.02); border-radius:10px; margin-bottom:6px;
+  font-size:.82rem; color:rgba(255,255,255,.6); }
+.msg-time { font-size:.65rem; color:rgba(255,255,255,.2); }
+
+/* Log */
+.log-item { padding:8px 12px; font-size:.75rem; color:rgba(255,255,255,.4);
+  border-bottom:1px solid rgba(255,255,255,.03); }
+.log-item .log-action { color:rgba(255,255,255,.6); } .log-item .log-target { color:#f5a623; }
+
+/* Modal */
+.a-modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:999; align-items:center; justify-content:center; }
+.a-modal-bg.show { display:flex; }
+.a-modal { background:#0d0d1c; border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:24px; max-width:380px; width:90%; }
+.a-modal h3 { font-size:1rem; color:#f5a623; margin-bottom:16px; }
+.a-modal .a-field { margin-bottom:10px; }
+.a-modal-actions { display:flex; gap:8px; margin-top:14px; }
+.a-modal-actions button { flex:1; padding:10px; border:none; border-radius:10px; font-family:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+.a-btn-save { background:#e94560; color:#fff; }
+.a-btn-cancel { background:rgba(255,255,255,.06); color:rgba(255,255,255,.5); }
+
+/* Export */
+.export-btn { padding:8px 16px; background:rgba(74,222,128,.12); border:1px solid rgba(74,222,128,.2);
+  border-radius:10px; color:#4ade80; font-family:inherit; font-size:.78rem; font-weight:700; cursor:pointer; }
+
+@media(max-width:600px) {
+  .stats-grid { grid-template-columns:repeat(3,1fr); }
+  .u-row { flex-wrap:wrap; }
+  .u-actions { width:100%; justify-content:flex-end; margin-top:6px; }
+  .admin-nav { gap:4px; } .admin-tab { font-size:.68rem; padding:6px 10px; }
+}
 </style>
 </head>
 <body>
-
-<div class="admin-container">
-  <!-- Login Form -->
-  <div id="adminLoginBox" class="admin-login">
+<div class="admin-wrap">
+  <!-- Login -->
+  <div id="loginBox" class="admin-login">
     <h2>⚙️ ورود پنل مدیریت</h2>
-    <div class="admin-field"><label>نام کاربری یا ایمیل</label>
-      <input type="text" id="adminUser" placeholder="username"></div>
-    <div class="admin-field"><label>رمز عبور</label>
-      <input type="password" id="adminPass" placeholder="••••••"></div>
-    <button class="admin-submit" onclick="adminLogin()">ورود</button>
-    <div class="admin-error" id="adminLoginError"></div>
+    <div class="a-field"><label>نام کاربری</label><input type="text" id="aUser" placeholder="admin"></div>
+    <div class="a-field"><label>رمز عبور</label><input type="password" id="aPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="a-submit" onclick="doLogin()">ورود</button>
+    <div class="a-error" id="aErr"></div>
   </div>
 
-  <!-- Dashboard (hidden until login) -->
-  <div id="adminDashboard" style="display:none">
-    <a href="/" class="btn-back">◀ بازگشت به سایت</a>
+  <!-- Dashboard -->
+  <div id="dashboard" style="display:none">
     <div class="admin-header">
-      <h1>⚙️ پنل مدیریت شوشانگ</h1>
-      <p>مدیریت کاربران و آمار سایت</p>
-    </div>
-
-    <div class="stats-grid" id="adminStats"></div>
-
-    <div class="users-header">
-      <h2>👥 کاربران</h2>
-      <div style="display:flex;gap:6px">
-        <input type="text" class="search-input" id="adminSearchInput" placeholder="جستجوی نام..." oninput="filterAdminUsers()">
-        <button class="refresh-btn" onclick="loadAdminData()">🔄</button>
+      <span class="admin-title">⚙️ پنل شوشانگ</span>
+      <div class="admin-nav">
+        <button class="admin-tab active" onclick="showTab('users')">👥 کاربران</button>
+        <button class="admin-tab" onclick="showTab('messages')">📨 پیام</button>
+        <button class="admin-tab" onclick="showTab('logs')">📋 لاگ</button>
+        <a href="/" class="admin-tab" style="text-decoration:none">◀ سایت</a>
       </div>
     </div>
-    <div id="adminUsersList"></div>
+
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <!-- Users Section -->
+    <div class="section active" id="sec-users">
+      <div class="section-head">
+        <h2>👥 کاربران</h2>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" class="a-search" id="searchInput" placeholder="جستجو..." oninput="filterUsers()">
+          <button class="export-btn" onclick="exportCsv()">📥 CSV</button>
+          <button class="btn-s btn-pw" onclick="loadData()">🔄</button>
+        </div>
+      </div>
+      <div id="usersList"></div>
+    </div>
+
+    <!-- Messages Section -->
+    <div class="section" id="sec-messages">
+      <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">📨 پیام سیستمی</h2>
+      <div class="msg-form">
+        <input type="text" id="msgInput" placeholder="متن پیام به همه کاربران...">
+        <button onclick="sendBroadcast()">ارسال</button>
+      </div>
+      <div id="msgList"></div>
+    </div>
+
+    <!-- Logs Section -->
+    <div class="section" id="sec-logs">
+      <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">📋 لاگ فعالیت ادمین</h2>
+      <div id="logList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="a-modal-bg" id="editModal">
+  <div class="a-modal">
+    <h3>✏️ ویرایش کاربر</h3>
+    <input type="hidden" id="editUid">
+    <div class="a-field"><label>نام کاربری</label><input type="text" id="editName"></div>
+    <div class="a-field"><label>ایمیل</label><input type="text" id="editEmail"></div>
+    <div class="a-field"><label>بیو</label><input type="text" id="editBio"></div>
+    <div class="a-modal-actions">
+      <button class="a-btn-save" onclick="saveEdit()">ذخیره</button>
+      <button class="a-btn-cancel" onclick="closeEdit()">لغو</button>
+    </div>
+  </div>
+</div>
+
+<!-- Games Modal -->
+<div class="a-modal-bg" id="gamesModal">
+  <div class="a-modal" style="max-width:480px">
+    <h3>🎮 تاریخچه بازی</h3>
+    <div id="gamesContent" style="max-height:300px;overflow-y:auto"></div>
+    <div class="a-modal-actions"><button class="a-btn-cancel" onclick="document.getElementById('gamesModal').classList.remove('show')">بستن</button></div>
   </div>
 </div>
 
 <script>
 const API = "";
-let adminToken = null;
+let token = null, allUsers = [];
 
-async function adminLogin() {
-  const identifier = document.getElementById("adminUser").value.trim();
-  const password = document.getElementById("adminPass").value;
-  const errEl = document.getElementById("adminLoginError");
-  errEl.textContent = "";
-
+async function doLogin() {
+  const id = document.getElementById("aUser").value.trim();
+  const pw = document.getElementById("aPass").value;
+  const err = document.getElementById("aErr");
+  err.textContent = "";
   try {
-    const r = await fetch(API + "/api/auth/login", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier, password })
-    });
-    const data = await r.json();
-    if (!r.ok) { errEl.textContent = data.error || "خطا"; return; }
-
-    adminToken = data.token;
-    // Check admin access
-    const check = await fetch(API + "/api/admin/stats", {
-      headers: { "Authorization": "Bearer " + adminToken }
-    });
-    if (check.status === 403) { errEl.textContent = "⛔ شما دسترسی ادمین ندارید"; adminToken = null; return; }
-
-    document.getElementById("adminLoginBox").style.display = "none";
-    document.getElementById("adminDashboard").style.display = "block";
-    loadAdminData();
-  } catch { errEl.textContent = "خطای شبکه"; }
+    const r = await fetch(API+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({identifier:id,password:pw})});
+    const d = await r.json();
+    if (!r.ok) { err.textContent = d.error||"خطا"; return; }
+    token = d.token;
+    const c = await fetch(API+"/api/admin/stats",{headers:{"Authorization":"Bearer "+token}});
+    if (c.status===403) { err.textContent="⛔ دسترسی ادمین ندارید"; token=null; return; }
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+    loadData();
+  } catch { err.textContent="خطای شبکه"; }
 }
 
-let allUsers = [];
+const hdr = ()=>({headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"}});
 
-async function loadAdminData() {
-  const headers = { "Authorization": "Bearer " + adminToken };
-
+async function loadData() {
   // Stats
-  const statsR = await fetch(API + "/api/admin/stats", { headers });
-  const stats = await statsR.json();
-  document.getElementById("adminStats").innerHTML = `
-    <div class="stat-card"><span class="num">${stats.total_users}</span><span class="lbl">کاربران</span></div>
-    <div class="stat-card"><span class="num">${stats.online_now}</span><span class="lbl">آنلاین</span></div>
-    <div class="stat-card"><span class="num">${stats.total_visits}</span><span class="lbl">بازدید</span></div>
-    <div class="stat-card"><span class="num">${stats.total_games}</span><span class="lbl">بازی آفلاین</span></div>
-    <div class="stat-card"><span class="num">${stats.total_chaos_rooms}</span><span class="lbl">اتاق کی‌اس</span></div>
-  `;
-
+  const sr = await fetch(API+"/api/admin/stats",hdr()); const s = await sr.json();
+  document.getElementById("statsGrid").innerHTML = `
+    <div class="s-card"><span class="n">${s.total_users}</span><span class="l">کاربران</span></div>
+    <div class="s-card green"><span class="n">${s.online_now}</span><span class="l">آنلاین</span></div>
+    <div class="s-card blue"><span class="n">${s.new_today}</span><span class="l">امروز</span></div>
+    <div class="s-card"><span class="n">${s.total_visits}</span><span class="l">بازدید</span></div>
+    <div class="s-card"><span class="n">${s.total_games}</span><span class="l">بازی</span></div>
+    <div class="s-card"><span class="n">${s.total_chaos_rooms}</span><span class="l">اتاق</span></div>
+    <div class="s-card red"><span class="n">${s.banned_users}</span><span class="l">بن شده</span></div>`;
   // Users
-  const usersR = await fetch(API + "/api/admin/users", { headers });
-  allUsers = await usersR.json();
-  renderAdminUsersList(allUsers);
+  const ur = await fetch(API+"/api/admin/users",hdr()); allUsers = await ur.json();
+  renderUsers(allUsers);
+  // Messages
+  const mr = await fetch(API+"/api/admin/messages",hdr()); const msgs = await mr.json();
+  document.getElementById("msgList").innerHTML = msgs.map(m=>`<div class="msg-item">${m.content} <span class="msg-time">${m.created_at} · ${m.target?'کاربر #'+m.target:'همه'}</span></div>`).join("")||'<div style="color:rgba(255,255,255,.2);text-align:center;padding:20px">پیامی نیست</div>';
+  // Logs
+  const lr = await fetch(API+"/api/admin/logs",hdr()); const logs = await lr.json();
+  document.getElementById("logList").innerHTML = logs.map(l=>`<div class="log-item"><span class="log-action">${l.action}</span> ${l.target?`<span class="log-target">${l.target}</span>`:''} <span class="msg-time">${l.created_at}</span></div>`).join("")||'<div style="color:rgba(255,255,255,.2);text-align:center;padding:20px">لاگی نیست</div>';
 }
 
-function renderAdminUsersList(users) {
-  document.getElementById("adminUsersList").innerHTML = users.map(u => `
-    <div class="user-row" data-name="${u.username.toLowerCase()}">
-      <span class="user-avatar">${u.avatar || '🎭'}</span>
-      <div class="user-info">
-        <div class="user-name">${u.username} <span style="font-size:.62rem;color:rgba(255,255,255,.25)">#${u.id}</span>
-          ${u.online ? '<span class="online-dot"> ●</span>' : '<span class="offline-dot"> ○</span>'}</div>
-        <div class="user-email">${u.email}</div>
-        <div class="user-meta">رمز: <strong style="color:#f5a623">${u.password || '—'}</strong> · ثبت‌نام: ${u.created_at} · بازی: ${u.total_games} · کی‌اس: ${u.chaos_wins}W/${u.chaos_losses}L</div>
+function renderUsers(users) {
+  document.getElementById("usersList").innerHTML = users.map(u=>`
+    <div class="u-row${u.banned?' banned':''}" data-name="${u.username.toLowerCase()}">
+      <span class="u-avatar">${u.avatar||'🎭'}</span>
+      <div class="u-info">
+        <div class="u-name">${u.banned?'<span class="ban-badge">BAN</span>':''}${u.username} <span style="font-size:.6rem;color:rgba(255,255,255,.2)">#${u.id}</span>
+          ${u.online?'<span class="online-dot"> ●</span>':'<span class="offline-dot"> ○</span>'}</div>
+        <div class="u-email">${u.email}</div>
+        <div class="u-meta">رمز: <b style="color:#f5a623">${u.password}</b> · ثبت‌نام: ${u.created_at} · ورود: ${u.last_login} · بازی: ${u.total_games} · ${u.chaos_wins}W/${u.chaos_losses}L</div>
       </div>
-      <div class="user-actions">
-        <button class="btn-sm btn-warn" onclick="resetPw(${u.id})">ریست رمز</button>
-        <button class="btn-sm btn-danger" onclick="deleteUser(${u.id},'${u.username}')">حذف</button>
+      <div class="u-actions">
+        <button class="btn-s btn-edit" onclick='openEdit(${JSON.stringify(u)})'>✏️</button>
+        <button class="btn-s ${u.banned?'btn-unban':'btn-ban'}" onclick="toggleBan(${u.id})">${u.banned?'آنبن':'بن'}</button>
+        <button class="btn-s btn-pw" onclick="resetPw(${u.id})">رمز</button>
+        <button class="btn-s btn-games" onclick="viewGames(${u.id})">بازی</button>
+        <button class="btn-s btn-del" onclick="delUser(${u.id},'${u.username}')">حذف</button>
       </div>
-    </div>
-  `).join("");
+    </div>`).join("");
 }
 
-function filterAdminUsers() {
-  const q = document.getElementById("adminSearchInput").value.trim().toLowerCase();
-  const filtered = q ? allUsers.filter(u => u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) : allUsers;
-  renderAdminUsersList(filtered);
+function filterUsers() {
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  renderUsers(q?allUsers.filter(u=>u.username.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)):allUsers);
 }
 
+function showTab(name) {
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("sec-"+name).classList.add("active");
+  event.target.classList.add("active");
+}
+
+// Edit
+function openEdit(u) {
+  document.getElementById("editUid").value=u.id;
+  document.getElementById("editName").value=u.username;
+  document.getElementById("editEmail").value=u.email;
+  document.getElementById("editBio").value=u.bio||"";
+  document.getElementById("editModal").classList.add("show");
+}
+function closeEdit() { document.getElementById("editModal").classList.remove("show"); }
+async function saveEdit() {
+  const uid=document.getElementById("editUid").value;
+  await fetch(API+`/api/admin/users/${uid}/edit`,{method:"PUT",...hdr(),body:JSON.stringify({
+    username:document.getElementById("editName").value,
+    email:document.getElementById("editEmail").value,
+    bio:document.getElementById("editBio").value
+  })});
+  closeEdit(); loadData(); alert("✅ ذخیره شد");
+}
+
+// Ban
+async function toggleBan(uid) {
+  const r=await fetch(API+`/api/admin/users/${uid}/ban`,{method:"PUT",...hdr()});
+  const d=await r.json();
+  alert(d.banned?"🚫 بن شد":"✅ آنبن شد");
+  loadData();
+}
+
+// Reset password
 async function resetPw(uid) {
-  const pw = prompt("رمز جدید:", "123456");
-  if (!pw) return;
-  await fetch(API + `/api/admin/users/${uid}/reset-password`, {
-    method: "PUT", headers: { "Authorization": "Bearer " + adminToken, "Content-Type": "application/json" },
-    body: JSON.stringify({ password: pw })
-  });
-  alert("✅ رمز تغییر کرد");
+  const pw=prompt("رمز جدید:","123456"); if(!pw)return;
+  await fetch(API+`/api/admin/users/${uid}/reset-password`,{method:"PUT",...hdr(),body:JSON.stringify({password:pw})});
+  alert("✅ رمز تغییر کرد"); loadData();
 }
 
-async function deleteUser(uid, username) {
-  if (!confirm(`کاربر "${username}" حذف شود؟ این عمل غیرقابل بازگشت است.`)) return;
-  await fetch(API + `/api/admin/users/${uid}`, {
-    method: "DELETE", headers: { "Authorization": "Bearer " + adminToken }
-  });
-  alert("✅ حذف شد");
-  loadAdminData();
+// Delete
+async function delUser(uid,name) {
+  if(!confirm(`"${name}" حذف شود؟`))return;
+  await fetch(API+`/api/admin/users/${uid}`,{method:"DELETE",...hdr()});
+  alert("✅ حذف شد"); loadData();
 }
+
+// View games
+async function viewGames(uid) {
+  const r=await fetch(API+`/api/admin/users/${uid}/games`,hdr());
+  const games=await r.json();
+  document.getElementById("gamesContent").innerHTML = games.length?
+    games.map(g=>`<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem">${g.group} · ${g.count} نفر · ${g.date}</div>`).join(""):
+    '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.2)">بازی ثبت نشده</div>';
+  document.getElementById("gamesModal").classList.add("show");
+}
+
+// Broadcast
+async function sendBroadcast() {
+  const input=document.getElementById("msgInput");
+  const content=input.value.trim(); if(!content)return;
+  await fetch(API+"/api/admin/broadcast",{method:"POST",...hdr(),body:JSON.stringify({content})});
+  input.value=""; alert("✅ ارسال شد"); loadData();
+}
+
+// Export CSV
+function exportCsv() { window.open(API+"/api/admin/export-csv?token="+token); }
 
 // Enter to login
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter" && !adminToken) adminLogin();
-});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!token)doLogin();});
 </script>
 </body>
 </html>
