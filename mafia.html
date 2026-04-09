@@ -531,7 +531,7 @@
             <input type="text" id="evEndTime" class="ef-input" placeholder="پایان" onfocus="this.type='time'">
           </div>
           <textarea id="evDescription" placeholder="توضیحات (اختیاری)..." class="ef-textarea" rows="2"></textarea>
-          <button class="start-btn start-btn-nearby" onclick="createEvent()" style="width:100%">🏠 ثبت ایونت</button>
+          <button class="start-btn start-btn-nearby" onclick="try{createEvent()}catch(e){alert('خطا: '+e.message)}" style="width:100%">🏠 ثبت ایونت</button>
         </div>
       </div>
       <!-- My Events -->
