@@ -14,11 +14,16 @@ function renderDMScreen() {
 }
 
 async function loadConversations() {
-  const r = await apiFetch("/api/dm/conversations");
   const el = document.getElementById("dmConvoList");
   if (!el) return;
-  if (!r.ok || !r.data.length) {
-    showEmptyState(el, '💬', 'هنوز پیامی ندارید', 'از بخش پروفایل با دوستانتان چت کنید', 'رفتن به پروفایل', "showScreen('profile')");
+  showSkeletonLoading('dmConvoList', 4);
+  const r = await apiFetch("/api/dm/conversations");
+  if (!r.ok) {
+    showErrorState('dmConvoList', 'خطا در بارگذاری پیام‌ها', 'loadConversations()');
+    return;
+  }
+  if (!r.data.length) {
+    showEmptyStateCard('dmConvoList', '💬', 'پیامی ندارید', 'با دوستانتان گفتگو کنید', null, null);
     return;
   }
   el.innerHTML = r.data.map(c => `
@@ -49,7 +54,7 @@ async function openDMChat(userId, username, avatar) {
       ${renderAvatar(username, '2rem')}
       <span class="dm-chat-name">${escapeHtml(username)}</span>
     </div>
-    <div class="dm-messages" id="dmMessages"><div class="custom-empty">در حال بارگذاری...</div></div>
+    <div class="dm-messages" id="dmMessages"></div>
     <div class="chat-input-bar">
       <input type="text" id="dmInput" placeholder="پیام..." maxlength="1000"
         onkeydown="if(event.key==='Enter')sendDM()">
@@ -57,9 +62,14 @@ async function openDMChat(userId, username, avatar) {
     </div>
   `;
 
+  showSkeletonLoading('dmMessages', 3);
   const r = await apiFetch(`/api/dm/${userId}`);
   const msgs = document.getElementById("dmMessages");
-  if (r.ok && r.data.length) {
+  if (!r.ok) {
+    showErrorState('dmMessages', 'خطا در بارگذاری پیام‌ها', `openDMChat(${userId},${JSON.stringify(username)},${JSON.stringify(avatar)})`);
+    return;
+  }
+  if (r.data.length) {
     msgs.innerHTML = r.data.map(m => `
       <div class="dm-msg ${m.is_me ? 'dm-msg-me' : 'dm-msg-other'}">
         <div class="dm-msg-text">${escapeHtml(m.content)}</div>

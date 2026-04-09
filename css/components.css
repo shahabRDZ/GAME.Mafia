@@ -950,7 +950,7 @@
 
 /* ── Toast / Particle ── */
 .toast {
-  position: fixed; bottom: 5.5rem; left: 50%; transform: translateX(-50%) translateY(100px);
+  position: fixed; bottom: calc(4.5rem + var(--safe-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(100px);
   background: rgba(20, 20, 42, 0.95); border: 1px solid rgba(255,255,255,.12);
   border-radius: var(--radius-lg);
   padding: var(--space-sm) var(--space-lg); font-size: 0.88rem; z-index: var(--z-toast);
@@ -1869,3 +1869,78 @@
   .lab-night-targets { grid-template-columns: repeat(2, 1fr); }
   .lab-revote-btns { flex-direction: column; }
 }
+
+/* ── Button loading state ── */
+.btn-loading { position: relative; pointer-events: none; opacity: 0.7; }
+.btn-loading::after {
+  content: ''; position: absolute; inset: 0; margin: auto;
+  width: 18px; height: 18px; border: 2px solid transparent;
+  border-top-color: currentColor; border-radius: 50%;
+  animation: btnSpin 0.6s linear infinite;
+}
+.btn-loading > * { visibility: hidden; }
+@keyframes btnSpin { to { transform: rotate(360deg); } }
+
+/* ── Form validation ── */
+.input-error { border-color: var(--color-danger) !important; box-shadow: 0 0 0 2px rgba(233,69,96,0.15); }
+.input-success { border-color: var(--color-success) !important; }
+.field-error { font-size: 0.7rem; color: var(--color-danger); margin-top: 4px; display: block; animation: fadeIn 0.2s ease; }
+.field-hint { font-size: 0.65rem; color: var(--dim); margin-top: 3px; }
+
+/* ── Empty state ── */
+.empty-state-card {
+  text-align: center; padding: var(--space-2xl) var(--space-lg);
+  color: var(--dim); border-radius: var(--radius-xl);
+  background: var(--glass); border: 1px dashed rgba(255,255,255,0.08);
+}
+.empty-state-card .empty-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); opacity: 0.4; }
+.empty-state-card .empty-title { font-size: var(--font-size-base); font-weight: 700; color: var(--text); margin-bottom: var(--space-2xs); }
+.empty-state-card .empty-desc { font-size: var(--font-size-xs); }
+.empty-state-card .empty-action {
+  margin-top: var(--space-md); padding: 10px 24px;
+  background: var(--accent); color: #fff; border: none; border-radius: var(--radius-full);
+  font-family: inherit; font-size: var(--font-size-sm); font-weight: 700; cursor: pointer;
+}
+
+/* ── Retry error state ── */
+.error-state {
+  text-align: center; padding: var(--space-xl) var(--space-lg);
+  color: var(--dim); border-radius: var(--radius-xl);
+  background: rgba(233,69,96,0.04); border: 1px solid rgba(233,69,96,0.12);
+}
+.error-state .error-icon { font-size: 2rem; margin-bottom: var(--space-xs); }
+.error-state .error-msg { font-size: var(--font-size-sm); margin-bottom: var(--space-md); }
+.error-state .retry-btn {
+  padding: 10px 28px; background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius-full); font-family: inherit; font-size: var(--font-size-sm);
+  font-weight: 700; cursor: pointer; transition: var(--transition-base);
+}
+.error-state .retry-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow-accent); }
+
+/* ── Pagination ── */
+.pagination {
+  display: flex; justify-content: center; align-items: center; gap: 6px;
+  margin-top: var(--space-lg); padding: var(--space-sm) 0;
+}
+.page-btn {
+  min-width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03); color: var(--dim); font-family: inherit; font-size: var(--font-size-xs);
+  font-weight: 700; cursor: pointer; transition: var(--transition-fast);
+  display: flex; align-items: center; justify-content: center;
+}
+.page-btn:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
+.page-btn.active { background: rgba(233,69,96,0.15); border-color: var(--accent); color: var(--accent); }
+.page-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+/* ── Skeleton loader ── */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%; animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-row { display: flex; gap: var(--space-sm); align-items: center; padding: var(--space-sm); margin-bottom: var(--space-xs); }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-lines { flex: 1; }
+.skeleton-line { height: 12px; margin-bottom: 6px; border-radius: 4px; }
+.skeleton-line:last-child { width: 60%; }

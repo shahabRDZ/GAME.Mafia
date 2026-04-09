@@ -289,6 +289,89 @@ async function manageReservation(eid, uid, status) {
   loadMyEvents();
 }
 
+// ── Empty State Card ──
+function showEmptyStateCard(container, icon, title, desc, actionText, actionFn) {
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el) return;
+  el.innerHTML = `
+    <div class="empty-state-card">
+      <div class="empty-icon">${icon}</div>
+      <div class="empty-title">${title}</div>
+      <div class="empty-desc">${desc}</div>
+      ${actionText ? `<button class="empty-action" onclick="${actionFn}">${actionText}</button>` : ''}
+    </div>`;
+}
+
+// ── Error State ──
+function showErrorState(container, msg, retryFn) {
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el) return;
+  el.innerHTML = `
+    <div class="error-state">
+      <div class="error-icon">⚠️</div>
+      <div class="error-msg">${msg || 'خطایی رخ داد'}</div>
+      ${retryFn ? `<button class="retry-btn" onclick="${retryFn}">🔄 تلاش مجدد</button>` : ''}
+    </div>`;
+}
+
+// ── Skeleton Loading ──
+function showSkeletonLoading(container, count = 3) {
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el) return;
+  el.innerHTML = Array.from({length: count}, () => `
+    <div class="skeleton-row">
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Pagination ──
+function renderPagination(container, page, total, onChange) {
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el || total <= 1) { if(el) el.innerHTML = ''; return; }
+  let html = '<div class="pagination">';
+  html += `<button class="page-btn" onclick="${onChange}(${page-1})" ${page<=1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - page) <= 1) {
+      html += `<button class="page-btn${i===page?' active':''}" onclick="${onChange}(${i})">${toFarsiNum(i)}</button>`;
+    } else if (Math.abs(i - page) === 2) {
+      html += '<span style="color:var(--dim);font-size:.7rem">…</span>';
+    }
+  }
+  html += `<button class="page-btn" onclick="${onChange}(${page+1})" ${page>=total?'disabled':''}>›</button>`;
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ── Form Validation ──
+function validateField(input, rules) {
+  const val = input.value.trim();
+  const errorEl = input.parentElement?.querySelector('.field-error');
+  if (errorEl) errorEl.remove();
+  input.classList.remove('input-error', 'input-success');
+
+  for (const rule of rules) {
+    if (rule.required && !val) return showFieldError(input, rule.msg || 'این فیلد الزامی است');
+    if (rule.minLength && val.length < rule.minLength) return showFieldError(input, rule.msg || `حداقل ${toFarsiNum(rule.minLength)} کاراکتر`);
+    if (rule.email && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return showFieldError(input, rule.msg || 'ایمیل نامعتبر');
+    if (rule.match && val !== document.getElementById(rule.match)?.value) return showFieldError(input, rule.msg || 'مقادیر یکسان نیستند');
+  }
+  input.classList.add('input-success');
+  return true;
+}
+
+function showFieldError(input, msg) {
+  input.classList.add('input-error');
+  const err = document.createElement('span');
+  err.className = 'field-error';
+  err.textContent = msg;
+  input.parentElement?.appendChild(err);
+  return false;
+}
+
 // ── Toast Queue ──
 const toastQueue = [];
 let toastActive = false;

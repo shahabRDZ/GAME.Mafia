@@ -6,7 +6,7 @@ async function renderProfileScreen() {
   const searchSec = document.getElementById("searchSection");
 
   if (!currentUser) {
-    showEmptyState(card, '🎭', 'به شوشانگ خوش آمدید!', 'وارد شوید تا پروفایل، دوستان و آمار بازی‌هاتون رو ببینید', 'ورود / ثبت‌نام', "openAuthModal('login')");
+    showEmptyStateCard('profileCard', '🎭', 'به شوشانگ خوش آمدید!', 'وارد شوید تا پروفایل، دوستان و آمار بازی‌هاتون رو ببینید', 'ورود / ثبت‌نام', "openAuthModal('login')");
     friendsSec.innerHTML = "";
     searchSec.innerHTML = "";
     return;
@@ -120,7 +120,7 @@ function renderBadges(u) {
 
   // Friends
   friendsSec.innerHTML = '<div class="section-title">👥 دوستان</div><div id="friendsList"></div><div id="friendRequests"></div>';
-  showSkeleton(document.getElementById("friendsList"));
+  showSkeletonLoading('friendsList', 3);
   loadFriends();
   loadFriendRequests();
 
@@ -136,7 +136,10 @@ function renderBadges(u) {
 }
 
 async function updateBio() {
-  const bio = document.getElementById("editBio").value.trim();
+  const bioInput = document.getElementById("editBio");
+  const bio = bioInput.value.trim();
+  const bioError = validateField(bio, 'bio', { maxLength: 200 });
+  if (bioError) { showToast("⚠️ " + bioError); return; }
   const r = await apiFetch("/api/profile", { method: "PUT", body: JSON.stringify({ bio }) });
   if (r.ok) { currentUser.bio = bio; showToast("✅ ذخیره شد"); }
 }
@@ -144,7 +147,7 @@ async function updateBio() {
 async function loadFriends() {
   const r = await apiFetch("/api/friends");
   const el = document.getElementById("friendsList");
-  if (!r.ok || !r.data.length) { showEmptyState(el, '👥', 'هنوز دوستی ندارید', 'از بخش جستجو دوستان خود را پیدا کنید'); return; }
+  if (!r.ok || !r.data.length) { showEmptyStateCard('friendsList', '👥', 'هنوز دوستی ندارید', 'از بخش جستجو دوستان خود را پیدا کنید', null, null); return; }
   el.innerHTML = r.data.map(f => `
     <div class="friend-item">
       ${renderAvatar(f.username, '2.2rem')}
@@ -179,9 +182,11 @@ async function loadFriendRequests() {
 async function searchUsersUI() {
   const q = document.getElementById("userSearchInput").value.trim();
   if (q.length < 2) { showToast("⚠️ حداقل ۲ حرف وارد کنید"); return; }
+  showSkeletonLoading('searchResults', 3);
   const r = await apiFetch(`/api/users/search?q=${encodeURIComponent(q)}`);
   const el = document.getElementById("searchResults");
-  if (!r.ok || !r.data.length) { el.innerHTML = '<div class="custom-empty">کاربری یافت نشد</div>'; return; }
+  if (!r.ok) { showErrorState('searchResults', 'خطا در جستجو', 'searchUsersUI()'); return; }
+  if (!r.data.length) { showEmptyStateCard('searchResults', '🔍', 'کاربری یافت نشد', 'با نام دیگری جستجو کنید', null, null); return; }
   el.innerHTML = r.data.map(u => `
     <div class="search-result-item">
       ${renderAvatar(u.username, '2.2rem')}
@@ -228,11 +233,15 @@ async function loadLeaderboard(type = 'wins') {
   if (activeTab) activeTab.classList.add('active');
 
   const list = document.getElementById('leaderboardList');
-  showSkeleton(list, 5);
+  showSkeletonLoading('leaderboardList', 5);
 
   const r = await apiFetch(`/api/leaderboard?type=${type}`);
-  if (!r.ok || !r.data || !r.data.length) {
-    showEmptyState(list, '🏆', 'هنوز رتبه‌بندی وجود نداره', 'بازی کنید تا در رتبه‌بندی قرار بگیرید');
+  if (!r.ok) {
+    showErrorState('leaderboardList', 'خطا در بارگذاری رتبه‌بندی', `loadLeaderboard('${type}')`);
+    return;
+  }
+  if (!r.data || !r.data.length) {
+    showEmptyStateCard('leaderboardList', '🏆', 'هنوز رتبه‌بندی وجود نداره', 'بازی کنید تا در رتبه‌بندی قرار بگیرید', null, null);
     return;
   }
 
