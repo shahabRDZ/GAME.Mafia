@@ -6,6 +6,7 @@
 <title>ایونت‌ها — شوشانگ</title>
 <meta name="theme-color" content="#000000">
 <link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margin:0; padding:0; min-height:100dvh; }
 
@@ -103,17 +104,25 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
   transition:all .2s;
 }
 .ev-card:hover { border-color:rgba(74,222,128,.15); }
-.ev-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
-.ev-card-loc { font-weight:900; font-size:1rem; color:#f5a623; }
-.ev-badge { padding:3px 10px; border-radius:50px; font-size:.62rem; font-weight:700; }
-.ev-badge-open { background:rgba(74,222,128,.12); color:#4ade80; }
-.ev-badge-full { background:rgba(233,69,96,.12); color:#e94560; }
-.ev-badge-pending { background:rgba(245,166,35,.12); color:#f5a623; }
-.ev-card-details { display:flex; flex-wrap:wrap; gap:6px; font-size:.75rem; color:rgba(255,255,255,.35); margin-bottom:8px; }
-.ev-card-details span { display:inline-flex; align-items:center; gap:3px; }
-.ev-card-desc { font-size:.75rem; color:rgba(255,255,255,.25); margin-bottom:8px; }
-.ev-card-bottom { display:flex; justify-content:space-between; align-items:center; }
-.ev-card-host { font-size:.72rem; color:rgba(255,255,255,.3); }
+.ev-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:8px; }
+.ev-card-name { font-weight:900; font-size:1.05rem; color:#f5a623; line-height:1.3; }
+.ev-card-sub { font-size:.72rem; color:rgba(255,255,255,.3); margin-top:3px; }
+.ev-badge { padding:4px 12px; border-radius:50px; font-size:.62rem; font-weight:700; white-space:nowrap; flex-shrink:0; }
+.ev-badge-open { background:rgba(74,222,128,.12); color:#4ade80; border:1px solid rgba(74,222,128,.2); }
+.ev-badge-full { background:rgba(233,69,96,.12); color:#e94560; border:1px solid rgba(233,69,96,.2); }
+.ev-badge-pending { background:rgba(245,166,35,.12); color:#f5a623; border:1px solid rgba(245,166,35,.2); }
+.ev-card-tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
+.ev-tag { padding:3px 10px; border-radius:50px; font-size:.68rem; color:rgba(255,255,255,.45);
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); }
+.ev-tag-price { color:#f5a623; border-color:rgba(245,166,35,.2); background:rgba(245,166,35,.06); }
+.ev-tag-free { color:#4ade80; border-color:rgba(74,222,128,.15); background:rgba(74,222,128,.05); }
+.ev-cap-wrap { margin-bottom:10px; }
+.ev-cap-bar { height:4px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; margin-bottom:4px; }
+.ev-cap-fill { height:100%; background:linear-gradient(90deg,#4ade80,#22c55e); border-radius:3px; transition:width .3s; }
+.ev-cap-text { font-size:.7rem; color:rgba(255,255,255,.3); }
+.ev-card-footer { display:flex; justify-content:space-between; align-items:center;
+  padding-top:8px; border-top:1px solid rgba(255,255,255,.04); }
+.ev-card-more { font-size:.75rem; color:#60a5fa; font-weight:600; }
 .ev-btn-reserve { padding:8px 18px; background:linear-gradient(135deg,#4ade80,#22c55e); border:none;
   border-radius:50px; color:#002211; font-family:inherit; font-size:.78rem; font-weight:900; cursor:pointer; }
 .ev-btn-reserve:active { transform:scale(.95); }
@@ -130,6 +139,35 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
 .ev-form-submit { padding:14px; background:linear-gradient(135deg,#4ade80,#22c55e); border:none;
   border-radius:14px; color:#002211; font-family:inherit; font-size:1rem; font-weight:900; cursor:pointer; }
 .ev-form-submit:active { transform:scale(.97); }
+.ev-form-label { font-size:.78rem; font-weight:700; color:rgba(255,255,255,.5); margin:12px 0 6px;
+  display:flex; align-items:center; gap:4px; }
+.ev-scenario-chips, .ev-count-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.ev-sc-chip { padding:8px 14px; border-radius:50px; border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04); color:rgba(255,255,255,.5); font-family:inherit;
+  font-size:.78rem; font-weight:700; cursor:pointer; transition:all .15s; }
+.ev-sc-chip.active { background:rgba(74,222,128,.15); border-color:rgba(74,222,128,.3); color:#4ade80; }
+.ev-sc-chip:active { transform:scale(.95); }
+.ev-map-wrap { border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.08); margin-bottom:4px; }
+.ev-map { width:100%; height:200px; background:#111; }
+.ev-map-hint { font-size:.68rem; color:rgba(255,255,255,.2); text-align:center; padding:4px; }
+.ev-word-count { font-size:.68rem; color:rgba(255,255,255,.2); text-align:left; margin-top:2px; }
+
+/* Event detail modal */
+.ev-detail-overlay { display:none; position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.92);
+  backdrop-filter:blur(10px); overflow-y:auto; padding:16px; }
+.ev-detail-overlay.show { display:block; }
+.ev-detail-box { max-width:480px; margin:0 auto; background:#0d0d1c; border:1px solid rgba(255,255,255,.08);
+  border-radius:20px; padding:20px; position:relative; }
+.ev-detail-close { position:absolute; top:12px; right:12px; background:rgba(255,255,255,.06);
+  border:none; border-radius:50%; width:32px; height:32px; color:rgba(255,255,255,.5);
+  cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+.ev-detail-title { font-size:1.2rem; font-weight:900; color:#f5a623; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.06); }
+.ev-detail-section { padding:10px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+.ev-detail-row { display:flex; align-items:center; gap:6px; font-size:.82rem; color:rgba(255,255,255,.5);
+  padding:4px 0; }
+.ev-detail-desc { font-size:.82rem; color:rgba(255,255,255,.4); line-height:1.8; margin:12px 0;
+  padding:12px; background:rgba(255,255,255,.03); border-radius:10px; white-space:pre-wrap; }
+.ev-detail-map { width:100%; height:200px; border-radius:12px; margin:10px 0; border:1px solid rgba(255,255,255,.06); }
 
 /* My events */
 .ev-my-label { font-size:.82rem; font-weight:700; margin:12px 0 8px; }
@@ -192,23 +230,66 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
 <div class="ev-section" id="evSec-create">
   <div class="ev-content">
     <div class="ev-form">
+      <div class="ev-form-label">🎭 نام ایونت *</div>
+      <input type="text" id="evFName" placeholder="مثلاً: شب مافیا استانبول" maxlength="60">
+
+      <div class="ev-form-label">🎙️ نام گرداننده *</div>
+      <input type="text" id="evFHost" placeholder="نام شما به عنوان گرداننده">
+
+      <div class="ev-form-label">🌍 کشور و شهر *</div>
       <div class="ev-form-row">
         <select id="evFCountry" onchange="updateFormCities()"></select>
         <select id="evFCity"></select>
       </div>
-      <input type="text" id="evFLocation" placeholder="📍 نام لوکیشن (کافه، رستوران...)">
-      <div class="ev-form-row">
-        <select id="evFScenario"><option value="بازپرس">🔍 بازپرس</option><option value="تکاور">⚔️ تکاور</option><option value="نماینده">🏛️ نماینده</option><option value="مذاکره">🤝 مذاکره</option></select>
-        <select id="evFCount"><option value="10">۱۰ نفر</option><option value="12">۱۲ نفر</option><option value="13">۱۳ نفر</option></select>
+
+      <div class="ev-form-label">☕ نام کافه / مکان *</div>
+      <input type="text" id="evFLocation" placeholder="مثلاً: کافه لاوندر، طبقه ۲">
+
+      <div class="ev-form-label">📍 آدرس دقیق *</div>
+      <input type="text" id="evFAddress" placeholder="خیابان، کوچه، پلاک...">
+
+      <div class="ev-form-label">🗺️ لوکیشن روی نقشه</div>
+      <div class="ev-map-wrap">
+        <div id="evMap" class="ev-map"></div>
+        <div class="ev-map-hint">روی نقشه کلیک کنید تا مکان ثبت شود</div>
+        <input type="hidden" id="evFLat">
+        <input type="hidden" id="evFLng">
       </div>
+
+      <div class="ev-form-label">🎭 سناریو *</div>
+      <div class="ev-scenario-chips" id="evScenarioChips">
+        <button type="button" class="ev-sc-chip active" onclick="selectScenarioChip(this)" data-val="بازپرس">🔍 بازپرس</button>
+        <button type="button" class="ev-sc-chip" onclick="selectScenarioChip(this)" data-val="تکاور">⚔️ تکاور</button>
+        <button type="button" class="ev-sc-chip" onclick="selectScenarioChip(this)" data-val="نماینده">🏛️ نماینده</button>
+        <button type="button" class="ev-sc-chip" onclick="selectScenarioChip(this)" data-val="مذاکره">🤝 مذاکره</button>
+        <button type="button" class="ev-sc-chip" onclick="selectScenarioChip(this)" data-val="دلخواه">✏️ دلخواه</button>
+      </div>
+
+      <div class="ev-form-label">👥 تعداد بازیکنان *</div>
+      <div class="ev-count-chips">
+        <button type="button" class="ev-sc-chip active" onclick="selectCountChip(this)" data-val="10">۱۰ نفر</button>
+        <button type="button" class="ev-sc-chip" onclick="selectCountChip(this)" data-val="12">۱۲ نفر</button>
+        <button type="button" class="ev-sc-chip" onclick="selectCountChip(this)" data-val="13">۱۳ نفر</button>
+      </div>
+
+      <div class="ev-form-label">📅 تاریخ و ساعت</div>
       <div class="ev-form-row">
         <input type="text" id="evFDate" placeholder="تاریخ" onfocus="this.type='date'">
         <input type="text" id="evFStart" placeholder="شروع" onfocus="this.type='time'">
         <input type="text" id="evFEnd" placeholder="پایان" onfocus="this.type='time'">
       </div>
-      <textarea id="evFDesc" rows="2" placeholder="توضیحات (اختیاری)..."></textarea>
+
+      <div class="ev-form-label">💰 هزینه ورودی</div>
+      <div class="ev-form-row">
+        <input type="text" id="evFPrice" placeholder="مثلاً: رایگان، ۵۰ هزار تومان، ۱۰ دلار">
+      </div>
+
+      <div class="ev-form-label">📝 توضیحات <span style="color:rgba(255,255,255,.2)">(حداکثر ۷۰۰ کلمه)</span></div>
+      <textarea id="evFDesc" rows="6" placeholder="توضیحات کامل ایونت، قوانین خاص، هزینه ورودی، نکات مهم..." maxlength="4000" oninput="updateWordCount()"></textarea>
+      <div class="ev-word-count" id="evWordCount">۰ / ۷۰۰ کلمه</div>
+
       <button class="ev-form-submit" onclick="evCreate()">🏠 ثبت ایونت</button>
-      <div style="text-align:center;font-size:.72rem;color:rgba(255,255,255,.25);margin-top:4px">ایونت بعد از تأیید ادمین منتشر می‌شود</div>
+      <div style="text-align:center;font-size:.72rem;color:rgba(255,255,255,.25);margin-top:6px">⏳ ایونت بعد از تأیید ادمین منتشر می‌شود</div>
     </div>
   </div>
 </div>
@@ -218,10 +299,16 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
   <div class="ev-content" id="evMyList"></div>
 </div>
 
+<!-- Event Detail Modal -->
+<div class="ev-detail-overlay" id="evDetailOverlay">
+  <div class="ev-detail-box" id="evDetailContent"></div>
+</div>
+
 <div class="ev-bottom">
   <a href="/">◀ بازگشت به شوشانگ</a>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/countries.js"></script>
 <script>
 const API = "";
@@ -240,6 +327,7 @@ function evShowTab(name, btn) {
   document.getElementById('evSec-'+name).classList.add('active');
   if(btn) btn.classList.add('active');
   if(name==='browse') evLoadEvents();
+  if(name==='create') initCreateMap();
   if(name==='my') evLoadMy();
 }
 
@@ -258,42 +346,63 @@ async function evLoadEvents() {
 }
 
 function evCard(e) {
-  const badge = e.status==='open'?'<span class="ev-badge ev-badge-open">باز</span>':
-    e.status==='full'?'<span class="ev-badge ev-badge-full">تکمیل</span>':
-    e.status==='pending'?'<span class="ev-badge ev-badge-pending">در انتظار</span>':'';
-  const canRes = e.status==='open' && evToken;
-  return `<div class="ev-card">
-    <div class="ev-card-top"><div class="ev-card-loc">📍 ${e.location_name}</div>${badge}</div>
-    <div class="ev-card-details">
-      <span>🌍 ${e.country}, ${e.city}</span>
-      <span>🎭 ${e.scenario||'—'}</span>
-      <span>👥 ${e.reserved_count}/${e.max_players}</span>
-      <span>📅 ${e.event_date}</span>
-      <span>⏰ ${e.start_time}${e.end_time?' — '+e.end_time:''}</span>
+  const badge = e.status==='open'?'<span class="ev-badge ev-badge-open">ثبت‌نام باز</span>':
+    e.status==='full'?'<span class="ev-badge ev-badge-full">تکمیل شده</span>':
+    e.status==='pending'?'<span class="ev-badge ev-badge-pending">در انتظار تأیید</span>':'';
+  const spotsLeft = e.max_players - e.reserved_count;
+  const pct = e.max_players > 0 ? (e.reserved_count / e.max_players * 100) : 0;
+  return `<div class="ev-card" onclick="showEventDetail(${e.id})">
+    <div class="ev-card-top">
+      <div>
+        <div class="ev-card-name">${e.event_name||e.location_name}</div>
+        <div class="ev-card-sub">🎙️ ${e.host_display_name||e.host_name} · ☕ ${e.location_name}</div>
+      </div>
+      ${badge}
     </div>
-    ${e.description?`<div class="ev-card-desc">${e.description}</div>`:''}
-    <div class="ev-card-bottom">
-      <span class="ev-card-host">🎙️ ${e.host_name}</span>
-      ${canRes?`<button class="ev-btn-reserve" onclick="evReserve(${e.id})">رزرو</button>`:''}
+    <div class="ev-card-tags">
+      <span class="ev-tag">🌍 ${e.city}</span>
+      <span class="ev-tag">🎭 ${e.scenario||'—'}</span>
+      ${e.event_date?'<span class="ev-tag">📅 '+e.event_date+'</span>':''}
+      ${e.start_time?'<span class="ev-tag">⏰ '+e.start_time+'</span>':''}
+      ${e.price?'<span class="ev-tag ev-tag-price">💰 '+e.price+'</span>':'<span class="ev-tag ev-tag-free">🆓 رایگان</span>'}
+    </div>
+    <div class="ev-cap-wrap">
+      <div class="ev-cap-bar"><div class="ev-cap-fill" style="width:${pct}%"></div></div>
+      <span class="ev-cap-text">👥 ${e.reserved_count}/${e.max_players} نفر${spotsLeft>0?' · '+spotsLeft+' جای خالی':''}</span>
+    </div>
+    <div class="ev-card-footer">
+      <span class="ev-card-more">مشاهده جزئیات و نظرات ←</span>
     </div>
   </div>`;
 }
 
 async function evCreate() {
   if(!evToken){alert('ابتدا وارد شوید');window.location='/';return;}
+  const scenario = document.querySelector('.ev-scenario-chips .ev-sc-chip.active')?.dataset.val || '';
+  const count = parseInt(document.querySelector('.ev-count-chips .ev-sc-chip.active')?.dataset.val || 10);
   const data={
+    event_name:document.getElementById('evFName').value.trim(),
+    host_display_name:document.getElementById('evFHost').value.trim(),
     country:document.getElementById('evFCountry').value,
     city:document.getElementById('evFCity').value,
     location_name:document.getElementById('evFLocation').value.trim(),
-    scenario:document.getElementById('evFScenario').value,
-    player_count:parseInt(document.getElementById('evFCount').value),
-    max_players:parseInt(document.getElementById('evFCount').value),
+    address:document.getElementById('evFAddress').value.trim(),
+    lat:document.getElementById('evFLat').value||null,
+    lng:document.getElementById('evFLng').value||null,
+    scenario:scenario,
+    player_count:count,
+    max_players:count,
     event_date:document.getElementById('evFDate').value,
     start_time:document.getElementById('evFStart').value,
     end_time:document.getElementById('evFEnd').value,
+    price:document.getElementById('evFPrice')?.value?.trim()||'',
     description:document.getElementById('evFDesc').value.trim()
   };
-  if(!data.city||!data.location_name||!data.event_date||!data.start_time){alert('شهر، لوکیشن، تاریخ و ساعت الزامی');return;}
+  if(!data.event_name){alert('نام ایونت الزامی است');return;}
+  if(!data.host_display_name){alert('نام گرداننده الزامی است');return;}
+  if(!data.location_name){alert('نام کافه/مکان الزامی است');return;}
+  if(!data.address){alert('آدرس الزامی است');return;}
+  if(!data.scenario){alert('سناریو را انتخاب کنید');return;}
   const r=await evFetch('/api/events',{method:'POST',body:JSON.stringify(data)});
   if(r.ok){alert('✅ ایونت ثبت شد — منتظر تأیید ادمین باشید');evShowTab('my',document.querySelectorAll('.ev-tab')[2]);}
   else alert('⚠️ '+(r.data?.error||'خطا'));
@@ -340,6 +449,118 @@ async function evManageRes(eid,uid,status) {
   await evFetch(`/api/events/${eid}/reservations/0`,{method:'PUT',body:JSON.stringify({status,user_id:uid})});
   alert(status==='accepted'?'✅ تأیید شد':'❌ رد شد');
   evLoadMy();
+}
+
+// ── Map ──
+let evMap = null, evMarker = null;
+function initCreateMap() {
+  if (evMap) return;
+  setTimeout(() => {
+    evMap = L.map('evMap').setView([35.7, 51.4], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 18
+    }).addTo(evMap);
+    evMap.on('click', function(e) {
+      if (evMarker) evMap.removeLayer(evMarker);
+      evMarker = L.marker(e.latlng).addTo(evMap);
+      document.getElementById('evFLat').value = e.latlng.lat;
+      document.getElementById('evFLng').value = e.latlng.lng;
+      document.querySelector('.ev-map-hint').textContent = '📍 مکان ثبت شد';
+    });
+  }, 300);
+}
+
+// ── Chip selectors ──
+function selectScenarioChip(btn) {
+  document.querySelectorAll('.ev-scenario-chips .ev-sc-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function selectCountChip(btn) {
+  document.querySelectorAll('.ev-count-chips .ev-sc-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function updateWordCount() {
+  const text = document.getElementById('evFDesc').value;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  document.getElementById('evWordCount').textContent = `${words} / ۷۰۰ کلمه`;
+  if (words > 700) document.getElementById('evWordCount').style.color = '#e94560';
+  else document.getElementById('evWordCount').style.color = 'rgba(255,255,255,.2)';
+}
+
+// ── Event Detail ──
+function showEventDetail(eid) {
+  const overlay = document.getElementById('evDetailOverlay');
+  const box = document.getElementById('evDetailContent');
+  box.innerHTML = '<div style="text-align:center;padding:30px;color:var(--dim)">در حال بارگذاری...</div>';
+  overlay.classList.add('show');
+  fetch(API+'/api/events/'+eid).then(r=>r.json()).then(e=>{
+    const canRes = e.status==='open' && evToken;
+    let mapHtml = '';
+    if (e.lat && e.lng) {
+      mapHtml = `<div id="detailMap" class="ev-detail-map"></div>`;
+    }
+    const spotsLeft = e.max_players - e.reserved_count;
+    const pct = e.max_players > 0 ? (e.reserved_count / e.max_players * 100) : 0;
+    box.innerHTML = `
+      <button class="ev-detail-close" onclick="document.getElementById('evDetailOverlay').classList.remove('show')">✕</button>
+      <div class="ev-detail-title">${e.event_name||e.location_name}</div>
+      <div class="ev-detail-section">
+        <div class="ev-detail-row">🎙️ <strong>گرداننده:</strong> ${e.host_display_name||e.host_name}</div>
+        <div class="ev-detail-row">☕ <strong>مکان:</strong> ${e.location_name}</div>
+        <div class="ev-detail-row">📍 <strong>آدرس:</strong> ${e.address||'ذکر نشده'}</div>
+        <div class="ev-detail-row">🌍 <strong>شهر:</strong> ${e.country}, ${e.city}</div>
+      </div>
+      <div class="ev-detail-section">
+        <div class="ev-detail-row">🎭 <strong>سناریو:</strong> ${e.scenario||'—'}</div>
+        <div class="ev-detail-row">👥 <strong>ظرفیت:</strong> ${e.reserved_count}/${e.max_players} نفر ${spotsLeft>0?'('+spotsLeft+' جای خالی)':'(تکمیل)'}</div>
+        <div class="ev-cap-wrap" style="margin:6px 0"><div class="ev-cap-bar"><div class="ev-cap-fill" style="width:${pct}%"></div></div></div>
+        ${e.event_date?`<div class="ev-detail-row">📅 <strong>تاریخ:</strong> ${e.event_date}</div>`:''}
+        ${e.start_time?`<div class="ev-detail-row">⏰ <strong>ساعت:</strong> ${e.start_time}${e.end_time?' — '+e.end_time:''}</div>`:''}
+        <div class="ev-detail-row">💰 <strong>ورودی:</strong> ${e.price||'رایگان'}</div>
+      </div>
+      ${e.description?`<div class="ev-detail-section"><div style="font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:6px">📝 توضیحات</div><div class="ev-detail-desc">${e.description}</div></div>`:''}
+      ${mapHtml}
+      ${canRes?`<button class="ev-form-submit" onclick="evReserve(${e.id});document.getElementById('evDetailOverlay').classList.remove('show')" style="width:100%;margin-top:12px">📋 رزرو کنید</button>`:''}
+      <div class="ev-detail-section" style="margin-top:16px">
+        <div style="font-size:.88rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:10px">💬 نظرات و ریویو</div>
+        <div id="evComments${e.id}"></div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <input type="text" id="evCommentInput${e.id}" placeholder="نظر خود را بنویسید..." style="flex:1;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;color:#fff;font-family:inherit;font-size:.82rem;outline:none">
+          <button onclick="addComment(${e.id})" style="padding:10px 16px;background:#4ade80;border:none;border-radius:12px;color:#002211;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer">ارسال</button>
+        </div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.15);margin-top:4px">فقط شرکت‌کنندگان تأیید شده می‌توانند نظر بدهند</div>
+      </div>
+    `;
+    loadComments(e.id);
+    if (e.lat && e.lng) {
+      setTimeout(()=>{
+        const m = L.map('detailMap').setView([e.lat, e.lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(m);
+        L.marker([e.lat, e.lng]).addTo(m);
+      }, 200);
+    }
+  });
+}
+
+// ── Comments ──
+async function loadComments(eid) {
+  const r = await fetch(API+'/api/events/'+eid+'/comments');
+  const comments = await r.json();
+  const el = document.getElementById('evComments'+eid);
+  if (!el) return;
+  if (!comments.length) { el.innerHTML='<div style="font-size:.75rem;color:rgba(255,255,255,.2);padding:8px">هنوز نظری ثبت نشده</div>'; return; }
+  el.innerHTML = comments.map(c=>`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem">
+    <strong style="color:rgba(255,255,255,.6)">${c.username}</strong> <span style="color:rgba(255,255,255,.15);font-size:.65rem">${c.created_at}</span>
+    <div style="color:rgba(255,255,255,.4);margin-top:2px">${c.content}</div>
+  </div>`).join('');
+}
+async function addComment(eid) {
+  const input = document.getElementById('evCommentInput'+eid);
+  const content = input?.value?.trim();
+  if (!content) return;
+  const r = await evFetch('/api/events/'+eid+'/comments',{method:'POST',body:JSON.stringify({content})});
+  if (r.ok) { input.value=''; loadComments(eid); }
+  else alert(r.data?.error||'خطا');
 }
 
 // Init — populate country dropdowns
