@@ -125,8 +125,8 @@ class GameEvent(db.Model):
     lng = db.Column(db.Float, nullable=True)
     scenario = db.Column(db.String(50), default="")
     player_count = db.Column(db.Integer, default=10)
-    event_date = db.Column(db.String(20), nullable=False)  # YYYY-MM-DD
-    start_time = db.Column(db.String(10), nullable=False)  # HH:MM
+    event_date = db.Column(db.String(20), default="")
+    start_time = db.Column(db.String(10), default="")
     end_time = db.Column(db.String(10), default="")
     description = db.Column(db.String(500), default="")
     max_players = db.Column(db.Integer, default=10)
@@ -4224,7 +4224,7 @@ def admin_reset_password(uid):
 def create_event():
     user = db.session.get(User, int(get_jwt_identity()))
     data = request.get_json()
-    required = ["country", "city", "location_name", "event_date", "start_time"]
+    required = ["country", "city", "location_name"]
     for field in required:
         if not data.get(field):
             return jsonify({"error": f"{field} الزامی است"}), 400
@@ -4240,8 +4240,8 @@ def create_event():
         lng=float(data["lng"]) if data.get("lng") else None,
         scenario=data.get("scenario", ""),
         player_count=int(data.get("player_count", 10)),
-        event_date=data["event_date"],
-        start_time=data["start_time"],
+        event_date=data.get("event_date", ""),
+        start_time=data.get("start_time", ""),
         end_time=data.get("end_time", ""),
         description=data.get("description", "")[:500],
         max_players=int(data.get("max_players", 10))

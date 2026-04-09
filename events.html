@@ -374,9 +374,11 @@ async function evCreate() {
     end_time:document.getElementById('evFEnd').value,
     description:document.getElementById('evFDesc').value.trim()
   };
-  if(!data.event_name){alert('نام ایونت الزامی');return;}
-  if(!data.host_display_name){alert('نام گرداننده الزامی');return;}
-  if(!data.city||!data.location_name||!data.event_date||!data.start_time){alert('شهر، نام کافه، تاریخ و ساعت الزامی');return;}
+  if(!data.event_name){alert('نام ایونت الزامی است');return;}
+  if(!data.host_display_name){alert('نام گرداننده الزامی است');return;}
+  if(!data.location_name){alert('نام کافه/مکان الزامی است');return;}
+  if(!data.address){alert('آدرس الزامی است');return;}
+  if(!data.scenario){alert('سناریو را انتخاب کنید');return;}
   const r=await evFetch('/api/events',{method:'POST',body:JSON.stringify(data)});
   if(r.ok){alert('✅ ایونت ثبت شد — منتظر تأیید ادمین باشید');evShowTab('my',document.querySelectorAll('.ev-tab')[2]);}
   else alert('⚠️ '+(r.data?.error||'خطا'));
