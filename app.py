@@ -300,7 +300,7 @@ def admin_panel():
 @app.route("/event")
 @app.route("/event/")
 def events_page():
-    return app.send_static_file("events.html")
+    return app.send_static_file("ev.html")
 
 
 # ── Visit Counter ────────────────────────────────────────────────────────────
