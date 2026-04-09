@@ -40,7 +40,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "postgresql://mafia:mafia123@localhost:5432/mafiadb"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET", "super-secret-key-change-in-prod")
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET", "shushang-mafia-jwt-secret-2026-stable-key-do-not-change")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
 
 db = SQLAlchemy(app)
