@@ -28,7 +28,13 @@ function confirmNarrator() {
   narratorName = input.value.trim() || 'گرداننده شوشانگ';
   localStorage.setItem('shushang_narrator', narratorName);
   document.getElementById("narratorModal").classList.remove("show");
-  actualStartGame();
+
+  if (window._nearbyNarratorMode) {
+    window._nearbyNarratorMode = false;
+    actualStartNearbyGame();
+  } else {
+    actualStartGame();
+  }
 }
 
 async function startGame() {
@@ -566,7 +572,7 @@ async function startNearbyGame() {
   // Nearby only supports 10, 12, 13 player games
   if (!state.group || !state.count) { showToast("⚠️ سناریو و تعداد انتخاب کنید"); return; }
   if (![10, 12, 13].includes(state.count) && !state.isCustom) {
-    showToast("⚠️ نزدیک‌یاب فقط برای ۱۰، ۱۲ و ۱۳ نفره");
+    showToast("⚠️ حرفه‌ای فقط برای ۱۰، ۱۲ و ۱۳ نفره");
     return;
   }
 
@@ -585,13 +591,37 @@ async function startNearbyGame() {
   }
   window._nearbyRoles = roles;
 
-  // Request location
+  // Show narrator modal first, then proceed
+  showNearbyNarratorModal();
+}
+
+function showNearbyNarratorModal() {
+  const modal = document.getElementById("narratorModal");
+  const input = document.getElementById("narratorNameInput");
+  const info = document.getElementById("narratorScenarioInfo");
+
+  const saved = localStorage.getItem('shushang_narrator');
+  if (saved) { input.value = saved; narratorName = saved; }
+
+  info.innerHTML = `
+    <span class="narrator-scenario-chip">🎭 ${state.group}</span>
+    <span class="narrator-scenario-chip">👥 ${toFarsiNum(state.count)} نفر</span>
+    <span class="narrator-scenario-chip">📱 حرفه‌ای</span>
+  `;
+
+  // Override confirm to go to nearby instead of normal game
+  window._nearbyNarratorMode = true;
+  modal.classList.add("show");
+  setTimeout(() => input.select(), 300);
+}
+
+function actualStartNearbyGame() {
   if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
 
   document.getElementById("nearbyOverlay").classList.add("show");
   document.getElementById("nearbyScenarioInfo").textContent = `🎭 ${state.group} · ${toFarsiNum(state.count)} نفر`;
-  document.getElementById("nearbyHostName").textContent = currentUser ? currentUser.username : 'گرداننده';
-  document.getElementById("nearbyStatus").textContent = "📍 در حال دریافت لوکیشن...";
+  document.getElementById("nearbyHostName").textContent = narratorName || (currentUser ? currentUser.username : 'گرداننده');
+  document.getElementById("nearbyStatus").textContent = "در انتظار پلیر...";
   document.getElementById("nearbyPlayerList").innerHTML = "";
   document.getElementById("nearbyPlayerList").style.display = "block";
   document.getElementById("nearbyConfirmList").style.display = "none";
