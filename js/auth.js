@@ -1,23 +1,40 @@
 /* ── Authentication System ── */
 
 async function initAuth() {
-  if (!authToken) return;
-  try {
-    const r = await apiFetch("/api/auth/me", { _background: true });
-    if (r.ok) {
-      currentUser = r.data;
-      renderAuthBar();
-    } else {
-      // Only clear if 401/403, not network error
-      if (r.data?.msg === "Token has expired" || r.data?.msg === "Signature verification failed") {
-        authToken = null;
-        localStorage.removeItem("mafiaToken");
-        sessionStorage.removeItem("mafiaToken");
-      }
-    }
-  } catch {
-    // Network error — keep token, don't logout
+  // Try localStorage token first
+  if (!authToken) {
+    authToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
   }
+
+  if (authToken) {
+    try {
+      const r = await apiFetch("/api/auth/me", { _background: true });
+      if (r.ok) {
+        currentUser = r.data;
+        renderAuthBar();
+        return;
+      }
+    } catch {}
+    // Token failed — clear it but try device login next
+    authToken = null;
+  }
+
+  // No valid token — try device fingerprint auto-login
+  try {
+    const fp = getDeviceFingerprint();
+    const r = await fetch(API + "/api/auth/device-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fingerprint: fp })
+    });
+    const data = await r.json();
+    if (r.ok && data.token) {
+      authToken = data.token;
+      currentUser = data.user;
+      localStorage.setItem("mafiaToken", authToken);
+      renderAuthBar();
+    }
+  } catch {}
 }
 
 function openAuthModal(mode) {

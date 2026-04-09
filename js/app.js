@@ -144,26 +144,6 @@ function toggleTheme() {
   }
 })();
 
-// ── Auto-login by device fingerprint ──
-async function autoLoginByDevice() {
-  if (authToken) return; // already logged in
-  try {
-    const fp = getDeviceFingerprint();
-    const r = await fetch(API + "/api/auth/device-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fingerprint: fp })
-    });
-    const data = await r.json();
-    if (r.ok && data.token) {
-      authToken = data.token;
-      currentUser = data.user;
-      localStorage.setItem("mafiaToken", authToken);
-      renderAuthBar();
-    }
-  } catch {}
-}
-
 function getDeviceFingerprint() {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -193,9 +173,7 @@ function getDeviceFingerprint() {
 
 // Initialize
 applyLang();
-initAuth().then(() => {
-  if (!currentUser) autoLoginByDevice();
-});
+initAuth();
 
 // ── System Messages — check and show to user ──
 async function checkSystemMessages() {
