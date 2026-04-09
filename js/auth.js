@@ -14,9 +14,21 @@ async function initAuth() {
         renderAuthBar();
         return;
       }
-    } catch {}
-    // Token failed — clear it but try device login next
-    authToken = null;
+      // Only clear token if server explicitly rejected it (401)
+      if (r.status === 401) {
+        authToken = null;
+        localStorage.removeItem("mafiaToken");
+        sessionStorage.removeItem("mafiaToken");
+      } else {
+        // Network error or server error — keep token, user stays logged in
+        renderAuthBar();
+        return;
+      }
+    } catch {
+      // Network error — keep token and stay logged in
+      renderAuthBar();
+      return;
+    }
   }
 
   // No valid token — try device fingerprint auto-login
