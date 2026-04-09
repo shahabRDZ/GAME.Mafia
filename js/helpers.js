@@ -211,7 +211,7 @@ function renderEventCard(e) {
 }
 
 async function createEvent() {
-  if (!authToken) { showToast('⚠️ ابتدا وارد شوید'); openAuthModal('login'); return; }
+  if (!authToken) { alert('ابتدا وارد حساب شوید'); openAuthModal('login'); return; }
   const data = {
     country: document.getElementById('evCountry').value,
     city: document.getElementById('evCity').value.trim(),
@@ -225,14 +225,19 @@ async function createEvent() {
     description: document.getElementById('evDescription').value.trim()
   };
   if (!data.city || !data.location_name || !data.event_date || !data.start_time) {
-    showToast('⚠️ شهر، لوکیشن، تاریخ و ساعت الزامی است'); return;
+    alert('شهر، لوکیشن، تاریخ و ساعت الزامی است\n\nشهر: ' + data.city + '\nلوکیشن: ' + data.location_name + '\nتاریخ: ' + data.event_date + '\nساعت: ' + data.start_time);
+    return;
   }
-  const r = await apiFetch('/api/events', { method: 'POST', body: JSON.stringify(data) });
-  if (r.ok) {
-    showToast('✅ ایونت ثبت شد!');
-    showEventTab('browse', document.querySelector('.event-tab'));
-  } else {
-    showToast('⚠️ ' + (r.data?.error || 'خطا'));
+  try {
+    const r = await apiFetch('/api/events', { method: 'POST', body: JSON.stringify(data) });
+    if (r.ok) {
+      showToast('✅ ایونت ثبت شد!');
+      showEventTab('browse', document.querySelector('.event-tab'));
+    } else {
+      showToast('⚠️ ' + (r.data?.error || 'خطا در ثبت'));
+    }
+  } catch(err) {
+    showToast('⚠️ خطا: ' + err.message);
   }
 }
 
