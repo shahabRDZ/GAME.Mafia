@@ -52,3 +52,17 @@ function getHttpErrorMessage(status) {
     default: return "خطای غیرمنتظره رخ داد";
   }
 }
+
+/* ── Button loading helpers ── */
+function btnLoading(btn) {
+  if (!btn) return;
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  btn._origText = btn.textContent;
+}
+function btnDone(btn) {
+  if (!btn) return;
+  btn.classList.remove('btn-loading');
+  btn.disabled = false;
+  if (btn._origText) btn.textContent = btn._origText;
+}

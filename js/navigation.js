@@ -3,6 +3,21 @@
 let previousScreen = null;
 
 function showScreen(name) {
+  // ── Auth guard: screens that require login ──
+  const authScreens = ['profile', 'dm', 'admin'];
+  if (authScreens.includes(name) && !authToken) {
+    showToast('⚠️ ابتدا وارد حساب کاربری شوید');
+    showScreen('setup');
+    return;
+  }
+
+  // ── Game guard: must have cards to enter game screen ──
+  if (name === 'game' && (!state || !state.cards || !state.cards.length)) {
+    showToast('⚠️ ابتدا یک بازی جدید بسازید');
+    showScreen('setup');
+    return;
+  }
+
   // Track previous screen
   const currentActive = document.querySelector(".screen.active");
   if (currentActive) previousScreen = currentActive.id.replace("Screen", "");

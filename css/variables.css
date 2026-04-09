@@ -16,6 +16,12 @@
   --text: #eaeaf5;
   --dim: rgba(255,255,255,0.38);
 
+  /* Semantic colors */
+  --color-success: #4ade80;
+  --color-warning: #f5a623;
+  --color-danger: #e94560;
+  --color-info: #60a5fa;
+
   /* Spacing scale */
   --space-2xs: 0.25rem;   /* 4px */
   --space-xs: 0.5rem;     /* 8px */
@@ -84,6 +90,10 @@
   --dim: rgba(0,0,0,0.45);
   --accent: #c0392b;
   --accent2: #d97706;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
 }
 [data-theme="light"] body { background: #f0f0f5; }
 [data-theme="light"] .atmo-glow,
@@ -96,6 +106,20 @@
 [data-theme="light"] .fs-game-menu { background: rgba(240,240,245,.97); }
 [data-theme="light"] .mod-panel { background: rgba(0,0,0,.03); }
 [data-theme="light"] .toast { background: rgba(240,240,245,.97); color: #1a1a2e; }
+[data-theme="light"] .gc { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .card-front.mafia { background: radial-gradient(ellipse at 50% 0%, #fff0f0, #fff5f5, #fff8f8); border-color: rgba(200,0,0,0.2); }
+[data-theme="light"] .card-front.citizen { background: radial-gradient(ellipse at 50% 0%, #f0fff5, #f5fff8, #f8fffa); border-color: rgba(0,200,120,0.2); }
+[data-theme="light"] .mafia .card-role-name { color: #c0392b; text-shadow: none; }
+[data-theme="light"] .citizen .card-role-name { color: #16a34a; text-shadow: none; }
+[data-theme="light"] .modal-box { background: #f5f5fa; border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .modal-overlay { background: rgba(0,0,0,0.5); }
+[data-theme="light"] input, [data-theme="light"] textarea { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a2e; }
+[data-theme="light"] .auth-bar { background: rgba(0,0,0,0.03); }
+[data-theme="light"] .setup-card { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+[data-theme="light"] .group-btn { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); color: #1a1a2e; }
+[data-theme="light"] .count-btn { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); color: #1a1a2e; }
+[data-theme="light"] .empty-state-card { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .error-state { background: rgba(220,38,38,0.04); border-color: rgba(220,38,38,0.12); }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
