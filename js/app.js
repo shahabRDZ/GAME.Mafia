@@ -131,12 +131,12 @@ function toggleTheme() {
   const current = html.getAttribute('data-theme');
   const newTheme = current === 'light' ? 'dark' : 'light';
   html.setAttribute('data-theme', newTheme);
-  localStorage.setItem('shushang_theme', newTheme);
+  localStorage.setItem('ShowShung_theme', newTheme);
   document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
 }
 // Load saved theme
 (function loadTheme() {
-  const saved = localStorage.getItem('shushang_theme');
+  const saved = localStorage.getItem('ShowShung_theme');
   if (saved === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
     const btn = document.getElementById('themeToggle');
@@ -149,7 +149,7 @@ function getDeviceFingerprint() {
   const ctx = canvas.getContext('2d');
   ctx.textBaseline = 'top';
   ctx.font = '14px Arial';
-  ctx.fillText('shushang', 2, 2);
+  ctx.fillText('ShowShung', 2, 2);
   const canvasHash = canvas.toDataURL().slice(-50);
 
   const data = [
@@ -238,12 +238,12 @@ setInterval(updateDmBadge, 10000);
 
 // ── Onboarding for first-time users ──
 function showOnboarding() {
-  if (localStorage.getItem('shushang_onboarded')) return;
+  if (localStorage.getItem('ShowShung_onboarded')) return;
   document.getElementById('onboardModal').classList.add('show');
 }
 function closeOnboarding() {
   document.getElementById('onboardModal').classList.remove('show');
-  localStorage.setItem('shushang_onboarded', '1');
+  localStorage.setItem('ShowShung_onboarded', '1');
 }
 setTimeout(showOnboarding, 800);
 
@@ -319,12 +319,12 @@ async function requestNotificationPermission() {
 function sendLocalNotification(title, body, icon = '/icon-192.png') {
   if (Notification.permission !== 'granted') return;
   try {
-    new Notification(title, { body, icon, badge: '/icon-192.png', tag: 'shushang' });
+    new Notification(title, { body, icon, badge: '/icon-192.png', tag: 'ShowShung' });
   } catch {
     // Fallback for mobile: use SW notification
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
       navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification(title, { body, icon, badge: '/icon-192.png', tag: 'shushang' });
+        reg.showNotification(title, { body, icon, badge: '/icon-192.png', tag: 'ShowShung' });
       });
     }
   }
