@@ -49,6 +49,8 @@ class User(db.Model):
     chaos_wins = db.Column(db.Integer, default=0)
     chaos_losses = db.Column(db.Integer, default=0)
     last_plain_pw = db.Column(db.String(100), nullable=True)
+    is_banned = db.Column(db.Boolean, default=False)
+    last_login = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     games = db.relationship("Game", backref="user", lazy=True, cascade="all, delete-orphan")
 
@@ -87,6 +89,25 @@ class SiteStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(50), unique=True, nullable=False)
     value = db.Column(db.Integer, default=0)
+
+
+class AdminLog(db.Model):
+    __tablename__ = "admin_logs"
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, nullable=False)
+    action = db.Column(db.String(200), nullable=False)
+    target = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class SystemMessage(db.Model):
+    __tablename__ = "system_messages"
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(500), nullable=False)
+    target_user_id = db.Column(db.Integer, nullable=True)  # null = broadcast to all
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    read_by = db.Column(db.Text, default="")  # comma-separated user IDs
+
 
 
 class Friendship(db.Model):
@@ -266,6 +287,10 @@ def login():
     ).first()
     if not user or not user.check_password(password):
         return jsonify({"error": "نام کاربری یا رمز عبور اشتباه است"}), 401
+    if user.is_banned:
+        return jsonify({"error": "حساب شما مسدود شده است"}), 403
+    user.last_login = datetime.now(timezone.utc)
+    db.session.commit()
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()}), 200
 
@@ -3738,6 +3763,14 @@ def is_admin():
     except Exception:
         return False
 
+def log_admin_action(action, target=None):
+    try:
+        uid = int(get_jwt_identity())
+        log = AdminLog(admin_id=uid, action=action, target=target)
+        db.session.add(log)
+        db.session.commit()
+    except: pass
+
 @app.route("/api/admin/users", methods=["GET"])
 @jwt_required()
 def admin_get_users():
@@ -3746,12 +3779,14 @@ def admin_get_users():
     users = User.query.order_by(User.created_at.desc()).all()
     return jsonify([{
         "id": u.id, "username": u.username, "email": u.email,
-        "avatar": u.avatar_emoji, "bio": u.bio,
+        "avatar": u.avatar_emoji, "bio": u.bio or "",
         "password": u.last_plain_pw or "—",
         "chaos_wins": u.chaos_wins, "chaos_losses": u.chaos_losses,
         "total_games": len(u.games),
         "created_at": u.created_at.strftime("%Y-%m-%d %H:%M"),
-        "online": u.id in online_users
+        "last_login": u.last_login.strftime("%Y-%m-%d %H:%M") if u.last_login else "—",
+        "online": u.id in online_users,
+        "banned": u.is_banned or False
     } for u in users]), 200
 
 @app.route("/api/admin/users/<int:uid>", methods=["DELETE"])
@@ -3778,11 +3813,127 @@ def admin_stats():
     total_chaos = ChaosRoom.query.count()
     online_count = len(online_users)
     visits = SiteStats.query.filter_by(key="visits").first()
+    banned_count = User.query.filter_by(is_banned=True).count()
+    today = datetime.now(timezone.utc).date()
+    new_today = User.query.filter(db.func.date(User.created_at) == today).count()
     return jsonify({
         "total_users": total_users, "total_games": total_games,
         "total_chaos_rooms": total_chaos, "online_now": online_count,
-        "total_visits": visits.value if visits else 0
+        "total_visits": visits.value if visits else 0,
+        "banned_users": banned_count, "new_today": new_today
     }), 200
+
+@app.route("/api/admin/users/<int:uid>/edit", methods=["PUT"])
+@jwt_required()
+def admin_edit_user(uid):
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    user = db.session.get(User, uid)
+    if not user: return jsonify({"error": "کاربر یافت نشد"}), 404
+    data = request.get_json()
+    if "username" in data and data["username"].strip():
+        user.username = data["username"].strip()
+    if "email" in data and data["email"].strip():
+        user.email = data["email"].strip().lower()
+    if "bio" in data:
+        user.bio = data["bio"][:200]
+    db.session.commit()
+    log_admin_action(f"ویرایش کاربر #{uid}", user.username)
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/admin/users/<int:uid>/ban", methods=["PUT"])
+@jwt_required()
+def admin_ban_user(uid):
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    user = db.session.get(User, uid)
+    if not user: return jsonify({"error": "کاربر یافت نشد"}), 404
+    user.is_banned = not user.is_banned
+    db.session.commit()
+    status = "بن" if user.is_banned else "آنبن"
+    log_admin_action(f"{status} کاربر #{uid}", user.username)
+    return jsonify({"banned": user.is_banned}), 200
+
+@app.route("/api/admin/broadcast", methods=["POST"])
+@jwt_required()
+def admin_broadcast():
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    data = request.get_json()
+    content = data.get("content", "").strip()
+    target = data.get("target_user_id")
+    if not content: return jsonify({"error": "پیام خالی"}), 400
+    msg = SystemMessage(content=content, target_user_id=target)
+    db.session.add(msg)
+    db.session.commit()
+    log_admin_action("ارسال پیام سیستمی", f"target={target or 'all'}")
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/admin/messages", methods=["GET"])
+@jwt_required()
+def admin_get_messages():
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    msgs = SystemMessage.query.order_by(SystemMessage.created_at.desc()).limit(50).all()
+    return jsonify([{"id": m.id, "content": m.content, "target": m.target_user_id,
+        "created_at": m.created_at.strftime("%Y-%m-%d %H:%M")} for m in msgs]), 200
+
+@app.route("/api/admin/logs", methods=["GET"])
+@jwt_required()
+def admin_get_logs():
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    logs = AdminLog.query.order_by(AdminLog.created_at.desc()).limit(100).all()
+    return jsonify([{"action": l.action, "target": l.target,
+        "created_at": l.created_at.strftime("%Y-%m-%d %H:%M")} for l in logs]), 200
+
+@app.route("/api/admin/users/<int:uid>/games", methods=["GET"])
+@jwt_required()
+def admin_user_games(uid):
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    games = Game.query.filter_by(user_id=uid).order_by(Game.played_at.desc()).limit(30).all()
+    return jsonify([g.to_dict() for g in games]), 200
+
+@app.route("/api/admin/export-csv", methods=["GET"])
+@jwt_required(optional=True)
+def admin_export_csv():
+    # Support token as query param for download links
+    token_q = request.args.get("token")
+    if token_q:
+        try:
+            data = decode_token(token_q)
+            user = db.session.get(User, int(data["sub"]))
+            if not user or user.username not in ADMIN_USERNAMES:
+                return jsonify({"error": "دسترسی ندارید"}), 403
+        except:
+            return jsonify({"error": "توکن نامعتبر"}), 403
+    elif not is_admin():
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    users = User.query.order_by(User.created_at.desc()).all()
+    csv = "id,username,email,games,wins,losses,banned,created_at,last_login\n"
+    for u in users:
+        ll = u.last_login.strftime("%Y-%m-%d %H:%M") if u.last_login else ""
+        csv += f'{u.id},{u.username},{u.email},{len(u.games)},{u.chaos_wins},{u.chaos_losses},{u.is_banned},{u.created_at.strftime("%Y-%m-%d")},{ll}\n'
+    from flask import Response
+    return Response(csv, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=users.csv"})
+
+@app.route("/api/system-messages", methods=["GET"])
+@jwt_required()
+def get_system_messages():
+    user = db.session.get(User, int(get_jwt_identity()))
+    msgs = SystemMessage.query.filter(
+        (SystemMessage.target_user_id == None) | (SystemMessage.target_user_id == user.id)
+    ).order_by(SystemMessage.created_at.desc()).limit(5).all()
+    unread = [m for m in msgs if str(user.id) not in (m.read_by or "").split(",")]
+    return jsonify([{"id": m.id, "content": m.content,
+        "created_at": m.created_at.strftime("%Y-%m-%d %H:%M")} for m in unread]), 200
+
+@app.route("/api/system-messages/<int:mid>/read", methods=["POST"])
+@jwt_required()
+def mark_message_read(mid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    msg = db.session.get(SystemMessage, mid)
+    if msg:
+        ids = set((msg.read_by or "").split(","))
+        ids.add(str(user.id))
+        msg.read_by = ",".join(ids)
+        db.session.commit()
+    return jsonify({"ok": True}), 200
 
 @app.route("/api/admin/users/<int:uid>/reset-password", methods=["PUT"])
 @jwt_required()
