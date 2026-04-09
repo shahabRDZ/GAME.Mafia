@@ -180,6 +180,40 @@
 }
 .extra-stat { display: flex; align-items: center; gap: var(--space-xs); }
 .extra-stat-icon { font-size: 1rem; }
+
+/* XP Bar */
+.profile-xp-bar {
+  display: flex; align-items: center; gap: var(--space-xs);
+  margin: var(--space-xs) 0; justify-content: center;
+}
+.xp-level { font-size: 0.75rem; font-weight: 700; color: var(--accent2); }
+.xp-bar {
+  width: 80px; height: 6px; background: rgba(255,255,255,.06);
+  border-radius: 3px; overflow: hidden;
+}
+.xp-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent2), #4ade80);
+  border-radius: 3px; transition: width 0.5s ease;
+}
+.xp-text { font-size: 0.65rem; color: var(--dim); font-family: monospace; }
+
+/* Avatar selector */
+.profile-avatar-select {
+  display: flex; align-items: center; gap: var(--space-sm);
+  justify-content: center; margin: var(--space-sm) 0;
+  flex-wrap: wrap;
+}
+.avatar-label { font-size: 0.75rem; color: var(--dim); }
+.avatar-options { display: flex; gap: 4px; flex-wrap: wrap; }
+.avatar-opt {
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03);
+  font-size: 1.1rem; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.avatar-opt:active { transform: scale(0.9); }
+.avatar-opt.active { border-color: var(--accent2); background: rgba(245,166,35,.12); }
 .profile-edit-row {
   display: flex; gap: var(--space-xs); margin-block-start: var(--space-md);
   justify-content: center; flex-wrap: wrap;

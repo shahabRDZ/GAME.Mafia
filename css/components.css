@@ -978,6 +978,46 @@
   .completion-banner { max-width: 90vw; margin-inline: auto; }
 }
 
+/* ── Rules Page ── */
+.rules-tabs { display:flex; gap:var(--space-xs); margin-bottom:var(--space-md); flex-wrap:wrap; }
+.rules-content { font-size:var(--font-size-sm); color:rgba(255,255,255,.65); line-height:1.8; }
+.rule-block { margin-bottom:var(--space-lg); }
+.rule-block h3 { font-size:var(--font-size-md); color:var(--accent2); margin-bottom:var(--space-xs); }
+.rule-block p { margin-bottom:var(--space-xs); }
+.rule-step {
+  display:flex; align-items:center; gap:var(--space-sm);
+  padding:var(--space-xs) 0;
+}
+.rule-num {
+  width:1.5rem; height:1.5rem; border-radius:50%;
+  background:var(--accent); color:#fff; font-size:0.7rem; font-weight:900;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.rule-role {
+  display:flex; gap:var(--space-sm); padding:var(--space-sm);
+  background:rgba(255,255,255,.03); border-radius:var(--radius-md);
+  margin-bottom:var(--space-xs); border:1px solid rgba(255,255,255,.05);
+}
+.rule-role .role-icon { font-size:1.5rem; flex-shrink:0; margin-top:2px; }
+.rule-role strong { color:rgba(255,255,255,.85); }
+.rule-role p { margin:4px 0 0; font-size:0.78rem; color:var(--dim); }
+
+/* ── System Message Banner ── */
+.sys-msg-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: rgba(245,166,35,.15);
+  border-bottom: 1px solid rgba(245,166,35,.3);
+  backdrop-filter: blur(12px); transform: translateY(-100%);
+  transition: transform 0.3s ease; font-size: var(--font-size-sm);
+}
+.sys-msg-banner.show { transform: translateY(0); }
+.sys-msg-text { color: var(--accent2); font-weight: 700; flex: 1; }
+.sys-msg-close {
+  background: none; border: none; color: rgba(255,255,255,.4);
+  font-size: 1rem; cursor: pointer; padding: 4px 8px;
+}
+
 /* ── Leaderboard ── */
 .lb-tabs {
   display: flex; gap: var(--space-xs); margin-bottom: var(--space-md);

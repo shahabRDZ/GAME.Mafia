@@ -15,6 +15,25 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
 CORS(app)
 
+# ── Simple Rate Limiter ──
+from collections import defaultdict
+_rate_store = defaultdict(list)
+def rate_limit(key, max_requests=30, window=60):
+    """Returns True if rate limit exceeded."""
+    now = _time.time() if '_time' in dir() else __import__('time').time()
+    _rate_store[key] = [t for t in _rate_store[key] if now - t < window]
+    if len(_rate_store[key]) >= max_requests:
+        return True
+    _rate_store[key].append(now)
+    return False
+
+@app.before_request
+def check_rate_limit():
+    if request.path.startswith('/api/'):
+        ip = request.remote_addr or "unknown"
+        if rate_limit(f"ip:{ip}", max_requests=60, window=60):
+            return jsonify({"error": "تعداد درخواست‌ها بیش از حد مجاز"}), 429
+
 # ── Config ──────────────────────────────────────────────────────────────────
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL",
@@ -51,6 +70,7 @@ class User(db.Model):
     last_plain_pw = db.Column(db.String(100), nullable=True)
     is_banned = db.Column(db.Boolean, default=False)
     last_login = db.Column(db.DateTime, nullable=True)
+    xp = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     games = db.relationship("Game", backref="user", lazy=True, cascade="all, delete-orphan")
 
@@ -65,7 +85,7 @@ class User(db.Model):
                 "avatar": self.avatar_emoji, "bio": self.bio,
                 "chaos_wins": self.chaos_wins, "chaos_losses": self.chaos_losses,
                 "created_at": self.created_at.isoformat(), "total_games": len(self.games),
-                "online": self.id in online_users}
+                "online": self.id in online_users, "xp": self.xp or 0}
 
 
 class Game(db.Model):
@@ -718,6 +738,9 @@ def save_game():
     game = Game(user_id=user.id, group_name=data.get("group", "نامشخص"),
                 total=data.get("count", 0), mafia=data.get("mafia", 0), citizen=data.get("citizen", 0))
     db.session.add(game)
+    # Award XP: 10 per game, bonus for larger games
+    xp_gain = 10 + (data.get("count", 0) // 5) * 5
+    user.xp = (user.xp or 0) + xp_gain
     db.session.commit()
     return jsonify(game.to_dict()), 201
 
@@ -3952,6 +3975,28 @@ def admin_reset_password(uid):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# ── Error Handlers ──
+@app.errorhandler(404)
+def page_not_found(e):
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "مسیر یافت نشد"}), 404
+    return '''<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>۴۰۴ — شوشانگ</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;color:#eaeaf5;font-family:system-ui,sans-serif;
+display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px}
+.e{max-width:360px}.e .n{font-size:6rem;font-weight:900;background:linear-gradient(120deg,#ff2244,#f5a623);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent}.e p{color:rgba(255,255,255,.4);margin:12px 0 24px;font-size:.9rem}
+.e a{display:inline-block;padding:12px 28px;background:#e94560;color:#fff;border-radius:12px;text-decoration:none;
+font-weight:700;font-size:.9rem}</style></head><body><div class="e"><div class="n">۴۰۴</div>
+<div style="font-size:2rem;margin-bottom:8px">🎭</div><p>صفحه‌ای که دنبالش بودی پیدا نشد!</p>
+<a href="/">بازگشت به شوشانگ</a></div></body></html>''', 404
+
+@app.errorhandler(429)
+def too_many_requests(e):
+    return jsonify({"error": "تعداد درخواست‌ها بیش از حد مجاز. کمی صبر کنید."}), 429
+
+
 # BOOTSTRAP
 # ══════════════════════════════════════════════════════════════════════════════
 

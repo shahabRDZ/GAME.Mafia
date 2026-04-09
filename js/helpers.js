@@ -93,6 +93,64 @@ function showEmptyState(container, icon, title, desc, ctaText, ctaAction) {
     </div>`;
 }
 
+// ── Game Rules ──
+function showRulesTab(tab, btn) {
+  if (btn) {
+    document.querySelectorAll('.rules-tabs .lb-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const el = document.getElementById('rulesContent');
+  const rules = {
+    overview: `
+      <div class="rule-block"><h3>🎭 بازی مافیا چیست؟</h3><p>مافیا یک بازی گروهی است که بازیکنان به دو تیم اصلی تقسیم می‌شوند: <strong style="color:#ff5555">مافیا</strong> و <strong style="color:#4ade80">شهروند</strong>. هدف مافیا حذف شهروندان و هدف شهروندان شناسایی و حذف مافیاست.</p></div>
+      <div class="rule-block"><h3>🌅 روند بازی</h3>
+        <div class="rule-step"><span class="rule-num">۱</span> <strong>روز:</strong> بازیکنان بحث می‌کنند و به یک نفر رأی می‌دهند</div>
+        <div class="rule-step"><span class="rule-num">۲</span> <strong>دفاع:</strong> متهم ۳۰ ثانیه دفاع می‌کند</div>
+        <div class="rule-step"><span class="rule-num">۳</span> <strong>رأی نهایی:</strong> اخراج یا بقا</div>
+        <div class="rule-step"><span class="rule-num">۴</span> <strong>شب:</strong> نقش‌ها اقدامات شبانه انجام می‌دهند</div>
+        <div class="rule-step"><span class="rule-num">۵</span> <strong>صبح:</strong> گرداننده نتیجه شب را اعلام می‌کند</div>
+      </div>
+      <div class="rule-block"><h3>🏆 شرط پیروزی</h3>
+        <p>😈 <strong>مافیا:</strong> تعداد مافیا ≥ تعداد شهروندان</p>
+        <p>😇 <strong>شهروند:</strong> همه مافیاها حذف شوند</p>
+      </div>
+      <div class="rule-block"><h3>⚠️ قوانین عمومی</h3>
+        <p>• ۳ اخطار = اخراج از بازی</p>
+        <p>• نقش خود را فاش نکنید</p>
+        <p>• در شب حرف نزنید</p>
+        <p>• به رأی اکثریت احترام بگذارید</p>
+      </div>`,
+    mafia: `
+      <div class="rule-role"><span class="role-icon">👑</span><div><strong>پدرخوانده / رئیس مافیا</strong><p>رهبر تیم مافیا. هر شب یک شات انجام می‌دهد. در استعلام کارآگاه «شهروند» نشان داده می‌شود.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🔫</span><div><strong>ناتو</strong><p>شات مستقل دارد. می‌تواند نقش مستقل را هم بزند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🃏</span><div><strong>شیاد / جوکر</strong><p>در استعلام، نقش جعلی نشان می‌دهد. مافیا را مخفی نگه می‌دارد.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🤝</span><div><strong>مذاکره‌کننده</strong><p>هر شب یک شهروند را جذب تیم مافیا می‌کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">💻</span><div><strong>هکر</strong><p>توانایی یک بازیکن را برای آن شب غیرفعال می‌کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">💣</span><div><strong>گروگان‌گیر</strong><p>یک بازیکن را گروگان می‌گیرد. اگر مافیا رأی بیاورد، گروگان هم حذف می‌شود.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🗡️</span><div><strong>یاغی</strong><p>حمله مستقل شبانه. به خودسر عمل می‌کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">😈</span><div><strong>مافیا ساده</strong><p>در رأی‌گیری شبانه مافیا شرکت می‌کند. توانایی ویژه ندارد.</p></div></div>`,
+    citizen: `
+      <div class="rule-role"><span class="role-icon">⚕️</span><div><strong>دکتر</strong><p>هر شب یک بازیکن را سیو می‌کند. نمی‌تواند دو شب متوالی یک نفر را سیو کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🕵️</span><div><strong>کارآگاه</strong><p>هر شب از یک بازیکن استعلام می‌گیرد: مافیا یا شهروند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🔍</span><div><strong>بازپرس</strong><p>مثل کارآگاه استعلام می‌گیرد. در بعضی سناریوها نقش دقیق را می‌فهمد.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🎯</span><div><strong>تک‌تیرانداز</strong><p>یک شات دارد. اگر مافیا بزند حذف می‌شود. اگر شهروند بزند خودش هم حذف می‌شود.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🏹</span><div><strong>هانتر</strong><p>یک بازیکن را نشانه می‌گذارد. اگر هانتر حذف شود، نشانه‌شده هم حذف می‌شود.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🛡️</span><div><strong>رویین‌تن / زره‌پوش</strong><p>یک بار از مرگ نجات پیدا می‌کند. سپر یک‌بار مصرف.</p></div></div>
+      <div class="rule-role"><span class="role-icon">👮</span><div><strong>نگهبان / محافظ</strong><p>هر شب از یک بازیکن محافظت می‌کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🍷</span><div><strong>ساقی</strong><p>یک بازیکن را سایلنت می‌کند — در روز بعد حق صحبت ندارد.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🧠</span><div><strong>روانشناس</strong><p>تیم یک بازیکن را تشخیص می‌دهد (مافیا/شهروند/مستقل).</p></div></div>
+      <div class="rule-role"><span class="role-icon">📰</span><div><strong>خبرنگار</strong><p>هر شب تحقیق می‌کند. اطلاعات محدود دریافت می‌کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">😇</span><div><strong>شهروند ساده</strong><p>توانایی شبانه ندارد. با منطق و استدلال بازی می‌کند.</p></div></div>`,
+    independent: `
+      <div class="rule-role"><span class="role-icon">🔪</span><div><strong>قاتل زنجیره‌ای</strong><p>هر شب مستقلاً یک نفر را می‌کشد. برد: آخرین نفر باقی بماند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🎭</span><div><strong>هزارچهره</strong><p>هر شب هویت خود را تغییر می‌دهد. در استعلام متفاوت دیده می‌شود.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🐺</span><div><strong>گرگ‌نما</strong><p>حمله شبانه مستقل. نه مافیاست نه شهروند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">♏</span><div><strong>زودیاک</strong><p>قاتل مستقل. باید مخفیانه حذف کند.</p></div></div>
+      <div class="rule-role"><span class="role-icon">🕶️</span><div><strong>سندیکا</strong><p>تیم خودش را تشکیل می‌دهد. بازیکنان را جذب می‌کند.</p></div></div>`
+  };
+  el.innerHTML = rules[tab] || '';
+}
+
 // ── Toast Queue ──
 const toastQueue = [];
 let toastActive = false;
