@@ -153,9 +153,10 @@ function showRulesTab(tab, btn) {
 
 // ── Events ──
 function showEventTab(tab, btn) {
-  document.querySelectorAll('.event-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.event-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.event-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('event' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+  const target = document.getElementById('event' + tab.charAt(0).toUpperCase() + tab.slice(1));
+  if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
   if (tab === 'browse') filterEvents();
   if (tab === 'my') loadMyEvents();
@@ -211,7 +212,7 @@ function renderEventCard(e) {
 }
 
 async function createEvent() {
-  if (!authToken) { alert('ابتدا وارد حساب شوید'); openAuthModal('login'); return; }
+  if (!authToken) { showToast('⚠️ ابتدا وارد شوید'); openAuthModal('login'); return; }
   const data = {
     country: document.getElementById('evCountry').value,
     city: document.getElementById('evCity').value.trim(),
@@ -225,7 +226,7 @@ async function createEvent() {
     description: document.getElementById('evDescription').value.trim()
   };
   if (!data.city || !data.location_name || !data.event_date || !data.start_time) {
-    alert('شهر، لوکیشن، تاریخ و ساعت الزامی است\n\nشهر: ' + data.city + '\nلوکیشن: ' + data.location_name + '\nتاریخ: ' + data.event_date + '\nساعت: ' + data.start_time);
+    showToast('⚠️ شهر، لوکیشن، تاریخ و ساعت الزامی است');
     return;
   }
   try {
