@@ -526,9 +526,9 @@
             <select id="evPlayerCount" class="event-select"><option value="10">۱۰ نفر</option><option value="12">۱۲ نفر</option><option value="13">۱۳ نفر</option></select>
           </div>
           <div class="ef-row">
-            <input type="date" id="evDate" class="ef-input">
-            <input type="time" id="evStartTime" class="ef-input">
-            <input type="time" id="evEndTime" class="ef-input" placeholder="پایان">
+            <input type="text" id="evDate" class="ef-input" placeholder="تاریخ (مثلاً ۱۴۰۵/۰۲/۱۵)" onfocus="this.type='date'" inputmode="numeric">
+            <input type="text" id="evStartTime" class="ef-input" placeholder="شروع (مثلاً ۱۹:۰۰)" onfocus="this.type='time'">
+            <input type="text" id="evEndTime" class="ef-input" placeholder="پایان" onfocus="this.type='time'">
           </div>
           <textarea id="evDescription" placeholder="توضیحات (اختیاری)..." class="ef-textarea" rows="2"></textarea>
           <button class="start-btn start-btn-nearby" onclick="createEvent()" style="width:100%">🏠 ثبت ایونت</button>
