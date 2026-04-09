@@ -4,20 +4,71 @@
 (function runSplash() {
   const fill = document.getElementById("splashFill");
   const splash = document.getElementById("splashScreen");
+  const percentEl = document.getElementById("splashPercent");
+  const tagline = document.getElementById("splashTagline");
+  const canvas = document.getElementById("splashCanvas");
   if (!fill || !splash) return;
+
+  // Particles
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const particles = [];
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.5,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        alpha: Math.random() * 0.3 + 0.1
+      });
+    }
+    let animFrame;
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(233,69,96,${p.alpha})`;
+        ctx.fill();
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      animFrame = requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+    setTimeout(() => cancelAnimationFrame(animFrame), 4000);
+  }
+
+  // Typing effect
+  const text = "به دنیای مافیا خوش اومدی...";
+  let charIdx = 0;
+  if (tagline) {
+    const typeInterval = setInterval(() => {
+      charIdx++;
+      tagline.textContent = text.slice(0, charIdx);
+      if (charIdx >= text.length) clearInterval(typeInterval);
+    }, 70);
+  }
+
+  // Progress bar with percentage
   let progress = 0;
   const interval = setInterval(() => {
-    progress += Math.random() * 15 + 5;
+    progress += Math.random() * 12 + 3;
     if (progress >= 100) progress = 100;
     fill.style.width = progress + "%";
+    if (percentEl) percentEl.textContent = Math.round(progress) + "٪";
     if (progress >= 100) {
       clearInterval(interval);
       setTimeout(() => {
         splash.classList.add("hide");
-        setTimeout(() => splash.remove(), 500);
-      }, 300);
+        setTimeout(() => splash.remove(), 600);
+      }, 500);
     }
-  }, 150);
+  }, 120);
 })();
 
 // Keyboard handlers
