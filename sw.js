@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v57';
+const CACHE_VERSION = 'v58';
 const STATIC_CACHE = `shushang-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `shushang-dynamic-${CACHE_VERSION}`;
 
