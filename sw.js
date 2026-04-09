@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v80';
+const CACHE_VERSION = 'v81';
 const STATIC_CACHE = `shushang-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `shushang-dynamic-${CACHE_VERSION}`;
 
@@ -70,8 +70,13 @@ self.addEventListener('fetch', e => {
   // Skip external requests (CDN, etc.)
   if (url.origin !== self.location.origin) return;
 
-  // Network-first for API calls
+  // API calls: network-only for auth, network-first for others
   if (url.pathname.startsWith('/api/')) {
+    // Never cache auth endpoints
+    if (url.pathname.includes('/auth/')) {
+      e.respondWith(fetch(e.request));
+      return;
+    }
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -86,10 +91,23 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Stale-while-revalidate for static assets (faster loads + always fresh)
+  // Network-first for JS (always get latest code)
+  if (url.pathname.startsWith('/js/')) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(STATIC_CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Stale-while-revalidate for CSS and images
   if (
     url.pathname.startsWith('/css/') ||
-    url.pathname.startsWith('/js/') ||
     url.pathname.match(/\.(png|svg|ico|woff2?|webp)$/)
   ) {
     e.respondWith(
