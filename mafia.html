@@ -155,7 +155,7 @@
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       <span>تاریخچه</span>
     </button>
-    <button class="bnav-btn" id="navDigitalReceive" onclick="confirmDigitalReceive()">
+    <button class="bnav-btn" id="navDigitalReceive" onclick="openHostList()">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span>دریافت نقش</span>
     </button>
@@ -567,6 +567,17 @@
   </div>
 </div>
 
+
+<!-- Host List Overlay (Player picks a host) -->
+<div class="digital-overlay" id="hostListOverlay">
+  <div class="digital-box" style="border-color:rgba(0,207,255,.2);max-width:24rem">
+    <button class="modal-close-btn" onclick="closeHostList()" aria-label="بستن">✕</button>
+    <div class="digital-icon">📱</div>
+    <div class="digital-title" style="color:#00cfff">انتخاب گرداننده</div>
+    <div class="host-list-hint" id="hostListHint">در حال جستجوی گرداننده‌های نزدیک...</div>
+    <div id="hostListContent"></div>
+  </div>
+</div>
 
 <!-- Narrator Modal -->
 <div class="narrator-overlay" id="narratorModal">

@@ -602,7 +602,11 @@ async function startNearbyGame() {
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
 
-      // Register own location
+      // Register as host with game info
+      await apiFetch("/api/nearby/host-register", {
+        method: "POST", body: JSON.stringify({ lat, lng, group: state.group, count: state.count }), _background: true
+      });
+      // Also register in players pool
       await apiFetch("/api/nearby/register", {
         method: "POST", body: JSON.stringify({ lat, lng }), _background: true
       });
@@ -799,32 +803,80 @@ function closeNearby() {
   if (nearbySearchInterval) { clearInterval(nearbySearchInterval); nearbySearchInterval = null; }
 }
 
-// ── Player side: confirm + share location + poll for role ──
-function confirmDigitalReceive() {
-  if (!authToken) { showToast("⚠️ ابتدا وارد حساب شوید"); openAuthModal('login'); return; }
-  if (!confirm("آیا مایل هستید نقش دیجیتال دریافت کنید؟\n\nلوکیشن شما برای گرداننده ارسال می‌شود تا نقش‌ها پخش شود.")) return;
-  shareMyLocation();
-}
+// ── Player side: find hosts → pick one → join → wait for role ──
+let hostSearchInterval = null;
+let playerLat = null, playerLng = null;
 
-async function shareMyLocation() {
+function openHostList() {
+  if (!authToken) { showToast("⚠️ ابتدا وارد حساب شوید"); openAuthModal('login'); return; }
   if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
-  showToast("📍 در حال دریافت لوکیشن...");
+
+  document.getElementById("hostListOverlay").classList.add("show");
+  document.getElementById("hostListHint").textContent = "📍 در حال دریافت لوکیشن...";
+  document.getElementById("hostListContent").innerHTML = "";
 
   navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      await apiFetch("/api/nearby/register", {
-        method: "POST",
-        body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude }), _background: true
-      });
-      showToast("✅ آماده دریافت نقش — منتظر گرداننده باشید");
-
-      // Start polling for role — every 2 seconds
-      if (nearbyRoleCheckInterval) clearInterval(nearbyRoleCheckInterval);
-      nearbyRoleCheckInterval = setInterval(checkMyNearbyRole, 2000);
+    (pos) => {
+      playerLat = pos.coords.latitude;
+      playerLng = pos.coords.longitude;
+      document.getElementById("hostListHint").textContent = "🔍 در حال جستجوی گرداننده‌ها...";
+      searchHosts();
+      hostSearchInterval = setInterval(searchHosts, 4000);
     },
-    () => showToast("❌ دسترسی لوکیشن رد شد — از تنظیمات فعال کنید"),
+    () => {
+      document.getElementById("hostListHint").textContent = "❌ دسترسی لوکیشن رد شد";
+    },
     { enableHighAccuracy: true }
   );
+}
+
+function closeHostList() {
+  document.getElementById("hostListOverlay").classList.remove("show");
+  if (hostSearchInterval) { clearInterval(hostSearchInterval); hostSearchInterval = null; }
+}
+
+async function searchHosts() {
+  if (!playerLat) return;
+  const r = await apiFetch("/api/nearby/hosts", {
+    method: "POST", body: JSON.stringify({ lat: playerLat, lng: playerLng }), _background: true
+  });
+  if (!r.ok) return;
+  const hosts = r.data;
+  const container = document.getElementById("hostListContent");
+
+  if (!hosts.length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--dim)">هنوز گرداننده‌ای پیدا نشده...<br><span style="font-size:0.72rem">گرداننده باید «حرفه‌ای» را بزند</span></div>';
+    document.getElementById("hostListHint").textContent = "🔍 در حال جستجو...";
+    return;
+  }
+
+  document.getElementById("hostListHint").textContent = `${toFarsiNum(hosts.length)} گرداننده پیدا شد`;
+  container.innerHTML = hosts.map(h => `
+    <div class="host-item" onclick="joinHostGame(${h.user_id})">
+      ${renderAvatar(h.username, '2.2rem')}
+      <div class="host-info">
+        <div class="host-name">${escapeHtml(h.username)}</div>
+        <div class="host-meta">🎭 ${escapeHtml(h.group)} · 👥 ${toFarsiNum(h.count)} نفر · ${toFarsiNum(h.distance)} متر</div>
+      </div>
+      <div class="host-join-icon">→</div>
+    </div>
+  `).join('');
+}
+
+async function joinHostGame(hostId) {
+  if (!playerLat) return;
+  const r = await apiFetch("/api/nearby/join-host/" + hostId, {
+    method: "POST", body: JSON.stringify({ lat: playerLat, lng: playerLng })
+  });
+  if (!r.ok) { showToast("⚠️ خطا در اتصال"); return; }
+
+  closeHostList();
+  haptic('medium');
+  showToast("✅ به بازی متصل شدید — منتظر پخش نقش باشید");
+
+  // Start polling for role
+  if (nearbyRoleCheckInterval) clearInterval(nearbyRoleCheckInterval);
+  nearbyRoleCheckInterval = setInterval(checkMyNearbyRole, 2000);
 }
 
 // ── Player: flip card to confirm ──
