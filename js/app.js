@@ -1,5 +1,25 @@
 /* ── Application Initialization ── */
 
+// ── Splash Screen ──
+(function runSplash() {
+  const fill = document.getElementById("splashFill");
+  const splash = document.getElementById("splashScreen");
+  if (!fill || !splash) return;
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 15 + 5;
+    if (progress >= 100) progress = 100;
+    fill.style.width = progress + "%";
+    if (progress >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        splash.classList.add("hide");
+        setTimeout(() => splash.remove(), 500);
+      }, 300);
+    }
+  }, 150);
+})();
+
 // Keyboard handlers
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && document.getElementById("authModal").classList.contains("show")) submitAuth();
