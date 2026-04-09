@@ -1079,15 +1079,18 @@
 .event-reserve-btn.disabled { opacity: .4; cursor: not-allowed; }
 
 /* ── Event Banner (main page) ── */
-.event-banner {
+.event-banner-img {
   display:block; margin-top:var(--space-md); border-radius:var(--radius-xl);
-  overflow:hidden; position:relative; text-decoration:none;
-  background:linear-gradient(135deg, #0a0000 0%, #1a0000 40%, #0d0000 70%, #000 100%);
-  border:1px solid rgba(233,69,96,.2); cursor:pointer;
+  overflow:hidden; position:relative; text-decoration:none; cursor:pointer;
+  border:1px solid rgba(233,69,96,.2);
   transition:all var(--transition-base);
 }
-.event-banner:hover { border-color:rgba(233,69,96,.4); }
-.event-banner:active { transform:scale(0.98); }
+.event-banner-img:hover { border-color:rgba(233,69,96,.4); }
+.event-banner-img:active { transform:scale(0.98); }
+.event-banner-pic { width:100%; display:block; border-radius:var(--radius-xl); }
+.event-banner-img .event-banner-fallback { display:none; }
+.event-banner-img.no-img .event-banner-pic { display:none; }
+.event-banner-img.no-img .event-banner-fallback { display:block; }
 .event-banner-fire {
   position:absolute; bottom:0; left:0; right:0; height:50px;
   background:linear-gradient(0deg, rgba(233,69,96,.12) 0%, rgba(245,166,35,.06) 40%, transparent 100%);
