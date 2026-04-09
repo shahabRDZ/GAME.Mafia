@@ -98,6 +98,21 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
   display: flex; align-items: center; justify-content: center;
 }
 .bnav-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+/* Main receive button — bigger, red, centered */
+.bnav-btn-main {
+  background: var(--accent); color: #fff !important;
+  border-radius: 50%; width: 3.2rem; height: 3.2rem;
+  margin-top: -1.2rem; padding: 0;
+  box-shadow: 0 4px 16px rgba(233,69,96,.4);
+  position: relative; z-index: 2;
+}
+.bnav-btn-main .bnav-icon { width: 1.6rem; height: 1.6rem; filter: none; }
+.bnav-btn-main span:last-child {
+  position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+  font-size: 0.55rem; white-space: nowrap; color: var(--accent);
+}
+.bnav-btn-main.active { color: #fff !important; }
+.bnav-btn-main.active::after { display: none; }
 
 /* Hide old nav */
 .nav { display: none; }
