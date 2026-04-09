@@ -864,6 +864,67 @@ def haversine(lat1, lng1, lat2, lng2):
     a = 0.5 - math.cos((lat2-lat1)*p)/2 + math.cos(lat1*p)*math.cos(lat2*p)*(1-math.cos((lng2-lng1)*p))/2
     return 2 * R * math.asin(math.sqrt(a))
 
+active_hosts = {}  # user_id -> {username, lat, lng, ts, group, count, player_count}
+
+@app.route("/api/nearby/host-register", methods=["POST"])
+@jwt_required()
+def register_host():
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    lat = data.get("lat"); lng = data.get("lng")
+    if lat is None or lng is None:
+        return jsonify({"error": "لوکیشن نامعتبر"}), 400
+    active_hosts[user.id] = {
+        "username": user.username, "user_id": user.id,
+        "lat": float(lat), "lng": float(lng),
+        "ts": _time.time(),
+        "group": data.get("group", ""),
+        "count": data.get("count", 0)
+    }
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/nearby/hosts", methods=["POST"])
+@jwt_required()
+def find_hosts():
+    """Player finds nearby hosts (game creators)."""
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    my_lat = float(data.get("lat", 0))
+    my_lng = float(data.get("lng", 0))
+    now = _time.time()
+    # Clean stale hosts (older than 10 min)
+    stale = [uid for uid, h in active_hosts.items() if now - h["ts"] > 600]
+    for uid in stale: active_hosts.pop(uid, None)
+    # Find nearby hosts
+    results = []
+    for uid, h in active_hosts.items():
+        if uid == user.id: continue
+        dist = haversine(my_lat, my_lng, h["lat"], h["lng"])
+        if dist <= 500:  # 500m radius
+            results.append({
+                "user_id": uid, "username": h["username"],
+                "group": h["group"], "count": h["count"],
+                "distance": round(dist)
+            })
+    results.sort(key=lambda x: x["distance"])
+    return jsonify(results), 200
+
+@app.route("/api/nearby/join-host/<int:host_id>", methods=["POST"])
+@jwt_required()
+def join_host(host_id):
+    """Player joins a specific host's game."""
+    user = db.session.get(User, int(get_jwt_identity()))
+    data = request.get_json()
+    lat = data.get("lat"); lng = data.get("lng")
+    if lat is None or lng is None:
+        return jsonify({"error": "لوکیشن نامعتبر"}), 400
+    # Register player location
+    nearby_players[user.id] = {
+        "username": user.username, "lat": float(lat), "lng": float(lng),
+        "ts": _time.time(), "user_id": user.id, "host_id": host_id
+    }
+    return jsonify({"ok": True, "message": "به بازی متصل شدید"}), 200
+
 @app.route("/api/nearby/register", methods=["POST"])
 @jwt_required()
 def register_nearby():
@@ -894,16 +955,20 @@ def find_nearby():
     stale = [uid for uid, p in nearby_players.items() if now - p["ts"] > 300]
     for uid in stale:
         nearby_players.pop(uid, None)
-    # Find nearby
+    # Find nearby — only players who joined this host
+    host_id = user.id
     results = []
     for uid, p in nearby_players.items():
         if uid == user.id:
+            continue
+        # Show players who joined this host, or nearby unjoined players
+        if p.get("host_id") and p["host_id"] != host_id:
             continue
         dist = haversine(my_lat, my_lng, p["lat"], p["lng"])
         if dist <= radius:
             results.append({
                 "user_id": uid, "username": p["username"],
-                "distance": round(dist)
+                "distance": round(dist), "joined": p.get("host_id") == host_id
             })
     results.sort(key=lambda x: x["distance"])
     return jsonify(results), 200

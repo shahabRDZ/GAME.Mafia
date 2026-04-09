@@ -758,6 +758,22 @@
 }
 .confirm-resend:active { transform: scale(0.9); background: rgba(255,255,255,.08); }
 
+/* ── Host List (Player picks host) ── */
+.host-list-hint { font-size:0.8rem; color:var(--dim); text-align:center; margin-bottom:12px; }
+.host-item {
+  display:flex; align-items:center; gap:var(--space-sm);
+  padding:var(--space-sm) var(--space-md);
+  background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--radius-md); margin-bottom:var(--space-xs);
+  cursor:pointer; transition:all var(--transition-fast);
+}
+.host-item:hover { background:rgba(0,207,255,.06); border-color:rgba(0,207,255,.2); }
+.host-item:active { transform:scale(0.98); }
+.host-info { flex:1; }
+.host-name { font-weight:700; font-size:var(--font-size-base); color:rgba(255,255,255,.85); }
+.host-meta { font-size:0.72rem; color:var(--dim); margin-top:2px; }
+.host-join-icon { font-size:1.2rem; color:#00cfff; font-weight:900; }
+
 /* ── Digital Tap Area (NFC-like) ── */
 .digital-tap-area {
   position: relative; padding: 3rem 2rem;
