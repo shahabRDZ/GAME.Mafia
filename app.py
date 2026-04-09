@@ -354,10 +354,15 @@ def login():
     ).first()
     if not user or not user.check_password(password):
         return jsonify({"error": "نام کاربری یا رمز عبور اشتباه است"}), 401
-    if user.is_banned:
-        return jsonify({"error": "حساب شما مسدود شده است"}), 403
-    user.last_login = datetime.now(timezone.utc)
-    db.session.commit()
+    try:
+        if user.is_banned:
+            return jsonify({"error": "حساب شما مسدود شده است"}), 403
+    except: pass
+    try:
+        user.last_login = datetime.now(timezone.utc)
+        db.session.commit()
+    except:
+        db.session.rollback()
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()}), 200
 
@@ -4280,6 +4285,9 @@ for attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_plain_pw VARCHAR(100)"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP"))
+                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0"))
                 # Recreate lab tables to ensure all columns exist
                 db.session.execute(db.text("DROP TABLE IF EXISTS lab_messages CASCADE"))
                 db.session.execute(db.text("DROP TABLE IF EXISTS lab_players CASCADE"))
