@@ -1026,8 +1026,8 @@
   font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all var(--transition-fast);
 }
 .event-tab.active { background: rgba(74,222,128,.12); border-color: rgba(74,222,128,.25); color: #4ade80; }
-.event-section { display: none; }
-.event-section.active { display: block; }
+.event-section { display: none !important; }
+.event-section.active { display: block !important; }
 
 /* Event form */
 .event-form { display: flex; flex-direction: column; gap: var(--space-sm); }
