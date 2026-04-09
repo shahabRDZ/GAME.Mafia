@@ -129,6 +129,7 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; paddi
       <span class="admin-title">⚙️ پنل شوشانگ</span>
       <div class="admin-nav">
         <button class="admin-tab active" onclick="showTab('users')">👥 کاربران</button>
+        <button class="admin-tab" onclick="showTab('events')">🏠 ایونت</button>
         <button class="admin-tab" onclick="showTab('messages')">📨 پیام</button>
         <button class="admin-tab" onclick="showTab('logs')">📋 لاگ</button>
         <a href="/" class="admin-tab" style="text-decoration:none">◀ سایت</a>
@@ -151,6 +152,12 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; paddi
     </div>
 
     <!-- Messages Section -->
+    <!-- Events Section -->
+    <div class="section" id="sec-events">
+      <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">🏠 مدیریت ایونت‌ها</h2>
+      <div id="adminEventList"></div>
+    </div>
+
     <div class="section" id="sec-messages">
       <h2 style="font-size:1rem;color:#f5a623;margin-bottom:14px">📨 پیام سیستمی</h2>
       <div class="msg-form">
@@ -236,6 +243,8 @@ async function loadData() {
   // Logs
   const lr = await fetch(API+"/api/admin/logs",hdr()); const logs = await lr.json();
   document.getElementById("logList").innerHTML = logs.map(l=>`<div class="log-item"><span class="log-action">${l.action}</span> ${l.target?`<span class="log-target">${l.target}</span>`:''} <span class="msg-time">${l.created_at}</span></div>`).join("")||'<div style="color:rgba(255,255,255,.2);text-align:center;padding:20px">لاگی نیست</div>';
+  // Events
+  loadAdminEvents();
 }
 
 function renderUsers(users) {
@@ -331,6 +340,42 @@ async function sendBroadcast() {
 
 // Export CSV
 function exportCsv() { window.open(API+"/api/admin/export-csv?token="+token); }
+
+// Events
+async function loadAdminEvents() {
+  const r=await fetch(API+"/api/admin/events",hdr()); const events=await r.json();
+  const el=document.getElementById("adminEventList");
+  if(!events.length){el.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,.2)">ایونتی نیست</div>';return;}
+  el.innerHTML=events.map(e=>{
+    const statusColor={pending:'#f5a623',open:'#4ade80',full:'#60a5fa',rejected:'#e94560',cancelled:'#666'}[e.status]||'#666';
+    const statusText={pending:'⏳ منتظر تأیید',open:'✅ فعال',full:'🔵 تکمیل',rejected:'❌ رد شده',cancelled:'⬛ لغو'}[e.status]||e.status;
+    return `<div class="u-row" style="border-right:3px solid ${statusColor}">
+      <div class="u-info" style="flex:1">
+        <div class="u-name">📍 ${e.location_name}</div>
+        <div class="u-email">🌍 ${e.country}, ${e.city} · 🎭 ${e.scenario} · 👥 ${e.reserved_count}/${e.max_players}</div>
+        <div class="u-meta">📅 ${e.event_date} · ⏰ ${e.start_time} · 🎙️ ${e.host_name} · <span style="color:${statusColor}">${statusText}</span></div>
+      </div>
+      <div class="u-actions">
+        ${e.status==='pending'?`<button class="btn-s btn-unban" onclick="approveEvent(${e.id})">تأیید</button><button class="btn-s btn-ban" onclick="rejectEvent(${e.id})">رد</button>`:''}
+        <button class="btn-s btn-del" onclick="deleteAdminEvent(${e.id})">حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function approveEvent(eid) {
+  await fetch(API+`/api/admin/events/${eid}/approve`,{method:"PUT",...hdr()});
+  alert("✅ تأیید شد"); loadAdminEvents();
+}
+async function rejectEvent(eid) {
+  await fetch(API+`/api/admin/events/${eid}/reject`,{method:"PUT",...hdr()});
+  alert("❌ رد شد"); loadAdminEvents();
+}
+async function deleteAdminEvent(eid) {
+  if(!confirm("حذف شود؟"))return;
+  await fetch(API+`/api/events/${eid}`,{method:"DELETE",...hdr()});
+  alert("حذف شد"); loadAdminEvents();
+}
 
 // Enter to login
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&!token)doLogin();});

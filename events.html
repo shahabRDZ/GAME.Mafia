@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ایونت‌ها — شوشانگ</title>
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="css/variables.css">
+<style>
+body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margin:0; padding:0; min-height:100dvh; }
+
+/* Header */
+.ev-header {
+  text-align:center; padding:24px 16px 16px;
+  background:linear-gradient(180deg, rgba(74,222,128,.06) 0%, transparent 100%);
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.ev-header-back { position:absolute; top:16px; right:16px; background:none; border:1px solid rgba(255,255,255,.1);
+  border-radius:50%; width:36px; height:36px; color:var(--dim); cursor:pointer; font-size:1rem;
+  display:flex; align-items:center; justify-content:center; }
+.ev-logo { font-size:2rem; margin-bottom:4px; }
+.ev-title { font-size:1.3rem; font-weight:900; color:#4ade80; }
+.ev-sub { font-size:.75rem; color:rgba(255,255,255,.3); }
+
+/* Tabs */
+.ev-tabs { display:flex; gap:6px; padding:12px 16px; overflow-x:auto; }
+.ev-tab { padding:8px 16px; border-radius:50px; border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.03); color:rgba(255,255,255,.4); font-family:inherit;
+  font-size:.78rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:all .2s; flex-shrink:0; }
+.ev-tab.active { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.25); color:#4ade80; }
+
+/* Filters */
+.ev-filters { display:flex; gap:8px; padding:0 16px 12px; }
+.ev-filters select, .ev-filters input { flex:1; padding:10px 12px; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08); border-radius:12px; color:#fff; font-family:inherit;
+  font-size:.82rem; outline:none; }
+.ev-filters select option { background:#0d0d1c; }
+.ev-filters input:focus, .ev-filters select:focus { border-color:#4ade80; }
+
+/* Content */
+.ev-content { padding:0 16px 100px; }
+.ev-section { display:none; }
+.ev-section.active { display:block; }
+
+/* Event Card */
+.ev-card {
+  padding:16px; margin-bottom:10px; border-radius:16px;
+  background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+  transition:all .2s;
+}
+.ev-card:hover { border-color:rgba(74,222,128,.15); }
+.ev-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+.ev-card-loc { font-weight:900; font-size:1rem; color:#f5a623; }
+.ev-badge { padding:3px 10px; border-radius:50px; font-size:.62rem; font-weight:700; }
+.ev-badge-open { background:rgba(74,222,128,.12); color:#4ade80; }
+.ev-badge-full { background:rgba(233,69,96,.12); color:#e94560; }
+.ev-badge-pending { background:rgba(245,166,35,.12); color:#f5a623; }
+.ev-card-details { display:flex; flex-wrap:wrap; gap:6px; font-size:.75rem; color:rgba(255,255,255,.35); margin-bottom:8px; }
+.ev-card-details span { display:inline-flex; align-items:center; gap:3px; }
+.ev-card-desc { font-size:.75rem; color:rgba(255,255,255,.25); margin-bottom:8px; }
+.ev-card-bottom { display:flex; justify-content:space-between; align-items:center; }
+.ev-card-host { font-size:.72rem; color:rgba(255,255,255,.3); }
+.ev-btn-reserve { padding:8px 18px; background:linear-gradient(135deg,#4ade80,#22c55e); border:none;
+  border-radius:50px; color:#002211; font-family:inherit; font-size:.78rem; font-weight:900; cursor:pointer; }
+.ev-btn-reserve:active { transform:scale(.95); }
+
+/* Create Form */
+.ev-form { display:flex; flex-direction:column; gap:10px; }
+.ev-form-row { display:flex; gap:8px; }
+.ev-form input, .ev-form select, .ev-form textarea {
+  flex:1; padding:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  border-radius:12px; color:#fff; font-family:inherit; font-size:.85rem; outline:none; }
+.ev-form input:focus, .ev-form select:focus, .ev-form textarea:focus { border-color:#4ade80; }
+.ev-form select option { background:#0d0d1c; }
+.ev-form textarea { resize:none; }
+.ev-form-submit { padding:14px; background:linear-gradient(135deg,#4ade80,#22c55e); border:none;
+  border-radius:14px; color:#002211; font-family:inherit; font-size:1rem; font-weight:900; cursor:pointer; }
+.ev-form-submit:active { transform:scale(.97); }
+
+/* My events */
+.ev-my-label { font-size:.82rem; font-weight:700; margin:12px 0 8px; }
+.ev-my-label.host { color:#f5a623; }
+.ev-my-label.reserved { color:#60a5fa; }
+.ev-res-item { display:flex; align-items:center; gap:8px; padding:6px 10px; border-bottom:1px solid rgba(255,255,255,.04); font-size:.78rem; }
+.ev-res-name { flex:1; color:rgba(255,255,255,.6); }
+.ev-res-status { font-size:.7rem; }
+.ev-res-btn { padding:4px 10px; border-radius:8px; border:none; cursor:pointer; font-family:inherit; font-size:.65rem; font-weight:700; }
+.ev-res-accept { background:rgba(74,222,128,.15); color:#4ade80; }
+.ev-res-reject { background:rgba(233,69,96,.12); color:#e94560; }
+
+/* Bottom bar */
+.ev-bottom { position:fixed; bottom:0; left:0; right:0; padding:12px 16px;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  background:rgba(0,0,0,.9); backdrop-filter:blur(12px); border-top:1px solid rgba(255,255,255,.06); }
+.ev-bottom a { display:block; text-align:center; padding:12px; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08); border-radius:12px; color:rgba(255,255,255,.5);
+  text-decoration:none; font-family:inherit; font-size:.82rem; font-weight:700; }
+</style>
+</head>
+<body>
+
+<div class="ev-header" style="position:relative">
+  <a href="/" class="ev-header-back">◀</a>
+  <div class="ev-logo">🏠</div>
+  <div class="ev-title">ایونت‌های بازی مافیا</div>
+  <div class="ev-sub">پیدا کن · رزرو کن · بازی کن</div>
+</div>
+
+<div class="ev-tabs">
+  <button class="ev-tab active" onclick="evShowTab('browse',this)">🔍 جستجو</button>
+  <button class="ev-tab" onclick="evShowTab('create',this)">➕ ایونت جدید</button>
+  <button class="ev-tab" onclick="evShowTab('my',this)">📋 ایونت‌های من</button>
+</div>
+
+<!-- Browse -->
+<div class="ev-section active" id="evSec-browse">
+  <div class="ev-filters">
+    <select id="evFilterCountry" onchange="evLoadEvents()">
+      <option value="">همه کشورها</option>
+      <option value="ایران">🇮🇷 ایران</option>
+      <option value="ترکیه">🇹🇷 ترکیه</option>
+      <option value="امارات">🇦🇪 امارات</option>
+      <option value="آلمان">🇩🇪 آلمان</option>
+      <option value="کانادا">🇨🇦 کانادا</option>
+    </select>
+    <input type="text" id="evFilterCity" placeholder="شهر..." oninput="evLoadEvents()">
+  </div>
+  <div class="ev-content" id="evBrowseList"></div>
+</div>
+
+<!-- Create -->
+<div class="ev-section" id="evSec-create">
+  <div class="ev-content">
+    <div class="ev-form">
+      <div class="ev-form-row">
+        <select id="evFCountry"><option value="ایران">🇮🇷 ایران</option><option value="ترکیه">🇹🇷 ترکیه</option><option value="امارات">🇦🇪 امارات</option><option value="آلمان">🇩🇪 آلمان</option><option value="کانادا">🇨🇦 کانادا</option></select>
+        <input type="text" id="evFCity" placeholder="شهر">
+      </div>
+      <input type="text" id="evFLocation" placeholder="📍 نام لوکیشن (کافه، رستوران...)">
+      <div class="ev-form-row">
+        <select id="evFScenario"><option value="بازپرس">🔍 بازپرس</option><option value="تکاور">⚔️ تکاور</option><option value="نماینده">🏛️ نماینده</option><option value="مذاکره">🤝 مذاکره</option></select>
+        <select id="evFCount"><option value="10">۱۰ نفر</option><option value="12">۱۲ نفر</option><option value="13">۱۳ نفر</option></select>
+      </div>
+      <div class="ev-form-row">
+        <input type="text" id="evFDate" placeholder="تاریخ" onfocus="this.type='date'">
+        <input type="text" id="evFStart" placeholder="شروع" onfocus="this.type='time'">
+        <input type="text" id="evFEnd" placeholder="پایان" onfocus="this.type='time'">
+      </div>
+      <textarea id="evFDesc" rows="2" placeholder="توضیحات (اختیاری)..."></textarea>
+      <button class="ev-form-submit" onclick="evCreate()">🏠 ثبت ایونت</button>
+      <div style="text-align:center;font-size:.72rem;color:rgba(255,255,255,.25);margin-top:4px">ایونت بعد از تأیید ادمین منتشر می‌شود</div>
+    </div>
+  </div>
+</div>
+
+<!-- My Events -->
+<div class="ev-section" id="evSec-my">
+  <div class="ev-content" id="evMyList"></div>
+</div>
+
+<div class="ev-bottom">
+  <a href="/">◀ بازگشت به شوشانگ</a>
+</div>
+
+<script>
+const API = "";
+let evToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
+
+async function evFetch(path, opts={}) {
+  const h = {"Content-Type":"application/json"};
+  if (evToken) h["Authorization"] = "Bearer " + evToken;
+  const r = await fetch(API+path, {...opts, headers:h});
+  return {ok:r.ok, data:await r.json().catch(()=>({}))};
+}
+
+function evShowTab(name, btn) {
+  document.querySelectorAll('.ev-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ev-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('evSec-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='browse') evLoadEvents();
+  if(name==='my') evLoadMy();
+}
+
+async function evLoadEvents() {
+  const country = document.getElementById('evFilterCountry').value;
+  const city = document.getElementById('evFilterCity').value;
+  const el = document.getElementById('evBrowseList');
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">در حال بارگذاری...</div>';
+  const params = new URLSearchParams();
+  if(country) params.set('country',country);
+  if(city) params.set('city',city);
+  const r = await fetch(API+'/api/events?'+params);
+  const events = await r.json();
+  if(!events.length){el.innerHTML='<div style="text-align:center;padding:40px;color:rgba(255,255,255,.2)"><div style="font-size:2rem;margin-bottom:8px">🏠</div>ایونتی پیدا نشد<br><span style="font-size:.72rem">اولین ایونت رو خودت بساز!</span></div>';return;}
+  el.innerHTML = events.map(evCard).join('');
+}
+
+function evCard(e) {
+  const badge = e.status==='open'?'<span class="ev-badge ev-badge-open">باز</span>':
+    e.status==='full'?'<span class="ev-badge ev-badge-full">تکمیل</span>':
+    e.status==='pending'?'<span class="ev-badge ev-badge-pending">در انتظار</span>':'';
+  const canRes = e.status==='open' && evToken;
+  return `<div class="ev-card">
+    <div class="ev-card-top"><div class="ev-card-loc">📍 ${e.location_name}</div>${badge}</div>
+    <div class="ev-card-details">
+      <span>🌍 ${e.country}, ${e.city}</span>
+      <span>🎭 ${e.scenario||'—'}</span>
+      <span>👥 ${e.reserved_count}/${e.max_players}</span>
+      <span>📅 ${e.event_date}</span>
+      <span>⏰ ${e.start_time}${e.end_time?' — '+e.end_time:''}</span>
+    </div>
+    ${e.description?`<div class="ev-card-desc">${e.description}</div>`:''}
+    <div class="ev-card-bottom">
+      <span class="ev-card-host">🎙️ ${e.host_name}</span>
+      ${canRes?`<button class="ev-btn-reserve" onclick="evReserve(${e.id})">رزرو</button>`:''}
+    </div>
+  </div>`;
+}
+
+async function evCreate() {
+  if(!evToken){alert('ابتدا وارد شوید');window.location='/';return;}
+  const data={
+    country:document.getElementById('evFCountry').value,
+    city:document.getElementById('evFCity').value.trim(),
+    location_name:document.getElementById('evFLocation').value.trim(),
+    scenario:document.getElementById('evFScenario').value,
+    player_count:parseInt(document.getElementById('evFCount').value),
+    max_players:parseInt(document.getElementById('evFCount').value),
+    event_date:document.getElementById('evFDate').value,
+    start_time:document.getElementById('evFStart').value,
+    end_time:document.getElementById('evFEnd').value,
+    description:document.getElementById('evFDesc').value.trim()
+  };
+  if(!data.city||!data.location_name||!data.event_date||!data.start_time){alert('شهر، لوکیشن، تاریخ و ساعت الزامی');return;}
+  const r=await evFetch('/api/events',{method:'POST',body:JSON.stringify(data)});
+  if(r.ok){alert('✅ ایونت ثبت شد — منتظر تأیید ادمین باشید');evShowTab('my',document.querySelectorAll('.ev-tab')[2]);}
+  else alert('⚠️ '+(r.data?.error||'خطا'));
+}
+
+async function evReserve(eid) {
+  if(!evToken){alert('ابتدا وارد شوید');window.location='/';return;}
+  const r=await evFetch('/api/events/'+eid+'/reserve',{method:'POST'});
+  if(r.ok){alert('✅ رزرو شد!');evLoadEvents();}
+  else alert('⚠️ '+(r.data?.error||'خطا'));
+}
+
+async function evLoadMy() {
+  if(!evToken){document.getElementById('evMyList').innerHTML='<div style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">ابتدا وارد شوید</div>';return;}
+  const r=await evFetch('/api/events/my');
+  if(!r.ok)return;
+  const el=document.getElementById('evMyList');
+  let html='';
+  if(r.data.hosted?.length){
+    html+='<div class="ev-my-label host">🎙️ ایونت‌های شما</div>';
+    r.data.hosted.forEach(e=>{
+      html+=evCard(e);
+      if(e.reservations?.length){
+        html+='<div style="padding:4px 12px;margin-top:-6px;margin-bottom:10px">';
+        e.reservations.forEach(rv=>{
+          const st=rv.status==='accepted'?'✅':rv.status==='rejected'?'❌':'⏳';
+          html+=`<div class="ev-res-item"><span class="ev-res-name">${rv.username}</span><span class="ev-res-status">${st}</span>
+            ${rv.status==='pending'?`<button class="ev-res-btn ev-res-accept" onclick="evManageRes(${e.id},${rv.user_id},'accepted')">تأیید</button><button class="ev-res-btn ev-res-reject" onclick="evManageRes(${e.id},${rv.user_id},'rejected')">رد</button>`:''}
+          </div>`;
+        });
+        html+='</div>';
+      }
+    });
+  }
+  if(r.data.reserved?.length){
+    html+='<div class="ev-my-label reserved">📋 رزروهای شما</div>';
+    r.data.reserved.forEach(e=>html+=evCard(e));
+  }
+  if(!html)html='<div style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">ایونتی ندارید</div>';
+  el.innerHTML=html;
+}
+
+async function evManageRes(eid,uid,status) {
+  await evFetch(`/api/events/${eid}/reservations/0`,{method:'PUT',body:JSON.stringify({status,user_id:uid})});
+  alert(status==='accepted'?'✅ تأیید شد':'❌ رد شد');
+  evLoadMy();
+}
+
+// Init
+evLoadEvents();
+</script>
+</body>
+</html>
