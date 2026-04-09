@@ -98,20 +98,26 @@ header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
   display: flex; align-items: center; justify-content: center;
 }
 .bnav-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
-/* Main receive button — bigger, red, centered */
+/* Main receive button — big red floating circle */
 .bnav-btn-main {
-  background: var(--accent); color: #fff !important;
-  border-radius: 50%; width: 3.2rem; height: 3.2rem;
-  margin-top: -1.2rem; padding: 0;
-  box-shadow: 0 4px 16px rgba(233,69,96,.4);
-  position: relative; z-index: 2;
+  background: none; border: none; padding: 0;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; margin-top: -1.8rem; position: relative; z-index: 3;
+  min-width: 4rem;
 }
-.bnav-btn-main .bnav-icon { width: 1.6rem; height: 1.6rem; filter: none; }
+.bnav-main-inner {
+  width: 3.5rem; height: 3.5rem; border-radius: 50%;
+  background: linear-gradient(135deg, #e94560, #c0392b);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(233,69,96,.5), 0 0 0 4px rgba(233,69,96,.15);
+  transition: all 0.2s ease;
+}
+.bnav-btn-main:active .bnav-main-inner { transform: scale(0.92); box-shadow: 0 2px 10px rgba(233,69,96,.4); }
 .bnav-btn-main span:last-child {
-  position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-  font-size: 0.55rem; white-space: nowrap; color: var(--accent);
+  font-size: 0.58rem; color: var(--accent); font-weight: 700;
+  white-space: nowrap; margin-top: 2px;
 }
-.bnav-btn-main.active { color: #fff !important; }
+.bnav-btn-main .bnav-icon { display: none; }
 .bnav-btn-main.active::after { display: none; }
 
 /* Hide old nav */
