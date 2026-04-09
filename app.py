@@ -4248,6 +4248,14 @@ def reserve_event(eid):
     db.session.add(res)
     if count + 1 >= event.max_players:
         event.status = "full"
+    # Send DM to host
+    try:
+        dm = DirectMessage(
+            sender_id=user.id, receiver_id=event.host_id,
+            content=f"📋 درخواست رزرو ایونت «{event.location_name}» از طرف {user.username} — {count+1}/{event.max_players} نفر"
+        )
+        db.session.add(dm)
+    except: pass
     db.session.commit()
     return jsonify({"ok": True, "status": res.status}), 201
 
@@ -4258,6 +4266,7 @@ def manage_reservation(eid, rid):
     event = db.session.get(GameEvent, eid)
     if not event or event.host_id != user.id:
         return jsonify({"error": "فقط گرداننده می‌تواند"}), 403
+    data = request.get_json()
     # Support by ID or by user_id
     if rid == 0:
         uid = data.get("user_id")
@@ -4266,8 +4275,16 @@ def manage_reservation(eid, rid):
         res = db.session.get(EventReservation, rid)
     if not res or res.event_id != eid:
         return jsonify({"error": "رزرو پیدا نشد"}), 404
-    data = request.get_json()
     res.status = data.get("status", res.status)
+    # Send DM to player
+    try:
+        status_text = "✅ تأیید شد" if res.status == "accepted" else "❌ رد شد"
+        dm = DirectMessage(
+            sender_id=user.id, receiver_id=res.user_id,
+            content=f"🏠 رزرو ایونت «{event.location_name}»: {status_text}"
+        )
+        db.session.add(dm)
+    except: pass
     db.session.commit()
     return jsonify({"ok": True}), 200
 
