@@ -758,6 +758,16 @@
 }
 .confirm-resend:active { transform: scale(0.9); background: rgba(255,255,255,.08); }
 
+/* ── Nearby instructions ── */
+.nearby-instructions {
+  padding: var(--space-sm); margin-bottom: var(--space-md);
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius-md); font-size: 0.8rem; color: var(--dim);
+  line-height: 1.8;
+}
+.nearby-instructions p { margin: 2px 0; }
+.nearby-instructions strong { color: var(--accent2); }
+
 /* ── Host List (Player picks host) ── */
 .host-list-hint { font-size:0.8rem; color:var(--dim); text-align:center; margin-bottom:12px; }
 .host-item {

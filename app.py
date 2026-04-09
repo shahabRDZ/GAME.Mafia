@@ -925,9 +925,9 @@ def join_host(host_id):
     lat = data.get("lat"); lng = data.get("lng")
     if lat is None or lng is None:
         return jsonify({"error": "لوکیشن نامعتبر"}), 400
-    # Register player location
+    display_name = data.get("displayName") or user.username
     nearby_players[user.id] = {
-        "username": user.username, "lat": float(lat), "lng": float(lng),
+        "username": display_name, "lat": float(lat), "lng": float(lng),
         "ts": _time.time(), "user_id": user.id, "host_id": host_id
     }
     return jsonify({"ok": True, "message": "به بازی متصل شدید"}), 200

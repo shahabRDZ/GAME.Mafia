@@ -589,7 +589,8 @@ async function startNearbyGame() {
   if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
 
   document.getElementById("nearbyOverlay").classList.add("show");
-  document.getElementById("nearbyScenarioInfo").textContent = `🎭 ${state.group} · ${toFarsiNum(state.count)} نفر (گرداننده + ${toFarsiNum(state.count - 1)} بازیکن)`;
+  document.getElementById("nearbyScenarioInfo").textContent = `🎭 ${state.group} · ${toFarsiNum(state.count)} نفر`;
+  document.getElementById("nearbyHostName").textContent = currentUser ? currentUser.username : 'گرداننده';
   document.getElementById("nearbyStatus").textContent = "📍 در حال دریافت لوکیشن...";
   document.getElementById("nearbyPlayerList").innerHTML = "";
   document.getElementById("nearbyPlayerList").style.display = "block";
@@ -803,15 +804,33 @@ function closeNearby() {
   if (nearbySearchInterval) { clearInterval(nearbySearchInterval); nearbySearchInterval = null; }
 }
 
-// ── Player side: find hosts → pick one → join → wait for role ──
+// ── Player side: enter name → find hosts → pick one → wait for role ──
 let hostSearchInterval = null;
 let playerLat = null, playerLng = null;
+let playerDisplayName = '';
 
 function openHostList() {
   if (!authToken) { showToast("⚠️ ابتدا وارد حساب شوید"); openAuthModal('login'); return; }
+
+  // Show name input first
+  document.getElementById("playerNamePhase").style.display = "block";
+  document.getElementById("hostPickPhase").style.display = "none";
+  const nameInput = document.getElementById("playerNameInput");
+  nameInput.value = currentUser ? currentUser.username : '';
+  document.getElementById("hostListOverlay").classList.add("show");
+  setTimeout(() => nameInput.select(), 300);
+}
+
+function submitPlayerName() {
+  const name = document.getElementById("playerNameInput").value.trim();
+  if (!name) { showToast("⚠️ اسم رو وارد کنید"); return; }
+  playerDisplayName = name;
+
   if (!navigator.geolocation) { showToast("⚠️ لوکیشن در دسترس نیست"); return; }
 
-  document.getElementById("hostListOverlay").classList.add("show");
+  // Switch to host pick phase
+  document.getElementById("playerNamePhase").style.display = "none";
+  document.getElementById("hostPickPhase").style.display = "block";
   document.getElementById("hostListHint").textContent = "📍 در حال دریافت لوکیشن...";
   document.getElementById("hostListContent").innerHTML = "";
 
@@ -824,7 +843,7 @@ function openHostList() {
       hostSearchInterval = setInterval(searchHosts, 4000);
     },
     () => {
-      document.getElementById("hostListHint").textContent = "❌ دسترسی لوکیشن رد شد";
+      document.getElementById("hostListHint").textContent = "❌ دسترسی لوکیشن رد شد — از تنظیمات فعال کنید";
     },
     { enableHighAccuracy: true }
   );
@@ -866,7 +885,7 @@ async function searchHosts() {
 async function joinHostGame(hostId) {
   if (!playerLat) return;
   const r = await apiFetch("/api/nearby/join-host/" + hostId, {
-    method: "POST", body: JSON.stringify({ lat: playerLat, lng: playerLng })
+    method: "POST", body: JSON.stringify({ lat: playerLat, lng: playerLng, displayName: playerDisplayName })
   });
   if (!r.ok) { showToast("⚠️ خطا در اتصال"); return; }
 
