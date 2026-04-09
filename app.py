@@ -299,7 +299,14 @@ def admin_panel():
 
 @app.route("/events")
 def events_page():
-    return app.send_static_file("events.html")
+    try:
+        return app.send_static_file("events.html")
+    except:
+        import os
+        filepath = os.path.join(BASE_DIR, "events.html")
+        if os.path.exists(filepath):
+            return open(filepath).read(), 200, {"Content-Type": "text/html; charset=utf-8"}
+        return "events.html not found", 404
 
 
 # ── Visit Counter ────────────────────────────────────────────────────────────
