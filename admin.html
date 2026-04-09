@@ -374,8 +374,9 @@ async function rejectEvent(eid) {
 }
 async function deleteAdminEvent(eid) {
   if(!confirm("حذف شود؟"))return;
-  await fetch(API+`/api/events/${eid}`,{method:"DELETE",...hdr()});
-  alert("حذف شد"); loadAdminEvents();
+  const r = await fetch(API+`/api/events/${eid}`,{method:"DELETE",...hdr()});
+  if(r.ok){alert("✅ حذف شد"); loadAdminEvents();}
+  else{const d=await r.json().catch(()=>({})); alert("⚠️ خطا: "+(d.error||r.status));}
 }
 
 // Enter to login
