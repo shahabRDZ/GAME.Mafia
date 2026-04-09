@@ -177,6 +177,26 @@ async function dismissSysMsg(id, el) {
 setTimeout(checkSystemMessages, 3000);
 setInterval(checkSystemMessages, 30000);
 
+// ── DM Unread Badge ──
+async function updateDmBadge() {
+  if (!authToken) return;
+  try {
+    const r = await apiFetch("/api/dm/unread", { _background: true });
+    if (!r.ok) return;
+    const badge = document.getElementById("dmBadge");
+    if (badge) {
+      if (r.data.count > 0) {
+        badge.textContent = r.data.count > 9 ? '۹+' : toFarsiNum(r.data.count);
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+  } catch {}
+}
+setTimeout(updateDmBadge, 4000);
+setInterval(updateDmBadge, 10000);
+
 // Auto-join digital room if opened via NFC URL (?nfc=CODE)
 (function checkNfcUrl() {
   const params = new URLSearchParams(window.location.search);

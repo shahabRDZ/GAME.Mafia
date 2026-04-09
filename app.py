@@ -452,6 +452,13 @@ def remove_friend(fid):
 # DIRECT MESSAGE ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
 
+@app.route("/api/dm/unread", methods=["GET"])
+@jwt_required()
+def get_dm_unread():
+    user = db.session.get(User, int(get_jwt_identity()))
+    count = DirectMessage.query.filter_by(receiver_id=user.id, seen=False).count()
+    return jsonify({"count": count}), 200
+
 @app.route("/api/dm/conversations", methods=["GET"])
 @jwt_required()
 def get_conversations():
@@ -987,12 +994,21 @@ def assign_nearby_roles():
     # Shuffle roles
     random.shuffle(roles)
     game_id = str(int(_time.time() * 1000))
+    host_user = db.session.get(User, int(get_jwt_identity()))
     for i, uid in enumerate(player_ids):
         nearby_roles[uid] = {
             "role": roles[i],
             "playerNum": i + 1,
             "gameId": game_id
         }
+        # Send private DM with role info
+        try:
+            role = roles[i]
+            dm_content = f"🔒 محرمانه — نقش شما: {role.get('name','?')} ({('مافیا' if role.get('team')=='mafia' else 'شهروند' if role.get('team')=='citizen' else 'مستقل')})"
+            dm = DirectMessage(sender_id=host_user.id, receiver_id=uid, content=dm_content)
+            db.session.add(dm)
+        except: pass
+    db.session.commit()
     return jsonify({"ok": True, "gameId": game_id, "count": len(player_ids)}), 200
 
 @app.route("/api/nearby/my-role", methods=["GET"])
@@ -1048,6 +1064,7 @@ def reassign_nearby_roles():
     # Reshuffle
     random.shuffle(roles_list)
     new_game_id = str(int(_time.time() * 1000))
+    host_user = db.session.get(User, int(get_jwt_identity()))
     for i, uid in enumerate(player_ids):
         nearby_roles[uid] = {
             "role": roles_list[i],
@@ -1055,6 +1072,13 @@ def reassign_nearby_roles():
             "gameId": new_game_id,
             "confirmed": False
         }
+        try:
+            role = roles_list[i]
+            dm_content = f"🔒 محرمانه — نقش جدید: {role.get('name','?')} (ریست شد)"
+            dm = DirectMessage(sender_id=host_user.id, receiver_id=uid, content=dm_content)
+            db.session.add(dm)
+        except: pass
+    db.session.commit()
     return jsonify({"ok": True, "gameId": new_game_id, "count": len(player_ids)}), 200
 
 @app.route("/api/nearby/confirmations/<game_id>", methods=["GET"])
