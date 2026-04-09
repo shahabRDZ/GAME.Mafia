@@ -297,6 +297,10 @@ def index():
 def admin_panel():
     return app.send_static_file("admin.html")
 
+@app.route("/events")
+def events_page():
+    return app.send_static_file("events.html")
+
 
 # ── Visit Counter ────────────────────────────────────────────────────────────
 @app.route("/api/visit", methods=["POST"])
@@ -4135,6 +4139,46 @@ def mark_message_read(mid):
         db.session.commit()
     return jsonify({"ok": True}), 200
 
+@app.route("/api/admin/events", methods=["GET"])
+@jwt_required()
+def admin_list_events():
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    events = GameEvent.query.order_by(GameEvent.created_at.desc()).all()
+    return jsonify([e.to_dict() for e in events]), 200
+
+@app.route("/api/admin/events/<int:eid>/approve", methods=["PUT"])
+@jwt_required()
+def admin_approve_event(eid):
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    event = db.session.get(GameEvent, eid)
+    if not event: return jsonify({"error": "ایونت پیدا نشد"}), 404
+    event.status = "open"
+    # Notify host
+    try:
+        dm = DirectMessage(sender_id=int(get_jwt_identity()), receiver_id=event.host_id,
+            content=f"✅ ایونت «{event.location_name}» تأیید شد و منتشر شد!")
+        db.session.add(dm)
+    except: pass
+    db.session.commit()
+    log_admin_action("تأیید ایونت", f"#{eid} {event.location_name}")
+    return jsonify({"ok": True}), 200
+
+@app.route("/api/admin/events/<int:eid>/reject", methods=["PUT"])
+@jwt_required()
+def admin_reject_event(eid):
+    if not is_admin(): return jsonify({"error": "دسترسی ندارید"}), 403
+    event = db.session.get(GameEvent, eid)
+    if not event: return jsonify({"error": "ایونت پیدا نشد"}), 404
+    event.status = "rejected"
+    try:
+        dm = DirectMessage(sender_id=int(get_jwt_identity()), receiver_id=event.host_id,
+            content=f"❌ ایونت «{event.location_name}» رد شد.")
+        db.session.add(dm)
+    except: pass
+    db.session.commit()
+    log_admin_action("رد ایونت", f"#{eid} {event.location_name}")
+    return jsonify({"ok": True}), 200
+
 @app.route("/api/admin/users/<int:uid>/reset-password", methods=["PUT"])
 @jwt_required()
 def admin_reset_password(uid):
@@ -4178,15 +4222,16 @@ def create_event():
         description=data.get("description", "")[:500],
         max_players=int(data.get("max_players", 10))
     )
+    event.status = "pending"  # needs admin approval
     db.session.add(event)
     db.session.commit()
-    return jsonify(event.to_dict()), 201
+    return jsonify({"ok": True, "message": "ایونت ثبت شد — منتظر تأیید ادمین باشید", "event": event.to_dict()}), 201
 
 @app.route("/api/events", methods=["GET"])
 def list_events():
     country = request.args.get("country", "").strip()
     city = request.args.get("city", "").strip()
-    q = GameEvent.query.filter(GameEvent.status.in_(["open", "full"]))
+    q = GameEvent.query.filter(GameEvent.status.in_(["open", "full", "approved"]))
     if country:
         q = q.filter(GameEvent.country.ilike(f"%{country}%"))
     if city:
