@@ -17,10 +17,12 @@ async function initAuth() {
       // Only clear token if server explicitly rejected it (401)
       if (r.status === 401) {
         authToken = null;
+        currentUser = null;
         localStorage.removeItem("mafiaToken");
         sessionStorage.removeItem("mafiaToken");
       } else {
-        // Network error or server error — keep token, user stays logged in
+        // Network error, timeout, or server error — keep token, user stays logged in
+        console.log("Auth check failed but keeping token:", r.status);
         renderAuthBar();
         return;
       }
