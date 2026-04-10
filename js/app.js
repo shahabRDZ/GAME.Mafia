@@ -257,29 +257,23 @@ setTimeout(showOnboarding, 800);
   } catch {}
 })();
 
-// Register Service Worker — force update on every load
+// Register Service Worker — notify on update, never force reload
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').then(reg => {
-    // Force immediate update check
     reg.update();
-    // Check for updates every 15 seconds
-    setInterval(() => reg.update(), 15000);
+    // Check for updates every 5 minutes (not 15 seconds)
+    setInterval(() => reg.update(), 300000);
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       newWorker.addEventListener('statechange', () => {
         if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-          // Clear all caches then reload
-          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
-            window.location.reload();
-          });
+          // Don't reload! Just notify user
+          showToast("🔄 نسخه جدید آماده‌ست. صفحه رو ببندید و دوباره باز کنید");
         }
       });
     });
   }).catch(() => {});
-  // Listen for controller change (another tab updated the SW)
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
-  });
+  // Don't auto-reload on controller change
 }
 
 // ── PWA Install Prompt ──
