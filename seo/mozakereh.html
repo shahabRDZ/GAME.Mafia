@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سناریو مذاکره — بازی مافیا شوشانگ | نقش‌ها و قوانین</title>
+<meta name="description" content="سناریو مذاکره در بازی مافیا شوشانگ. جذب شهروند به تیم مافیا و تغییر تیم. نقش‌های مافیا: پدرخوانده، مذاکره‌کننده. نقش‌های شهروند: کارآگاه، دکتر، تک‌تیرانداز، خبرنگار، زره‌پوش، روانشناس.">
+<meta name="keywords" content="سناریو مذاکره, بازی مافیا, مافیا شوشانگ, نقش پدرخوانده, نقش مذاکره‌کننده, نقش خبرنگار, نقش زره‌پوش, نقش روانشناس, جذب شهروند, تغییر تیم مافیا, قوانین مافیا">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://showshung.com/scenarios/mozakereh">
+<meta property="og:type" content="article">
+<meta property="og:title" content="سناریو مذاکره — بازی مافیا شوشانگ">
+<meta property="og:description" content="سناریو مذاکره: جذب شهروند به مافیا و تغییر تیم. نقش‌ها، قوانین و روند بازی.">
+<meta property="og:image" content="https://showshung.com/icon-512.png">
+<meta property="og:url" content="https://showshung.com/scenarios/mozakereh">
+<meta property="og:locale" content="fa_IR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="سناریو مذاکره — بازی مافیا شوشانگ">
+<meta name="twitter:description" content="سناریو مذاکره: قدرت جذب مافیا، مذاکره‌کننده و پدرخوانده.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "سناریو مذاکره — بازی مافیا شوشانگ",
+  "description": "راهنمای کامل سناریو مذاکره در بازی مافیا شوشانگ. نقش‌ها، قوانین و روند بازی.",
+  "author": {"@type": "Organization", "name": "شوشانگ"},
+  "publisher": {"@type": "Organization", "name": "شوشانگ", "logo": {"@type": "ImageObject", "url": "https://showshung.com/icon-512.png"}},
+  "mainEntityOfPage": "https://showshung.com/scenarios/mozakereh",
+  "inLanguage": "fa"
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#eaeaf5;font-family:'Vazirmatn',system-ui,sans-serif;line-height:1.8;padding:0}
+a{color:#a855f7;text-decoration:none}a:hover{text-decoration:underline}
+.hero{background:linear-gradient(135deg,#0a0010,#150020,#000);padding:60px 20px 40px;text-align:center;border-bottom:2px solid rgba(168,85,247,.3)}
+.hero-icon{font-size:4rem;margin-bottom:12px}
+.hero h1{font-size:1.8rem;color:#fff;margin-bottom:8px}
+.hero .subtitle{color:rgba(255,255,255,.5);font-size:.95rem}
+.container{max-width:800px;margin:0 auto;padding:30px 20px}
+.breadcrumb{color:rgba(255,255,255,.4);font-size:.85rem;margin-bottom:30px}
+.breadcrumb a{color:rgba(255,255,255,.5)}
+.section{margin-bottom:40px}
+.section h2{font-size:1.3rem;color:#a855f7;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(168,85,247,.2)}
+.section p{color:rgba(255,255,255,.7);margin-bottom:16px}
+.flow-list{list-style:none;counter-reset:flow}
+.flow-list li{counter-increment:flow;padding:10px 16px;margin-bottom:8px;background:rgba(255,255,255,.03);border-radius:10px;border-right:3px solid #a855f7;color:rgba(255,255,255,.7)}
+.flow-list li::before{content:counter(flow) ".";color:#a855f7;font-weight:700;margin-left:8px}
+.rules-list{list-style:none}
+.rules-list li{padding:8px 0;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.05)}
+.rules-list li::before{content:"•";color:#a855f7;margin-left:8px;font-weight:700}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.role-card{background:rgba(255,255,255,.04);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.06);transition:border-color .2s}
+.role-card:hover{border-color:rgba(168,85,247,.4)}
+.role-card.mafia{border-right:3px solid #e94560}
+.role-card.citizen{border-right:3px solid #00cfff}
+.role-icon{font-size:1.6rem;margin-bottom:6px}
+.role-name{font-weight:700;color:#fff;font-size:1rem;margin-bottom:4px}
+.role-desc{color:rgba(255,255,255,.5);font-size:.85rem}
+.quorum-table{width:100%;border-collapse:collapse}
+.quorum-table th,.quorum-table td{padding:10px 16px;text-align:right;border-bottom:1px solid rgba(255,255,255,.06)}
+.quorum-table th{color:#a855f7;font-weight:600;font-size:.9rem}
+.quorum-table td{color:rgba(255,255,255,.6)}
+.nav-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06)}
+.nav-link{display:inline-block;padding:10px 20px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:10px;color:#a855f7;font-size:.9rem;transition:background .2s}
+.nav-link:hover{background:rgba(168,85,247,.2);text-decoration:none}
+.cta{text-align:center;margin:40px 0}
+.cta a{display:inline-block;padding:14px 32px;background:#a855f7;color:#fff;border-radius:12px;font-weight:700;font-size:1rem}
+.cta a:hover{background:#9333ea;text-decoration:none}
+footer{text-align:center;padding:30px 20px;color:rgba(255,255,255,.25);font-size:.8rem;border-top:1px solid rgba(255,255,255,.05)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-icon">🤝</div>
+  <h1>سناریو مذاکره</h1>
+  <div class="subtitle">جذب شهروند · تغییر تیم · بازی مافیا شوشانگ</div>
+</div>
+
+<div class="container">
+  <div class="breadcrumb">
+    <a href="/">شوشانگ</a> / <a href="/scenarios">سناریوها</a> / سناریو مذاکره
+  </div>
+
+  <div class="section">
+    <h2>درباره سناریو مذاکره</h2>
+    <p>سناریوی مذاکره بر پایه قدرت جذب مافیا طراحی شده. مذاکره‌کننده می‌تواند شهروندان ساده یا زره‌پوش را به تیم مافیا بکشاند. در شب مذاکره، مافیا حق شلیک ندارد. این سناریو یکی از هیجان‌انگیزترین سناریوهای بازی مافیا است چون تیم‌ها می‌توانند در طول بازی تغییر کنند.</p>
+  </div>
+
+  <div class="section">
+    <h2>روند بازی</h2>
+    <ol class="flow-list">
+      <li>روز معارفه</li>
+      <li>شب اول (بدون شلیک)</li>
+      <li>روز اول (بحث + رأی‌گیری)</li>
+      <li>شب‌های اصلی (شلیک یا مذاکره)</li>
+      <li>روزها (اعلام نتایج + رأی‌گیری)</li>
+    </ol>
+  </div>
+
+  <div class="section">
+    <h2>قوانین کلیدی سناریو مذاکره</h2>
+    <ul class="rules-list">
+      <li>مذاکره فقط پس از حذف یک مافیا فعال می‌شود</li>
+      <li>در شب مذاکره، مافیا شلیک ندارد</li>
+      <li>مذاکره با شهروند ساده یا زره‌پوش موفق است</li>
+      <li>مذاکره با نقش‌دارها (دکتر، کارآگاه و...) شکست می‌خورد</li>
+      <li>استعلام پدرخوانده برای کارآگاه منفی است</li>
+      <li>اسنایپر ۲ تیر دارد · شلیک به شهروند = حذف خودش</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>نقش‌های تیم مافیا</h2>
+    <div class="role-grid">
+      <div class="role-card mafia">
+        <div class="role-icon">👑</div>
+        <div class="role-name">پدرخوانده</div>
+        <div class="role-desc">رهبر مافیا · تصمیم شلیک · استعلام منفی</div>
+      </div>
+      <div class="role-card mafia">
+        <div class="role-icon">🤝</div>
+        <div class="role-name">مذاکره‌کننده</div>
+        <div class="role-desc">جذب شهروند به مافیا · شب مذاکره بدون شلیک</div>
+      </div>
+      <div class="role-card mafia">
+        <div class="role-icon">😈</div>
+        <div class="role-name">مافیا ساده</div>
+        <div class="role-desc">هماهنگی در شب · جهت‌دهی آرا در روز</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>نقش‌های تیم شهروند</h2>
+    <div class="role-grid">
+      <div class="role-card citizen">
+        <div class="role-icon">🕵️</div>
+        <div class="role-name">کارآگاه</div>
+        <div class="role-desc">استعلام شبانه · پدرخوانده منفی نشان داده می‌شود</div>
+      </div>
+      <div class="role-card citizen">
+        <div class="role-icon">⚕️</div>
+        <div class="role-name">دکتر</div>
+        <div class="role-desc">نجات یک نفر در شب از شلیک مافیا</div>
+      </div>
+      <div class="role-card citizen">
+        <div class="role-icon">🎯</div>
+        <div class="role-name">تک‌تیرانداز</div>
+        <div class="role-desc">۲ تیر · شلیک به شهروند = حذف خودش</div>
+      </div>
+      <div class="role-card citizen">
+        <div class="role-icon">📰</div>
+        <div class="role-name">خبرنگار</div>
+        <div class="role-desc">بعد از شب مذاکره نتیجه را می‌فهمد</div>
+      </div>
+      <div class="role-card citizen">
+        <div class="role-icon">🛡️</div>
+        <div class="role-name">زره‌پوش</div>
+        <div class="role-desc">شلیک شب اثر ندارد · رأی روز = زره می‌افتد</div>
+      </div>
+      <div class="role-card citizen">
+        <div class="role-icon">🧠</div>
+        <div class="role-name">روانشناس</div>
+        <div class="role-desc">سایلنت کردن یک نفر در روز</div>
+      </div>
+      <div class="role-card citizen">
+        <div class="role-icon">😇</div>
+        <div class="role-name">شهروند ساده</div>
+        <div class="role-desc">تحلیل و رأی‌گیری در روز</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>حد نصاب آرا</h2>
+    <table class="quorum-table">
+      <thead><tr><th>تعداد بازیکنان</th><th>آرای لازم</th></tr></thead>
+      <tbody>
+        <tr><td>۱۳–۱۱ نفر</td><td>۶ رأی</td></tr>
+        <tr><td>۱۰–۸ نفر</td><td>۴ رأی</td></tr>
+        <tr><td>۷–۶ نفر</td><td>۳ رأی</td></tr>
+        <tr><td>۵ نفر به پایین</td><td>۲ رأی</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cta">
+    <a href="/">همین الان بازی مافیا رو شروع کن!</a>
+  </div>
+
+  <div class="nav-links">
+    <a class="nav-link" href="/scenarios/takavor">⚔️ سناریو تکاور</a>
+    <a class="nav-link" href="/scenarios/namayandeh">🏛️ سناریو نماینده</a>
+    <a class="nav-link" href="/scenarios/bazpors">🔍 سناریو بازپرس</a>
+    <a class="nav-link" href="/roles">📋 همه نقش‌ها</a>
+  </div>
+</div>
+
+<footer>شوشانگ — بازی آنلاین مافیا | <a href="/">صفحه اصلی</a> | <a href="/roles">نقش‌ها</a></footer>
+
+</body>
+</html>

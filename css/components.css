@@ -673,6 +673,71 @@
 .start-btn-nearby:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,222,128,.3); }
 .start-btn-nearby:active { transform: scale(0.97); }
 
+/* ── Digital No-Narrator Mode ── */
+.dg-action-btn {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; width: 100%;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-lg); cursor: pointer;
+  transition: all var(--transition-base); text-align: right; color: #fff;
+  font-family: inherit;
+}
+.dg-action-btn:hover { background: rgba(255,255,255,.08); transform: translateY(-1px); }
+.dg-action-btn:active { transform: scale(0.98); }
+.dg-host-btn { border-color: rgba(74,222,128,.25); }
+.dg-host-btn:hover { border-color: rgba(74,222,128,.5); box-shadow: 0 4px 20px rgba(74,222,128,.15); }
+.dg-player-btn { border-color: rgba(0,207,255,.25); }
+.dg-player-btn:hover { border-color: rgba(0,207,255,.5); box-shadow: 0 4px 20px rgba(0,207,255,.15); }
+.dg-action-icon { font-size: 2rem; flex-shrink: 0; }
+.dg-action-text { display: flex; flex-direction: column; gap: 2px; }
+.dg-action-text strong { font-size: .95rem; font-weight: 800; }
+.dg-action-text small { font-size: .72rem; color: var(--dim); font-weight: 400; }
+
+.dg-scenario-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.dg-scenario-btn {
+  padding: 12px 8px; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-md);
+  color: #fff; font-family: inherit; font-size: .85rem; font-weight: 700;
+  cursor: pointer; transition: all var(--transition-base);
+}
+.dg-scenario-btn:hover { background: rgba(255,255,255,.08); }
+.dg-scenario-btn.active { border-color: #00cfff; background: rgba(0,207,255,.1); color: #00cfff; box-shadow: 0 0 12px rgba(0,207,255,.15); }
+
+.dg-count-grid {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.dg-count-btn {
+  padding: 10px 18px; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-md);
+  color: #fff; font-family: inherit; font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: all var(--transition-base); min-width: 60px;
+}
+.dg-count-btn:hover { background: rgba(255,255,255,.08); }
+.dg-count-btn.active { border-color: #00cfff; background: rgba(0,207,255,.1); color: #00cfff; }
+
+.dg-back-link {
+  display: inline-block; padding: 8px 16px;
+  background: none; border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-md); color: var(--dim);
+  font-family: inherit; font-size: .78rem; cursor: pointer;
+  transition: all var(--transition-base);
+}
+.dg-back-link:hover { border-color: rgba(255,255,255,.25); color: #fff; }
+
+.dg-role-card {
+  padding: 24px; text-align: center;
+  background: linear-gradient(160deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+  border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-xl);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.dg-role-emoji { font-size: 4rem; margin-bottom: 8px; }
+.dg-role-name { font-size: 2rem; font-weight: 900; margin-bottom: 4px; }
+.dg-role-team { font-size: 1rem; margin-bottom: 12px; }
+.dg-role-ability { font-size: .82rem; color: var(--dim); padding: 10px; background: rgba(255,255,255,.04); border-radius: var(--radius-md); margin-bottom: 8px; }
+.dg-role-num { font-size: .82rem; color: var(--dim); }
+
 /* Nearby player item */
 .nearby-item {
   display: flex; align-items: center; gap: var(--space-sm);

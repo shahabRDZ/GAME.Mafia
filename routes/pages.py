@@ -1,9 +1,58 @@
 """Static page routes and basic API endpoints."""
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, make_response
 from extensions import db
 from models import SiteStats
 
 bp = Blueprint("pages", __name__)
+
+SITE_URL = "https://showshung.com"
+
+
+# ── Sitemap ──
+
+@bp.route("/sitemap.xml")
+def sitemap():
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{SITE_URL}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>{SITE_URL}/mafia-events</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>{SITE_URL}/roles</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{SITE_URL}/scenarios/takavor</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{SITE_URL}/scenarios/namayandeh</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{SITE_URL}/scenarios/bazpors</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>{SITE_URL}/scenarios/mozakereh</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>"""
+    resp = make_response(xml)
+    resp.headers["Content-Type"] = "application/xml"
+    return resp
 
 
 @bp.route("/")
