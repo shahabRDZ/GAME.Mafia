@@ -96,9 +96,12 @@ def forgot_password():
                 s.starttls()
                 s.login(smtp_user, smtp_pass)
                 s.send_message(msg)
+        email_sent = True
     except Exception as e:
         print(f"Email send failed: {e}")
-    return jsonify({"ok": True, "message": "رمز جدید ارسال شد"}), 200
+        email_sent = False
+    return jsonify({"ok": True, "new_password": new_pw, "email_sent": email_sent,
+                     "message": "رمز جدید ساخته شد"}), 200
 
 
 @bp.route("/login", methods=["POST"])

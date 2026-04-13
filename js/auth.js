@@ -158,8 +158,22 @@ async function sendResetEmail() {
   const r = await apiFetch("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
   if (r.ok) {
     document.getElementById("authError").textContent = "";
-    showToast("✅ رمز جدید به ایمیل ارسال شد");
-    hideForgotPassword();
+    const newPw = r.data.new_password;
+    // Show new password directly
+    const forgotFields = document.getElementById("forgotFields");
+    forgotFields.innerHTML = `
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:2rem;margin-bottom:10px">🔑</div>
+        <div style="font-size:.85rem;color:var(--dim);margin-bottom:12px">رمز عبور جدید شما:</div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--accent2);letter-spacing:3px;
+          padding:14px 20px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);
+          border-radius:12px;direction:ltr;user-select:all;cursor:pointer"
+          onclick="navigator.clipboard?.writeText('${newPw}');showToast('📋 کپی شد!')">${newPw}</div>
+        <div style="font-size:.7rem;color:var(--dim);margin-top:10px">روی رمز بزن تا کپی بشه · با این رمز وارد شو</div>
+      </div>
+      <button onclick="hideForgotPassword()" style="width:100%;padding:12px;margin-top:12px;
+        background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:inherit;
+        font-size:.9rem;font-weight:700;cursor:pointer">ورود با رمز جدید</button>`;
   } else {
     document.getElementById("authError").textContent = r.data?.error || "خطا";
   }
