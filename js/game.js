@@ -1663,7 +1663,7 @@ async function digitalCreateRoom() {
   const groupData = ROLES_DATA[dgSelectedScenario] && ROLES_DATA[dgSelectedScenario][dgSelectedCount];
   if (!groupData) { showToast("⚠️ داده سناریو یافت نشد"); return; }
 
-  // Build roles array
+  // Build roles array — one extra for host (last role)
   const roles = [];
   groupData.mafia.forEach(n => roles.push({ name: n, team: "mafia" }));
   groupData.citizen.forEach(n => roles.push({ name: n, team: "citizen" }));
@@ -1677,6 +1677,9 @@ async function digitalCreateRoom() {
     const data = await r.json();
     if (!r.ok) { showToast("⚠️ " + (data.error || "خطا")); return; }
 
+    dgHostRoomCode = data.code;
+    dgHostTotal = data.total;
+
     // Hide scenario selection, show code + status
     document.getElementById("dgScenarioGrid").style.display = "none";
     document.getElementById("dgCountSection").style.display = "none";
@@ -1684,9 +1687,12 @@ async function digitalCreateRoom() {
     document.getElementById("dgHostStatus").style.display = "block";
     document.getElementById("dgRoomCode").textContent = data.code;
     document.getElementById("dgProgressBar").style.width = "0%";
-    document.getElementById("dgProgressText").textContent = `${toFarsiNum(0)} از ${toFarsiNum(data.total)} نقش دریافت شده`;
-    document.getElementById("dgStatusText").textContent = "در انتظار بازیکنان...";
+    document.getElementById("dgProgressText").textContent = `${toFarsiNum(0)} از ${toFarsiNum(data.total - 1)} بازیکن دریافت کرد`;
+    document.getElementById("dgStatusText").textContent = "کد رو به بازیکنا بگو — نقش تو آخر نشون داده میشه";
     document.getElementById("dgStatusText").style.color = "#00cfff";
+    // Hide host role initially
+    const hostRoleEl = document.getElementById("dgHostRole");
+    if (hostRoleEl) hostRoleEl.style.display = "none";
 
     haptic('medium');
 
@@ -1698,27 +1704,66 @@ async function digitalCreateRoom() {
   }
 }
 
+let dgHostRoomCode = null;
+let dgHostTotal = 0;
+
 async function digitalPollStatus(code, total) {
   try {
     const r = await fetch(API + "/api/digital/status/" + code);
     const data = await r.json();
     if (!r.ok) return;
 
-    const pct = data.total > 0 ? (data.assigned / data.total) * 100 : 0;
+    // remaining=1 means only host's role is left
+    const othersTotal = data.total - 1;
+    const othersAssigned = Math.min(data.assigned, othersTotal);
+    const pct = othersTotal > 0 ? (othersAssigned / othersTotal) * 100 : 0;
     document.getElementById("dgProgressBar").style.width = pct + "%";
     document.getElementById("dgProgressText").textContent =
-      `${toFarsiNum(data.assigned)} از ${toFarsiNum(data.total)} نقش دریافت شده`;
+      `${toFarsiNum(othersAssigned)} از ${toFarsiNum(othersTotal)} بازیکن نقش دریافت کرد`;
 
-    if (data.done) {
-      document.getElementById("dgStatusText").textContent = "🎉 همه نقش‌ها تقسیم شد!";
-      document.getElementById("dgStatusText").style.color = "#4ade80";
+    if (data.remaining <= 1 && data.assigned >= othersTotal) {
+      // All other players received — now get host's own role
       clearInterval(dgPollInterval);
       dgPollInterval = null;
+      document.getElementById("dgStatusText").textContent = "🎉 همه بازیکنا نقششون رو گرفتن!";
+      document.getElementById("dgStatusText").style.color = "#4ade80";
       haptic('heavy');
+      // Auto-receive host's role
+      await digitalReceiveHostRole(code);
     } else {
       document.getElementById("dgStatusText").textContent =
-        `${toFarsiNum(data.remaining)} نقش باقی‌مانده`;
+        `${toFarsiNum(data.remaining - 1)} بازیکن مونده`;
       document.getElementById("dgStatusText").style.color = "#00cfff";
+    }
+  } catch {}
+}
+
+async function digitalReceiveHostRole(code) {
+  try {
+    const r = await fetch(API + "/api/digital/receive/" + code, { method: "POST" });
+    const data = await r.json();
+    if (!r.ok) return;
+
+    const role = data.role;
+    const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
+    const teamNames = { mafia: "😈 تیم مافیا", citizen: "😇 تیم شهروند", independent: "🐺 مستقل" };
+    const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
+
+    // Show host role section
+    const hostEl = document.getElementById("dgHostRole");
+    if (hostEl) {
+      hostEl.style.display = "block";
+      hostEl.innerHTML = `
+        <div style="text-align:center;margin-top:20px;padding:20px;border-radius:18px;
+          background:linear-gradient(160deg, ${role.team==='mafia'?'rgba(255,85,85,.1)':'rgba(68,255,153,.1)'}, transparent);
+          border:1px solid ${role.team==='mafia'?'rgba(255,85,85,.3)':'rgba(68,255,153,.3)'}">
+          <div style="font-size:.75rem;color:var(--dim);margin-bottom:8px">نقش تو:</div>
+          <div style="font-size:2.5rem;margin-bottom:6px">${ROLE_ICONS[role.name] || teamEmojis[role.team] || '🎭'}</div>
+          <div style="font-size:1.3rem;font-weight:900;color:${teamColors[role.team] || '#fff'};margin-bottom:4px">${role.name}</div>
+          <div style="font-size:.85rem;color:${teamColors[role.team] || '#fff'}">${teamNames[role.team] || ''}</div>
+          <div style="font-size:.7rem;color:var(--dim);margin-top:6px">بازیکن شماره ${toFarsiNum(data.playerNum)}</div>
+        </div>`;
+      hostEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   } catch {}
 }
