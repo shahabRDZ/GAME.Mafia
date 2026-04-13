@@ -15,6 +15,7 @@ def register_blueprints(app):
     from routes.admin import bp as admin_bp
     from routes.digital import bp as digital_bp
     from routes.nearby import bp as nearby_bp
+    from routes.seo import bp as seo_bp
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
@@ -28,3 +29,4 @@ def register_blueprints(app):
     app.register_blueprint(admin_bp)
     app.register_blueprint(digital_bp)
     app.register_blueprint(nearby_bp)
+    app.register_blueprint(seo_bp)

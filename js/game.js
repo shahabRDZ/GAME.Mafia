@@ -1592,3 +1592,193 @@ function newGame() {
   document.querySelectorAll(".group-btn,.count-btn").forEach(b => b.classList.remove("selected"));
   exitGameFullscreen();
 }
+
+// ══════════════════════════════════════════
+// DIGITAL NO-NARRATOR MODE (بدون گرداننده)
+// ══════════════════════════════════════════
+let dgSelectedScenario = null;
+let dgSelectedCount = null;
+let dgPollInterval = null;
+
+function openDigitalMode() {
+  document.getElementById("dgScreenA").style.display = "block";
+  document.getElementById("dgScreenB").style.display = "none";
+  document.getElementById("dgScreenC").style.display = "none";
+  document.getElementById("digitalModeOverlay").classList.add("show");
+}
+
+function closeDigitalMode() {
+  document.getElementById("digitalModeOverlay").classList.remove("show");
+  if (dgPollInterval) { clearInterval(dgPollInterval); dgPollInterval = null; }
+}
+
+function digitalBackToA() {
+  document.getElementById("dgScreenA").style.display = "block";
+  document.getElementById("dgScreenB").style.display = "none";
+  document.getElementById("dgScreenC").style.display = "none";
+  if (dgPollInterval) { clearInterval(dgPollInterval); dgPollInterval = null; }
+}
+
+// ── Host Flow ──
+function digitalStartHost() {
+  dgSelectedScenario = null;
+  dgSelectedCount = null;
+  document.getElementById("dgScreenA").style.display = "none";
+  document.getElementById("dgScreenB").style.display = "block";
+  // Reset host UI
+  document.getElementById("dgCountSection").style.display = "none";
+  document.getElementById("dgCreateBtn").style.display = "none";
+  document.getElementById("dgHostStatus").style.display = "none";
+  document.getElementById("dgScenarioGrid").style.display = "grid";
+  document.querySelectorAll(".dg-scenario-btn").forEach(b => b.classList.remove("active"));
+}
+
+function digitalSelectScenario(name) {
+  dgSelectedScenario = name;
+  dgSelectedCount = null;
+  // Highlight active button
+  document.querySelectorAll(".dg-scenario-btn").forEach(b => {
+    b.classList.toggle("active", b.textContent.includes(name));
+  });
+  // Show count buttons
+  const counts = Object.keys(ROLES_DATA[name]).map(Number);
+  const grid = document.getElementById("dgCountGrid");
+  grid.innerHTML = counts.map(c =>
+    `<button class="dg-count-btn" onclick="digitalSelectCount(${c})">${toFarsiNum(c)} نفر</button>`
+  ).join('');
+  document.getElementById("dgCountSection").style.display = "block";
+  document.getElementById("dgCreateBtn").style.display = "none";
+}
+
+function digitalSelectCount(count) {
+  dgSelectedCount = count;
+  document.querySelectorAll(".dg-count-btn").forEach(b => {
+    b.classList.toggle("active", b.textContent.includes(toFarsiNum(count)));
+  });
+  document.getElementById("dgCreateBtn").style.display = "block";
+}
+
+async function digitalCreateRoom() {
+  if (!dgSelectedScenario || !dgSelectedCount) { showToast("⚠️ سناریو و تعداد را انتخاب کنید"); return; }
+  const groupData = ROLES_DATA[dgSelectedScenario] && ROLES_DATA[dgSelectedScenario][dgSelectedCount];
+  if (!groupData) { showToast("⚠️ داده سناریو یافت نشد"); return; }
+
+  // Build roles array
+  const roles = [];
+  groupData.mafia.forEach(n => roles.push({ name: n, team: "mafia" }));
+  groupData.citizen.forEach(n => roles.push({ name: n, team: "citizen" }));
+
+  try {
+    const r = await fetch(API + "/api/digital/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roles, group: dgSelectedScenario })
+    });
+    const data = await r.json();
+    if (!r.ok) { showToast("⚠️ " + (data.error || "خطا")); return; }
+
+    // Hide scenario selection, show code + status
+    document.getElementById("dgScenarioGrid").style.display = "none";
+    document.getElementById("dgCountSection").style.display = "none";
+    document.getElementById("dgCreateBtn").style.display = "none";
+    document.getElementById("dgHostStatus").style.display = "block";
+    document.getElementById("dgRoomCode").textContent = data.code;
+    document.getElementById("dgProgressBar").style.width = "0%";
+    document.getElementById("dgProgressText").textContent = `${toFarsiNum(0)} از ${toFarsiNum(data.total)} نقش دریافت شده`;
+    document.getElementById("dgStatusText").textContent = "در انتظار بازیکنان...";
+    document.getElementById("dgStatusText").style.color = "#00cfff";
+
+    haptic('medium');
+
+    // Start polling
+    if (dgPollInterval) clearInterval(dgPollInterval);
+    dgPollInterval = setInterval(() => digitalPollStatus(data.code, data.total), 3000);
+  } catch (e) {
+    showToast("⚠️ خطا در اتصال به سرور");
+  }
+}
+
+async function digitalPollStatus(code, total) {
+  try {
+    const r = await fetch(API + "/api/digital/status/" + code);
+    const data = await r.json();
+    if (!r.ok) return;
+
+    const pct = data.total > 0 ? (data.assigned / data.total) * 100 : 0;
+    document.getElementById("dgProgressBar").style.width = pct + "%";
+    document.getElementById("dgProgressText").textContent =
+      `${toFarsiNum(data.assigned)} از ${toFarsiNum(data.total)} نقش دریافت شده`;
+
+    if (data.done) {
+      document.getElementById("dgStatusText").textContent = "🎉 همه نقش‌ها تقسیم شد!";
+      document.getElementById("dgStatusText").style.color = "#4ade80";
+      clearInterval(dgPollInterval);
+      dgPollInterval = null;
+      haptic('heavy');
+    } else {
+      document.getElementById("dgStatusText").textContent =
+        `${toFarsiNum(data.remaining)} نقش باقی‌مانده`;
+      document.getElementById("dgStatusText").style.color = "#00cfff";
+    }
+  } catch {}
+}
+
+// ── Player Flow ──
+function digitalOpenReceive() {
+  document.getElementById("dgScreenA").style.display = "none";
+  document.getElementById("dgScreenC").style.display = "block";
+  document.getElementById("dgCodePhase").style.display = "block";
+  document.getElementById("dgRolePhase").style.display = "none";
+  document.getElementById("dgCodeInput").value = "";
+  setTimeout(() => document.getElementById("dgCodeInput").focus(), 300);
+}
+
+async function digitalReceiveRole() {
+  const code = document.getElementById("dgCodeInput").value.trim().toUpperCase();
+  if (code.length < 3) { showToast("⚠️ کد اتاق را وارد کنید"); return; }
+
+  try {
+    const r = await fetch(API + "/api/digital/receive/" + code, { method: "POST" });
+    const data = await r.json();
+
+    if (!r.ok) { showToast("⚠️ " + (data.error || "خطا")); return; }
+
+    haptic('heavy');
+    if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
+
+    const role = data.role;
+    const teamColors = { mafia: "#ff5555", citizen: "#44ff99", independent: "#c084fc" };
+    const teamNames = { mafia: "😈 تیم مافیا", citizen: "😇 تیم شهروند", independent: "🐺 مستقل" };
+    const teamEmojis = { mafia: "😈", citizen: "😇", independent: "🐺" };
+    const teamBorder = { mafia: "rgba(255,85,85,.3)", citizen: "rgba(68,255,153,.3)", independent: "rgba(192,132,252,.3)" };
+    const teamBg = { mafia: "linear-gradient(160deg, rgba(255,85,85,.08), rgba(255,85,85,.02))", citizen: "linear-gradient(160deg, rgba(68,255,153,.08), rgba(68,255,153,.02))", independent: "linear-gradient(160deg, rgba(192,132,252,.08), rgba(192,132,252,.02))" };
+
+    document.getElementById("dgRoleEmoji").textContent = ROLE_ICONS[role.name] || teamEmojis[role.team] || "🎭";
+    document.getElementById("dgRoleName").textContent = role.name;
+    document.getElementById("dgRoleName").style.color = teamColors[role.team] || "#fff";
+    document.getElementById("dgRoleTeam").textContent = teamNames[role.team] || role.team;
+    document.getElementById("dgRoleTeam").style.color = teamColors[role.team] || "#fff";
+    const abilityInfo = (typeof ROLE_ABILITIES !== 'undefined') ? ROLE_ABILITIES[role.name] : null;
+    document.getElementById("dgRoleAbility").textContent = abilityInfo ? abilityInfo.action : "";
+    document.getElementById("dgRoleAbility").style.display = abilityInfo ? "block" : "none";
+    document.getElementById("dgRolePlayerNum").textContent = `بازیکن شماره ${toFarsiNum(data.playerNum)}`;
+
+    // Style the card
+    const card = document.getElementById("dgRoleCard");
+    card.style.background = teamBg[role.team] || "";
+    card.style.borderColor = teamBorder[role.team] || "rgba(255,255,255,.1)";
+
+    // Switch to role reveal
+    document.getElementById("dgCodePhase").style.display = "none";
+    document.getElementById("dgRolePhase").style.display = "block";
+
+  } catch {
+    showToast("⚠️ خطا در دریافت نقش");
+  }
+}
+
+function digitalBackToCode() {
+  document.getElementById("dgRolePhase").style.display = "none";
+  document.getElementById("dgCodePhase").style.display = "block";
+  // Keep the code input value so next player can just tap receive
+}

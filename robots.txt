@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
+Allow: /mafia-events
 Disallow: /api/
-Sitemap: https://web-production-43621.up.railway.app/sitemap.xml
+Disallow: /panel
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+Sitemap: https://showshung.com/sitemap.xml
