@@ -1,2 +1,23 @@
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+docker-compose.override.yml
+
+# Old files
 app_old.py
