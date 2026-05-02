@@ -585,121 +585,69 @@
 }
 .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
 
-/* ── Scenario tile grid (cinematic mafia design) ──
-   Matches the gold-rim collectible-card aesthetic from the
-   reference: black velvet inside, double-stroke gold border,
-   icon on top, gold Persian label, decorative flourish below. */
+/* ── Scenario tile grid — borderless, big icon stacked above label ── */
 .group-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+@media (min-width: 600px) {
+  .group-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1000px) {
+  .group-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 .group-btn {
-  position: relative; overflow: hidden;
-  padding: 18px 12px 22px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.012) 60%, rgba(212,175,55,.04) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(212,175,55,.10), transparent 65%),
-    #0d0907;
-  border: 1px solid rgba(212,175,55,.42);
-  border-radius: 14px;
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.5) inset,
-    0 0 18px rgba(212,175,55,.10) inset,
-    0 12px 30px rgba(0,0,0,.55);
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 10px 6px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  text-align: center;
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
   font-family: inherit;
   color: var(--text);
-  min-height: 9rem;
-}
-/* Inner gold hairline frame (the second stroke of the double-border) */
-.group-btn::before {
-  content: ''; position: absolute; inset: 5px;
-  border: 1px solid rgba(212,175,55,.18);
-  border-radius: 10px;
-  pointer-events: none;
-  transition: border-color .25s ease;
-}
-/* Decorative flourish under the label */
-.group-btn::after {
-  content: ''; position: absolute;
-  left: 18%; right: 18%; bottom: 8px;
-  height: 6px;
-  background:
-    radial-gradient(circle at 50% 0, rgba(212,175,55,.55) 0, transparent 70%),
-    linear-gradient(90deg, transparent 0%, rgba(212,175,55,.45) 50%, transparent 100%) bottom/100% 1px no-repeat;
-  opacity: .85;
-  pointer-events: none;
+  text-align: center;
+  transition: transform .22s ease, filter .22s ease;
+  min-height: var(--touch-min);
 }
 .group-btn .icon {
   display: flex; align-items: center; justify-content: center;
-  width: 76px; height: 76px;
-  margin: 0 auto 10px;
-  font-size: 1.9rem;
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 30% 25%, rgba(212,175,55,.18), rgba(0,0,0,.6) 70%);
-  border: 1px solid rgba(212,175,55,.35);
-  color: var(--gold, #D4AF37);
-  filter: drop-shadow(0 0 8px rgba(212,175,55,.20));
-  overflow: hidden;
+  width: 96px; height: 96px;
+  border-radius: 22px; overflow: hidden;
+  background: transparent; border: none;
+  filter: drop-shadow(0 0 16px rgba(212,175,55,.28));
+  transition: filter .22s ease, transform .22s ease;
 }
 .group-btn .icon img {
   width: 100%; height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
+  object-fit: contain;
   display: block;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 .group-btn .name {
   font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
-  font-size: 1.02rem; font-weight: 900; display: block;
+  font-size: 0.95rem; font-weight: 800; display: block;
   color: var(--gold, #D4AF37);
   letter-spacing: .02em;
-  text-shadow: 0 1px 4px rgba(0,0,0,.85), 0 0 14px rgba(212,175,55,.18);
+  text-shadow: 0 1px 4px rgba(0,0,0,.85), 0 0 14px rgba(212,175,55,.20);
 }
 .group-btn .desc {
-  font-size: 0.68rem; color: var(--khaki, #B8A47A);
-  margin-block-start: 4px; display: block; opacity: .85;
+  font-size: 0.66rem; color: var(--khaki, #B8A47A);
+  margin-block-start: 2px; display: block; opacity: .85;
 }
-.group-btn:hover {
-  transform: translateY(-4px);
-  border-color: var(--gold, #D4AF37);
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.5) inset,
-    0 0 26px rgba(212,175,55,.20) inset,
-    0 16px 36px rgba(0,0,0,.7),
-    0 0 30px rgba(212,175,55,.22);
+.group-btn:hover { transform: translateY(-3px); }
+.group-btn:hover .icon { filter: drop-shadow(0 0 26px rgba(212,175,55,.55)); }
+.group-btn.selected .icon {
+  filter: drop-shadow(0 0 30px rgba(212,175,55,.75));
+  transform: scale(1.04);
 }
-.group-btn:hover::before { border-color: rgba(212,175,55,.40); }
-.group-btn:hover .icon {
-  border-color: rgba(212,175,55,.65);
-  filter: drop-shadow(0 0 14px rgba(212,175,55,.45));
-}
-.group-btn.selected {
-  border-color: var(--gold, #D4AF37);
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.5) inset,
-    0 0 30px rgba(212,175,55,.32) inset,
-    0 0 36px rgba(212,175,55,.30);
-}
-.group-btn.selected::before { border-color: rgba(212,175,55,.55); }
-.group-btn:focus-visible { outline: 2px solid var(--gold, #D4AF37); outline-offset: 3px; }
+.group-btn.selected .name { text-shadow: 0 0 18px rgba(212,175,55,.55); }
+.group-btn:focus-visible { outline: 2px solid var(--gold, #D4AF37); outline-offset: 4px; border-radius: 14px; }
 
-/* ── Defuse the inline override colors that legacy buttons set ──
-   (digital / chaos / lab buttons tried to mark themselves with cyan
-   or pink — that fights the unified gold theme) */
-.group-btn[data-group="دیجیتال"],
-.group-btn[data-group="کی‌اس"],
-.group-btn[data-group="آزمایشی"] {
-  border-color: rgba(212,175,55,.42) !important;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(155,17,30,.06) 100%),
-    radial-gradient(ellipse at 50% 0%, rgba(212,175,55,.10), transparent 65%),
-    #0d0907 !important;
+@media (min-width: 768px) {
+  .group-btn .icon { width: 116px; height: 116px; }
+  .group-btn .name { font-size: 1.05rem; }
 }
 
 .count-grid { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
