@@ -21,18 +21,19 @@ os.makedirs(OUT, exist_ok=True)
 # Row 2 (left → right):
 #   lab · chaos
 ICON_BOXES = {
-    # Centered crops — each tile's skull illustration centered in a
-    # square. The CSS .group-btn renders its own gold frame around
-    # the icon so we keep the artwork tight and centered here.
-    "custom":       (148, 195, 268, 315),   # دلخواه
-    "digital":      (335, 195, 455, 315),   # بدون گرداننده
-    "bounty":       (522, 195, 642, 315),   # جایزه سر رئیس
-    "negotiation":  (709, 195, 829, 315),   # مذاکره
-    "parliament":   (896, 195, 1016, 315),  # نماینده
-    "investigator": (1083, 195, 1203, 315), # بازپرس
-    "ranger":       (1270, 195, 1390, 315), # تکاور
-    "lab":          (148, 500, 268, 620),   # آزمایش
-    "chaos":        (335, 500, 455, 620),   # کپاس
+    # Pixel-precise boxes derived by scanning the supplied 1536×1024
+    # reference for each tile's bright interior region (gold rim +
+    # skull artwork). Tile widths vary 122–151 px so we keep each
+    # box as wide as its real tile rather than forcing a uniform size.
+    "custom":       (114, 175, 236, 330),   # دلخواه
+    "digital":      (294, 175, 420, 330),   # بدون گرداننده
+    "bounty":       (496, 175, 646, 330),   # جایزه سر رئیس
+    "negotiation":  (703, 175, 830, 330),   # مذاکره
+    "parliament":   (909, 175, 1038, 330),  # نماینده
+    "investigator": (1092, 175, 1242, 330), # بازپرس
+    "ranger":       (1318, 175, 1450, 330), # تکاور
+    "lab":          (114, 480, 236, 635),   # آزمایش
+    "chaos":        (294, 480, 420, 635),   # کپاس
 }
 
 
