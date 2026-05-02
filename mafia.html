@@ -276,6 +276,9 @@
         <button class="group-btn" onclick="selectGroup('مذاکره')" data-group="مذاکره">
           <span class="icon">🤝</span><span class="name">مذاکره</span><span class="desc">جذب شهروند</span>
         </button>
+        <button class="group-btn" onclick="selectGroup('جایزه سر رئیس')" data-group="جایزه سر رئیس">
+          <span class="icon">💰</span><span class="name">جایزه سر رئیس</span><span class="desc">شکار رئیس مافیا</span>
+        </button>
         <button class="group-btn" onclick="openDigitalMode()" data-group="دیجیتال" style="border-color:rgba(0,207,255,.3);background:rgba(0,207,255,.06)">
           <span class="icon">📱</span><span class="name">بدون گرداننده</span><span class="desc">پخش نقش دیجیتال</span>
         </button>
@@ -619,7 +622,7 @@
           </div>
           <input type="text" id="evLocation" placeholder="📍 نام لوکیشن (مثلاً کافه فلان)" class="ef-input" style="width:100%">
           <div class="ef-row">
-            <select id="evScenario" class="event-select"><option value="بازپرس">🔍 بازپرس</option><option value="تکاور">⚔️ تکاور</option><option value="نماینده">🏛️ نماینده</option><option value="مذاکره">🤝 مذاکره</option><option value="دلخواه">✏️ دلخواه</option></select>
+            <select id="evScenario" class="event-select"><option value="بازپرس">🔍 بازپرس</option><option value="تکاور">⚔️ تکاور</option><option value="نماینده">🏛️ نماینده</option><option value="مذاکره">🤝 مذاکره</option><option value="جایزه سر رئیس">💰 جایزه سر رئیس</option><option value="دلخواه">✏️ دلخواه</option></select>
             <select id="evPlayerCount" class="event-select"><option value="10">۱۰ نفر</option><option value="12">۱۲ نفر</option><option value="13">۱۳ نفر</option></select>
           </div>
           <div class="ef-row">
@@ -814,6 +817,7 @@
           <button class="dg-scenario-btn" onclick="digitalSelectScenario('بازپرس')"><span>🔍</span> بازپرس</button>
           <button class="dg-scenario-btn" onclick="digitalSelectScenario('نماینده')"><span>🏛️</span> نماینده</button>
           <button class="dg-scenario-btn" onclick="digitalSelectScenario('مذاکره')"><span>🤝</span> مذاکره</button>
+          <button class="dg-scenario-btn" onclick="digitalSelectScenario('جایزه سر رئیس')"><span>💰</span> جایزه سر رئیس</button>
         </div>
       </div>
 

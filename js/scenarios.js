@@ -143,7 +143,7 @@ const SCENARIO_INFO = {
         {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
       ]
     }
-  }
+  },
   "مذاکره": {
     icon: "🤝",
     color: "#a855f7",
@@ -187,6 +187,55 @@ const SCENARIO_INFO = {
         {name:"خبرنگار", fa:"بعد از شب مذاکره نتیجه را می‌فهمد", en:"Learns negotiation result after negotiation night", tr:"Müzakere gecesinden sonra sonucu öğrenir", icon:"📰"},
         {name:"زره‌پوش", fa:"شلیک شب اثر ندارد · رأی روز = زره می‌افتد", en:"Immune to night shot · Day vote = loses armor", tr:"Gece ateşine bağışık · Gündüz oyu = zırhı düşer", icon:"🛡️"},
         {name:"روانشناس", fa:"سایلنت کردن یک نفر در روز", en:"Silence one player during day", tr:"Gündüz bir oyuncuyu sustur", icon:"🧠"},
+        {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
+      ]
+    }
+  },
+  "جایزه سر رئیس": {
+    icon: "💰",
+    color: "#fbbf24",
+    fa: {
+      title: "سناریو جایزه سر رئیس", subtitle: "شکار رئیس مافیا · هیجان بالا",
+      intro: "سناریوی جایزه سر رئیس بر پایه شکار رئیس مافیا طراحی شده. اگر رئیس مافیا با رأی شهر یا تیر تکاور حذف شود، شهروندان بلافاصله برنده می‌شوند. تعادل میان نقش‌های قدرتی و استدلالی بالا است.",
+      flow: ["روز معارفه","شب اول (بدون شلیک)","روز اول (بحث + رأی‌گیری)","شب‌های اصلی (اجرای نقش‌ها)","روزها (اعلام نتایج + رأی‌گیری)"],
+      rules: ["حذف رئیس مافیا = برد فوری شهر","استعلام رئیس مافیا برای کارآگاه منفی است","تکاور ۲ تیر دارد · شلیک به شهروند = حذف خودش","جراح (دکتر لکتر) فقط یک بار خودش را نجات می‌دهد","شهردار حق وتو در رأی‌گیری دارد","جان‌سخت با تیر اول مافیا نمی‌میرد"],
+      quorum: [{range:"۱۵–۱۱ نفر",votes:"۶ رأی"},{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵ نفر به پایین",votes:"۲ رأی"}],
+      proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
+      flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند"
+    },
+    en: {
+      title: "Bounty on the Boss", subtitle: "Hunt the Mafia Boss · High Thrill",
+      intro: "The Bounty on the Boss scenario is built around hunting down the mafia leader. If the Godfather is eliminated by city vote or sniper shot, citizens win immediately. Strong balance between power and reasoning roles.",
+      flow: ["Introduction Day","Night 1 (no shot)","Day 1 (discussion + voting)","Main Nights (role actions)","Days (announce results + voting)"],
+      rules: ["Eliminating the Godfather = instant city win","Godfather's inquiry shows negative to Detective","Commando has 2 bullets · shooting citizen = self elimination","Surgeon (Dr. Lecter) saves self only once","Mayor has veto in voting","Tough Guy survives the first mafia shot"],
+      quorum: [{range:"15–11 players",votes:"6 votes"},{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5 or less",votes:"2 votes"}],
+      proceed: "Continue — Select Player Count ➜",
+      flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles"
+    },
+    tr: {
+      title: "Patronun Başına Ödül", subtitle: "Mafya Lideri Avı · Yüksek Heyecan",
+      intro: "Patronun Başına Ödül senaryosu mafya liderini avlamaya dayanır. Baba şehir oyu veya keskin nişancı ateşiyle elenirse vatandaşlar anında kazanır. Güç ve akıl yürütme rolleri arasında güçlü denge.",
+      flow: ["Tanışma Günü","1. Gece (ateş yok)","1. Gün (tartışma + oylama)","Ana Geceler (rol eylemleri)","Günler (sonuçlar + oylama)"],
+      rules: ["Baba'nın elenmesi = anında şehir galibiyeti","Baba'nın sorgusu Dedektife negatif görünür","Komando 2 mermi · vatandaşa ateş = kendini ele","Cerrah (Dr. Lecter) kendini yalnız bir kez kurtarır","Belediye Başkanı oylamada veto hakkına sahip","Sert Adam ilk mafya ateşinden ölmez"],
+      quorum: [{range:"15–11 oyuncu",votes:"6 oy"},{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5 ve altı",votes:"2 oy"}],
+      proceed: "Devam — Oyuncu Sayısı Seç ➜",
+      flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri"
+    },
+    roles: {
+      mafia: [
+        {name:"رئیس مافیا", fa:"رهبر تیم · حذف او = برد فوری شهر · استعلام منفی", en:"Team leader · Elimination = instant city win · Negative inquiry", tr:"Takım lideri · Elenmesi = şehir kazanır · Negatif sorgulama", icon:"👑"},
+        {name:"دکتر لکتر", fa:"نجات اعضای مافیا در شب · خودنجات یک‌بار", en:"Save mafia members at night · Self-save once", tr:"Gece mafya üyelerini kurtar · Kendini bir kez kurtar", icon:"🔪"},
+        {name:"بمب‌گذار", fa:"بمب‌گذاری روی بازیکن · حذف هدف با حذف فرد", en:"Plant bomb on player · Target out when player out", tr:"Oyuncuya bomba yerleştir · Oyuncu çıkınca hedef çıkar", icon:"💣"},
+        {name:"ناتو", fa:"حفاظت از رئیس · گمراه کردن شهروندان", en:"Protect the boss · Mislead citizens", tr:"Patronu koru · Vatandaşları yanılt", icon:"🔫"}
+      ],
+      citizen: [
+        {name:"شهردار", fa:"حق وتو در رأی‌گیری · نقش کلیدی شهر", en:"Veto in voting · Key city role", tr:"Oylama veto hakkı · Kilit şehir rolü", icon:"🎩"},
+        {name:"کارآگاه", fa:"استعلام شبانه · رئیس منفی نشان می‌دهد", en:"Night inquiry · Boss shows negative", tr:"Gece sorgulama · Patron negatif görünür", icon:"🕵️"},
+        {name:"دکتر", fa:"نجات یک نفر در شب از تیر مافیا", en:"Save a player at night from mafia shot", tr:"Gece bir oyuncuyu mafya ateşinden kurtar", icon:"⚕️"},
+        {name:"تکاور", fa:"۲ تیر · شلیک به شهروند = حذف خودش", en:"2 bullets · Shooting citizen = self elimination", tr:"2 mermi · Vatandaşa ateş = kendini ele", icon:"🎯"},
+        {name:"قاضی", fa:"تغییر رأی نهایی دادگاه · صدور حکم", en:"Change final court vote · Issue ruling", tr:"Son mahkeme oyunu değiştir · Hüküm ver", icon:"⚖️"},
+        {name:"وکیل", fa:"دفاع از یک نفر در برابر رأی‌گیری", en:"Defend a player against voting", tr:"Bir oyuncuyu oylamaya karşı savun", icon:"📜"},
+        {name:"جان‌سخت", fa:"تیر اول مافیا اثر ندارد · ۲ استعلام از حذف‌شده‌ها", en:"Survives first mafia shot · 2 inquiries on eliminated", tr:"İlk mafya ateşinden sağ · Elenenlerden 2 sorgu", icon:"💪"},
         {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
       ]
     }

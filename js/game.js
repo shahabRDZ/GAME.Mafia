@@ -1397,6 +1397,8 @@ const ROLE_ABILITIES = {
   "شیاد":          { icon: "🃏", action: "فریب", color: "#ff7777", type: "deceive" },
   "گروگان‌گیر":    { icon: "💣", action: "گروگان", color: "#ff5555", type: "hostage" },
   "یاغی":          { icon: "🗡️", action: "حمله", color: "#ff5555", type: "attack" },
+  "دکتر لکتر":     { icon: "🔪", action: "سیو مافیا", color: "#ff5555", type: "save" },
+  "بمب‌گذار":      { icon: "💣", action: "بمب‌گذاری", color: "#ff5555", type: "mine" },
   // Citizen
   "دکتر":          { icon: "⚕️", action: "سیو", color: "#4ade80", type: "save" },
   "کارآگاه":       { icon: "🕵️", action: "استعلام", color: "#60a5fa", type: "inquiry" },
@@ -1420,6 +1422,9 @@ const ROLE_ABILITIES = {
   "گورکن":         { icon: "⚰️", action: "بررسی", color: "#94a3b8", type: "inquiry" },
   "جادوگر":        { icon: "🔮", action: "طلسم", color: "#c084fc", type: "spell" },
   "پرستار":        { icon: "💊", action: "سیو", color: "#4ade80", type: "save" },
+  "شهردار":        { icon: "🎩", action: "وتو", color: "#4ade80", type: "veto" },
+  "قاضی":          { icon: "⚖️", action: "حکم", color: "#4ade80", type: "judge" },
+  "جان‌سخت":       { icon: "💪", action: "مقاومت", color: "#4ade80", type: "shield" },
   // Independent
   "هزارچهره":      { icon: "🎭", action: "تبدیل", color: "#c084fc", type: "transform" },
   "قاتل زنجیره‌ای": { icon: "🔪", action: "قتل", color: "#c084fc", type: "kill" },

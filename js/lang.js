@@ -19,15 +19,16 @@ const LANG = {
       noCards: "هنوز کارتی اضافه نشده — کارت‌های بازیکنان را وارد کنید",
       clearConfirm: "تاریخچه پاک شود؟",
       mafiaTeam: "😈 مافیا", citizenTeam: "😇 شهروند",
-      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", دلخواه: "سفارشی‌سازی" },
-      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", دلخواه: "دلخواه" }
+      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی" },
+      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه" }
     },
     roles: {
       "رئیس مافیا": "رئیس مافیا", "ناتو": "ناتو", "شیاد": "شیاد", "گروگان‌گیر": "گروگان‌گیر",
       "هکر": "هکر", "یاغی": "یاغی", "مافیا ساده": "مافیا ساده",
       "شهروند ساده": "شهروند ساده", "بازپرس": "بازپرس", "کارآگاه": "کارآگاه", "هانتر": "هانتر",
       "دکتر": "دکتر", "رویین‌تن": "رویین‌تن", "راهنما": "راهنما", "مین‌گذار": "مین‌گذار",
-      "وکیل": "وکیل", "محافظ": "محافظ", "تفنگدار": "تفنگدار", "نگهبان": "نگهبان", "تک‌تیرانداز": "تک‌تیرانداز", "سرباز": "سرباز"
+      "وکیل": "وکیل", "محافظ": "محافظ", "تفنگدار": "تفنگدار", "نگهبان": "نگهبان", "تک‌تیرانداز": "تک‌تیرانداز", "سرباز": "سرباز",
+      "شهردار": "شهردار", "قاضی": "قاضی", "جان‌سخت": "جان‌سخت", "دکتر لکتر": "دکتر لکتر", "بمب‌گذار": "بمب‌گذار"
     }
   },
   en: {
@@ -48,15 +49,16 @@ const LANG = {
       noCards: "No cards added yet — enter player cards",
       clearConfirm: "Clear history?",
       mafiaTeam: "😈 Mafia", citizenTeam: "😇 Citizen",
-      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", دلخواه: "Custom" },
-      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", دلخواه: "Custom" }
+      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom" },
+      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom" }
     },
     roles: {
       "رئیس مافیا": "Mafia Boss", "ناتو": "NATO Agent", "شیاد": "Swindler", "گروگان‌گیر": "Kidnapper",
       "هکر": "Hacker", "یاغی": "Outlaw", "مافیا ساده": "Mafia",
       "شهروند ساده": "Citizen", "بازپرس": "Interrogator", "کارآگاه": "Detective", "هانتر": "Hunter",
       "دکتر": "Doctor", "رویین‌تن": "Invincible", "راهنما": "Guide", "مین‌گذار": "Bomb Expert",
-      "وکیل": "Lawyer", "محافظ": "Bodyguard", "تفنگدار": "Rifleman", "نگهبان": "Guard", "تک‌تیرانداز": "Sniper", "تکاور": "Commando", "سرباز": "Soldier"
+      "وکیل": "Lawyer", "محافظ": "Bodyguard", "تفنگدار": "Rifleman", "نگهبان": "Guard", "تک‌تیرانداز": "Sniper", "تکاور": "Commando", "سرباز": "Soldier",
+      "شهردار": "Mayor", "قاضی": "Judge", "جان‌سخت": "Tough Guy", "دکتر لکتر": "Dr. Lecter", "بمب‌گذار": "Bomber"
     }
   },
   tr: {
@@ -77,15 +79,16 @@ const LANG = {
       noCards: "Henüz kart eklenmedi — oyuncu kartlarını girin",
       clearConfirm: "Geçmiş silinsin mi?",
       mafiaTeam: "😈 Mafya", citizenTeam: "😇 Vatandaş",
-      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", دلخواه: "Özel" },
-      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", دلخواه: "Özel" }
+      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel" },
+      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel" }
     },
     roles: {
       "رئیس مافیا": "Mafya Başı", "ناتو": "NATO Ajan", "شیاد": "Dolandırıcı", "گروگان‌گیر": "Rehine Alan",
       "هکر": "Hacker", "یاغی": "Haydut", "مافیا ساده": "Mafya",
       "شهروند ساده": "Vatandaş", "بازپرس": "Sorgu Memuru", "کارآگاه": "Dedektif", "هانتر": "Avcı",
       "دکتر": "Doktor", "رویین‌تن": "Yenilmez", "راهنما": "Rehber", "مین‌گذار": "Bomba Uzmanı",
-      "وکیل": "Avukat", "محافظ": "Koruyucu", "تفنگدار": "Nişancı", "نگهبان": "Bekçi", "تک‌تیرانداز": "Keskin Nişancı", "سرباز": "Asker"
+      "وکیل": "Avukat", "محافظ": "Koruyucu", "تفنگدار": "Nişancı", "نگهبان": "Bekçi", "تک‌تیرانداز": "Keskin Nişancı", "سرباز": "Asker",
+      "شهردار": "Belediye Başkanı", "قاضی": "Yargıç", "جان‌سخت": "Sert Adam", "دکتر لکتر": "Dr. Lecter", "بمب‌گذار": "Bombacı"
     }
   }
 };
