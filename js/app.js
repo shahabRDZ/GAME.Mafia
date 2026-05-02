@@ -43,15 +43,26 @@
     setTimeout(() => cancelAnimationFrame(animFrame), 4000);
   }
 
-  // Typing effect
-  const text = "به دنیای مافیا خوش اومدی...";
-  let charIdx = 0;
+  // Typing effect — first welcome line, then a second line below
+  const lines = [
+    "به دنیای مافیا خوش اومدی...",
+    "با شوشانگ دورهمی بازی کنین و لذت ببرید"
+  ];
   if (tagline) {
-    const typeInterval = setInterval(() => {
-      charIdx++;
-      tagline.textContent = text.slice(0, charIdx);
-      if (charIdx >= text.length) clearInterval(typeInterval);
-    }, 70);
+    tagline.innerHTML = '<span class="splash-line splash-line-1"></span><br><span class="splash-line splash-line-2"></span>';
+    const line1 = tagline.querySelector(".splash-line-1");
+    const line2 = tagline.querySelector(".splash-line-2");
+    let i = 0;
+    const typeLine = (el, text, speed, done) => {
+      const id = setInterval(() => {
+        i++;
+        el.textContent = text.slice(0, i);
+        if (i >= text.length) { clearInterval(id); i = 0; done && done(); }
+      }, speed);
+    };
+    typeLine(line1, lines[0], 70, () => {
+      setTimeout(() => typeLine(line2, lines[1], 55), 350);
+    });
   }
 
   // 8-second smooth fill — the bar width is driven by a CSS animation;

@@ -6,6 +6,7 @@ Output: img/cards/  +  img/cards/cards.json (mapping)
 """
 import os, json, glob, shutil
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, features
+from strip_white_frame import strip_white_frame
 
 # Pillow's Raqm backend (HarfBuzz + FriBidi) handles Arabic/Persian shaping
 # and bidi natively — far cleaner than arabic_reshaper + python-bidi which
@@ -97,12 +98,21 @@ def fa_textbbox(draw: ImageDraw.ImageDraw, text: str, font):
 
 
 def fit_to_canvas(img: Image.Image, w: int, h: int) -> Image.Image:
-    """Resize keeping aspect ratio, then center on a black canvas of (w,h)."""
-    img = img.convert("RGBA")
-    scale = min(w / img.width, h / img.height)
+    """Strip the printed deco frame, then fill the canvas edge-to-edge.
+
+    Source artwork has an ornate gothic frame baked in that reads as a
+    "white border" once the card is mounted in our UI. We crop ~7% from
+    every side to remove it, then scale-to-cover so the skull artwork
+    fills the canvas with no letterboxing.
+    """
+    img = strip_white_frame(img, inset_pct=0.07)
+
+    # Scale-to-cover (vs. fit-inside) so the artwork goes corner-to-corner
+    # of the 2:3 card with no black bars.
+    scale = max(w / img.width, h / img.height)
     nw, nh = int(img.width * scale), int(img.height * scale)
     resized = img.resize((nw, nh), Image.LANCZOS)
-    canvas = Image.new("RGBA", (w, h), (5, 5, 8, 255))
+    canvas = Image.new("RGBA", (w, h), (0, 0, 0, 255))
     canvas.paste(resized, ((w - nw) // 2, (h - nh) // 2), resized)
     return canvas
 

@@ -229,10 +229,17 @@
 }
 .splash-content { padding-bottom: 18vh; }
 .splash-tagline {
-  font-size: 0.92rem; color: rgba(255,255,255,.85);
-  margin-top: 6px; height: 1.2em;
+  font-size: 0.92rem; color: rgba(255,255,255,.92);
+  margin-top: 6px; min-height: 2.6em;
   font-weight: 600; letter-spacing: 1px;
-  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  text-shadow: 0 1px 4px rgba(0,0,0,.85);
+  line-height: 1.55;
+}
+.splash-line { display: inline-block; }
+.splash-line-2 {
+  color: var(--gold, #D4AF37);
+  font-weight: 700;
+  font-size: 0.86rem;
 }
 .splash-bar-wrap {
   display: flex; align-items: center; justify-content: center;
