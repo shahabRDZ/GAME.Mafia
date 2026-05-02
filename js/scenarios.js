@@ -437,35 +437,100 @@ function openStartOverlay() {
   const T = titles[currentLang] || titles.fa;
 
   content.innerHTML = `
-    <div class="scn-header" style="--scn-color:${info.color}">
-      <div class="scn-icon">${info.icon}</div>
-      <h2 class="scn-title">${T.title}</h2>
-      <p class="scn-subtitle">${T.subtitle}</p>
+    <div class="st-hero" style="--scn-color:${info.color}">
+      <div class="st-hero-bg"></div>
+      <div class="st-hero-grid"></div>
+      <div class="st-hero-content">
+        <div class="st-hero-icon">
+          <span class="st-hero-icon-glow"></span>
+          <span class="st-hero-icon-emoji">${info.icon}</span>
+        </div>
+        <h2 class="st-hero-title">${T.title}</h2>
+        <p class="st-hero-subtitle">${T.subtitle}</p>
+      </div>
     </div>
-    <div class="st-summary">
-      <div class="st-sum-item"><span class="st-sum-label">${T.scenario}</span><span class="st-sum-value">${state.group}</span></div>
-      <div class="st-sum-item"><span class="st-sum-label">${T.players}</span><span class="st-sum-value">${toFarsiNum(state.count)}</span></div>
-      <div class="st-sum-item st-sum-mafia"><span class="st-sum-label">${T.mafia}</span><span class="st-sum-value">${toFarsiNum(state.mafiaCount)}</span></div>
-      <div class="st-sum-item st-sum-citizen"><span class="st-sum-label">${T.citizen}</span><span class="st-sum-value">${toFarsiNum(state.citizenCount)}</span></div>
+
+    <div class="st-stats">
+      <div class="st-stat">
+        <div class="st-stat-icon">🎭</div>
+        <div class="st-stat-text">
+          <div class="st-stat-label">${T.scenario}</div>
+          <div class="st-stat-value">${state.group}</div>
+        </div>
+      </div>
+      <div class="st-stat">
+        <div class="st-stat-icon">👥</div>
+        <div class="st-stat-text">
+          <div class="st-stat-label">${T.players}</div>
+          <div class="st-stat-value">${toFarsiNum(state.count)}</div>
+        </div>
+      </div>
+      <div class="st-stat st-stat-mafia">
+        <div class="st-stat-icon">😈</div>
+        <div class="st-stat-text">
+          <div class="st-stat-label">${T.mafia}</div>
+          <div class="st-stat-value">${toFarsiNum(state.mafiaCount)}</div>
+        </div>
+      </div>
+      <div class="st-stat st-stat-citizen">
+        <div class="st-stat-icon">😇</div>
+        <div class="st-stat-text">
+          <div class="st-stat-label">${T.citizen}</div>
+          <div class="st-stat-value">${toFarsiNum(state.citizenCount)}</div>
+        </div>
+      </div>
     </div>
+
+    <div class="st-divider"><span class="st-divider-text">⚡ ${T.subtitle} ⚡</span></div>
+
     <div class="st-modes">
-      <button class="st-mode-card st-mode-classic" onclick="proceedClassicStart()">
-        <div class="st-mode-icon">⚔️</div>
-        <div class="st-mode-body">
-          <div class="st-mode-title">${T.classic}</div>
-          <div class="st-mode-desc">${T.classicDesc}</div>
+      <button class="st-mega st-mega-classic" onclick="proceedClassicStart()" aria-label="${T.classic}">
+        <div class="st-mega-glow"></div>
+        <div class="st-mega-shine"></div>
+        <div class="st-mega-content">
+          <div class="st-mega-emblem">
+            <span class="st-mega-ring"></span>
+            <span class="st-mega-icon">⚔️</span>
+          </div>
+          <div class="st-mega-text">
+            <div class="st-mega-title">${T.classic}</div>
+            <div class="st-mega-desc">${T.classicDesc}</div>
+            <div class="st-mega-tags">
+              <span class="st-tag">🎴 پخش کارت</span>
+              <span class="st-tag">👥 حضوری</span>
+            </div>
+          </div>
+          <div class="st-mega-cta">
+            <span class="st-mega-cta-text">شروع</span>
+            <span class="st-mega-cta-arrow">◀</span>
+          </div>
         </div>
-        <div class="st-mode-arrow">◀</div>
       </button>
-      <button class="st-mode-card st-mode-digital" onclick="proceedDigitalStart()">
-        <div class="st-mode-icon">📱</div>
-        <div class="st-mode-body">
-          <div class="st-mode-title">${T.digital}</div>
-          <div class="st-mode-desc">${T.digitalDesc}</div>
+
+      <button class="st-mega st-mega-digital" onclick="proceedDigitalStart()" aria-label="${T.digital}">
+        <div class="st-mega-glow"></div>
+        <div class="st-mega-shine"></div>
+        <div class="st-mega-content">
+          <div class="st-mega-emblem">
+            <span class="st-mega-ring"></span>
+            <span class="st-mega-icon">📱</span>
+          </div>
+          <div class="st-mega-text">
+            <div class="st-mega-title">${T.digital}</div>
+            <div class="st-mega-desc">${T.digitalDesc}</div>
+            <div class="st-mega-tags">
+              <span class="st-tag">⚡ آنلاین</span>
+              <span class="st-tag">📡 نزدیکی</span>
+            </div>
+          </div>
+          <div class="st-mega-cta">
+            <span class="st-mega-cta-text">شروع</span>
+            <span class="st-mega-cta-arrow">◀</span>
+          </div>
         </div>
-        <div class="st-mode-arrow">◀</div>
       </button>
     </div>
+
     <div class="scn-btn-row">
       <button class="scn-back-btn" onclick="goBackFromStart()" style="width:100%">◀ ${T.back}</button>
     </div>
