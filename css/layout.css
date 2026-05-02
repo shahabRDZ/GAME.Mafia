@@ -123,20 +123,31 @@ header {
 .bottom-nav {
   position: fixed;
   left: 50%;
-  bottom: calc(2px + var(--safe-bottom));
+  bottom: calc(4px + var(--safe-bottom));
   transform: translateX(-50%);
-  width: min(96vw, 540px);
+  /* Phone-first: span the screen with a small inset, capped so it
+     doesn't get giant on tablets/desktop */
+  width: calc(100vw - 8px);
+  max-width: 480px;
   aspect-ratio: 2.55 / 1;
+  /* Hard ceiling so the nav never eats too much vertical space on
+     wide-but-short viewports (landscape phones, etc.) */
+  max-height: 110px;
   z-index: var(--z-overlay);
   display: flex; align-items: stretch;
   background: url("/img/bottom-nav.png") center / 100% 100% no-repeat;
   background-color: transparent;
   border: none;
-  /* Skull endcaps occupy ~7% of width on each side — pad them out
-     so flex children land squarely on the 5 inner cells. */
   padding: 0 7%;
   box-shadow: none;
-  filter: drop-shadow(0 -10px 24px rgba(0,0,0,.6));
+  filter: drop-shadow(0 -8px 18px rgba(0,0,0,.55));
+}
+
+/* Reserve the nav's own height at the bottom of every page so its
+   floating bar never covers the last row of content. */
+body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 768px) {
+  body { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
 }
 .bottom-nav::before, .bottom-nav::after { content: none; }
 
