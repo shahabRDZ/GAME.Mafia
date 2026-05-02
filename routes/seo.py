@@ -11,6 +11,7 @@ SCENARIO_FILES = {
     "namayandeh": "namayandeh.html",
     "bazpors": "bazpors.html",
     "mozakereh": "mozakereh.html",
+    "jayezeh": "jayezeh.html",
 }
 
 

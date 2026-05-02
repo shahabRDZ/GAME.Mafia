@@ -49,6 +49,11 @@ def sitemap():
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>{SITE_URL}/scenarios/jayezeh</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
 </urlset>"""
     resp = make_response(xml)
     resp.headers["Content-Type"] = "application/xml"
