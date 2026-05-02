@@ -20,19 +20,71 @@
   padding-block: var(--space-md);
 }
 
-/* ── Header ── */
-header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
+/* ── Hero Header — image artwork above the brand titles ── */
+header { text-align: center; padding-block: var(--space-md) var(--space-md); }
+
+.hero-header {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0;
+}
+
+/* Skeleton-cards artwork that sits at the very top of the home screen.
+   Fades into the page bg at its bottom so the title sits naturally below. */
+.hero-art {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  margin-inline: auto;
+  aspect-ratio: 3/2;
+  border-radius: 18px;
+  overflow: hidden;
+  filter: drop-shadow(0 18px 36px rgba(0,0,0,.55));
+}
+.hero-art-img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  -webkit-user-drag: none;
+}
+.hero-art-fade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.85) 100%);
+}
+
+/* Title block — sits BELOW the artwork, slightly pulled up so it
+   anchors visually onto the bottom edge of the image */
+.hero-titles {
+  margin-top: -18px;
+  position: relative; z-index: 2;
+  text-align: center;
+}
+
 .logo {
-  font-size: clamp(3rem,9vw,6.5rem); font-weight: 900; letter-spacing: -4px;
+  font-family: 'Cinzel', 'Vazirmatn', serif;
+  font-size: clamp(2.6rem, 8vw, 4.5rem);
+  font-weight: 900; letter-spacing: -1px;
   background: linear-gradient(120deg, #A11212 0%, #D4AF37 50%, #8B0000 100%);
   background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; animation: shine 4s linear infinite;
-  filter: drop-shadow(0 0 50px rgba(212,175,55,.45));
+  background-clip: text;
+  animation: shine 4s linear infinite;
+  filter: drop-shadow(0 0 38px rgba(212,175,55,.45));
+  line-height: 1.1;
 }
+
 .logo-sub {
-  font-size: var(--font-size-sm); color: var(--dim);
-  letter-spacing: 3px; margin-block-start: var(--space-2xs);
+  font-family: 'Cinzel', system-ui, sans-serif;
+  font-size: clamp(0.85rem, 2.4vw, 1.05rem);
+  font-weight: 600;
+  color: var(--gold, #D4AF37);
+  letter-spacing: clamp(6px, 2vw, 14px);
+  margin-block-start: 4px;
   text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 20px rgba(212,175,55,.18);
+}
+
+@media (min-width: 768px) {
+  .hero-art { max-width: 640px; aspect-ratio: 16/9; }
+  .hero-titles { margin-top: -28px; }
 }
 
 /* ── Hero feature chips ── */
