@@ -229,18 +229,14 @@
 }
 .splash-content { padding-bottom: 18vh; }
 .splash-tagline {
-  font-size: 0.92rem; color: rgba(255,255,255,.92);
-  margin-top: 6px; min-height: 2.6em;
+  font-size: 0.92rem; color: rgba(255,255,255,.95);
+  margin-top: 14px; min-height: 1.4em;
   font-weight: 600; letter-spacing: 1px;
   text-shadow: 0 1px 4px rgba(0,0,0,.85);
-  line-height: 1.55;
+  line-height: 1.5;
+  transition: opacity .35s ease;
 }
-.splash-line { display: inline-block; }
-.splash-line-2 {
-  color: var(--gold, #D4AF37);
-  font-weight: 700;
-  font-size: 0.86rem;
-}
+.splash-tagline.fading { opacity: 0; }
 .splash-bar-wrap {
   display: flex; align-items: center; justify-content: center;
   gap: 12px; margin-top: 10px;

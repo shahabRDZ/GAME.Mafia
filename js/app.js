@@ -43,26 +43,47 @@
     setTimeout(() => cancelAnimationFrame(animFrame), 4000);
   }
 
-  // Typing effect — first welcome line, then a second line below
+  // Typing effect — cycle through tagline phrases below the loading bar.
+  // Each phrase types in, holds briefly, fades out, then the next one
+  // appears. Continues cycling for the full splash duration.
   const lines = [
     "به دنیای مافیا خوش اومدی...",
     "با شوشانگ دورهمی بازی کنین و لذت ببرید"
   ];
   if (tagline) {
-    tagline.innerHTML = '<span class="splash-line splash-line-1"></span><br><span class="splash-line splash-line-2"></span>';
-    const line1 = tagline.querySelector(".splash-line-1");
-    const line2 = tagline.querySelector(".splash-line-2");
-    let i = 0;
-    const typeLine = (el, text, speed, done) => {
+    let lineIdx = 0;
+    let cancelled = false;
+
+    const typePhrase = (text, speed = 60) => new Promise(res => {
+      tagline.classList.remove("fading");
+      tagline.textContent = "";
+      let ci = 0;
       const id = setInterval(() => {
-        i++;
-        el.textContent = text.slice(0, i);
-        if (i >= text.length) { clearInterval(id); i = 0; done && done(); }
+        if (cancelled) { clearInterval(id); return res(); }
+        ci++;
+        tagline.textContent = text.slice(0, ci);
+        if (ci >= text.length) { clearInterval(id); res(); }
       }, speed);
-    };
-    typeLine(line1, lines[0], 70, () => {
-      setTimeout(() => typeLine(line2, lines[1], 55), 350);
     });
+    const fadeOut = (ms = 350) => new Promise(res => {
+      tagline.classList.add("fading");
+      setTimeout(res, ms);
+    });
+
+    (async function loop() {
+      while (!cancelled) {
+        await typePhrase(lines[lineIdx], 60);
+        await new Promise(r => setTimeout(r, 900));
+        await fadeOut(350);
+        lineIdx = (lineIdx + 1) % lines.length;
+      }
+    })();
+
+    // stop the loop once the splash hides
+    const obs = new MutationObserver(() => {
+      if (splash.classList.contains("hide")) { cancelled = true; obs.disconnect(); }
+    });
+    obs.observe(splash, { attributes: true, attributeFilter: ["class"] });
   }
 
   // 8-second smooth fill — the bar width is driven by a CSS animation;
