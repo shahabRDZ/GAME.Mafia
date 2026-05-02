@@ -163,19 +163,27 @@ function generateCards() {
   let citizenVariants = deepShuffle([0, 1, 2, 3]);
   let mi = 0, ci = 0;
 
+  // Pool of citizen-variant indices (7 source images), shuffled & cycled
+  const citizenImagePool = deepShuffle([0, 1, 2, 3, 4, 5, 6]);
+  let cip = 0;
+  const pickCitizenVariant = (name) => name === "شهروند ساده"
+    ? citizenImagePool[cip++ % citizenImagePool.length]
+    : null;
+
   if (groupData) {
     const mn = deepShuffle([...groupData.mafia]);
     const cn = deepShuffle([...groupData.citizen]);
     mn.forEach(n => cards.push({ role: "mafia", roleName: n, charVariant: mafiaVariants[mi++ % 4] }));
-    cn.forEach(n => cards.push({ role: "citizen", roleName: n, charVariant: citizenVariants[ci++ % 4] }));
+    cn.forEach(n => cards.push({ role: "citizen", roleName: n, charVariant: citizenVariants[ci++ % 4], citizenImageIdx: pickCitizenVariant(n) }));
   } else if (state.customCards && state.customCards.length) {
     deepShuffle([...state.customCards]).forEach(c => cards.push({
       role: c.team, roleName: c.name,
-      charVariant: c.team === "mafia" ? mafiaVariants[mi++ % 4] : citizenVariants[ci++ % 4]
+      charVariant: c.team === "mafia" ? mafiaVariants[mi++ % 4] : citizenVariants[ci++ % 4],
+      citizenImageIdx: pickCitizenVariant(c.name)
     }));
   } else {
     for (let i = 0; i < mafiaCount; i++) cards.push({ role: "mafia", roleName: "مافیا ساده", charVariant: mafiaVariants[i % 4] });
-    for (let i = 0; i < citizenCount; i++) cards.push({ role: "citizen", roleName: "شهروند ساده", charVariant: citizenVariants[i % 4] });
+    for (let i = 0; i < citizenCount; i++) cards.push({ role: "citizen", roleName: "شهروند ساده", charVariant: citizenVariants[i % 4], citizenImageIdx: pickCitizenVariant("شهروند ساده") });
   }
 
   // Multi-layer smart shuffle
@@ -397,10 +405,25 @@ function showCompletion() {
 
 function buildCard(card, flipped = false) {
   const flippedClass = flipped ? "flipped" : "";
-  const charSVG = getCharSVG(card.roleName, card.role, card.charVariant || 0);
   const displayName = translateRole(card.roleName);
   const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : '<div class="citizen-sparks"></div>';
   const delay = (card.charVariant || 0) * 0.4;
+
+  const cardImg = (typeof getCardImageOrFallback === 'function')
+    ? getCardImageOrFallback(card.roleName, card.citizenImageIdx)
+    : null;
+  // Overlay label whenever the baked-in Persian name on the image won't match
+  // what we want to show (custom role, or a non-Persian display language).
+  const safeName = (typeof escapeHtml === 'function') ? escapeHtml(displayName) : displayName;
+  const needsOverlay = cardImg && (!cardImg.hasBakedName || displayName !== card.roleName);
+  const front = cardImg
+    ? `<img class="card-image" src="${cardImg.src}" alt="${safeName}" draggable="false" oncontextmenu="return false">${
+        needsOverlay ? `<div class="card-name-overlay">${safeName}</div>` : ''
+      }`
+    : `<div class="char-wrap" style="animation-delay:${delay}s">${getCharSVG(card.roleName, card.role, card.charVariant || 0)}</div>
+       <div class="char-shadow"></div>
+       <div class="card-role-name">${safeName}</div>`;
+
   // Generate floating particles for card back
   let particles = '<div class="card-particles">';
   for (let i = 0; i < 12; i++) {
@@ -420,9 +443,7 @@ function buildCard(card, flipped = false) {
       </div>
       <div class="card-face card-front ${card.role}">
         ${sparks}
-        <div class="char-wrap" style="animation-delay:${delay}s">${charSVG}</div>
-        <div class="char-shadow"></div>
-        <div class="card-role-name">${displayName}</div>
+        ${front}
       </div>
     </div>`;
 }

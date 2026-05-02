@@ -44,6 +44,30 @@
   font-size: 1.1rem;
 }
 
+/* ── Card front image (replaces SVG character) ── */
+.card-image {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: inherit;
+  pointer-events: none; -webkit-user-select: none; user-select: none;
+  -webkit-user-drag: none;
+}
+/* Overlay shown for custom/unknown roles whose image has a baked-in
+   different name — masks the printed name and shows the new one. */
+.card-name-overlay {
+  position: absolute; left: 5.5%; right: 5.5%; bottom: 1.8%;
+  height: 11.5%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(0,0,0,.96), rgba(0,0,0,1));
+  border-block: 2px solid rgba(233,69,96,.85);
+  color: #fff; font-weight: 900; letter-spacing: 1px;
+  font-size: clamp(0.95rem, 3.5vw, 1.45rem);
+  text-align: center; padding-inline: var(--space-sm);
+  z-index: 5;
+  text-shadow: 0 2px 6px rgba(0,0,0,.9);
+  pointer-events: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 /* ── Card 3D flip ── */
 .card-wrapper { aspect-ratio: 2/3; perspective: 1000px; cursor: pointer; }
 .card {
@@ -76,15 +100,13 @@
 
 /* ── Card back ── */
 .card-back {
-  background: linear-gradient(145deg, #080810, #030306, #000000);
+  background: #000 url("/img/cards/back.png") center/cover no-repeat;
   border: 1.5px solid rgba(60,70,120,.12);
-  box-shadow: 0 12px 36px rgba(0,0,0,.8), inset 0 0 80px rgba(0,0,0,.95);
+  box-shadow: 0 12px 36px rgba(0,0,0,.8);
+  display: flex; align-items: center; justify-content: center;
 }
-.card-back::before {
-  content: ''; position: absolute; inset: 0; border-radius: inherit;
-  background: radial-gradient(ellipse at 50% 40%, rgba(233,69,96,.06) 0%, transparent 60%);
-  pointer-events: none;
-}
+.card-back .card-particles,
+.card-back .tap-hint { display: none; }
 
 /* ── Floating particles on card back ── */
 .card-particles {
@@ -121,18 +143,15 @@
   animation: lightningGlow 0.6s ease-out forwards;
 }
 
-/* ── Card number ── */
+/* ── Card number (centered white over back image) ── */
 .card-number {
-  font-size: 2.8rem; font-weight: 900; color: var(--accent);
-  text-shadow: 0 0 30px var(--accent), 0 0 60px rgba(233,69,96,.3);
+  font-size: 3.4rem; font-weight: 900; color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.95), 0 0 30px rgba(0,0,0,.9), 0 0 60px rgba(0,0,0,.7);
   position: relative; z-index: 1;
-  filter: drop-shadow(0 0 15px var(--accent));
   animation: numPulse 3s ease-in-out infinite;
+  font-variant-numeric: tabular-nums;
 }
-.card-back .tap-hint {
-  font-size: var(--font-size-xs); color: rgba(255,255,255,.3);
-  margin-block-start: var(--space-sm); position: relative; z-index: 1; letter-spacing: 2px;
-}
+.card-back .tap-hint { display: none; }
 
 /* ── Card front shared ── */
 .card-front { transform: rotateY(180deg); }

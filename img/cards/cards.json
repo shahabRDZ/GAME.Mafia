@@ -1,0 +1,145 @@
+{
+  "size": [
+    900,
+    1350
+  ],
+  "roles": {
+    "boss": {
+      "file": "boss.png",
+      "name_fa": "رئیس مافیا"
+    },
+    "godfather": {
+      "file": "godfather.png",
+      "name_fa": "پدرخوانده"
+    },
+    "nato": {
+      "file": "nato.png",
+      "name_fa": "ناتو"
+    },
+    "mafia": {
+      "file": "mafia.png",
+      "name_fa": "مافیا ساده"
+    },
+    "hostage": {
+      "file": "hostage.png",
+      "name_fa": "گروگان‌گیر"
+    },
+    "hacker": {
+      "file": "hacker.png",
+      "name_fa": "هکر"
+    },
+    "rebel": {
+      "file": "rebel.png",
+      "name_fa": "یاغی"
+    },
+    "trickster": {
+      "file": "trickster.png",
+      "name_fa": "شیاد"
+    },
+    "negotiator": {
+      "file": "negotiator.png",
+      "name_fa": "مذاکره‌کننده"
+    },
+    "lecter": {
+      "file": "lecter.png",
+      "name_fa": "دکتر لکتر"
+    },
+    "bomber": {
+      "file": "bomber.png",
+      "name_fa": "بمب‌گذار"
+    },
+    "detective": {
+      "file": "detective.png",
+      "name_fa": "کارآگاه"
+    },
+    "doctor": {
+      "file": "doctor.png",
+      "name_fa": "دکتر"
+    },
+    "sniper": {
+      "file": "sniper.png",
+      "name_fa": "تک‌تیرانداز"
+    },
+    "ranger": {
+      "file": "ranger.png",
+      "name_fa": "تکاور"
+    },
+    "gunner": {
+      "file": "gunner.png",
+      "name_fa": "تفنگدار"
+    },
+    "guard": {
+      "file": "guard.png",
+      "name_fa": "نگهبان"
+    },
+    "protector": {
+      "file": "protector.png",
+      "name_fa": "محافظ"
+    },
+    "lawyer": {
+      "file": "lawyer.png",
+      "name_fa": "وکیل"
+    },
+    "miner": {
+      "file": "miner.png",
+      "name_fa": "مین‌گذار"
+    },
+    "guide": {
+      "file": "guide.png",
+      "name_fa": "راهنما"
+    },
+    "soldier": {
+      "file": "soldier.png",
+      "name_fa": "سرباز"
+    },
+    "investigator": {
+      "file": "investigator.png",
+      "name_fa": "بازپرس"
+    },
+    "hunter": {
+      "file": "hunter.png",
+      "name_fa": "هانتر"
+    },
+    "invincible": {
+      "file": "invincible.png",
+      "name_fa": "رویین‌تن"
+    },
+    "armored": {
+      "file": "armored.png",
+      "name_fa": "زره‌پوش"
+    },
+    "reporter": {
+      "file": "reporter.png",
+      "name_fa": "خبرنگار"
+    },
+    "psychologist": {
+      "file": "psychologist.png",
+      "name_fa": "روانشناس"
+    },
+    "mayor": {
+      "file": "mayor.png",
+      "name_fa": "شهردار"
+    },
+    "judge": {
+      "file": "judge.png",
+      "name_fa": "قاضی"
+    },
+    "toughguy": {
+      "file": "toughguy.png",
+      "name_fa": "جان‌سخت"
+    },
+    "kingkiller": {
+      "file": "kingkiller.png",
+      "name_fa": "شاه کش"
+    }
+  },
+  "citizen_variants": [
+    "citizen_1.png",
+    "citizen_2.png",
+    "citizen_3.png",
+    "citizen_4.png",
+    "citizen_5.png",
+    "citizen_6.png",
+    "citizen_7.png"
+  ]
+}

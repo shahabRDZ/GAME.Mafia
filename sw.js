@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v91';
+const CACHE_VERSION = 'v94';
 const STATIC_CACHE = `ShowShung-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `ShowShung-dynamic-${CACHE_VERSION}`;
 
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   '/js/helpers.js',
   '/js/api.js',
   '/js/characters.js',
+  '/js/cardImages.js',
   '/js/lang.js',
   '/js/auth.js',
   '/js/navigation.js',
@@ -34,6 +35,9 @@ const STATIC_ASSETS = [
   '/js/app.js',
   '/icon-192.png',
   '/icon-512.png',
+  '/img/cover.png',
+  '/img/backgrand.png',
+  '/img/cards/back.png',
   '/manifest.json'
 ];
 
