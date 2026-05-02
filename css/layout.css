@@ -24,10 +24,10 @@
 header { text-align: center; padding-block: var(--space-xl) var(--space-md); }
 .logo {
   font-size: clamp(3rem,9vw,6.5rem); font-weight: 900; letter-spacing: -4px;
-  background: linear-gradient(120deg, #ff2244 0%, #ff7700 40%, #f5a623 60%, #ff2244 100%);
+  background: linear-gradient(120deg, #A11212 0%, #D4AF37 50%, #8B0000 100%);
   background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; animation: shine 4s linear infinite;
-  filter: drop-shadow(0 0 50px rgba(255,34,68,.55));
+  filter: drop-shadow(0 0 50px rgba(212,175,55,.45));
 }
 .logo-sub {
   font-size: var(--font-size-sm); color: var(--dim);

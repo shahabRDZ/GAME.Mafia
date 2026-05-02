@@ -2,25 +2,56 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap');
 
 :root {
-  /* Colors */
-  --dark: #000000;
-  --dark2: #0a0508;
-  --dark3: #120a0e;
-  --accent: #e94560;
-  --accent2: #f5a623;
-  --neon-red: #ff2244;
+  /* ── Cinematic Mafia palette ──
+     Deep black canvas, antique gold highlight, blood red emphasis.
+     Most legacy CSS reads --accent / --accent2 — those now point at
+     the cinematic blood-red and gold so the new theme propagates
+     site-wide without touching every rule. */
+  --dark: #0B0B0B;
+  --dark2: #121212;
+  --dark3: #1A1A1A;
+  --gold:        #D4AF37;
+  --gold-soft:   #C9A14A;
+  --gold-deep:   #8C6A1F;
+  --blood:       #8B0000;
+  --blood-bright:#A11212;
+  --blood-deep:  #5A0707;
+  --khaki:       #B8A47A;
+
+  --accent:  var(--blood-bright);
+  --accent2: var(--gold);
+
+  --neon-red: #ff2244;     /* legacy — used by lightning effects */
   --neon-green: #00ff88;
   --neon-blue: #00cfff;
-  --glass: rgba(255,255,255,0.04);
-  --gb: rgba(255,255,255,0.07);
-  --text: #eaeaf5;
-  --dim: rgba(255,255,255,0.38);
+
+  --glass: rgba(11, 11, 11, 0.62);
+  --gb:    rgba(212, 175, 55, 0.14);   /* hairline gold border */
+  --text:  #EAEAEA;
+  --dim:   rgba(234, 234, 234, 0.55);
+  --muted: #CFCFCF;
+
+  /* Cinematic component tokens */
+  --panel-bg:        rgba(11, 11, 11, 0.78);
+  --panel-bg-strong: rgba(7, 7, 7, 0.92);
+  --panel-border:    rgba(212, 175, 55, 0.22);
+  --panel-border-hot:rgba(212, 175, 55, 0.45);
+  --panel-shadow:    0 18px 48px rgba(0,0,0,.65),
+                     0 0 0 1px rgba(212,175,55,.06),
+                     inset 0 1px 0 rgba(212,175,55,.08);
+  --panel-radius:    14px;
+
+  --btn-primary-bg:     linear-gradient(180deg, #6c0d0d 0%, #3b0707 100%);
+  --btn-primary-bg-hot: linear-gradient(180deg, #8a1212 0%, #4a0808 100%);
+  --btn-primary-border: rgba(212, 175, 55, 0.55);
+  --btn-primary-glow:   0 0 18px rgba(139, 0, 0, .45),
+                        0 0 32px rgba(212, 175, 55, .18);
 
   /* Semantic colors */
   --color-success: #4ade80;
-  --color-warning: #f5a623;
-  --color-danger: #e94560;
-  --color-info: #60a5fa;
+  --color-warning: var(--gold);
+  --color-danger:  var(--blood-bright);
+  --color-info:    #60a5fa;
 
   /* Spacing scale */
   --space-2xs: 0.25rem;   /* 4px */
@@ -41,11 +72,11 @@
   --radius-full: 50px;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-md: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-  --shadow-lg: 0 15px 42px rgba(0,0,0,0.5);
-  --shadow-glow-accent: 0 0 24px rgba(233,69,96,0.45);
-  --shadow-glow-accent2: 0 8px 24px rgba(245,166,35,0.2);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md: 0 12px 36px rgba(0,0,0,0.55), inset 0 1px 0 rgba(212,175,55,0.06);
+  --shadow-lg: 0 20px 50px rgba(0,0,0,0.7);
+  --shadow-glow-accent:  0 0 22px rgba(161, 18, 18, 0.55);
+  --shadow-glow-accent2: 0 0 22px rgba(212, 175, 55, 0.35);
 
   /* Transitions */
   --transition-fast: 0.15s ease;
@@ -185,7 +216,7 @@
 .splash-logo {
   font-family: var(--font-family); font-size: clamp(3.5rem, 14vw, 5.5rem);
   font-weight: 900; letter-spacing: -3px;
-  background: linear-gradient(120deg, #ff2244 0%, #ff7700 40%, #f5a623 60%, #ff2244 100%);
+  background: linear-gradient(120deg, #A11212 0%, #D4AF37 50%, #8B0000 100%);
   background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; animation: shine 3s linear infinite;
   filter: drop-shadow(0 0 50px rgba(255,34,68,.5));
@@ -238,14 +269,151 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 /* True fixed background for ALL devices (incl. iOS) — uses a position:fixed
-   element instead of background-attachment which iOS Safari ignores. */
+   element instead of background-attachment which iOS Safari ignores.
+   The artwork is layered with a vignette and a faint film-grain noise
+   to give every screen the cinematic mafia atmosphere. */
 .body-bg {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
-    linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.82)),
-    url("/img/backgrand.png") center center / cover no-repeat;
+    /* vignette */
+    radial-gradient(ellipse at 50% 35%, transparent 30%, rgba(0,0,0,.55) 75%, rgba(0,0,0,.92) 100%),
+    /* color tint (mafia velvet) */
+    linear-gradient(rgba(11,11,11,.74), rgba(11,11,11,.86)),
+    /* hero artwork */
+    url("/img/backgrand.png") center center / cover no-repeat,
+    #000;
+}
+.body-bg::after {
+  /* SVG film-grain noise — fully self-contained, no extra requests */
+  content: ""; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85  0 0 0 0 0.78  0 0 0 0 0.55  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+  opacity: .07; mix-blend-mode: overlay;
 }
 [data-theme="light"] .body-bg { display: none; }
+
+/* ─────────────────────────────────────────────────────────────────
+   CINEMATIC THEME — UNIFIED COMPONENTS
+   Reusable utility classes plus targeted overrides for legacy buttons
+   and panels so every page (home, inner pages, modals, overlays) shares
+   the deep-black / antique-gold / blood-red mafia aesthetic.
+   ───────────────────────────────────────────────────────────────── */
+
+/* Glass panel: dark velvet with hairline gold edge */
+.panel,
+.cinema-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+}
+.panel--strong {
+  background: var(--panel-bg-strong);
+  border-color: var(--panel-border-hot);
+}
+
+/* Title helpers: gold/serif vibe with text shadow */
+.title-cinema,
+.title-gold {
+  color: var(--gold);
+  font-weight: 900;
+  letter-spacing: .5px;
+  text-shadow: 0 2px 6px rgba(0,0,0,.85), 0 0 24px rgba(212,175,55,.18);
+}
+.title-cinema .accent,
+.title-gold .accent { color: var(--blood-bright); }
+
+/* Primary cinematic CTA — dark red gradient with gold trim & shimmer */
+.btn-cinema {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .75rem 1.5rem;
+  background: var(--btn-primary-bg);
+  color: var(--text);
+  border: 1px solid var(--btn-primary-border);
+  border-radius: 10px;
+  font-family: inherit; font-weight: 800; letter-spacing: .5px;
+  cursor: pointer; overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0,0,0,.7);
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-base),
+              background var(--transition-base);
+  box-shadow: 0 6px 20px rgba(0,0,0,.55),
+              inset 0 1px 0 rgba(212,175,55,.18);
+}
+.btn-cinema::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(115deg,
+              transparent 30%,
+              rgba(212,175,55,.35) 50%,
+              transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .8s ease;
+  pointer-events: none;
+}
+.btn-cinema:hover {
+  background: var(--btn-primary-bg-hot);
+  transform: translateY(-1px);
+  box-shadow: var(--btn-primary-glow), 0 10px 28px rgba(0,0,0,.6);
+}
+.btn-cinema:hover::before { transform: translateX(120%); }
+.btn-cinema:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.btn-cinema:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Ghost/secondary button — gold outline on transparent */
+.btn-cinema-ghost {
+  background: rgba(11,11,11,.5);
+  color: var(--gold);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: .65rem 1.25rem;
+  font-weight: 700; cursor: pointer;
+  transition: all var(--transition-base);
+}
+.btn-cinema-ghost:hover {
+  border-color: var(--panel-border-hot);
+  background: rgba(212,175,55,.08);
+  color: var(--text);
+}
+
+/* ── Auto-upgrade existing buttons to the cinematic palette ── */
+.btn-login,
+.scn-proceed-btn,
+.btn-reveal-all {
+  background: var(--btn-primary-bg) !important;
+  border: 1px solid var(--btn-primary-border) !important;
+  color: var(--text) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.7);
+  box-shadow: 0 6px 18px rgba(0,0,0,.5),
+              inset 0 1px 0 rgba(212,175,55,.18);
+}
+.btn-login:hover,
+.scn-proceed-btn:hover,
+.btn-reveal-all:hover {
+  background: var(--btn-primary-bg-hot) !important;
+  box-shadow: var(--btn-primary-glow), 0 10px 28px rgba(0,0,0,.6) !important;
+  transform: translateY(-1px);
+}
+
+/* Cards / overlays inherit the gold-on-velvet panel feel */
+.modal-content,
+.scn-content,
+.cnt-content,
+.fs-game-menu {
+  background: var(--panel-bg-strong) !important;
+  border: 1px solid var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
+/* Section / page headings on inner pages take the gold treatment */
+h1, h2, h3, .logo, .scn-title, .ev-hero-title {
+  color: var(--gold);
+  text-shadow: 0 2px 8px rgba(0,0,0,.85);
+}
+h1 .accent, h2 .accent, h3 .accent { color: var(--blood-bright); }
 
 body {
   font-family: var(--font-family);
