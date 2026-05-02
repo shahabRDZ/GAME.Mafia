@@ -20,71 +20,79 @@
   padding-block: var(--space-md);
 }
 
-/* ── Hero Header — image artwork above the brand titles ── */
-header { text-align: center; padding-block: var(--space-md) var(--space-md); }
+/* ── Hero Header — transparent skeleton-cards artwork over the page ── */
+header { text-align: center; padding-block: var(--space-sm) var(--space-md); }
 
 .hero-header {
   position: relative;
   display: flex; flex-direction: column; align-items: center;
   gap: 0;
+  /* Subtle "enter the game" entrance */
+  animation: heroEnter .9s cubic-bezier(.22,.61,.36,1) both;
 }
 
-/* Skeleton-cards artwork that sits at the very top of the home screen.
-   Fades into the page bg at its bottom so the title sits naturally below. */
+@keyframes heroEnter {
+  0%   { opacity: 0; transform: translateY(-12px) scale(.97); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* Logo artwork — PNG already has a transparent background, so no frame
+   or fade overlay is needed. Just float it with a soft gold halo. */
 .hero-art {
   position: relative;
   width: 100%;
-  max-width: 580px;
+  max-width: 560px;
   margin-inline: auto;
-  aspect-ratio: 3/2;
-  border-radius: 18px;
-  overflow: hidden;
-  filter: drop-shadow(0 18px 36px rgba(0,0,0,.55));
+  filter:
+    drop-shadow(0 0 36px rgba(212,175,55,.30))
+    drop-shadow(0 18px 32px rgba(0,0,0,.60));
 }
 .hero-art-img {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
+  width: 100%; height: auto;
+  display: block;
   -webkit-user-drag: none;
 }
-.hero-art-fade {
-  position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.85) 100%);
-}
+.hero-art-fade { display: none; }   /* obsolete — keep for safety */
 
-/* Title block — sits BELOW the artwork, slightly pulled up so it
-   anchors visually onto the bottom edge of the image */
+/* Title block — pulled up to overlap the bottom of the artwork so the
+   English subtitle reads as part of the image, like a movie poster */
 .hero-titles {
-  margin-top: -18px;
+  margin-top: -36px;
   position: relative; z-index: 2;
   text-align: center;
 }
 
+/* "شوشانگ" — wider, more dramatic */
 .logo {
   font-family: 'Cinzel', 'Vazirmatn', serif;
-  font-size: clamp(2.6rem, 8vw, 4.5rem);
-  font-weight: 900; letter-spacing: -1px;
+  font-size: clamp(2.8rem, 9vw, 5rem);
+  font-weight: 900;
+  letter-spacing: clamp(6px, 1.6vw, 12px);
   background: linear-gradient(120deg, #A11212 0%, #D4AF37 50%, #8B0000 100%);
-  background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shine 4s linear infinite;
-  filter: drop-shadow(0 0 38px rgba(212,175,55,.45));
-  line-height: 1.1;
+  filter: drop-shadow(0 0 42px rgba(212,175,55,.55));
+  line-height: 1;
+  transform: translateY(-6px);   /* nudge up to kiss the artwork */
 }
 
+/* "ShowShung · GAME" — sits IMMEDIATELY under the logo, hugging it */
 .logo-sub {
   font-family: 'Cinzel', system-ui, sans-serif;
-  font-size: clamp(0.85rem, 2.4vw, 1.05rem);
-  font-weight: 600;
+  font-size: clamp(0.92rem, 2.6vw, 1.12rem);
+  font-weight: 700;
   color: var(--gold, #D4AF37);
-  letter-spacing: clamp(6px, 2vw, 14px);
-  margin-block-start: 4px;
+  letter-spacing: clamp(8px, 2.4vw, 16px);
+  margin-block-start: -4px;       /* hug the logo */
   text-transform: uppercase;
-  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 20px rgba(212,175,55,.18);
+  text-shadow: 0 2px 8px rgba(0,0,0,.9), 0 0 22px rgba(212,175,55,.30);
 }
 
 @media (min-width: 768px) {
-  .hero-art { max-width: 640px; aspect-ratio: 16/9; }
-  .hero-titles { margin-top: -28px; }
+  .hero-art   { max-width: 640px; }
+  .hero-titles { margin-top: -52px; }
 }
 
 /* ── Hero feature chips ── */
