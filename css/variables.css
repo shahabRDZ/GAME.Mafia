@@ -459,6 +459,183 @@ h1 .accent, h2 .accent, h3 .accent { color: var(--blood-bright); }
 .badge-danger,  .chip-danger  { color: var(--blood-bright) !important; border-color: rgba(161,18,18,.35) !important; background: rgba(139,0,0,.12) !important; }
 .badge-info,    .chip-info    { color: var(--text) !important; border-color: rgba(255,255,255,.15) !important; background: rgba(255,255,255,.04) !important; }
 
+/* ─────────────────────────────────────────────────────────────────
+   CINEMATIC MID-SCREEN OVERLAYS
+   Scenario picker, player-count, start-mode — all redrawn in the
+   black/gold/blood mafia palette. Feels like opening a velvet-lined
+   antique chest each step toward role reveal.
+   ───────────────────────────────────────────────────────────────── */
+
+/* ── Scenario overlay ── */
+.scn-content {
+  background: linear-gradient(180deg, #0e0e0e 0%, #060606 100%) !important;
+  border: 1px solid var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+.scn-title { color: var(--gold) !important; text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 22px rgba(212,175,55,.18) !important; }
+.scn-subtitle { color: var(--khaki) !important; }
+.scn-intro { color: var(--text) !important; }
+.scn-icon { filter: drop-shadow(0 0 18px rgba(212,175,55,.35)); }
+.scn-section { border-bottom: 1px solid rgba(212,175,55,.10) !important; }
+.scn-toggle { color: var(--gold) !important; font-weight: 800; }
+.scn-toggle:hover { background: rgba(212,175,55,.05) !important; }
+.scn-toggle-icon { color: var(--gold) !important; }
+.scn-flow li::marker { color: var(--gold) !important; }
+.scn-rules li {
+  background: rgba(212,175,55,.05) !important;
+  border-inline-start: 2px solid rgba(212,175,55,.35);
+  padding-inline-start: var(--space-md) !important;
+}
+.scn-rules li::before { color: var(--gold) !important; }
+.scn-q-item {
+  background: rgba(11,11,11,.6) !important;
+  border: 1px solid rgba(212,175,55,.18) !important;
+  border-radius: 8px;
+  padding: var(--space-xs) var(--space-md) !important;
+}
+.scn-q-range { color: var(--khaki) !important; }
+.scn-q-votes { color: var(--gold) !important; }
+.scn-role-card {
+  background: rgba(11,11,11,.55) !important;
+  border: 1px solid rgba(212,175,55,.14) !important;
+  border-radius: 10px !important;
+  padding: var(--space-sm) !important;
+}
+.scn-role-card.mafia-rc { border-color: rgba(161,18,18,.35) !important; background: rgba(139,0,0,.12) !important; }
+.scn-role-card.citizen-rc { border-color: rgba(212,175,55,.22) !important; background: rgba(212,175,55,.06) !important; }
+.scn-role-name { color: var(--text) !important; }
+.scn-role-desc { color: var(--khaki) !important; }
+.scn-role-icon { filter: drop-shadow(0 0 8px rgba(212,175,55,.25)); }
+
+/* Section heading colors inside scenario panel */
+.scn-content h4 {
+  color: var(--gold) !important;
+  font-family: var(--font-display, 'Cinzel', serif);
+  letter-spacing: .04em;
+}
+
+/* ── Player-count overlay ── */
+.cnt-content {
+  background: linear-gradient(180deg, #0e0e0e 0%, #060606 100%) !important;
+  border: 1px solid var(--panel-border) !important;
+}
+.cnt-section-title { color: var(--gold) !important; letter-spacing: 1px; font-family: var(--font-display, serif); }
+.cnt-btn {
+  background: rgba(11,11,11,.7) !important;
+  border: 1.5px solid rgba(212,175,55,.18) !important;
+  border-radius: 12px !important;
+}
+.cnt-btn:hover {
+  border-color: var(--gold) !important;
+  background: rgba(212,175,55,.08) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.55), 0 0 22px rgba(212,175,55,.18) !important;
+}
+.cnt-btn.selected {
+  border-color: var(--gold) !important;
+  background: rgba(212,175,55,.14) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.6), 0 0 28px rgba(212,175,55,.30) !important;
+}
+.cnt-btn.selected::after { background: var(--gold) !important; color: #0b0b0b !important; }
+.cnt-number { color: var(--text) !important; }
+.cnt-label  { color: var(--khaki) !important; }
+.cnt-m { color: var(--blood-bright) !important; }
+.cnt-c { color: var(--gold) !important; }
+.cnt-sep { color: var(--khaki) !important; opacity: .55; }
+
+/* ── Start-mode overlay ── */
+.start-overlay .scenario-box {
+  background: linear-gradient(180deg, #0e0e0e 0%, #050505 100%) !important;
+  border: 1px solid var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+.st-hero-bg {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(212,175,55,.18) 0%, transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(139,0,0,.15) 0%, transparent 55%) !important;
+}
+.st-hero-icon {
+  background: linear-gradient(135deg, rgba(212,175,55,.20), rgba(212,175,55,.04)) !important;
+  border: 2px solid var(--gold) !important;
+  box-shadow:
+    0 0 0 6px rgba(212,175,55,.10),
+    0 12px 40px rgba(212,175,55,.30),
+    inset 0 0 30px rgba(0,0,0,.4) !important;
+}
+.st-hero-icon-glow { background: var(--gold) !important; }
+.st-hero-title {
+  background: linear-gradient(180deg, #fff 30%, var(--gold) 100%) !important;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(212,175,55,.45) !important;
+}
+.st-hero-subtitle { color: var(--khaki) !important; }
+
+.st-stat {
+  background: rgba(11,11,11,.6) !important;
+  border: 1px solid rgba(212,175,55,.14) !important;
+}
+.st-stat-icon { background: rgba(212,175,55,.10) !important; }
+.st-stat-label { color: var(--khaki) !important; }
+.st-stat-value { color: var(--text) !important; }
+.st-stat-mafia {
+  background: rgba(139,0,0,.12) !important;
+  border-color: rgba(161,18,18,.30) !important;
+}
+.st-stat-mafia .st-stat-icon { background: rgba(161,18,18,.20) !important; }
+.st-stat-mafia .st-stat-value { color: var(--blood-bright) !important; }
+.st-stat-citizen {
+  background: rgba(212,175,55,.08) !important;
+  border-color: rgba(212,175,55,.25) !important;
+}
+.st-stat-citizen .st-stat-icon { background: rgba(212,175,55,.18) !important; }
+.st-stat-citizen .st-stat-value { color: var(--gold) !important; }
+
+.st-divider { background: linear-gradient(90deg, transparent, rgba(212,175,55,.30), transparent) !important; }
+.st-divider-text { background: #0a0a0a !important; color: var(--gold) !important; font-family: var(--font-display, serif); }
+
+/* Both mega buttons share the same antique-gold-on-velvet face;
+   classic stays slightly warmer (red), digital slightly cooler (gold). */
+.st-mega-classic::before,
+.st-mega-digital::before {
+  background:
+    linear-gradient(135deg, rgba(139,0,0,.22) 0%, rgba(212,175,55,.10) 55%, rgba(11,11,11,.0) 100%),
+    radial-gradient(circle at 80% 20%, rgba(212,175,55,.12), transparent 55%) !important;
+}
+.st-mega-digital::before {
+  background:
+    linear-gradient(135deg, rgba(212,175,55,.20) 0%, rgba(11,11,11,.0) 55%) !important;
+}
+.st-mega-classic .st-mega-glow,
+.st-mega-digital .st-mega-glow {
+  background: radial-gradient(ellipse at center, rgba(212,175,55,.55), transparent 70%) !important;
+}
+.st-mega-classic .st-mega-emblem {
+  background: linear-gradient(135deg, rgba(139,0,0,.25), rgba(212,175,55,.12)) !important;
+  border: 2px solid rgba(212,175,55,.50) !important;
+  box-shadow: 0 0 20px rgba(139,0,0,.30), inset 0 0 15px rgba(212,175,55,.18) !important;
+}
+.st-mega-digital .st-mega-emblem {
+  background: linear-gradient(135deg, rgba(212,175,55,.20), rgba(11,11,11,.10)) !important;
+  border: 2px solid rgba(212,175,55,.50) !important;
+  box-shadow: 0 0 20px rgba(212,175,55,.30), inset 0 0 15px rgba(212,175,55,.10) !important;
+}
+.st-mega-classic .st-mega-ring,
+.st-mega-digital .st-mega-ring { border-color: rgba(212,175,55,.65) !important; }
+.st-mega-classic .st-mega-title,
+.st-mega-digital .st-mega-title { color: var(--gold) !important; font-family: var(--font-display, serif); letter-spacing: .04em; }
+.st-mega-classic .st-mega-cta,
+.st-mega-digital .st-mega-cta {
+  background: linear-gradient(180deg, #6c0d0d, #3b0707) !important;
+  border: 1px solid var(--btn-primary-border) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.5), inset 0 1px 0 rgba(212,175,55,.18) !important;
+  color: var(--text) !important;
+}
+
+/* "Or pick a side" / divider labels and any subtitle text on the
+   start panel inherit the gold/cream voice */
+.start-overlay [class*="-subtitle"],
+.start-overlay [class*="-desc"] { color: var(--khaki) !important; }
+
 body {
   font-family: var(--font-family);
   /* Solid black fallback; the actual artwork is rendered by .body-bg below
