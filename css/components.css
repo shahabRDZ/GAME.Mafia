@@ -97,9 +97,12 @@
 }
 .scenario-overlay.show { display: flex; }
 .scenario-box {
-  background: #0c0c1a; border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-2xl);
+  background: linear-gradient(180deg, #0e0a08 0%, #050302 100%);
+  border: 1px solid rgba(212,175,55,.28);
+  border-radius: var(--radius-2xl);
   padding: 0; max-width: 32.5rem; width: 100%; animation: popIn var(--transition-bounce);
   overflow: hidden; margin-block: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,.72), inset 0 1px 0 rgba(212,175,55,.10);
 }
 @media (max-width: 480px) {
   .scenario-overlay { padding-inline: var(--space-sm); }
