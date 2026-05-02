@@ -665,10 +665,12 @@
 }
 .group-btn .icon {
   display: flex; align-items: center; justify-content: center;
-  width: 96px; height: 96px;
-  border-radius: 22px; overflow: hidden;
+  /* Phone-first sizing — 3 cols × icon must fit page width */
+  width: clamp(58px, 22vw, 92px);
+  height: clamp(58px, 22vw, 92px);
+  border-radius: 16px; overflow: hidden;
   background: transparent; border: none;
-  filter: drop-shadow(0 0 16px rgba(212,175,55,.28));
+  filter: drop-shadow(0 0 14px rgba(212,175,55,.30));
   transition: filter .22s ease, transform .22s ease;
 }
 .group-btn .icon img {
@@ -680,14 +682,16 @@
 }
 .group-btn .name {
   font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
-  font-size: 0.95rem; font-weight: 800; display: block;
+  font-size: clamp(0.78rem, 3vw, 0.96rem); font-weight: 800; display: block;
   color: var(--gold, #D4AF37);
   letter-spacing: .02em;
   text-shadow: 0 1px 4px rgba(0,0,0,.85), 0 0 14px rgba(212,175,55,.20);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 .group-btn .desc {
-  font-size: 0.66rem; color: var(--khaki, #B8A47A);
-  margin-block-start: 2px; display: block; opacity: .85;
+  font-size: 0.62rem; color: var(--khaki, #B8A47A);
+  margin-block-start: 2px; display: block; opacity: .80;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 .group-btn:hover { transform: translateY(-3px); }
 .group-btn:hover .icon { filter: drop-shadow(0 0 26px rgba(212,175,55,.55)); }
@@ -699,8 +703,8 @@
 .group-btn:focus-visible { outline: 2px solid var(--gold, #D4AF37); outline-offset: 4px; border-radius: 14px; }
 
 @media (min-width: 768px) {
-  .group-btn .icon { width: 116px; height: 116px; }
-  .group-btn .name { font-size: 1.05rem; }
+  .group-btn .icon { width: 100px; height: 100px; }
+  .group-btn .name { font-size: 1.0rem; }
 }
 
 .count-grid { display: flex; gap: var(--space-sm); flex-wrap: wrap; }

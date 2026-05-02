@@ -155,25 +155,38 @@ function updateStepIndicator(step) {
 }
 
 // ── Scenario tile pagination (6 per page, horizontal swipe) ──
+const SCENARIO_PAGE_SIZE = 6;
+
 function paginateScenarios() {
   const grid = document.querySelector('.group-grid');
-  if (!grid || grid.querySelector('.group-page')) return;
-  const PAGE_SIZE = 6;
-  const btns = Array.from(grid.querySelectorAll('.group-btn'));
-  if (!btns.length) return;
+  if (!grid) return;
+  // Already paginated → nothing to do
+  if (grid.querySelector('.group-page')) return;
 
-  grid.innerHTML = '';
-  const pages = [];
-  for (let i = 0; i < btns.length; i += PAGE_SIZE) {
+  const btns = Array.from(grid.querySelectorAll(':scope > .group-btn'));
+  if (btns.length <= SCENARIO_PAGE_SIZE) {
+    // Still wrap them in a single .group-page so spacing/grid is consistent
+    if (btns.length === 0) return;
     const page = document.createElement('div');
     page.className = 'group-page';
-    btns.slice(i, i + PAGE_SIZE).forEach(b => page.appendChild(b));
+    btns.forEach(b => page.appendChild(b));
+    grid.appendChild(page);
+    return;
+  }
+
+  // Multiple pages
+  grid.innerHTML = '';
+  const pages = [];
+  for (let i = 0; i < btns.length; i += SCENARIO_PAGE_SIZE) {
+    const page = document.createElement('div');
+    page.className = 'group-page';
+    btns.slice(i, i + SCENARIO_PAGE_SIZE).forEach(b => page.appendChild(b));
     grid.appendChild(page);
     pages.push(page);
   }
 
   // Page-indicator dots inserted right after the grid
-  if (pages.length > 1) {
+  if (!grid.parentElement.querySelector('.group-pager-dots')) {
     const dots = document.createElement('div');
     dots.className = 'group-pager-dots';
     pages.forEach((_, i) => {
@@ -183,7 +196,6 @@ function paginateScenarios() {
     });
     grid.parentElement.insertBefore(dots, grid.nextSibling);
 
-    // Sync the active dot with scroll position
     grid.addEventListener('scroll', () => {
       const idx = Math.round(grid.scrollLeft / grid.clientWidth);
       dots.querySelectorAll('.group-pager-dot').forEach((d, i) => {
@@ -192,7 +204,17 @@ function paginateScenarios() {
     }, { passive: true });
   }
 }
-document.addEventListener('DOMContentLoaded', paginateScenarios);
+
+// Run on first paint, again after a tiny delay (in case scripts loaded
+// after DOMContentLoaded already fired), and on window load as a fallback.
+function _kickPagination() { try { paginateScenarios(); } catch (e) {} }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _kickPagination);
+} else {
+  _kickPagination();
+}
+window.addEventListener('load', _kickPagination);
+setTimeout(_kickPagination, 250);
 
 // ── Setup Flow ──
 function selectGroup(group) {
