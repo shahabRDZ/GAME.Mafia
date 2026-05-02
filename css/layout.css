@@ -38,30 +38,31 @@ header {
   100% { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
-/* "SHOWSHUNG" wordmark — full-width banner across the top of the page */
+/* "SHOWSHUNG" wordmark — full-width banner. Pulled flush with the
+   art below so the two read as one composition. */
 .hero-wordmark {
   display: block;
-  width: 96vw;
-  max-width: 720px;
+  width: 92vw;
+  max-width: 640px;
   height: auto;
-  margin-inline: auto;
-  margin-block: 0 -4px;           /* small overlap onto the artwork below */
+  margin: 0 auto;
+  margin-block-end: -8%;          /* hard overlap onto art below */
   filter:
     drop-shadow(0 0 28px rgba(212,175,55,.45))
     drop-shadow(0 8px 22px rgba(0,0,0,.55));
   -webkit-user-drag: none;
 }
 
-/* Skeleton-hand fanning cards — sits directly under the wordmark */
+/* Skeleton-hand fanning cards — kissing the wordmark above */
 .hero-art {
   position: relative;
-  width: 90vw;
-  max-width: 560px;
-  margin-inline: auto;
-  margin-block-end: 4px;
+  width: 80vw;
+  max-width: 480px;
+  margin: 0 auto;
+  margin-block: -4% 0;
   filter:
-    drop-shadow(0 0 32px rgba(212,175,55,.22))
-    drop-shadow(0 16px 28px rgba(0,0,0,.55));
+    drop-shadow(0 0 28px rgba(212,175,55,.22))
+    drop-shadow(0 14px 24px rgba(0,0,0,.55));
 }
 .hero-art-img {
   width: 100%; height: auto;
@@ -112,104 +113,61 @@ header {
 }
 
 /* ── Bottom Navigation (App Style) ── */
-/* ── Bottom Nav — bone-framed mafia console ──
-   Five tab buttons in a gold-bordered velvet frame, with red rim-light
-   underneath, gold skull endcaps on each side, and the active tab
-   glowing red — matches the supplied design reference. */
+/* ── Bottom Nav — bone-framed artwork from img/bottom-nav.png ──
+   The PNG ships the entire frame (skull endcaps, gold borders, icons,
+   labels and red active-tab glow) baked in. We use it as the visual,
+   then overlay 5 invisible tap targets at the right positions. */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   z-index: var(--z-overlay);
-  display: flex; justify-content: space-around; align-items: stretch;
-  background:
-    /* deep black with subtle paper texture vibe */
-    linear-gradient(180deg, rgba(12,8,6,.96) 0%, rgba(4,2,2,.98) 100%);
-  border-top: 2px solid rgba(212, 175, 55, 0.55);
-  border-block-end: 0;
-  padding: 8px 56px 6px;          /* leave room for the skull endcaps */
-  padding-bottom: calc(6px + var(--safe-bottom));
-  box-shadow:
-    0 -4px 30px rgba(0,0,0,.7),
-    0 -1px 0 rgba(212,175,55,.18) inset,
-    0 -22px 38px -22px rgba(161,18,18,.55);   /* red rim-glow underneath */
+  display: flex; justify-content: space-between; align-items: center;
+  background: url("/img/bottom-nav.png") center bottom / contain no-repeat;
+  background-color: transparent;
+  border: none;
+  /* Aspect of the frame is ~1798×500 (≈3.6:1), so width sets height */
+  height: calc(min(94vw, 480px) / 3.6);
+  min-height: 64px;
+  padding: 0 6%;                  /* skip skull endcap zones */
+  padding-bottom: var(--safe-bottom);
+  box-shadow: none;
 }
-/* Inner gold hairline for the double-stroke frame */
-.bottom-nav::before {
-  content: ""; position: absolute;
-  inset: 4px 50px auto 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,.55), transparent);
-  pointer-events: none;
-}
-/* Skull endcap — left */
-.bottom-nav::after {
-  content: "💀";
-  position: absolute; left: 8px; top: 50%; transform: translateY(-55%);
-  font-size: 32px;
-  color: rgba(212,175,55,.95);
-  text-shadow:
-    0 0 12px rgba(212,175,55,.45),
-    0 0 18px rgba(255,40,60,.30);
-  filter: drop-shadow(0 0 6px rgba(212,175,55,.40));
-  pointer-events: none;
-}
-/* Skull endcap — right (mirrored via a separate element on the nav root would be ideal,
-   but a sibling pseudo isn't possible; we attach to a child instead) */
-.bottom-nav .bnav-btn:last-child::before {
-  content: "💀";
-  position: absolute; right: -52px; top: 50%; transform: translateY(-55%);
-  font-size: 32px;
-  color: rgba(212,175,55,.95);
-  text-shadow:
-    0 0 12px rgba(212,175,55,.45),
-    0 0 18px rgba(255,40,60,.30);
-  pointer-events: none;
-}
+.bottom-nav::before, .bottom-nav::after { content: none; }
 
+/* Each tab is a transparent hit-area sized to one of the 5 cells.
+   The icon SVG and label text inside are HIDDEN — the artwork already
+   has them baked in. */
 .bnav-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 4px;
+  flex: 1;
+  height: 100%;
   background: none;
   border: none;
-  border-inline-end: 1px solid rgba(212,175,55,.18);
   cursor: pointer;
-  color: rgba(212,175,55,.78);
-  font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
-  font-size: 0.68rem; font-weight: 700;
-  letter-spacing: .02em;
-  transition: all var(--transition-base);
+  font-size: 0;          /* hide the inline label text */
   position: relative;
-  min-width: 3.5rem;
-  flex: 1;
+  padding: 0;
 }
-.bnav-btn:last-child { border-inline-end: none; }
+.bnav-btn .bnav-icon,
+.bnav-btn > span {
+  display: none;         /* hide built-in icon/text — baked in artwork */
+}
+.bnav-btn .bnav-badge {
+  display: block !important;
+  position: absolute; top: 8%; right: 14%;
+  font-size: 9px; font-weight: 900;
+  background: #ff2a40; color: #fff;
+  padding: 2px 6px; border-radius: 999px;
+  box-shadow: 0 0 8px rgba(255,40,60,.55);
+}
 
-.bnav-icon {
-  width: 1.55rem; height: 1.55rem;
-  color: var(--gold, #D4AF37);
-  filter: drop-shadow(0 0 6px rgba(212,175,55,.35));
-  transition: all var(--transition-base);
-}
-
-/* Active tab — red glow + lit gold icon */
-.bnav-btn.active {
-  color: var(--blood-bright, #ff4054);
-  text-shadow: 0 0 12px rgba(255,64,84,.55);
-}
-.bnav-btn.active .bnav-icon {
-  color: var(--blood-bright, #ff4054);
-  filter:
-    drop-shadow(0 0 8px rgba(255,40,60,.65))
-    drop-shadow(0 0 4px rgba(212,175,55,.45));
-}
+/* Active tab — soft red bloom under the cell to amplify the artwork's
+   own red highlight on whichever tab is current. */
 .bnav-btn.active::after {
-  content: ''; position: absolute; top: -2px;
-  left: 18%; right: 18%;
-  height: 2px;
-  background: var(--blood-bright, #ff4054);
-  border-radius: 0 0 4px 4px;
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none;
+  border-radius: 12px;
   box-shadow:
-    0 0 12px rgba(255,40,60,.85),
-    0 0 22px rgba(255,40,60,.55);
+    inset 0 0 24px rgba(255,40,60,.30),
+    0 0 30px -8px rgba(255,40,60,.55);
 }
 .bnav-badge {
   position: absolute; top: 0; right: 0.4rem;
