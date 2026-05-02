@@ -167,10 +167,12 @@
 /* ── Splash Screen ──
    Avoid background-attachment:fixed (broken on iOS Safari). The .splash
    element itself is position:fixed, so a normal background already stays
-   put — no scrolling can move it. */
+   put — no scrolling can move it.
+   Use contain (not cover) so the 3:4 cover artwork shows in its
+   entirety on tall phone screens — no zoom-in cropping. */
 .splash {
   position: fixed; inset: 0; z-index: 99999;
-  background: #000 url("/img/cover.png") center/cover no-repeat;
+  background: #000 url("/img/cover.png") center top / contain no-repeat;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-end;
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -227,7 +229,7 @@
   letter-spacing: 8px; margin-top: 4px; text-transform: uppercase;
   display: none;
 }
-.splash-content { padding-bottom: 18vh; }
+.splash-content { padding-bottom: 4vh; }
 .splash-tagline {
   font-size: 0.92rem; color: rgba(255,255,255,.95);
   margin-top: 14px; min-height: 1.4em;
@@ -244,7 +246,7 @@
 /* The cover.png artwork has an empty banner near the bottom; position the
    loader and label so they sit inside that banner on common aspect ratios. */
 .splash-content {
-  padding-bottom: 12vh;
+  padding-bottom: 5vh;
   text-align: center; position: relative; z-index: 2;
   width: min(80vw, 360px);
 }
@@ -417,6 +419,41 @@ h1, h2, h3, .logo, .scn-title, .ev-hero-title {
   text-shadow: 0 2px 8px rgba(0,0,0,.85);
 }
 h1 .accent, h2 .accent, h3 .accent { color: var(--blood-bright); }
+
+/* ── Unify off-theme button gradients ──
+   Several legacy buttons hard-code blue / green / pink-red gradients that
+   fight the cinematic palette. Re-tint them in place — we keep their
+   distinct intent (primary / reset / new-game) but expressed as variants
+   of black + gold + blood. */
+.btn-reset {
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%) !important;
+  border: 1px solid var(--panel-border) !important;
+  color: var(--text) !important;
+}
+.btn-reset:hover {
+  background: linear-gradient(180deg, #242424 0%, #121212 100%) !important;
+  box-shadow: 0 0 18px rgba(212,175,55,.18) !important;
+}
+.btn-new-game {
+  background: linear-gradient(180deg, #2a1a05 0%, #150a02 100%) !important;
+  border: 1px solid var(--panel-border-hot) !important;
+  color: var(--gold) !important;
+}
+.btn-new-game:hover {
+  background: linear-gradient(180deg, #3a2208 0%, #1d0d03 100%) !important;
+  box-shadow: 0 0 22px rgba(212,175,55,.30) !important;
+}
+.comp-btn-review {
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%) !important;
+  color: var(--gold) !important;
+  border: 1px solid var(--panel-border) !important;
+}
+
+/* Generic colored chips/badges used across pages — keep the meaning
+   (mafia=red tint, citizen=gold tint) but read consistently */
+.badge-success, .chip-success { color: var(--gold) !important; border-color: var(--panel-border) !important; background: rgba(212,175,55,.08) !important; }
+.badge-danger,  .chip-danger  { color: var(--blood-bright) !important; border-color: rgba(161,18,18,.35) !important; background: rgba(139,0,0,.12) !important; }
+.badge-info,    .chip-info    { color: var(--text) !important; border-color: rgba(255,255,255,.15) !important; background: rgba(255,255,255,.04) !important; }
 
 body {
   font-family: var(--font-family);

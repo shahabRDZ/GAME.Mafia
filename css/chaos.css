@@ -19,7 +19,7 @@
 }
 .chaos-join input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(233,69,96,.15); }
 .chaos-btn {
-  padding: var(--space-sm) var(--space-lg); background: linear-gradient(135deg, #e94560, #c0392b);
+  padding: var(--space-sm) var(--space-lg); background: linear-gradient(180deg, #6c0d0d, #3b0707);
   border: none; border-radius: var(--radius-lg); color: #fff; font-family: inherit;
   font-size: 1rem; font-weight: 900; cursor: pointer; transition: all var(--transition-base);
   letter-spacing: 1px; min-height: var(--touch-min);
