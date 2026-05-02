@@ -589,26 +589,43 @@
 
       <!-- Warnings -->
       <div class="tools-section">
-        <div class="tools-section-title">⚠️ اخطار <span style="font-size:0.7rem;color:var(--dim);font-weight:400">(۳ اخطار = اخراج)</span></div>
+        <div class="tools-section-header">
+          <div class="tools-section-title">⚠️ اخطار بازیکنان</div>
+          <span class="tools-section-badge" id="tlPlayerCount">۰ بازیکن</span>
+        </div>
+        <p class="tools-section-hint">با هر کلیک روی نقطه، یک اخطار اضافه می‌شود. ۳ اخطار = اخراج خودکار.</p>
         <div class="tl-warn-add">
-          <input type="text" id="tlWarnNewName" class="tl-input" placeholder="نام بازیکن..." maxlength="30">
-          <button class="mod-btn mod-btn-start" onclick="addToolsPlayer()">+ افزودن</button>
+          <div class="tl-input-wrap">
+            <span class="tl-input-icon">👤</span>
+            <input type="text" id="tlWarnNewName" class="tl-input" placeholder="نام بازیکن..." maxlength="30" autocomplete="off">
+          </div>
+          <button class="mod-btn mod-btn-start tl-add-btn" onclick="addToolsPlayer()" aria-label="افزودن بازیکن">+ افزودن</button>
         </div>
         <div class="tl-warn-list" id="tlWarnList"></div>
-        <div style="margin-top:10px">
-          <button class="mod-btn" onclick="resetToolsWarnings()" style="width:100%">ریست همه اخطارها</button>
+        <div class="tl-warn-footer">
+          <button class="mod-btn tl-reset-btn" onclick="resetToolsWarnings()">↻ ریست همه اخطارها</button>
         </div>
       </div>
 
       <!-- Notes -->
       <div class="tools-section">
-        <div class="tools-section-title">📝 یادداشت گرداننده</div>
-        <textarea id="tlNotes" class="tl-notes" placeholder="یادداشت‌های بازی، نقش‌ها، شک‌ها و..."></textarea>
+        <div class="tools-section-header">
+          <div class="tools-section-title">📝 یادداشت گرداننده</div>
+          <span class="tools-section-badge" id="tlNotesCount">۰ کاراکتر</span>
+        </div>
+        <p class="tools-section-hint">نقش‌ها، شک‌ها، اقدام‌های شب و یادداشت‌های کلیدی بازی.</p>
+        <div class="tl-notes-wrap">
+          <textarea id="tlNotes" class="tl-notes" placeholder="یادداشت‌های بازی، نقش‌ها، شک‌ها و..."></textarea>
+          <div class="tl-notes-status" id="tlNotesStatus">
+            <span class="tl-save-dot"></span>
+            <span class="tl-save-text">ذخیره خودکار</span>
+          </div>
+        </div>
         <div class="tl-notes-actions">
           <button class="mod-btn" onclick="copyToolsNotes()">📋 کپی</button>
-          <button class="mod-btn" onclick="clearToolsNotes()">🗑️ پاک کردن</button>
+          <button class="mod-btn" onclick="downloadToolsNotes()">💾 دانلود</button>
+          <button class="mod-btn" onclick="clearToolsNotes()">🗑️ پاک</button>
         </div>
-        <div class="tl-notes-status" id="tlNotesStatus">به‌طور خودکار ذخیره می‌شود</div>
       </div>
     </div>
   </section>

@@ -83,20 +83,27 @@ function toggleToolsPhase() {
 
 function renderToolsWarnings() {
   const list = document.getElementById("tlWarnList");
+  const badge = document.getElementById("tlPlayerCount");
   if (!list) return;
+  if (badge) badge.textContent = `${toFarsiNum(tlPlayers.length)} بازیکن`;
   if (!tlPlayers.length) {
-    list.innerHTML = `<div class="tl-warn-empty">هنوز بازیکنی اضافه نشده — نام یک بازیکن را وارد کنید.</div>`;
+    list.innerHTML = `<div class="tl-warn-empty">👥 هنوز بازیکنی اضافه نشده<br><span style="font-size:.75rem;opacity:.6">نام یک بازیکن را در کادر بالا وارد کنید</span></div>`;
     return;
   }
   list.innerHTML = tlPlayers.map((p, i) => {
-    const dots = [0, 1, 2].map(d => `<button class="tl-warn-dot ${d < p.warns ? "on" : ""}" onclick="bumpToolsWarn(${i})" aria-label="اخطار"></button>`).join("");
+    const dots = [0, 1, 2].map(d => `<button class="tl-warn-dot ${d < p.warns ? "on" : ""}" onclick="bumpToolsWarn(${i})" aria-label="اخطار ${toFarsiNum(d+1)}"></button>`).join("");
     return `
-      <div class="tl-warn-item">
-        <span class="tl-warn-name ${p.warns >= 3 ? "eliminated" : ""}">${p.name}</span>
+      <div class="tl-warn-item ${p.warns >= 3 ? "is-eliminated" : ""}">
+        <span class="tl-warn-num">${toFarsiNum(i+1)}</span>
+        <span class="tl-warn-name ${p.warns >= 3 ? "eliminated" : ""}">${escapeHtml(p.name)}</span>
         <div class="tl-warn-dots">${dots}</div>
-        <button class="tl-warn-remove" onclick="removeToolsPlayer(${i})" aria-label="حذف">×</button>
+        <button class="tl-warn-remove" onclick="removeToolsPlayer(${i})" aria-label="حذف ${escapeHtml(p.name)}">×</button>
       </div>`;
   }).join("");
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 }
 
 function addToolsPlayer() {
@@ -153,8 +160,53 @@ function copyToolsNotes() {
 
 function clearToolsNotes() {
   if (!confirm("یادداشت‌ها پاک شوند؟")) return;
-  document.getElementById("tlNotes").value = "";
+  const ta = document.getElementById("tlNotes");
+  ta.value = "";
   tlSave();
+  updateNotesCount();
+}
+
+function downloadToolsNotes() {
+  const text = document.getElementById("tlNotes").value;
+  if (!text.trim()) {
+    if (typeof showToast === "function") showToast("یادداشتی برای دانلود وجود ندارد");
+    return;
+  }
+  const date = new Date().toLocaleDateString("fa-IR");
+  const blob = new Blob([`📝 یادداشت گرداننده — ${date}\n${"=".repeat(40)}\n\n${text}\n`], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `mafia-notes-${Date.now()}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if (typeof showToast === "function") showToast("💾 یادداشت دانلود شد");
+}
+
+function updateNotesCount() {
+  const ta = document.getElementById("tlNotes");
+  const badge = document.getElementById("tlNotesCount");
+  if (!ta || !badge) return;
+  const len = ta.value.length;
+  badge.textContent = `${toFarsiNum(len)} کاراکتر`;
+}
+
+let tlSaveTimer = null;
+function flashSaveStatus() {
+  const dot = document.querySelector(".tl-save-dot");
+  const text = document.querySelector(".tl-save-text");
+  if (!dot || !text) return;
+  dot.style.background = "#fbbf24";
+  dot.style.boxShadow = "0 0 8px #fbbf24";
+  text.textContent = "ذخیره شد";
+  clearTimeout(tlSaveTimer);
+  tlSaveTimer = setTimeout(() => {
+    dot.style.background = "#4ade80";
+    dot.style.boxShadow = "0 0 8px #4ade80";
+    text.textContent = "ذخیره خودکار";
+  }, 1200);
 }
 
 function initToolsScreen() {
@@ -163,7 +215,8 @@ function initToolsScreen() {
   const notes = document.getElementById("tlNotes");
   if (notes) {
     notes.value = data.notes || "";
-    notes.addEventListener("input", () => tlSave());
+    notes.addEventListener("input", () => { tlSave(); updateNotesCount(); flashSaveStatus(); });
+    updateNotesCount();
   }
   const newName = document.getElementById("tlWarnNewName");
   if (newName) {
