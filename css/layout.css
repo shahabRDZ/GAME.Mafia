@@ -189,9 +189,31 @@ body { padding-bottom: calc(115px + env(safe-area-inset-bottom, 0px)); }
 /* Notification dot disabled — keeps DOM but hides visually */
 .bnav-btn .bnav-badge { display: none !important; }
 
+/* Cover the leftmost cell's printed "پروفایل" label and overlay
+   "ابزار گرداننده" on top, since that cell now opens the moderator
+   tools. Position is calibrated against the artwork's cell bounds. */
+.bnav-btn#navTools::before {
+  content: "ابزار گرداننده";
+  position: absolute;
+  left: 50%; bottom: 14%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
+  font-size: clamp(0.62rem, 1.6vw, 0.78rem);
+  font-weight: 800;
+  color: rgb(218, 178, 100);
+  letter-spacing: .02em;
+  text-shadow: 0 0 6px #0d0907, 0 0 4px #0d0907, 0 1px 0 #000;
+  /* Solid backplate to mask out the baked-in 'پروفایل' label */
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(11, 9, 8, .98);
+  box-shadow: 0 0 0 4px rgba(11, 9, 8, .98);
+  z-index: 2;
+}
+
 /* No active overlay — the artwork's own red glow on the right cell
-   carries the active state. (Kept hidden so JS toggling .active
-   doesn't draw a red rectangle.) */
+   carries the active state. */
 .bnav-btn.active::after {
   content: none;
 }
