@@ -136,7 +136,7 @@
 /* ── Splash Screen ── */
 .splash {
   position: fixed; inset: 0; z-index: 99999;
-  background: #000 url("/img/cover.png") center/cover no-repeat;
+  background: #000 url("/img/cover.png") center/cover no-repeat fixed;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-end;
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -144,7 +144,7 @@
 }
 .splash::before {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 60%, rgba(0,0,0,.85) 100%);
+  background: linear-gradient(180deg, transparent 0%, transparent 70%, rgba(0,0,0,.35) 100%);
   pointer-events: none;
 }
 .splash.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
@@ -195,33 +195,41 @@
 }
 .splash-content { padding-bottom: 18vh; }
 .splash-tagline {
-  font-size: 0.85rem; color: rgba(255,255,255,.35);
-  margin-top: 20px; height: 1.2em;
-  font-weight: 500;
+  font-size: 0.92rem; color: rgba(255,255,255,.85);
+  margin-top: 6px; height: 1.2em;
+  font-weight: 600; letter-spacing: 1px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
 }
 .splash-bar-wrap {
   display: flex; align-items: center; justify-content: center;
-  gap: 10px; margin-top: 16px;
+  gap: 12px; margin-top: 10px;
+}
+/* The cover.png artwork has an empty banner near the bottom; position the
+   loader and label so they sit inside that banner on common aspect ratios. */
+.splash-content {
+  padding-bottom: 12vh;
+  text-align: center; position: relative; z-index: 2;
+  width: min(80vw, 360px);
 }
 .splash-bar {
-  width: 160px; height: 3px;
-  background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden;
+  width: 100%; height: 3px;
+  background: rgba(255,255,255,.18); border-radius: 3px; overflow: hidden;
 }
 .splash-fill {
   width: 0%; height: 100%;
-  background: linear-gradient(90deg, #e94560, #f5a623);
-  border-radius: 3px; transition: width 0.1s linear;
-  box-shadow: 0 0 8px rgba(233,69,96,.4);
+  background: #ffffff;
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255,255,255,.6);
+  /* 8-second smooth linear fill driven entirely by CSS */
+  animation: splashFill 8s linear forwards;
 }
+@keyframes splashFill { to { width: 100%; } }
 .splash-percent {
-  font-size: 0.7rem; color: rgba(255,255,255,.25);
-  font-variant-numeric: tabular-nums; min-width: 2rem;
-  font-family: monospace;
+  font-size: 0.72rem; color: rgba(255,255,255,.85);
+  font-variant-numeric: tabular-nums; min-width: 2.4rem;
+  font-family: monospace; text-shadow: 0 1px 4px rgba(0,0,0,.8);
 }
-.splash-footer {
-  position: absolute; bottom: 24px;
-  font-size: 0.65rem; color: rgba(255,255,255,.08); letter-spacing: 1px;
-}
+.splash-footer { display: none; }
 
 /* ── Global Reset ── */
 * { margin: 0; padding: 0; box-sizing: border-box; }

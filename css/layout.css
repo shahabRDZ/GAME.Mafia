@@ -156,23 +156,23 @@ main { padding-bottom: 5rem; }
 /* Exit button */
 .fs-exit-btn {
   width: 2.5rem; height: 2.5rem; border-radius: 50%;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  color: var(--dim); cursor: pointer;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15);
+  color: #fff; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all var(--transition-fast);
 }
-.fs-exit-btn:hover { background: rgba(233,69,96,.15); border-color: var(--accent); color: var(--accent); }
+.fs-exit-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
 
 /* Center info */
 .fs-info-center {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .fs-scenario-name {
-  font-size: var(--font-size-sm); font-weight: 700; color: var(--accent2);
+  font-size: var(--font-size-sm); font-weight: 700; color: #fff;
   letter-spacing: 0.5px;
 }
 .fs-card-counter {
-  font-size: 0.7rem; color: var(--dim);
+  font-size: 0.7rem; color: #fff; opacity: .85;
   font-variant-numeric: tabular-nums;
 }
 
@@ -208,14 +208,14 @@ main { padding-bottom: 5rem; }
 .fs-chip {
   padding: 2px 8px; border-radius: var(--radius-full);
   font-size: 0.62rem; font-weight: 700;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.04);
-  color: var(--dim); white-space: nowrap;
+  color: #fff; white-space: nowrap;
 }
-.fs-chip-total { color: rgba(255,255,255,.7); }
-.fs-chip-mafia { color: #ff7777; border-color: rgba(233,69,96,.2); background: rgba(233,69,96,.08); }
-.fs-chip-citizen { color: #4ade80; border-color: rgba(74,222,128,.15); background: rgba(74,222,128,.06); }
-.fs-chip-remaining { color: var(--accent2); border-color: rgba(245,166,35,.2); background: rgba(245,166,35,.08); }
+.fs-chip-total    { color: #fff; }
+.fs-chip-mafia    { color: #fff; border-color: rgba(233,69,96,.35);  background: rgba(233,69,96,.12); }
+.fs-chip-citizen  { color: #fff; border-color: rgba(74,222,128,.30); background: rgba(74,222,128,.10); }
+.fs-chip-remaining{ color: #fff; border-color: rgba(245,166,35,.35); background: rgba(245,166,35,.12); }
 
 /* Game menu dropdown */
 .fs-game-menu {
@@ -262,14 +262,13 @@ main { padding-bottom: 5rem; }
 }
 .game-fullscreen .fs-narrator { display: block; }
 .fs-narrator-label {
-  font-size: 0.65rem; color: var(--dim); letter-spacing: 1px;
+  font-size: 0.65rem; color: #fff; letter-spacing: 1px; opacity: .7;
 }
 .fs-narrator-name {
   font-size: var(--font-size-sm); font-weight: 900;
-  color: var(--accent2);
-  background: linear-gradient(90deg, var(--accent2), #e67e22);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #fff;
+  -webkit-background-clip: initial; -webkit-text-fill-color: #fff;
+  background: none;
 }
 
 /* ── Footer ── */

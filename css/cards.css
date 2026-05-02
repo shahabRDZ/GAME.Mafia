@@ -31,10 +31,13 @@
   animation: tapArrowPulse 1.5s ease-in-out infinite;
 }
 
-/* ── Tap hint on flipped card (next player) ── */
+/* ── Tap hint above the card (next player) ── */
 .tap-hint-next {
-  position: absolute; bottom: var(--space-md); inset-inline: 0; text-align: center;
-  font-size: 0.78rem; color: rgba(255,255,255,.4); letter-spacing: 1px; z-index: 5;
+  width: 100%; text-align: center;
+  margin-block-end: var(--space-md); padding-block: var(--space-xs);
+  font-size: 0.92rem; color: #fff; letter-spacing: 1.5px;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0,0,0,.85), 0 0 12px rgba(255,255,255,.15);
   display: flex; align-items: center; justify-content: center; gap: var(--space-xs);
   animation: fadeIn .4s ease;
 }
@@ -153,7 +156,6 @@
   height: 11.5%;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(180deg, rgba(0,0,0,.96), rgba(0,0,0,1));
-  border-block: 2px solid rgba(233,69,96,.85);
   color: #fff; font-weight: 900; letter-spacing: 1px;
   font-size: clamp(0.95rem, 3.5vw, 1.45rem);
   text-align: center; padding-inline: var(--space-sm);

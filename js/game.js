@@ -292,12 +292,12 @@ function flipCurrentCard(e, card) {
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
   setTimeout(() => showFunnyText(card), 500);
   setTimeout(() => {
-    const front = cardEl.querySelector(".card-front");
-    if (front) {
+    const wrapper = cardEl.closest(".big-card-wrapper");
+    if (wrapper && !wrapper.parentElement.querySelector(".tap-hint-next")) {
       const hint = document.createElement("div");
       hint.className = "tap-hint-next";
       hint.textContent = 'لمس کنید — نفر بعدی';
-      front.appendChild(hint);
+      wrapper.parentElement.insertBefore(hint, wrapper);
     }
   }, 600);
 }

@@ -54,21 +54,22 @@
     }, 70);
   }
 
-  // Progress bar with percentage
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += Math.random() * 12 + 3;
-    if (progress >= 100) progress = 100;
-    fill.style.width = progress + "%";
-    if (percentEl) percentEl.textContent = Math.round(progress) + "٪";
-    if (progress >= 100) {
-      clearInterval(interval);
+  // 8-second smooth fill — the bar width is driven by a CSS animation;
+  // here we only update the percentage label and trigger the hide.
+  const SPLASH_DURATION = 8000;
+  const startTime = performance.now();
+  function tick(now) {
+    const pct = Math.min(100, Math.round(((now - startTime) / SPLASH_DURATION) * 100));
+    if (percentEl) percentEl.textContent = pct + "٪";
+    if (pct < 100) requestAnimationFrame(tick);
+    else {
       setTimeout(() => {
         splash.classList.add("hide");
         setTimeout(() => splash.remove(), 600);
-      }, 500);
+      }, 200);
     }
-  }, 120);
+  }
+  requestAnimationFrame(tick);
 })();
 
 // Keyboard handlers

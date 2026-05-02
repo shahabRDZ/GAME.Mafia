@@ -114,12 +114,10 @@ def add_label(img: Image.Image, persian_name: str) -> Image.Image:
     band_h = 130
     band_y = H - band_h - 30  # leave 30px padding from bottom of card
 
-    # subtle dark gradient banner with thin red accent line
+    # Solid dark banner — borderless to keep the look clean
     overlay = Image.new("RGBA", (W, band_h), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
-    od.rectangle([(40, 0), (W - 40, band_h)], fill=(0, 0, 0, 200))
-    od.line([(60, 0), (W - 60, 0)], fill=(233, 69, 96, 220), width=3)
-    od.line([(60, band_h - 1), (W - 60, band_h - 1)], fill=(233, 69, 96, 220), width=3)
+    od.rectangle([(40, 0), (W - 40, band_h)], fill=(0, 0, 0, 220))
     img.alpha_composite(overlay, (0, band_y))
 
     # text — Raqm handles RTL + shaping automatically
@@ -148,7 +146,7 @@ def add_watermarks(img: Image.Image, logo: Image.Image) -> Image.Image:
         wfont = ImageFont.truetype(FONT_REG, 28)
     except Exception:
         wfont = ImageFont.load_default()
-    pd.text((30, 180), "© YOTA.GAME", font=wfont, fill=(255, 255, 255, 28))
+    pd.text((30, 180), "© SHOWSHUNG.COM", font=wfont, fill=(255, 255, 255, 28))
     pat = pat.rotate(-30, resample=Image.BICUBIC, expand=True)
 
     # tile across the card
@@ -165,10 +163,11 @@ def add_watermarks(img: Image.Image, logo: Image.Image) -> Image.Image:
         cfont = ImageFont.truetype(FONT_REG, 22)
     except Exception:
         cfont = ImageFont.load_default()
-    draw.text((50, 30), "yota.game", font=cfont, fill=(255, 255, 255, 140))
-    bbox = draw.textbbox((0, 0), "yota.game", font=cfont)
+    BRAND = "showshung.com"
+    draw.text((50, 30), BRAND, font=cfont, fill=(255, 255, 255, 140))
+    bbox = draw.textbbox((0, 0), BRAND, font=cfont)
     tw = bbox[2] - bbox[0]
-    draw.text((W - 50 - tw, 30), "yota.game", font=cfont, fill=(255, 255, 255, 140))
+    draw.text((W - 50 - tw, 30), BRAND, font=cfont, fill=(255, 255, 255, 140))
 
     # 3) small logo stamp in bottom-right corner
     logo_size = 80
