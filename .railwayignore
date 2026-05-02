@@ -1,0 +1,10 @@
+# Ignore raw source images and dev tooling for faster Railway uploads
+img/untitled folder/
+img/cards_clean/
+data/card-prompts.md
+data/card-prompts.txt
+scripts/
+__pycache__/
+*.pyc
+.DS_Store
+**/.DS_Store

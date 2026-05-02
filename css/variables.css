@@ -233,7 +233,7 @@
   letter-spacing: 8px; margin-top: 4px; text-transform: uppercase;
   display: none;
 }
-.splash-content { padding-bottom: 4vh; }
+/* (overridden below to 9vh) */
 .splash-tagline {
   font-size: 0.92rem; color: rgba(255,255,255,.95);
   margin-top: 14px; min-height: 1.4em;
@@ -250,7 +250,9 @@
 /* The cover.png artwork has an empty banner near the bottom; position the
    loader and label so they sit inside that banner on common aspect ratios. */
 .splash-content {
-  padding-bottom: 5vh;
+  /* ~0.8cm above previous position so the loader and tagline land
+     cleanly inside the cover artwork's bottom banner */
+  padding-bottom: 9vh;
   text-align: center; position: relative; z-index: 2;
   width: min(80vw, 360px);
 }

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v107';
+const CACHE_VERSION = 'v108';
 const STATIC_CACHE = `ShowShung-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `ShowShung-dynamic-${CACHE_VERSION}`;
 
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   '/css/animations.css',
   '/css/chaos.css',
   '/css/typography.css',
+  '/css/cinema-pages.css',
   '/js/config.js',
   '/js/state.js',
   '/js/helpers.js',

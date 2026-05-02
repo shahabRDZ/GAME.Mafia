@@ -1,0 +1,153 @@
+/* ─────────────────────────────────────────────────────────────────
+   Cinematic palette overrides for non-game pages
+   ─────────────────────────────────────────────────────────────────
+   Re-skins admin.html, ev.html, events.html and all seo/*.html pages
+   to match the black + antique-gold + blood-red mafia theme without
+   touching their inline styles. Applied via !important so it wins
+   over per-page <style> blocks.
+   ─────────────────────────────────────────────────────────────────*/
+
+:root {
+  --c-gold:       #D4AF37;
+  --c-gold-soft:  #C9A14A;
+  --c-gold-deep:  #8C6A1F;
+  --c-blood:      #8B0000;
+  --c-blood-bright:#A11212;
+  --c-khaki:      #B8A47A;
+  --c-text:       #EAEAEA;
+  --c-muted:      #CFCFCF;
+  --c-panel:      rgba(11,11,11,.72);
+  --c-panel-border: rgba(212,175,55,.20);
+}
+
+/* ── Shared body / container surface ─────────────────────────────── */
+body {
+  color: var(--c-text) !important;
+}
+
+/* ── Hero blocks (SEO + ev landing) ──────────────────────────────── */
+.hero, .ev-hero {
+  background: linear-gradient(180deg, #0e0e0e 0%, #060606 100%) !important;
+  border-bottom: 1px solid var(--c-panel-border) !important;
+  position: relative;
+}
+.hero::after, .ev-hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(212,175,55,.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 80%, rgba(139,0,0,.08)  0%, transparent 55%);
+}
+.hero h1, .ev-hero h1, .ev-hero-line2 {
+  color: var(--c-gold) !important;
+  text-shadow: 0 0 22px rgba(212,175,55,.18), 0 2px 8px rgba(0,0,0,.85) !important;
+}
+.hero .subtitle, .ev-hero-line1, .ev-hero-line3 { color: var(--c-khaki) !important; }
+.ev-hero-line2 span { color: var(--c-blood-bright) !important; }
+.hero-icon, .ev-hero-mask { filter: drop-shadow(0 0 30px rgba(212,175,55,.45)) !important; }
+
+.ev-hero-fire {
+  background: linear-gradient(0deg, rgba(212,175,55,.10) 0%, rgba(139,0,0,.08) 40%, transparent 100%) !important;
+}
+.ev-hero-cta {
+  background: linear-gradient(180deg, #6c0d0d 0%, #3b0707 100%) !important;
+  border: 1px solid var(--c-gold) !important;
+  color: var(--c-gold) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.55), inset 0 1px 0 rgba(212,175,55,.18) !important;
+}
+
+/* ── Links / CTAs / nav ──────────────────────────────────────────── */
+a { color: var(--c-gold) !important; }
+a:hover { color: var(--c-blood-bright) !important; }
+.cta a, .nav-link {
+  background: linear-gradient(180deg, #6c0d0d, #3b0707) !important;
+  color: var(--c-text) !important;
+  border: 1px solid var(--c-gold) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.5), inset 0 1px 0 rgba(212,175,55,.18) !important;
+}
+.cta a:hover, .nav-link:hover {
+  background: linear-gradient(180deg, #8a1212, #4a0808) !important;
+  color: var(--c-text) !important;
+}
+
+/* ── Lists / role cards / generic panels (SEO pages) ─────────────── */
+.flow-list li {
+  background: rgba(11,11,11,.55) !important;
+  border-inline-start: 3px solid var(--c-gold) !important;
+  color: var(--c-text) !important;
+}
+.role-card {
+  background: var(--c-panel) !important;
+  border: 1px solid var(--c-panel-border) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.role-card:hover { border-color: var(--c-gold) !important; }
+.role-card h3, .role-card h4 { color: var(--c-gold) !important; }
+
+/* ── Events list cards / tabs / filters / badges ─────────────────── */
+.ev-tab {
+  background: rgba(11,11,11,.55) !important;
+  border: 1px solid var(--c-panel-border) !important;
+  color: var(--c-khaki) !important;
+}
+.ev-tab.active {
+  background: rgba(212,175,55,.14) !important;
+  border-color: var(--c-gold) !important;
+  color: var(--c-gold) !important;
+}
+.ev-filters select {
+  background: rgba(11,11,11,.6) !important;
+  border: 1.5px solid var(--c-panel-border) !important;
+  color: var(--c-text) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+}
+.ev-filters select:focus { border-color: var(--c-gold) !important; box-shadow: 0 0 0 3px rgba(212,175,55,.18) !important; }
+
+.ev-card {
+  background: var(--c-panel) !important;
+  border: 1px solid var(--c-panel-border) !important;
+}
+.ev-card:hover { border-color: var(--c-gold) !important; }
+.ev-card-name { color: var(--c-gold) !important; }
+.ev-card-sub  { color: var(--c-khaki) !important; }
+
+.ev-badge-open    { background: rgba(212,175,55,.12) !important; color: var(--c-gold) !important; border-color: var(--c-panel-border) !important; }
+.ev-badge-full    { background: rgba(139,0,0,.16)   !important; color: var(--c-blood-bright) !important; border-color: rgba(161,18,18,.35) !important; }
+.ev-badge-pending { background: rgba(184,164,122,.14)!important; color: var(--c-khaki) !important; border-color: rgba(184,164,122,.30) !important; }
+
+.ev-tag       { background: rgba(255,255,255,.04) !important; color: var(--c-khaki) !important; border: 1px solid rgba(212,175,55,.10) !important; }
+.ev-tag-price { color: var(--c-gold) !important; border-color: var(--c-panel-border) !important; background: rgba(212,175,55,.08) !important; }
+.ev-tag-free  { color: var(--c-gold-soft) !important; }
+
+.ev-cap-fill   { background: linear-gradient(90deg, var(--c-gold-deep), var(--c-gold)) !important; }
+.ev-card-more  { color: var(--c-gold) !important; }
+.ev-btn-reserve {
+  background: linear-gradient(180deg, #6c0d0d, #3b0707) !important;
+  color: var(--c-text) !important;
+  border: 1px solid var(--c-gold) !important;
+}
+
+/* ── Admin panel ─────────────────────────────────────────────────── */
+.admin-sidebar, .sidebar, .admin-header, .admin-card,
+.stat-card, .data-table, .toolbar {
+  background: var(--c-panel) !important;
+  border-color: var(--c-panel-border) !important;
+}
+.admin-header h1, .admin-header h2, .admin-card h3, .admin-card h2,
+.stat-value, .nav-item.active, .stat-card .label {
+  color: var(--c-gold) !important;
+}
+.btn-primary, .admin-btn-primary, .btn-save {
+  background: linear-gradient(180deg, #6c0d0d, #3b0707) !important;
+  border: 1px solid var(--c-gold) !important;
+  color: var(--c-text) !important;
+}
+.tag-mafia, .badge-mafia, .role-mafia      { color: var(--c-blood-bright) !important; background: rgba(139,0,0,.12) !important; border-color: rgba(161,18,18,.35) !important; }
+.tag-citizen, .badge-citizen, .role-citizen{ color: var(--c-gold) !important; background: rgba(212,175,55,.10) !important; border-color: var(--c-panel-border) !important; }
+
+/* Admin generic colored chips/labels — keep gold/blood/khaki only */
+[class*="-success"]:not([class*="badge-"]) { color: var(--c-gold) !important; }
+[class*="-danger"]:not([class*="badge-"])  { color: var(--c-blood-bright) !important; }
+[class*="-warning"]:not([class*="badge-"]) { color: var(--c-gold-soft) !important; }
+[class*="-info"]:not([class*="badge-"])    { color: var(--c-khaki) !important; }
