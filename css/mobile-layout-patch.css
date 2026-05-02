@@ -1,0 +1,45 @@
+/* Force mobile vertical layout patch — only applies under .ss-theme */
+@media (max-width: 767px) {
+  body.ss-theme main,
+  body.ss-theme .page,
+  body.ss-theme .container:not(.fs-info-center),
+  body.ss-theme [class*="container"]:not(.fs-info-center) {
+    width: calc(100% - 20px) !important;
+    margin-inline: auto !important;
+  }
+
+  body.ss-theme nav:not(.fs-game-menu):not([class*="bottom"]),
+  body.ss-theme .nav {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 12px !important;
+    white-space: nowrap !important;
+    padding-bottom: 6px !important;
+  }
+
+  body.ss-theme .hero,
+  body.ss-theme [class*="hero"]:not(.ev-hero):not(.st-hero) {
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 22px 16px !important;
+  }
+
+  /* Scenario grid stays 2 columns on mobile */
+  body.ss-theme .scenario-grid,
+  body.ss-theme [class*="scenario"] [class*="grid"],
+  body.ss-theme .scenarios,
+  body.ss-theme .group-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Generic dashboards stack vertically */
+  body.ss-theme .dashboard,
+  body.ss-theme [class*="dashboard"],
+  body.ss-theme .content-grid,
+  body.ss-theme [class*="grid-layout"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+}

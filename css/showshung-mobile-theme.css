@@ -1,0 +1,143 @@
+/* ShowShung Mobile Skeleton Mafia Theme */
+/* Import this globally after the site's existing CSS. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap');
+
+:root {
+  --ss-bg: #050505;
+  --ss-bg-2: #0b0706;
+  --ss-panel: rgba(16, 12, 10, 0.82);
+  --ss-panel-2: rgba(28, 20, 16, 0.62);
+  --ss-gold: #d4af37;
+  --ss-gold-2: #a8832a;
+  --ss-red: #a11212;
+  --ss-red-2: #5b0709;
+  --ss-red-glow: rgba(198, 22, 36, 0.42);
+  --ss-text: #f4ead7;
+  --ss-muted: #b7aa91;
+  --ss-dim: #7c7363;
+  --ss-line: rgba(212, 175, 55, 0.22);
+  --ss-soft-line: rgba(255, 255, 255, 0.08);
+  --ss-radius: 24px;
+  --ss-radius-sm: 16px;
+  --ss-font-fa: "Vazirmatn", system-ui, -apple-system, sans-serif;
+  --ss-font-brand: "Cinzel", "Vazirmatn", serif;
+}
+
+/* Theme is applied only when body has .ss-theme so existing pages
+   keep their current look until they opt in. */
+
+body.ss-theme h1,
+body.ss-theme h2,
+body.ss-theme h3,
+body.ss-theme .brand {
+  color: var(--ss-gold);
+  text-shadow: 0 0 18px rgba(212,175,55,.25);
+}
+
+body.ss-theme h1,
+body.ss-theme .logo,
+body.ss-theme .brand-en {
+  font-family: var(--ss-font-brand);
+  letter-spacing: .04em;
+}
+
+body.ss-theme a { color: var(--ss-gold); text-decoration: none; }
+
+/* Scenario selection — 2-column on mobile, more on desktop */
+body.ss-theme .scenario-grid,
+body.ss-theme [class*="scenario"] [class*="grid"],
+body.ss-theme .scenarios,
+body.ss-theme .group-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Role cards — horizontal snap-scroll on mobile */
+body.ss-theme .role-grid,
+body.ss-theme [class*="role"] [class*="grid"]:not(.cnt-grid),
+body.ss-theme .cards-grid {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 4px 2px 12px;
+}
+
+body.ss-theme .role-card,
+body.ss-theme [class*="role-card"]:not(.scn-role-card) {
+  min-width: 148px;
+  max-width: 170px;
+  scroll-snap-align: start;
+}
+
+/* Timer / game master */
+body.ss-theme .timer,
+body.ss-theme [class*="timer"] {
+  color: var(--ss-gold);
+  font-family: var(--ss-font-brand);
+  text-shadow: 0 0 24px rgba(212,175,55,.22);
+}
+
+body.ss-theme .warning,
+body.ss-theme [class*="warning"]:not([class*="ev-tag-"]) {
+  color: #ff4657;
+  border-color: rgba(161,18,18,.45);
+}
+
+/* Tabs / filters — pill style */
+body.ss-theme .tab,
+body.ss-theme .filter,
+body.ss-theme [class*="tab"]:not([class*="-tab-"]):not(.ev-tab),
+body.ss-theme [class*="filter"]:not(.ev-filters) {
+  border-radius: 999px;
+  border: 1px solid rgba(212,175,55,.22);
+  background: rgba(0,0,0,.28);
+  color: var(--ss-muted);
+}
+
+body.ss-theme .tab.active,
+body.ss-theme .filter.active {
+  color: var(--ss-gold);
+  border-color: var(--ss-gold);
+  background: rgba(212,175,55,.10);
+}
+
+/* PWA install prompt */
+body.ss-theme [class*="install-prompt"],
+body.ss-theme .install {
+  background: rgba(12,10,18,.86);
+  border: 1px solid rgba(212,175,55,.30);
+  border-radius: 999px;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  body.ss-theme * { animation: none !important; transition: none !important; }
+}
+
+/* Responsive grid upgrade */
+@media (min-width: 768px) {
+  body.ss-theme .scenario-grid,
+  body.ss-theme [class*="scenario"] [class*="grid"],
+  body.ss-theme .scenarios,
+  body.ss-theme .group-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  body.ss-theme .role-grid,
+  body.ss-theme [class*="role"] [class*="grid"]:not(.cnt-grid),
+  body.ss-theme .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    overflow: visible;
+  }
+}
+
+@media (min-width: 1100px) {
+  body.ss-theme .scenario-grid,
+  body.ss-theme [class*="scenario"] [class*="grid"],
+  body.ss-theme .scenarios,
+  body.ss-theme .group-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
