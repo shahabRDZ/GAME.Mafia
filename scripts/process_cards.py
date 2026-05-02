@@ -20,7 +20,8 @@ OUT = os.path.join(ROOT, "img", "cards")
 LOGO_PATH = os.path.join(ROOT, "icon-192.png")
 
 # --- output dimensions (2:3 ratio) ---
-W, H = 900, 1350
+# Higher-res so the artwork looks crisp on retina phones and tablets.
+W, H = 1200, 1800
 
 # --- fonts (system) ---
 # Tahoma has reliable Persian/Arabic shaping with Presentation Forms-B
@@ -167,17 +168,19 @@ def add_watermarks(img: Image.Image, logo: Image.Image) -> Image.Image:
             tile_layer.paste(pat, (x, y), pat)
     img.alpha_composite(tile_layer)
 
-    # 2) site URL in top corners
+    # 2) Brand mark — tiny + faint so it protects the file without
+    #    standing out on the artwork. Single corner, lowered opacity.
     draw = ImageDraw.Draw(img, "RGBA")
     try:
-        cfont = ImageFont.truetype(FONT_REG, 22)
+        cfont = ImageFont.truetype(FONT_REG, 18)
     except Exception:
         cfont = ImageFont.load_default()
     BRAND = "showshung.com"
-    draw.text((50, 30), BRAND, font=cfont, fill=(255, 255, 255, 140))
     bbox = draw.textbbox((0, 0), BRAND, font=cfont)
     tw = bbox[2] - bbox[0]
-    draw.text((W - 50 - tw, 30), BRAND, font=cfont, fill=(255, 255, 255, 140))
+    th = bbox[3] - bbox[1]
+    # Bottom-right inside the safe area, very subtle
+    draw.text((W - 28 - tw, H - 28 - th), BRAND, font=cfont, fill=(255, 255, 255, 65))
 
     # 3) small logo stamp in bottom-right corner
     logo_size = 80

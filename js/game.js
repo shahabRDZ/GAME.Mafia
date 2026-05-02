@@ -251,7 +251,7 @@ function showCurrentCard() {
   document.getElementById("fsProgNums").textContent = `${toFarsiNum(total - done)} باقی‌مانده`;
   document.getElementById("fsProgressFill").style.width = `${(done / total) * 100}%`;
   const slot = document.getElementById("cardSlot");
-  slot.innerHTML = `<div class="big-card-wrapper" style="animation: cardSlideUp 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards">${buildCard(card, false)}</div>`;
+  slot.innerHTML = `<div class="big-card-wrapper" style="animation: cardSlideUp 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) forwards">${buildCard(card, false)}</div>`;
   const cardEl = slot.querySelector(".card");
   cardEl.addEventListener("click", e => flipCurrentCard(e, card));
   cardEl.style.touchAction = "manipulation";
@@ -385,14 +385,18 @@ function nextCard() {
   cardRevealed = false;
   const funny = document.querySelector(".funny-container");
   if (funny) funny.remove();
+  const hint = document.querySelector(".tap-hint-next");
+  if (hint) hint.remove();
   const slot = document.getElementById("cardSlot");
   const wrapper = slot.querySelector(".big-card-wrapper");
   if (wrapper) {
-    wrapper.style.transition = "transform 0.3s ease, opacity 0.3s ease";
-    wrapper.style.transform = "translateY(-40px) scale(0.9)";
+    // Quick clean exit — straight slide-out with a touch of fade,
+    // no bounce, no scale jitter.
+    wrapper.style.transition = "transform 0.18s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s linear";
+    wrapper.style.transform = "translateY(-24px)";
     wrapper.style.opacity = "0";
   }
-  setTimeout(() => { state.queueIdx++; showCurrentCard(); }, 300);
+  setTimeout(() => { state.queueIdx++; showCurrentCard(); }, 180);
 }
 
 function showCompletion() {
