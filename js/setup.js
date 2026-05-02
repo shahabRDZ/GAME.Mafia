@@ -154,6 +154,46 @@ function updateStepIndicator(step) {
   });
 }
 
+// ── Scenario tile pagination (6 per page, horizontal swipe) ──
+function paginateScenarios() {
+  const grid = document.querySelector('.group-grid');
+  if (!grid || grid.querySelector('.group-page')) return;
+  const PAGE_SIZE = 6;
+  const btns = Array.from(grid.querySelectorAll('.group-btn'));
+  if (!btns.length) return;
+
+  grid.innerHTML = '';
+  const pages = [];
+  for (let i = 0; i < btns.length; i += PAGE_SIZE) {
+    const page = document.createElement('div');
+    page.className = 'group-page';
+    btns.slice(i, i + PAGE_SIZE).forEach(b => page.appendChild(b));
+    grid.appendChild(page);
+    pages.push(page);
+  }
+
+  // Page-indicator dots inserted right after the grid
+  if (pages.length > 1) {
+    const dots = document.createElement('div');
+    dots.className = 'group-pager-dots';
+    pages.forEach((_, i) => {
+      const d = document.createElement('span');
+      d.className = 'group-pager-dot' + (i === 0 ? ' active' : '');
+      dots.appendChild(d);
+    });
+    grid.parentElement.insertBefore(dots, grid.nextSibling);
+
+    // Sync the active dot with scroll position
+    grid.addEventListener('scroll', () => {
+      const idx = Math.round(grid.scrollLeft / grid.clientWidth);
+      dots.querySelectorAll('.group-pager-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+      });
+    }, { passive: true });
+  }
+}
+document.addEventListener('DOMContentLoaded', paginateScenarios);
+
 // ── Setup Flow ──
 function selectGroup(group) {
   state.group = group;

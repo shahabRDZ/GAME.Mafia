@@ -136,17 +136,14 @@ header {
 
 .bottom-nav {
   position: fixed;
-  left: 50%;
-  bottom: calc(4px + var(--safe-bottom));
-  transform: translateX(-50%);
-  /* Phone-first: span the screen with a small inset, capped so it
-     doesn't get giant on tablets/desktop */
-  width: calc(100vw - 8px);
-  max-width: 480px;
-  aspect-ratio: 2.55 / 1;
-  /* Hard ceiling so the nav never eats too much vertical space on
-     wide-but-short viewports (landscape phones, etc.) */
-  max-height: 110px;
+  left: 0; right: 0;
+  bottom: var(--safe-bottom);
+  /* Full-width on every device — no horizontal inset */
+  width: 100vw;
+  /* Height scales with viewport width but caps so it stays usable
+     on big screens. The artwork is stretched to fit (its aspect is
+     2.55:1, and at our height range the slight scale-up is invisible). */
+  height: clamp(78px, 22vw, 108px);
   z-index: var(--z-overlay);
   display: flex; align-items: stretch;
   background: url("/img/bottom-nav.png") center / 100% 100% no-repeat;

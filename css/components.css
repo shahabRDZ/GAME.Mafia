@@ -596,17 +596,54 @@
 }
 .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
 
-/* ── Scenario tile grid — borderless, big icon stacked above label ── */
+/* ── Scenario picker — 6 tiles per page, swipe horizontally for more ──
+   JS (paginateScenarios in setup.js) wraps every 6 .group-btn
+   children in a .group-page div. Each page is one snap-stop. */
 .group-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-block-end: 14px;       /* leaves room for the page-dot indicators */
+  position: relative;
+}
+.group-grid::-webkit-scrollbar { display: none; }
+
+.group-page {
+  flex: 0 0 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(0, auto);
+  gap: 12px;
+  padding-inline: 4px;
+  scroll-snap-align: start;
 }
-@media (min-width: 600px) {
-  .group-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* Page dots — auto-injected by JS as siblings of the grid */
+.group-pager-dots {
+  display: flex; justify-content: center; gap: 8px;
+  margin-block-start: 8px;
 }
-@media (min-width: 1000px) {
-  .group-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.group-pager-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(212,175,55,.30);
+  transition: all .25s ease;
+}
+.group-pager-dot.active {
+  background: var(--gold, #D4AF37);
+  box-shadow: 0 0 8px rgba(212,175,55,.55);
+  width: 22px; border-radius: 4px;
+}
+
+@media (min-width: 768px) {
+  .group-page { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 1100px) {
+  /* On wide screens, no need to paginate — one page wide enough */
+  .group-grid { overflow-x: visible; scroll-snap-type: none; }
+  .group-page { flex: 1 0 auto; }
 }
 .group-btn {
   position: relative;
