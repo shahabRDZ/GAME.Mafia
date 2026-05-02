@@ -229,6 +229,7 @@ function renderGame() {
 
 function exitGameFullscreen() {
   stopAmbientLightning();
+  pauseCardMusic();
   const gs = document.getElementById("gameScreen");
   gs.classList.remove("game-fullscreen", "active");
   document.querySelector(".container").style.display = "block";
@@ -269,6 +270,32 @@ function haptic(style = 'light') {
 
 let cardRevealed = false;
 
+/* ── Card-reveal background music ─────────────────────────────────
+   A single shared <audio> element carries an atmospheric track that
+   plays only while a role card is flipped open. Tapping again pauses
+   it; the next player's reveal resumes from the same position. */
+let cardMusicEl = null;
+function getCardMusic() {
+  if (cardMusicEl) return cardMusicEl;
+  cardMusicEl = new Audio('/audio/card-music.mp3');
+  cardMusicEl.preload = 'auto';
+  cardMusicEl.loop = false;          // resume continues, not restart
+  cardMusicEl.volume = 0.55;
+  // Soft graceful fail if the file isn't present yet
+  cardMusicEl.addEventListener('error', () => { cardMusicEl = null; });
+  return cardMusicEl;
+}
+function playCardMusic() {
+  const a = getCardMusic();
+  if (!a) return;
+  // Browsers require a user-gesture; flipCurrentCard is one, so this works
+  const p = a.play();
+  if (p && p.catch) p.catch(() => {});
+}
+function pauseCardMusic() {
+  if (cardMusicEl && !cardMusicEl.paused) cardMusicEl.pause();
+}
+
 function flipCurrentCard(e, card) {
   const cardEl = document.querySelector("#cardSlot .card");
   if (!cardEl) return;
@@ -276,6 +303,7 @@ function flipCurrentCard(e, card) {
   // Card is showing role — go to next
   if (cardRevealed) {
     cardRevealed = false;
+    pauseCardMusic();
     stopAmbientLightning();
     if (state.queueIdx + 1 >= state.cards.length) { showCompletion(); }
     else { nextCard(); }
@@ -285,6 +313,7 @@ function flipCurrentCard(e, card) {
   // Flip the card to show role
   cardEl.classList.add("flipped");
   cardRevealed = true;
+  playCardMusic();
   haptic('medium');
   spawnLightningFlash();
   startAmbientLightning();
@@ -401,6 +430,9 @@ function nextCard() {
 
 function showCompletion() {
   stopAmbientLightning();
+  pauseCardMusic();
+  // Reset playback so the next game starts the track from the beginning
+  if (cardMusicEl) cardMusicEl.currentTime = 0;
   document.getElementById("cardStage").style.display = "none";
   document.getElementById("completionBanner").classList.add("show");
   document.getElementById("fsProgressFill").style.width = "100%";

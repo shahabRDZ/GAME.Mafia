@@ -26,6 +26,7 @@ COPY manifest.json icon-192.png icon-512.png icon.svg sw.js ./
 COPY css/ css/
 COPY js/ js/
 COPY img/ img/
+COPY audio/ audio/
 COPY seo/ seo/
 
 # Copy Python modules (architecture: config, models, routes, services, sockets, utils)
