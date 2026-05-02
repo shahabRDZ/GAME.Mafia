@@ -203,7 +203,7 @@
 /* ── Card back ── */
 .card-back {
   background: #000 url("/img/cards/back.png") center/cover no-repeat;
-  border: 1.5px solid rgba(60,70,120,.12);
+  border: none;
   box-shadow: 0 12px 36px rgba(0,0,0,.8);
   display: flex; align-items: center; justify-content: center;
 }
@@ -258,38 +258,22 @@
 /* ── Card front shared ── */
 .card-front { transform: rotateY(180deg); }
 
-/* ── Mafia card ── */
-.card-front.mafia {
-  background: radial-gradient(ellipse at 50% 0%, #2a0000 0%, #110000 50%, #0a0000 100%);
-  border: 1.5px solid rgba(200,0,0,.45);
-  box-shadow: 0 0 40px rgba(180,0,0,.35), inset 0 0 50px rgba(0,0,0,.5);
-}
-.card-front.mafia::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(140,0,0,.3) 0%, transparent 65%); pointer-events: none;
-}
-
-/* ── Citizen card ── */
-.card-front.citizen {
-  background: radial-gradient(ellipse at 50% 0%, #001f1a 0%, #000e14 50%, #000810 100%);
-  border: 1.5px solid rgba(0,200,120,.35);
-  box-shadow: 0 0 40px rgba(0,180,100,.25), inset 0 0 50px rgba(0,0,0,.5);
-}
-.card-front.citizen::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(0,120,80,.25) 0%, transparent 65%); pointer-events: none;
-}
-
-/* ── Independent card ── */
+/* ── Card fronts ──
+   The card-image fills the entire face, so gradients/borders just create
+   a visible frame around the artwork. Keep only a soft team-tinted outer
+   glow for atmosphere; no border, no inset overlays. */
+.card-front.mafia,
+.card-front.citizen,
 .card-front.independent {
-  background: radial-gradient(ellipse at 50% 0%, #1a0030 0%, #0d0018 50%, #080010 100%);
-  border: 1.5px solid rgba(180,100,255,.35);
-  box-shadow: 0 0 40px rgba(150,80,230,.25), inset 0 0 50px rgba(0,0,0,.5);
+  background: #000;
+  border: none;
 }
-.card-front.independent::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(120,60,200,.25) 0%, transparent 65%); pointer-events: none;
-}
+.card-front.mafia       { box-shadow: 0 0 38px rgba(139,0,0,.30); }
+.card-front.citizen     { box-shadow: 0 0 38px rgba(0,160,90,.20); }
+.card-front.independent { box-shadow: 0 0 38px rgba(150,80,230,.20); }
+.card-front.mafia::after,
+.card-front.citizen::after,
+.card-front.independent::after { content: none; }
 .independent .card-role-name { color: #d8b4fe; text-shadow: 0 0 10px #9333ea; }
 .independent .card-role-num { color: rgba(180,140,255,.65); }
 

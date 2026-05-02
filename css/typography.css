@@ -1,0 +1,223 @@
+/* ─────────────────────────────────────────────────────────────────
+   ShowShung — Cinematic Typography System
+   ─────────────────────────────────────────────────────────────────
+   Direction: noir / Godfather / luxury — elegant, powerful, dangerous.
+
+   Pairing
+     • Headings  → Cinzel (Trajan-style serif, classic, cinematic)
+     • Body      → Inter (clean modern sans-serif)
+     • Persian   → Vazirmatn (already loaded; Inter/Cinzel don't cover
+                  Arabic letters so the browser falls back automatically)
+     • Accents   → blood-red, bold, with a soft glow
+
+   Scale (mobile-first; desktop ramps via clamp)
+     h1   2.25 – 3.5 rem      900   tracking +1
+     h2   1.75 – 2.5  rem      800   tracking +.5
+     h3   1.35 – 1.75 rem      700   tracking +.5
+     h4   1.10 – 1.30 rem      700
+     body 0.95 – 1.00 rem      400   line-height 1.65
+     sm   0.82 rem             400
+     xs   0.72 rem             500
+   ───────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Font families */
+  --font-display: 'Cinzel', 'Vazirmatn', 'Playfair Display', Georgia, serif;
+  --font-body:    'Inter',  'Vazirmatn', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-persian: 'Vazirmatn', 'Inter', system-ui, sans-serif;
+
+  /* Type scale (responsive via clamp) */
+  --fs-h1:   clamp(2.25rem, 5.5vw, 3.5rem);
+  --fs-h2:   clamp(1.75rem, 4.2vw, 2.5rem);
+  --fs-h3:   clamp(1.35rem, 3.0vw, 1.75rem);
+  --fs-h4:   clamp(1.10rem, 2.4vw, 1.30rem);
+  --fs-lead: clamp(1.00rem, 2.0vw, 1.18rem);
+  --fs-body: clamp(0.95rem, 1.7vw, 1.00rem);
+  --fs-sm:   0.82rem;
+  --fs-xs:   0.72rem;
+
+  /* Line-heights */
+  --lh-tight: 1.18;
+  --lh-snug:  1.30;
+  --lh-base:  1.65;
+  --lh-loose: 1.75;
+
+  /* Letter-spacing (display fonts get a touch more breathing room) */
+  --ls-display: 0.04em;
+  --ls-h1: 0.06em;
+  --ls-h2: 0.05em;
+  --ls-h3: 0.04em;
+  --ls-body: 0.005em;
+
+  /* Text colors (cinematic) */
+  --tx-title:   var(--gold);
+  --tx-strong:  #ffffff;
+  --tx-body:    #CFCFCF;
+  --tx-muted:   rgba(207, 207, 207, .68);
+  --tx-accent:  var(--blood-bright);
+}
+
+/* ── Base body ──────────────────────────────────────────────────── */
+html { font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-base);
+  letter-spacing: var(--ls-body);
+  color: var(--tx-body);
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Headings ───────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--tx-title);
+  line-height: var(--lh-tight);
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 24px rgba(212,175,55,.12);
+}
+h1 {
+  font-size: var(--fs-h1);
+  font-weight: 900;
+  letter-spacing: var(--ls-h1);
+  text-transform: uppercase;
+}
+h2 {
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  letter-spacing: var(--ls-h2);
+}
+h3 {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: var(--ls-h3);
+}
+h4 {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: var(--ls-display);
+}
+
+/* ── Persian content ─────────────────────────────────────────────
+   Persian doesn't sit well with serif Latin display fonts, so when
+   the document/element is in Persian we elevate Vazirmatn instead.
+   - Persian headings → 900 weight (matches the cinematic gravitas
+     without serifs)
+   - Persian body    → 400 weight, slightly looser line-height
+   ───────────────────────────────────────────────────────────────── */
+:lang(fa), [lang="fa"], :dir(rtl) { font-family: var(--font-persian); }
+:lang(fa) h1, :lang(fa) h2, :lang(fa) h3, :lang(fa) h4,
+[lang="fa"] h1, [lang="fa"] h2, [lang="fa"] h3, [lang="fa"] h4,
+:dir(rtl) h1, :dir(rtl) h2, :dir(rtl) h3, :dir(rtl) h4 {
+  font-family: var(--font-persian);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: none;
+}
+:lang(fa) body, [lang="fa"] body, :dir(rtl) body {
+  letter-spacing: 0;
+  line-height: var(--lh-loose);
+}
+
+/* ── Paragraphs and lead text ───────────────────────────────────── */
+p { color: var(--tx-body); line-height: var(--lh-base); }
+.lead {
+  font-size: var(--fs-lead);
+  color: var(--tx-strong);
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+/* ── Links ──────────────────────────────────────────────────────── */
+a {
+  color: var(--gold);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover { color: var(--blood-bright); }
+a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ── Strong / accent ────────────────────────────────────────────── */
+strong, b { font-weight: 700; color: var(--tx-strong); }
+em, i    { font-style: italic; color: var(--tx-body); }
+
+/* Highlight role names, warnings, dangerous keywords */
+.t-accent,
+.t-danger,
+.role-name,
+.t-role {
+  color: var(--tx-accent);
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(161,18,18,.55), 0 1px 2px rgba(0,0,0,.7);
+  letter-spacing: .03em;
+}
+
+/* Gold / serif title helper (for mid-page eyebrows or featured words) */
+.t-gold {
+  color: var(--gold);
+  font-family: var(--font-display);
+  text-shadow: 0 0 18px rgba(212,175,55,.25), 0 2px 4px rgba(0,0,0,.85);
+}
+.t-white { color: var(--tx-strong); }
+.t-mute  { color: var(--tx-muted); }
+
+/* Numerics — tabular figures look right in scoreboards / counters */
+.num, .tabular { font-variant-numeric: tabular-nums; }
+
+/* Small / fine-print */
+small, .t-sm  { font-size: var(--fs-sm); color: var(--tx-muted); }
+.t-xs        { font-size: var(--fs-xs); color: var(--tx-muted); letter-spacing: .04em; }
+
+/* Block quotes — a touch of mob-boss gravitas */
+blockquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-lead);
+  color: var(--tx-strong);
+  border-inline-start: 3px solid var(--gold);
+  padding-inline-start: 1rem;
+  margin-block: 1rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,.7);
+}
+
+/* Lists — readable, no marker color clash */
+ul, ol { color: var(--tx-body); line-height: var(--lh-base); padding-inline-start: 1.25rem; }
+ul li::marker { color: var(--gold); }
+ol li::marker { color: var(--gold); font-weight: 700; }
+
+/* Code / mono — kept neutral so cinematic UI doesn't fight monospace */
+code, kbd, samp, pre {
+  font-family: ui-monospace, SFMono-Regular, 'Menlo', 'Consolas', monospace;
+  font-size: 0.92em;
+  color: var(--gold-soft);
+}
+
+/* ── Utility classes for cinematic text effects ─────────────────── */
+.t-uppercase { text-transform: uppercase; letter-spacing: var(--ls-h2); }
+.t-track     { letter-spacing: var(--ls-h1); }
+
+.t-glow-gold  { text-shadow: 0 0 18px rgba(212,175,55,.45), 0 1px 2px rgba(0,0,0,.85); }
+.t-glow-blood { text-shadow: 0 0 18px rgba(161,18,18,.55),  0 1px 2px rgba(0,0,0,.85); }
+
+.t-divider {
+  display: inline-flex; align-items: center; gap: .8rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--gold);
+  letter-spacing: .25em;
+  text-transform: uppercase;
+}
+.t-divider::before, .t-divider::after {
+  content: ""; flex: 1 1 2.5rem; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-deep), transparent);
+}
+
+/* Reduce motion-sensitive effects when requested */
+@media (prefers-reduced-motion: reduce) {
+  h1, h2, h3, h4 { text-shadow: none; }
+}

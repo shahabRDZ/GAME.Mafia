@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v100';
+const CACHE_VERSION = 'v101';
 const STATIC_CACHE = `ShowShung-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `ShowShung-dynamic-${CACHE_VERSION}`;
 
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   '/css/cards.css',
   '/css/animations.css',
   '/css/chaos.css',
+  '/css/typography.css',
   '/js/config.js',
   '/js/state.js',
   '/js/helpers.js',
