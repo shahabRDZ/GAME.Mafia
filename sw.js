@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v114';
+const CACHE_VERSION = 'v115';
 const STATIC_CACHE = `ShowShung-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `ShowShung-dynamic-${CACHE_VERSION}`;
 

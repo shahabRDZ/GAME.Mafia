@@ -21,19 +21,23 @@ os.makedirs(OUT, exist_ok=True)
 # Row 2 (left → right):
 #   lab · chaos
 ICON_BOXES = {
-    # Pixel-precise boxes derived by scanning the supplied 1536×1024
-    # reference for each tile's bright interior region (gold rim +
-    # skull artwork). Tile widths vary 122–151 px so we keep each
-    # box as wide as its real tile rather than forcing a uniform size.
-    "custom":       (114, 175, 236, 330),   # دلخواه
-    "digital":      (294, 175, 420, 330),   # بدون گرداننده
-    "bounty":       (496, 175, 646, 330),   # جایزه سر رئیس
-    "negotiation":  (703, 175, 830, 330),   # مذاکره
-    "parliament":   (909, 175, 1038, 330),  # نماینده
-    "investigator": (1092, 175, 1242, 330), # بازپرس
-    "ranger":       (1318, 175, 1450, 330), # تکاور
-    "lab":          (114, 480, 236, 635),   # آزمایش
-    "chaos":        (294, 480, 420, 635),   # کپاس
+    # Pixel-precise tile bounds — measured from the supplied 1536×1024
+    # reference by profiling per-row brightness:
+    #   row 1 tile rim: y=189–340  (label sits at y≈365)
+    #   row 2 tile rim: y=510–660  (label at y≈685)
+    # Widths come from the bright vertical bands per tile (122–151 px).
+    # Earlier crops used y=175–330 which clipped a sliver of empty
+    # space above the tile and cut the bottom rim — that's the
+    # "white line at top" / off-center look that was reported.
+    "custom":       (114, 189, 236, 340),   # دلخواه
+    "digital":      (294, 189, 420, 340),   # بدون گرداننده
+    "bounty":       (496, 189, 646, 340),   # جایزه سر رئیس
+    "negotiation":  (703, 189, 830, 340),   # مذاکره
+    "parliament":   (909, 189, 1038, 340),  # نماینده
+    "investigator": (1092, 189, 1242, 340), # بازپرس
+    "ranger":       (1318, 189, 1450, 340), # تکاور
+    "lab":          (114, 510, 236, 660),   # آزمایش
+    "chaos":        (294, 510, 420, 660),   # کپاس
 }
 
 

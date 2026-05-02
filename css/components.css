@@ -702,7 +702,19 @@
   box-shadow: 0 10px 30px rgba(245,166,35,.25);
 }
 .hero-tools-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; }
-.htb-icon { font-size: 1.2rem; }
+.htb-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 8px; overflow: hidden;
+  background: radial-gradient(circle at 30% 25%, rgba(212,175,55,.18), rgba(0,0,0,.55) 70%);
+  border: 1px solid rgba(212,175,55,.35);
+  flex-shrink: 0;
+}
+.htb-icon img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
 .htb-arrow { font-size: 0.7rem; opacity: .7; }
 
 /* ── Tools Screen ── */
