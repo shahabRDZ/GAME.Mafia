@@ -348,21 +348,67 @@ main { padding-bottom: 5rem; }
 .lang-bar {
   display: flex; align-items: center;
   justify-content: flex-end;
-  gap: var(--space-2xs);
-  padding-block: 0;
+  gap: 10px;
+  padding-block: 4px 0;
 }
-.lang-bar-spacer { flex: 1; }
+.lang-bar .lang-btn { display: none; }   /* moved into the profile menu */
+.lang-bar-spacer { display: none; }
+
+/* Username shown next to the profile icon (left side in RTL) */
+.profile-greeting {
+  font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
+  font-size: 0.95rem; font-weight: 800;
+  color: var(--gold, #D4AF37);
+  letter-spacing: .02em;
+  text-shadow: 0 1px 4px rgba(0,0,0,.85), 0 0 12px rgba(212,175,55,.20);
+  white-space: nowrap;
+}
+@media (min-width: 768px) {
+  .profile-greeting { font-size: 1.05rem; }
+}
+
+/* Language switch row inside the profile menu */
+.profile-menu-langs {
+  display: flex; gap: 8px; justify-content: center;
+  margin-block-start: 12px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid rgba(212,175,55,.18);
+}
+.profile-lang-btn {
+  flex: 1;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(212,175,55,.22);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.profile-lang-btn:hover {
+  background: rgba(212,175,55,.10);
+  border-color: var(--gold, #D4AF37);
+}
+.profile-lang-btn.lang-active {
+  background: rgba(212,175,55,.18);
+  border-color: var(--gold, #D4AF37);
+  color: var(--gold, #D4AF37);
+  box-shadow: 0 0 12px rgba(212,175,55,.25);
+}
 
 /* ── Profile icon (top-right) + popover menu ────────────────────── */
 .profile-icon-btn {
-  width: 44px; height: 44px;
+  width: 64px; height: 64px;
   padding: 0;
   background: transparent;
   border: none;
   cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
-  filter: drop-shadow(0 0 14px rgba(212,175,55,.30));
+  filter: drop-shadow(0 0 16px rgba(212,175,55,.35));
   transition: transform .2s ease, filter .2s ease;
+}
+@media (min-width: 768px) {
+  .profile-icon-btn { width: 78px; height: 78px; }
 }
 .profile-icon-btn img {
   width: 100%; height: 100%;

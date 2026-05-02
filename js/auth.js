@@ -172,25 +172,29 @@ function renderAuthBar() {
   if (logoutBtn)   logoutBtn.style.display   = li ? "block" : "none";
   if (viewBtn)     viewBtn.style.display     = li ? "block" : "none";
 
-  // Header card (avatar / name / sub-line)
-  const avatarEl = document.getElementById("userAvatar");
-  const nameEl   = document.getElementById("usernameDisplay");
-  const subEl    = document.getElementById("gamesCountDisplay");
+  // Header card (avatar / name / sub-line) + the visible greeting
+  // next to the profile icon at the top of the page.
+  const avatarEl   = document.getElementById("userAvatar");
+  const nameEl     = document.getElementById("usernameDisplay");
+  const subEl      = document.getElementById("gamesCountDisplay");
+  const greetingEl = document.getElementById("profileGreeting");
   if (li) {
     if (avatarEl) {
       const [c1, c2] = getAvatarColor(currentUser.username);
       avatarEl.textContent = currentUser.username[0].toUpperCase();
       avatarEl.style.background = `linear-gradient(135deg,${c1},${c2})`;
     }
-    if (nameEl) nameEl.textContent = currentUser.username;
-    if (subEl)  subEl.textContent  = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+    if (nameEl)     nameEl.textContent     = currentUser.username;
+    if (subEl)      subEl.textContent      = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+    if (greetingEl) greetingEl.textContent = currentUser.username;
     const ab = document.getElementById("navAdmin");
     if (ab) ab.style.display = ["shahab","admin"].includes(currentUser.username) ? "inline-block" : "none";
     initSocket();
   } else {
     if (avatarEl) { avatarEl.textContent = "م"; avatarEl.style.background = ""; }
-    if (nameEl)   nameEl.textContent   = "میهمان";
-    if (subEl)    subEl.textContent    = "برای ذخیره تاریخچه وارد شوید";
+    if (nameEl)     nameEl.textContent     = "میهمان";
+    if (subEl)      subEl.textContent      = "برای ذخیره تاریخچه وارد شوید";
+    if (greetingEl) greetingEl.textContent = "میهمان";
     const ab = document.getElementById("navAdmin");
     if (ab) ab.style.display = "none";
     disconnectSocket();

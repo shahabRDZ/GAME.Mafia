@@ -200,16 +200,12 @@
 <div class="toast" id="toast" aria-live="polite" role="status"></div>
 
 <div class="container">
-  <!-- Top toolbar: profile icon at top-right, language switcher, no auth-bar below -->
+  <!-- Top toolbar: profile icon + visible username at top-right -->
   <div class="lang-bar">
-    <!-- Profile button — opens the profile menu (login / logout / view profile) -->
     <button class="profile-icon-btn" id="profileIconBtn" onclick="toggleProfileMenu()" aria-label="پروفایل">
       <img src="img/profile.png" alt="" loading="lazy" draggable="false">
     </button>
-    <div class="lang-bar-spacer"></div>
-    <button class="lang-btn lang-active" data-lang="fa" onclick="setLang('fa')">FA</button>
-    <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
-    <button class="lang-btn" data-lang="tr" onclick="setLang('tr')">TR</button>
+    <span class="profile-greeting" id="profileGreeting">میهمان</span>
   </div>
 
   <!-- Profile pop-over menu (anchored to the top-right icon) -->
@@ -227,6 +223,12 @@
     <button class="profile-menu-item" id="loginBtn" onclick="closeProfileMenu();openAuthModal('login')">ورود</button>
     <button class="profile-menu-item" id="registerBtn" onclick="closeProfileMenu();openAuthModal('register')">ثبت‌نام</button>
     <button class="profile-menu-item profile-menu-danger" id="logoutBtn" onclick="closeProfileMenu();logout()" style="display:none">خروج</button>
+    <!-- Languages now live inside the profile menu -->
+    <div class="profile-menu-langs">
+      <button class="profile-lang-btn lang-active" data-lang="fa" onclick="setLang('fa')">FA</button>
+      <button class="profile-lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="profile-lang-btn" data-lang="tr" onclick="setLang('tr')">TR</button>
+    </div>
   </div>
 
   <header class="hero-header">
