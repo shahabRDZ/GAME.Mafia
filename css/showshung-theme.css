@@ -1,0 +1,222 @@
+/* ShowShung Mafia Theme */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&family=Cinzel:wght@500;700;900&display=swap');
+
+:root {
+  --ss-bg: #070707;
+  --ss-bg-2: #0d0b0a;
+  --ss-panel: rgba(18, 14, 12, 0.78);
+  --ss-panel-solid: #15110f;
+  --ss-border: rgba(212, 175, 55, 0.32);
+  --ss-border-soft: rgba(255, 255, 255, 0.08);
+  --ss-gold: #d4af37;
+  --ss-gold-2: #c9a14a;
+  --ss-gold-soft: rgba(212, 175, 55, 0.18);
+  --ss-red: #9b111e;
+  --ss-red-2: #5f070c;
+  --ss-red-glow: rgba(180, 20, 32, 0.45);
+  --ss-text: #f3eee3;
+  --ss-muted: #b8aa93;
+  --ss-dim: #7c7468;
+  --ss-shadow: 0 18px 60px rgba(0,0,0,.65);
+  --ss-radius: 22px;
+  --ss-radius-sm: 14px;
+  --ss-font-fa: "Vazirmatn", system-ui, sans-serif;
+  --ss-font-title: "Cinzel", "Vazirmatn", serif;
+}
+
+html {
+  direction: rtl;
+  background: var(--ss-bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ss-text);
+  font-family: var(--ss-font-fa);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212,175,55,.10), transparent 34%),
+    radial-gradient(circle at 90% 20%, rgba(155,17,30,.12), transparent 28%),
+    linear-gradient(180deg, #050505 0%, #0d0908 55%, #050505 100%);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 46px 46px;
+  opacity: .18;
+  z-index: -2;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle, transparent 45%, rgba(0,0,0,.78) 100%);
+  z-index: -1;
+}
+
+.ss-page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 96px;
+}
+
+.ss-title {
+  font-family: var(--ss-font-title);
+  color: var(--ss-gold);
+  letter-spacing: .04em;
+  text-shadow: 0 0 22px rgba(212,175,55,.25);
+  margin: 0 0 18px;
+}
+
+.ss-subtitle {
+  color: var(--ss-muted);
+  line-height: 1.8;
+}
+
+.ss-panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+    var(--ss-panel);
+  border: 1px solid var(--ss-border-soft);
+  border-radius: var(--ss-radius);
+  box-shadow: var(--ss-shadow);
+  backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ss-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(212,175,55,.18), transparent) top/100% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(155,17,30,.22), transparent) bottom/100% 1px no-repeat;
+}
+
+.ss-btn {
+  border: 1px solid rgba(212,175,55,.55);
+  border-radius: 14px;
+  padding: 12px 22px;
+  color: #ffe9b0;
+  background: linear-gradient(180deg, #8f1119, #4d060a);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset, 0 12px 32px rgba(155,17,30,.28);
+  font-family: var(--ss-font-fa);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.ss-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 0 22px var(--ss-red-glow), 0 0 18px rgba(212,175,55,.22) inset;
+}
+
+.ss-btn.secondary {
+  background: linear-gradient(180deg, #221d17, #0f0c0a);
+  color: var(--ss-text);
+  border-color: rgba(212,175,55,.32);
+}
+
+.ss-input,
+.ss-select,
+.ss-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(212,175,55,.22);
+  border-radius: 14px;
+  background: rgba(0,0,0,.34);
+  color: var(--ss-text);
+  padding: 13px 16px;
+  font-family: var(--ss-font-fa);
+  outline: none;
+}
+
+.ss-input:focus,
+.ss-select:focus,
+.ss-textarea:focus {
+  border-color: var(--ss-gold);
+  box-shadow: 0 0 0 3px rgba(212,175,55,.12);
+}
+
+.ss-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 16px;
+}
+
+.ss-tile {
+  min-height: 138px;
+  padding: 18px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.01));
+  border: 1px solid rgba(212,175,55,.16);
+  color: var(--ss-text);
+  text-align: center;
+  transition: .2s ease;
+}
+
+.ss-tile:hover,
+.ss-tile.active {
+  border-color: var(--ss-gold);
+  box-shadow: 0 0 28px rgba(212,175,55,.18), 0 0 28px rgba(155,17,30,.12) inset;
+  transform: translateY(-3px);
+}
+
+.ss-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: radial-gradient(circle at 35% 20%, rgba(212,175,55,.25), rgba(0,0,0,.45));
+  border: 1px solid rgba(212,175,55,.28);
+  color: var(--ss-gold);
+  font-size: 28px;
+}
+
+.ss-tile-title {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.ss-tile-desc {
+  margin-top: 6px;
+  color: var(--ss-dim);
+  font-size: 13px;
+}
+
+.ss-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 68px;
+  background: rgba(8,7,8,.78);
+  border-top: 1px solid rgba(212,175,55,.16);
+  backdrop-filter: blur(18px);
+  z-index: 50;
+}
+
+.ss-glow-red {
+  text-shadow: 0 0 18px var(--ss-red-glow);
+  color: #ff4458;
+}
+
+.ss-glow-gold {
+  text-shadow: 0 0 18px rgba(212,175,55,.35);
+  color: var(--ss-gold);
+}

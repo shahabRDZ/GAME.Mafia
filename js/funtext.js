@@ -118,16 +118,73 @@ function showFunnyText(card) {
   const cardSlot = document.getElementById("cardSlot");
   cardSlot.parentElement.appendChild(container);
 
-  // Play subtle pop sound
+  // Demonic laugh on role reveal (Web Audio synth — no asset needed)
+  playDemonicLaugh();
+}
+
+/**
+ * Synthesise a short "Mwahahaha" — six descending chuckle bursts
+ * shaped through a vocal-formant bandpass filter, with a low drone
+ * underneath for cinematic weight. ~1s long, ~30% volume.
+ */
+function playDemonicLaugh() {
   try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-  } catch(e) {}
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const now = ctx.currentTime;
+    const out = ctx.createGain();
+    out.gain.value = 0.32;
+    out.connect(ctx.destination);
+
+    // 6 chuckle bursts — pitch descends each time
+    const bursts = [
+      { t: 0.00, f: 330 },
+      { t: 0.13, f: 290 },
+      { t: 0.27, f: 250 },
+      { t: 0.42, f: 220 },
+      { t: 0.58, f: 195 },
+      { t: 0.78, f: 175 }
+    ];
+    bursts.forEach(({ t, f }) => {
+      const start = now + t;
+      const osc  = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc2.type = 'square';
+      osc.frequency.setValueAtTime(f,        start);
+      osc.frequency.exponentialRampToValueAtTime(f * 0.78, start + 0.10);
+      osc2.frequency.setValueAtTime(f * 1.01, start); // detune for thickness
+      osc2.frequency.exponentialRampToValueAtTime(f * 0.79, start + 0.10);
+
+      filter.type = 'bandpass';
+      filter.frequency.value = 850;
+      filter.Q.value = 5.5;
+
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.18, start + 0.018);
+      gain.gain.linearRampToValueAtTime(0.12, start + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.14);
+
+      osc.connect(filter); osc2.connect(filter);
+      filter.connect(gain); gain.connect(out);
+      osc.start(start);  osc.stop(start + 0.16);
+      osc2.start(start); osc2.stop(start + 0.16);
+    });
+
+    // Low sub-drone for ominous bed
+    const drone = ctx.createOscillator();
+    const dgain = ctx.createGain();
+    drone.type = 'sine';
+    drone.frequency.setValueAtTime(60, now);
+    drone.frequency.exponentialRampToValueAtTime(48, now + 1.0);
+    dgain.gain.setValueAtTime(0, now);
+    dgain.gain.linearRampToValueAtTime(0.06, now + 0.18);
+    dgain.gain.exponentialRampToValueAtTime(0.001, now + 1.05);
+    drone.connect(dgain); dgain.connect(out);
+    drone.start(now); drone.stop(now + 1.1);
+  } catch (e) {}
 }

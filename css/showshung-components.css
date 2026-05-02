@@ -1,0 +1,106 @@
+/* ShowShung reusable components */
+
+.ss-hero {
+  min-height: 420px;
+  border-radius: 28px;
+  padding: 42px;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.92), rgba(0,0,0,.48), rgba(0,0,0,.86)),
+    var(--hero-image, none);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(212,175,55,.22);
+  box-shadow: 0 30px 90px rgba(0,0,0,.8);
+}
+
+.ss-hero h1 {
+  font-size: clamp(42px, 7vw, 92px);
+  margin: 0;
+  color: var(--ss-gold);
+  font-family: var(--ss-font-title);
+}
+
+.ss-hero p {
+  max-width: 560px;
+  color: var(--ss-muted);
+  font-size: 18px;
+  line-height: 1.9;
+}
+
+.ss-scenario-section {
+  padding: 28px;
+}
+
+.ss-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.ss-mafia-icon-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(212,175,55,.36);
+  box-shadow: 0 0 18px rgba(212,175,55,.16);
+}
+
+.ss-role-card {
+  aspect-ratio: 2 / 3;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(212,175,55,.25);
+  box-shadow: var(--ss-shadow);
+  background: #090909;
+  position: relative;
+}
+
+.ss-role-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ss-role-card .label {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(0,0,0,.72);
+  border: 1px solid rgba(212,175,55,.28);
+  color: var(--ss-gold);
+  font-weight: 900;
+}
+
+.ss-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+
+.ss-modal {
+  width: min(560px, calc(100% - 28px));
+  padding: 26px;
+}
+
+.ss-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(212,175,55,.10);
+  border: 1px solid rgba(212,175,55,.22);
+  color: var(--ss-gold);
+  font-weight: 800;
+}
