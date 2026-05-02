@@ -342,7 +342,7 @@
   max-width: 22.5rem; width: 90%; animation: popIn var(--transition-bounce);
 }
 .invite-notif-content {
-  background: #0d0d1c; border: 2px solid rgba(233,69,96,.4); border-radius: 1.25rem;
+  background: #0c0907; border: 2px solid rgba(233,69,96,.4); border-radius: 1.25rem;
   padding: var(--space-md) var(--space-md); text-align: center;
   box-shadow: 0 10px 40px rgba(233,69,96,.3), 0 0 60px rgba(233,69,96,.1);
 }
