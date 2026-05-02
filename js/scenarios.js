@@ -421,3 +421,73 @@ function goBackFromCount() {
     openScenarioOverlay(state.group);
   }
 }
+
+function openStartOverlay() {
+  if (!state.group || !state.count) return;
+  const info = SCENARIO_INFO[state.group] || { icon: "🎭", color: "var(--accent2)" };
+  const overlay = document.getElementById("startOverlay");
+  const content = document.getElementById("startOverlayContent");
+  if (!overlay || !content) return;
+
+  const titles = {
+    fa: { title: "آماده نبرد", subtitle: "نوع بازی را انتخاب کنید", scenario: "سناریو", players: "بازیکن", mafia: "مافیا", citizen: "شهروند", classic: "آغاز نبرد معمولی", classicDesc: "بازی حضوری با پخش کارت", digital: "آغاز نبرد دیجیتالی", digitalDesc: "بازی آنلاین، تشخیص نزدیکی", back: "بازگشت" },
+    en: { title: "Ready for Battle", subtitle: "Choose your battle mode", scenario: "Scenario", players: "Players", mafia: "Mafia", citizen: "Citizen", classic: "Start Classic Battle", classicDesc: "Local game with card distribution", digital: "Start Digital Battle", digitalDesc: "Online game with proximity detection", back: "Back" },
+    tr: { title: "Savaşa Hazır", subtitle: "Savaş modunu seçin", scenario: "Senaryo", players: "Oyuncu", mafia: "Mafya", citizen: "Vatandaş", classic: "Klasik Savaşı Başlat", classicDesc: "Kart dağıtımıyla yerel oyun", digital: "Dijital Savaşı Başlat", digitalDesc: "Yakınlık tespitli çevrimiçi oyun", back: "Geri" }
+  };
+  const T = titles[currentLang] || titles.fa;
+
+  content.innerHTML = `
+    <div class="scn-header" style="--scn-color:${info.color}">
+      <div class="scn-icon">${info.icon}</div>
+      <h2 class="scn-title">${T.title}</h2>
+      <p class="scn-subtitle">${T.subtitle}</p>
+    </div>
+    <div class="st-summary">
+      <div class="st-sum-item"><span class="st-sum-label">${T.scenario}</span><span class="st-sum-value">${state.group}</span></div>
+      <div class="st-sum-item"><span class="st-sum-label">${T.players}</span><span class="st-sum-value">${toFarsiNum(state.count)}</span></div>
+      <div class="st-sum-item st-sum-mafia"><span class="st-sum-label">${T.mafia}</span><span class="st-sum-value">${toFarsiNum(state.mafiaCount)}</span></div>
+      <div class="st-sum-item st-sum-citizen"><span class="st-sum-label">${T.citizen}</span><span class="st-sum-value">${toFarsiNum(state.citizenCount)}</span></div>
+    </div>
+    <div class="st-modes">
+      <button class="st-mode-card st-mode-classic" onclick="proceedClassicStart()">
+        <div class="st-mode-icon">⚔️</div>
+        <div class="st-mode-body">
+          <div class="st-mode-title">${T.classic}</div>
+          <div class="st-mode-desc">${T.classicDesc}</div>
+        </div>
+        <div class="st-mode-arrow">◀</div>
+      </button>
+      <button class="st-mode-card st-mode-digital" onclick="proceedDigitalStart()">
+        <div class="st-mode-icon">📱</div>
+        <div class="st-mode-body">
+          <div class="st-mode-title">${T.digital}</div>
+          <div class="st-mode-desc">${T.digitalDesc}</div>
+        </div>
+        <div class="st-mode-arrow">◀</div>
+      </button>
+    </div>
+    <div class="scn-btn-row">
+      <button class="scn-back-btn" onclick="goBackFromStart()" style="width:100%">◀ ${T.back}</button>
+    </div>
+  `;
+  overlay.classList.add("show");
+}
+
+function closeStartOverlay() {
+  document.getElementById("startOverlay")?.classList.remove("show");
+}
+
+function goBackFromStart() {
+  closeStartOverlay();
+  if (state.group && ROLES_DATA[state.group]) openCountOverlay(state.group);
+}
+
+function proceedClassicStart() {
+  closeStartOverlay();
+  if (typeof startGame === "function") startGame();
+}
+
+function proceedDigitalStart() {
+  closeStartOverlay();
+  if (typeof startNearbyGame === "function") startNearbyGame();
+}

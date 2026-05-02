@@ -205,15 +205,7 @@ function selectCount(count) {
   if (cc) cc.style.display = "none";
 
   updateStepIndicator(3);
-  const row = document.getElementById("startBtnRow");
-  const cc2 = document.getElementById("countCard");
-  if (row && cc2) {
-    cc2.style.display = "block";
-    const grid = document.getElementById("countGrid");
-    if (grid) grid.innerHTML = `<div class="count-summary">${toFarsiNum(count)} ${t("persons")} · <span class="m">${toFarsiNum(ROLE_MAP[count].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[count].citizen)} ${t("citizen")}</span></div>`;
-    row.style.display = "flex";
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  if (typeof openStartOverlay === "function") openStartOverlay();
 }
 
 function setTeam(team) {

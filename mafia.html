@@ -186,6 +186,11 @@
   <div class="scenario-box" id="countOverlayContent"></div>
 </div>
 
+<!-- Start Mode Selection Overlay -->
+<div class="scenario-overlay start-overlay" id="startOverlay" role="dialog" aria-modal="true" aria-label="انتخاب نوع نبرد">
+  <div class="scenario-box" id="startOverlayContent"></div>
+</div>
+
 <div class="toast" id="toast" aria-live="polite" role="status"></div>
 
 <div class="container">
@@ -337,11 +342,10 @@
     </div>
 
     <div class="setup-card gc" id="countCard" style="display:none">
-      <div class="section-title">👥 تعداد بازیکنان</div>
       <div class="count-grid" id="countGrid"></div>
       <div class="start-btns-row" id="startBtnRow" style="display:none">
-        <button class="start-btn start-btn-animated" onclick="startGame()" id="startBtn">🎮 سنتی</button>
-        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📱 حرفه‌ای</button>
+        <button class="start-btn start-btn-animated" onclick="startGame()" id="startBtn">⚔️ آغاز نبرد معمولی</button>
+        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📱 آغاز نبرد دیجیتالی</button>
       </div>
     </div>
 
