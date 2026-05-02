@@ -202,20 +202,15 @@ function selectCount(count) {
   state.citizenCount = ROLE_MAP[count].citizen;
 
   const cc = document.getElementById("countCard");
-  const grid = document.getElementById("countGrid");
-  if (cc && grid && state.group && ROLES_DATA[state.group]) {
-    const counts = Object.keys(ROLES_DATA[state.group]).map(Number);
-    grid.innerHTML = counts.map(c => `
-      <button class="count-btn ${c === count ? "selected" : ""}" onclick="selectCount(${c})" data-count="${c}">
-        <span class="number">${toFarsiNum(c)}</span><span class="label">${t("persons")}</span>
-        <span class="breakdown"><span class="m">${toFarsiNum(ROLE_MAP[c].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[c].citizen)} ${t("citizen")}</span></span>
-      </button>`).join("");
-    cc.style.display = "block";
-  }
+  if (cc) cc.style.display = "none";
 
   updateStepIndicator(3);
   const row = document.getElementById("startBtnRow");
-  if (row) {
+  const cc2 = document.getElementById("countCard");
+  if (row && cc2) {
+    cc2.style.display = "block";
+    const grid = document.getElementById("countGrid");
+    if (grid) grid.innerHTML = `<div class="count-summary">${toFarsiNum(count)} ${t("persons")} · <span class="m">${toFarsiNum(ROLE_MAP[count].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[count].citizen)} ${t("citizen")}</span></div>`;
     row.style.display = "flex";
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }

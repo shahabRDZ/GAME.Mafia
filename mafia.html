@@ -199,10 +199,11 @@
     <div class="logo" id="logoTitle">شوشانگ</div>
     <div class="logo-sub">ShowShung · GAME</div>
     <div class="hero-features">
-      <span class="hero-chip">🎭 ۵ سناریو</span>
-      <span class="hero-chip">⏱️ تایمر شب/روز</span>
-      <span class="hero-chip">🗳️ رأی‌گیری</span>
-      <span class="hero-chip">⚡ آنلاین</span>
+      <button class="hero-tools-btn" onclick="showScreen('tools')" aria-label="ابزار گرداننده">
+        <span class="htb-icon">🎙️</span>
+        <span class="htb-text">ابزار گرداننده</span>
+        <span class="htb-arrow">◀</span>
+      </button>
     </div>
   </header>
 
@@ -558,6 +559,60 @@
     <div class="lab-game" id="labGame" style="display:none"></div>
   </section>
 
+  <!-- Moderator Tools Screen (standalone) -->
+  <section class="screen" id="toolsScreen" aria-label="ابزار گرداننده" aria-labelledby="toolsHeading">
+    <div class="setup-card gc" style="padding:20px">
+      <div class="section-title" id="toolsHeading">🎙️ ابزار گرداننده</div>
+      <p class="tools-intro">ابزار حرفه‌ای برای گرداننده مافیا — تایمر روز/شب، اخطار به بازیکنان و یادداشت‌های بازی.</p>
+
+      <!-- Timer -->
+      <div class="tools-section">
+        <div class="tools-section-title">⏱️ تایمر روز/شب</div>
+        <div class="tl-phase" id="tlPhase">
+          <div class="tl-phase-icon" id="tlPhaseIcon">☀️</div>
+          <div class="tl-phase-name" id="tlPhaseName">روز</div>
+        </div>
+        <div class="tl-timer-display" id="tlTimerDisplay">۰۰:۰۰</div>
+        <div class="tl-timer-presets">
+          <button class="mod-btn" onclick="setToolsTimer(30)">۳۰ ثانیه</button>
+          <button class="mod-btn" onclick="setToolsTimer(45)">۴۵ ثانیه</button>
+          <button class="mod-btn" onclick="setToolsTimer(60)">۱ دقیقه</button>
+          <button class="mod-btn" onclick="setToolsTimer(120)">۲ دقیقه</button>
+          <button class="mod-btn" onclick="setToolsTimer(180)">۳ دقیقه</button>
+        </div>
+        <div class="tl-timer-actions">
+          <button class="mod-btn mod-btn-start" id="tlTimerStartBtn" onclick="toggleToolsTimer()">شروع</button>
+          <button class="mod-btn" onclick="resetToolsTimer()">ریست</button>
+          <button class="mod-btn mod-btn-phase" onclick="toggleToolsPhase()">تغییر فاز</button>
+        </div>
+      </div>
+
+      <!-- Warnings -->
+      <div class="tools-section">
+        <div class="tools-section-title">⚠️ اخطار <span style="font-size:0.7rem;color:var(--dim);font-weight:400">(۳ اخطار = اخراج)</span></div>
+        <div class="tl-warn-add">
+          <input type="text" id="tlWarnNewName" class="tl-input" placeholder="نام بازیکن..." maxlength="30">
+          <button class="mod-btn mod-btn-start" onclick="addToolsPlayer()">+ افزودن</button>
+        </div>
+        <div class="tl-warn-list" id="tlWarnList"></div>
+        <div style="margin-top:10px">
+          <button class="mod-btn" onclick="resetToolsWarnings()" style="width:100%">ریست همه اخطارها</button>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="tools-section">
+        <div class="tools-section-title">📝 یادداشت گرداننده</div>
+        <textarea id="tlNotes" class="tl-notes" placeholder="یادداشت‌های بازی، نقش‌ها، شک‌ها و..."></textarea>
+        <div class="tl-notes-actions">
+          <button class="mod-btn" onclick="copyToolsNotes()">📋 کپی</button>
+          <button class="mod-btn" onclick="clearToolsNotes()">🗑️ پاک کردن</button>
+        </div>
+        <div class="tl-notes-status" id="tlNotesStatus">به‌طور خودکار ذخیره می‌شود</div>
+      </div>
+    </div>
+  </section>
+
   <!-- DM Screen -->
   <section class="screen" id="dmScreen" aria-label="پیام‌ها" aria-labelledby="dmHeading">
     <div class="setup-card gc" style="padding:20px">
@@ -891,6 +946,7 @@
 <script src="js/navigation.js"></script>
 <script src="js/scenarios.js"></script>
 <script src="js/setup.js"></script>
+<script src="js/tools.js"></script>
 <script src="js/funtext.js"></script>
 <script src="js/game.js"></script>
 <script src="js/history.js"></script>

@@ -34,7 +34,7 @@ function showScreen(name) {
     setup: "navNewGame", game: "gameNavBtn", history: "navHistory",
     dm: "navDM", profile: "navProfile", admin: "navAdmin",
     chaos: "navNewGame", lab: "navNewGame", leaderboard: "navLeaderboard",
-    rules: "navRules", events: "navEvents"
+    rules: "navRules", events: "navEvents", tools: "navNewGame"
   };
   const navBtn = document.getElementById(navMap[name]);
   if (navBtn) navBtn.classList.add("active");
