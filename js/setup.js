@@ -181,17 +181,18 @@ function selectGroup(group) {
     renderCustomCardsList();
   } else {
     cf.classList.remove("show");
-    cc.style.display = "block";
+    cc.style.display = "none";
     state.count = null;
     customCardsList = [];
-    const counts = Object.keys(ROLES_DATA[group]).map(Number);
-    document.getElementById("countGrid").innerHTML = counts.map(c => `
-      <button class="count-btn" onclick="selectCount(${c})" data-count="${c}">
-        <span class="number">${toFarsiNum(c)}</span><span class="label">${t("persons")}</span>
-        <span class="breakdown"><span class="m">${toFarsiNum(ROLE_MAP[c].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[c].citizen)} ${t("citizen")}</span></span>
-      </button>`).join("");
-    cc.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    if (SCENARIO_INFO[group]) openScenarioOverlay(group);
+    if (!ROLES_DATA[group]) {
+      showToast("⚠️ این سناریو هنوز پیکربندی نشده");
+      return;
+    }
+    if (SCENARIO_INFO[group]) {
+      openScenarioOverlay(group);
+    } else {
+      openCountOverlay(group);
+    }
   }
 }
 
@@ -199,8 +200,19 @@ function selectCount(count) {
   state.count = count;
   state.mafiaCount = ROLE_MAP[count].mafia;
   state.citizenCount = ROLE_MAP[count].citizen;
-  document.querySelectorAll(".count-btn").forEach(b => b.classList.remove("selected"));
-  document.querySelector(`[data-count="${count}"]`).classList.add("selected");
+
+  const cc = document.getElementById("countCard");
+  const grid = document.getElementById("countGrid");
+  if (cc && grid && state.group && ROLES_DATA[state.group]) {
+    const counts = Object.keys(ROLES_DATA[state.group]).map(Number);
+    grid.innerHTML = counts.map(c => `
+      <button class="count-btn ${c === count ? "selected" : ""}" onclick="selectCount(${c})" data-count="${c}">
+        <span class="number">${toFarsiNum(c)}</span><span class="label">${t("persons")}</span>
+        <span class="breakdown"><span class="m">${toFarsiNum(ROLE_MAP[c].mafia)} ${t("mafia")}</span> · <span class="c">${toFarsiNum(ROLE_MAP[c].citizen)} ${t("citizen")}</span></span>
+      </button>`).join("");
+    cc.style.display = "block";
+  }
+
   updateStepIndicator(3);
   const row = document.getElementById("startBtnRow");
   if (row) {

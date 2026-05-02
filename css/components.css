@@ -158,6 +158,55 @@
 }
 .scn-proceed-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(233,69,96,.4); }
 .scn-proceed-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.scn-proceed-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ── Player Count Overlay ── */
+.cnt-section { padding: var(--space-md) var(--space-lg) var(--space-lg); }
+.cnt-section-title {
+  font-size: 0.95rem; font-weight: 800; color: var(--text);
+  margin-block-end: var(--space-md); text-align: center; letter-spacing: .5px;
+}
+.cnt-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--space-sm);
+}
+.cnt-btn {
+  position: relative; padding: var(--space-md) var(--space-sm);
+  border: 2px solid rgba(255,255,255,.09); background: rgba(255,255,255,.03);
+  border-radius: var(--radius-lg); cursor: pointer; text-align: center;
+  transition: all var(--transition-base); font-family: inherit; color: var(--text);
+  display: flex; flex-direction: column; gap: var(--space-2xs);
+  min-height: 6.5rem;
+}
+.cnt-btn:hover {
+  border-color: var(--scn-color, var(--accent2));
+  background: rgba(255,255,255,.06);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,.3);
+}
+.cnt-btn.selected {
+  border-color: var(--scn-color, var(--accent2));
+  background: color-mix(in srgb, var(--scn-color, var(--accent2)) 14%, transparent);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px color-mix(in srgb, var(--scn-color, var(--accent2)) 30%, transparent);
+}
+.cnt-btn.selected::after {
+  content: "✓"; position: absolute; top: 6px; inset-inline-end: 8px;
+  width: 1.2rem; height: 1.2rem; border-radius: 50%;
+  background: var(--scn-color, var(--accent2)); color: #000;
+  font-size: 0.75rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
+.cnt-btn:focus-visible { outline: 2px solid var(--scn-color, var(--accent2)); outline-offset: 2px; }
+.cnt-number { font-size: 2rem; font-weight: 900; line-height: 1; color: var(--text); }
+.cnt-label { font-size: 0.7rem; color: var(--dim); }
+.cnt-breakdown {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 0.65rem; margin-block-start: 4px;
+}
+.cnt-m { color: var(--accent); font-weight: 700; }
+.cnt-c { color: #4ade80; font-weight: 700; }
+.cnt-sep { color: var(--dim); opacity: .6; }
 
 /* ── Visit Counter ── */
 .visit-counter {

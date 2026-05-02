@@ -337,13 +337,87 @@ function openScenarioOverlay(group) {
 
 function closeScenarioOverlay() {
   document.getElementById("scenarioOverlay").classList.remove("show");
+  if (state.group && state.group !== "دلخواه" && SCENARIO_INFO[state.group]) {
+    openCountOverlay(state.group);
+  }
 }
 
 function goBackFromScenario() {
-  closeScenarioOverlay();
+  document.getElementById("scenarioOverlay").classList.remove("show");
   state.group = null;
   state.count = null;
   document.querySelectorAll(".group-btn").forEach(b => b.classList.remove("selected"));
   document.getElementById("countCard").style.display = "none";
   document.getElementById("startBtn").style.display = "none";
+}
+
+function openCountOverlay(group) {
+  const info = SCENARIO_INFO[group];
+  if (!info) return;
+  const L = info[currentLang] || info.fa;
+  const overlay = document.getElementById("countOverlay");
+  const content = document.getElementById("countOverlayContent");
+  const counts = Object.keys(ROLES_DATA[group] || {}).map(Number);
+  if (!counts.length) return;
+
+  const titleByLang = { fa: "انتخاب تعداد بازیکنان", en: "Select Player Count", tr: "Oyuncu Sayısı Seç" };
+  const subtitleByLang = { fa: "تعداد بازیکنان را انتخاب کنید", en: "Choose number of players", tr: "Oyuncu sayısını seçin" };
+  const personsByLang = { fa: "نفر", en: "players", tr: "oyuncu" };
+  const mafiaByLang = { fa: "مافیا", en: "Mafia", tr: "Mafya" };
+  const citizenByLang = { fa: "شهروند", en: "Citizen", tr: "Vatandaş" };
+  const backByLang = { fa: "بازگشت", en: "Back", tr: "Geri" };
+  const startByLang = { fa: "شروع بازی", en: "Start Game", tr: "Oyunu Başlat" };
+
+  content.innerHTML = `
+    <div class="scn-header" style="--scn-color:${info.color}">
+      <div class="scn-icon">${info.icon}</div>
+      <h2 class="scn-title">${L.title}</h2>
+      <p class="scn-subtitle">${subtitleByLang[currentLang] || subtitleByLang.fa}</p>
+    </div>
+    <div class="cnt-section">
+      <h3 class="cnt-section-title">👥 ${titleByLang[currentLang] || titleByLang.fa}</h3>
+      <div class="cnt-grid">
+        ${counts.map(c => `
+          <button class="cnt-btn" data-cnt="${c}" onclick="selectCountFromOverlay(${c})" style="--scn-color:${info.color}">
+            <span class="cnt-number">${toFarsiNum(c)}</span>
+            <span class="cnt-label">${personsByLang[currentLang] || personsByLang.fa}</span>
+            <span class="cnt-breakdown">
+              <span class="cnt-m">${toFarsiNum(ROLE_MAP[c].mafia)} ${mafiaByLang[currentLang] || mafiaByLang.fa}</span>
+              <span class="cnt-sep">·</span>
+              <span class="cnt-c">${toFarsiNum(ROLE_MAP[c].citizen)} ${citizenByLang[currentLang] || citizenByLang.fa}</span>
+            </span>
+          </button>`).join("")}
+      </div>
+    </div>
+    <div class="scn-btn-row">
+      <button class="scn-back-btn" onclick="goBackFromCount()">◀ ${backByLang[currentLang] || backByLang.fa}</button>
+      <button class="scn-proceed-btn" id="cntProceedBtn" onclick="proceedFromCount()" disabled>${startByLang[currentLang] || startByLang.fa} ➜</button>
+    </div>
+  `;
+  overlay.classList.add("show");
+}
+
+function selectCountFromOverlay(count) {
+  state.count = count;
+  state.mafiaCount = ROLE_MAP[count].mafia;
+  state.citizenCount = ROLE_MAP[count].citizen;
+  document.querySelectorAll("#countOverlayContent .cnt-btn").forEach(b => b.classList.remove("selected"));
+  const btn = document.querySelector(`#countOverlayContent .cnt-btn[data-cnt="${count}"]`);
+  if (btn) btn.classList.add("selected");
+  const proceed = document.getElementById("cntProceedBtn");
+  if (proceed) proceed.disabled = false;
+}
+
+function proceedFromCount() {
+  if (!state.count) return;
+  document.getElementById("countOverlay").classList.remove("show");
+  selectCount(state.count);
+}
+
+function goBackFromCount() {
+  document.getElementById("countOverlay").classList.remove("show");
+  state.count = null;
+  if (state.group && SCENARIO_INFO[state.group]) {
+    openScenarioOverlay(state.group);
+  }
 }
