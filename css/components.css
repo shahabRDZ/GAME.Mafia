@@ -1,17 +1,32 @@
-/* ── Step Indicator (سناریو · بازیکنان · شروع) — frosted mirror ── */
+/* ── Step Indicator — uses img/top-nav.png artwork ──
+   The PNG has 3 gold-rimmed circles + connecting bone-bars + labels
+   (سناریو, بازیکنان, شروع) baked in. Hide the original step-num /
+   step-line / step-label spans and use the image instead. */
 .step-indicator {
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: stretch;
   gap: 0;
-  margin-block-end: var(--space-lg);
-  padding: var(--space-md) var(--space-lg);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
-    rgba(11, 9, 7, 0.28);
-  backdrop-filter: blur(20px) saturate(1.1);
-  -webkit-backdrop-filter: blur(20px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  box-shadow: 0 8px 22px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
+  margin-block-end: var(--space-md);
+  padding: 0;
+  background: url("/img/top-nav.png") center / 100% 100% no-repeat;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  width: 100%;
+  aspect-ratio: 3.14 / 1;
+  max-height: 130px;
+  position: relative;
+}
+/* Hide the baked-in CSS step pieces — the image carries them */
+.step-indicator .step-num,
+.step-indicator .step-label,
+.step-indicator .step-line { display: none; }
+
+/* Each .step-item becomes an invisible hit area over its circle */
+.step-indicator .step-item {
+  flex: 1;
+  display: block;
+  cursor: pointer;
+  position: relative;
 }
 .step-item {
   display: flex; flex-direction: column; align-items: center; gap: 5px;
