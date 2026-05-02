@@ -44,12 +44,107 @@
   font-size: 1.1rem;
 }
 
-/* ── Card front image (replaces SVG character) ── */
+/* ──────────────────────────────────────────────────────────
+   Animated card art (cinematic skull "breathing" effect)
+   ──────────────────────────────────────────────────────────
+   Layers (bottom → top):
+     1. .card-image-base   — full static card image
+     2. .head-layer        — soft-edged elliptical mask over the
+                              skull's head; contains a duplicate of
+                              the same image which slowly tilts.
+                              Because the mask is on the parent,
+                              only the head appears to move while
+                              the rest stays perfectly still.
+     3. .card-eyes-glow    — optional pulsing red glow on eye sockets
+     4. .card-smoke        — optional drifting smoke overlay
+   Per-card geometry is overridable via CSS variables set inline
+   on .card-art (see js/cardImages.js → getHeadStyle()).
+   ────────────────────────────────────────────────────────── */
+.card-art {
+  position: absolute; inset: 0; border-radius: inherit; overflow: hidden;
+  /* Defaults — usually overridden inline per role */
+  --head-cx: 50%;
+  --head-cy: 30%;
+  --head-rx: 27%;
+  --head-ry: 22%;
+  --eye-y: 30%;
+  --eye-l-x: 43%;
+  --eye-r-x: 57%;
+  --head-tilt: 1.3deg;
+}
+
 .card-image {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; border-radius: inherit;
   pointer-events: none; -webkit-user-select: none; user-select: none;
   -webkit-user-drag: none;
+}
+
+/* Head animation layer — soft elliptical mask, no movement on the layer
+   itself (so its mask stays fixed in space). The duplicate image inside
+   does the actual rotation. */
+.head-layer {
+  position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    ellipse var(--head-rx) var(--head-ry) at var(--head-cx) var(--head-cy),
+    #000 55%, rgba(0,0,0,.5) 80%, transparent 100%
+  );
+          mask-image: radial-gradient(
+    ellipse var(--head-rx) var(--head-ry) at var(--head-cx) var(--head-cy),
+    #000 55%, rgba(0,0,0,.5) 80%, transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.head-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; pointer-events: none;
+  /* Pivot at the base of the neck so tilt feels natural */
+  transform-origin: var(--head-cx) calc(var(--head-cy) + 14%);
+  animation: headBreathe 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes headBreathe {
+  0%, 100% { transform: rotate(calc(var(--head-tilt) * -1)) translateY(0); }
+  50%      { transform: rotate(var(--head-tilt))            translateY(-1px); }
+}
+
+/* Subtle red eye-socket glow — additive, non-interactive */
+.card-eyes-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle 5px at var(--eye-l-x) var(--eye-y),
+                    rgba(255,60,90,.85), transparent 70%),
+    radial-gradient(circle 5px at var(--eye-r-x) var(--eye-y),
+                    rgba(255,60,90,.85), transparent 70%);
+  filter: blur(2px);
+  mix-blend-mode: screen;
+  animation: eyesPulse 2.6s ease-in-out infinite;
+  opacity: .7;
+}
+@keyframes eyesPulse {
+  0%, 100% { opacity: .35; filter: blur(1.5px) brightness(1); }
+  50%      { opacity: .85; filter: blur(2.5px) brightness(1.45); }
+}
+
+/* Slow drifting smoke wisps — purely decorative */
+.card-smoke {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 28% at 30% 65%, rgba(200,200,220,.07), transparent 70%),
+    radial-gradient(ellipse 50% 22% at 70% 78%, rgba(180,180,200,.06), transparent 70%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: smokeDrift 14s ease-in-out infinite;
+}
+@keyframes smokeDrift {
+  0%, 100% { transform: translate(0,0) scale(1);    opacity: .55; }
+  33%      { transform: translate(2px,-3px) scale(1.04); opacity: .8; }
+  66%      { transform: translate(-2px,2px) scale(1.02); opacity: .65; }
+}
+
+/* Respect users who prefer no motion */
+@media (prefers-reduced-motion: reduce) {
+  .head-img, .card-eyes-glow, .card-smoke { animation: none !important; }
 }
 /* Overlay shown for custom/unknown roles whose image has a baked-in
    different name — masks the printed name and shows the new one. */

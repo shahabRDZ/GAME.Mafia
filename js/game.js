@@ -416,10 +416,17 @@ function buildCard(card, flipped = false) {
   // what we want to show (custom role, or a non-Persian display language).
   const safeName = (typeof escapeHtml === 'function') ? escapeHtml(displayName) : displayName;
   const needsOverlay = cardImg && (!cardImg.hasBakedName || displayName !== card.roleName);
+  const headStyle = (cardImg && typeof getHeadStyle === 'function')
+    ? getHeadStyle(card.roleName) : '';
   const front = cardImg
-    ? `<img class="card-image" src="${cardImg.src}" alt="${safeName}" draggable="false" oncontextmenu="return false">${
-        needsOverlay ? `<div class="card-name-overlay">${safeName}</div>` : ''
-      }`
+    ? `<div class="card-art" style="${headStyle}">
+         <img class="card-image card-image-base" src="${cardImg.src}" alt="${safeName}" draggable="false" oncontextmenu="return false">
+         <div class="head-layer" aria-hidden="true">
+           <img class="head-img" src="${cardImg.src}" alt="" draggable="false">
+         </div>
+         <div class="card-eyes-glow" aria-hidden="true"></div>
+         <div class="card-smoke" aria-hidden="true"></div>
+       </div>${needsOverlay ? `<div class="card-name-overlay">${safeName}</div>` : ''}`
     : `<div class="char-wrap" style="animation-delay:${delay}s">${getCharSVG(card.roleName, card.role, card.charVariant || 0)}</div>
        <div class="char-shadow"></div>
        <div class="card-role-name">${safeName}</div>`;

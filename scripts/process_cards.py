@@ -5,9 +5,12 @@ apply watermark logo + diagonal © YOTA pattern (anti-theft).
 Output: img/cards/  +  img/cards/cards.json (mapping)
 """
 import os, json, glob, shutil
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
-import arabic_reshaper
-from bidi.algorithm import get_display
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, features
+
+# Pillow's Raqm backend (HarfBuzz + FriBidi) handles Arabic/Persian shaping
+# and bidi natively — far cleaner than arabic_reshaper + python-bidi which
+# produce disconnected isolated forms with most fonts.
+HAS_RAQM = features.check("raqm")
 
 # --- paths ---
 ROOT = "/Users/sir.sh/testdevops"
@@ -19,7 +22,9 @@ LOGO_PATH = os.path.join(ROOT, "icon-192.png")
 W, H = 900, 1350
 
 # --- fonts (system) ---
-FONT_BOLD = "/System/Library/Fonts/SFArabic.ttf"
+# Tahoma has reliable Persian/Arabic shaping with Presentation Forms-B
+# (including پ/چ/ژ/گ extensions) which gives properly joined letters.
+FONT_BOLD = "/System/Library/Fonts/Supplemental/Tahoma Bold.ttf"
 FONT_REG  = "/System/Library/Fonts/Supplemental/Tahoma.ttf"
 
 # Source filename → (clean key, display Persian name)
@@ -70,9 +75,25 @@ CITIZEN_VARIANTS = [
 CITIZEN_NAME = "شهروند ساده"
 
 
-def fa_text(s: str) -> str:
-    """Reshape & bidi-flip Persian text for PIL."""
+def _fallback_shape(s: str) -> str:
+    """Best-effort Persian shaping when Raqm isn't available."""
+    import arabic_reshaper
+    from bidi.algorithm import get_display
     return get_display(arabic_reshaper.reshape(s))
+
+
+def draw_fa(draw: ImageDraw.ImageDraw, xy, text: str, font, fill):
+    """Draw Persian text using Raqm shaping when available, otherwise fallback."""
+    if HAS_RAQM:
+        draw.text(xy, text, font=font, fill=fill, direction="rtl", language="fa")
+    else:
+        draw.text(xy, _fallback_shape(text), font=font, fill=fill)
+
+
+def fa_textbbox(draw: ImageDraw.ImageDraw, text: str, font):
+    if HAS_RAQM:
+        return draw.textbbox((0, 0), text, font=font, direction="rtl", language="fa")
+    return draw.textbbox((0, 0), _fallback_shape(text), font=font)
 
 
 def fit_to_canvas(img: Image.Image, w: int, h: int) -> Image.Image:
@@ -101,20 +122,19 @@ def add_label(img: Image.Image, persian_name: str) -> Image.Image:
     od.line([(60, band_h - 1), (W - 60, band_h - 1)], fill=(233, 69, 96, 220), width=3)
     img.alpha_composite(overlay, (0, band_y))
 
-    # text
+    # text — Raqm handles RTL + shaping automatically
     try:
         font = ImageFont.truetype(FONT_BOLD, 70)
     except Exception:
         font = ImageFont.truetype(FONT_REG, 70)
-    txt = fa_text(persian_name)
-    bbox = draw.textbbox((0, 0), txt, font=font)
+    bbox = fa_textbbox(draw, persian_name, font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
     tx = (W - tw) // 2 - bbox[0]
     ty = band_y + (band_h - th) // 2 - bbox[1] - 4
 
-    # text shadow + main
-    draw.text((tx + 3, ty + 3), txt, font=font, fill=(0, 0, 0, 220))
-    draw.text((tx, ty), txt, font=font, fill=(255, 255, 255, 255))
+    # shadow + main fill
+    draw_fa(draw, (tx + 3, ty + 3), persian_name, font, (0, 0, 0, 220))
+    draw_fa(draw, (tx, ty), persian_name, font, (255, 255, 255, 255))
     return img
 
 
@@ -173,8 +193,13 @@ def process_one(src_path: str, out_key: str, persian_name: str, logo: Image.Imag
 
 
 def main():
+    # Preserve hand-curated assets like the card-back image across re-runs.
+    PRESERVE = {"back.png"}
     if os.path.isdir(OUT):
-        shutil.rmtree(OUT)
+        for f in os.listdir(OUT):
+            if f in PRESERVE:
+                continue
+            os.remove(os.path.join(OUT, f))
     os.makedirs(OUT, exist_ok=True)
 
     logo = Image.open(LOGO_PATH).convert("RGBA")
