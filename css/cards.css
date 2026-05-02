@@ -13,6 +13,9 @@
   /* Match the source card art's 2:3 aspect so the image fills the frame
      edge-to-edge with no cropping or letterboxing. */
   aspect-ratio: 2/3;
+  /* Cap the height on tall portrait phones so the card never exceeds
+     the viewport — the browser will then shrink width to keep 2:3. */
+  max-height: 75dvh;
   will-change: transform, opacity;
 }
 .big-card-wrapper .card { width: 100%; height: 100%; border-radius: 1.25rem; }
@@ -332,7 +335,14 @@
 /* ── Card responsive ── */
 @media (max-width: 30em) {
   .card-stage { min-height: 85dvh; padding-block: 0 var(--space-sm); }
-  .big-card-wrapper { width: 78vw; max-width: 19rem; }
+  .big-card-wrapper {
+    /* On phones, prefer height-driven sizing so the card always fits the
+       viewport with the topbar/stats bar visible. 2:3 ratio is preserved. */
+    width: auto; max-width: 92vw;
+    height: min(70dvh, calc(92vw * 1.5));
+    aspect-ratio: 2/3;
+    max-height: 70dvh;
+  }
   .big-card-wrapper .card-back .card-number { font-size: 5.5rem; }
   .big-card-wrapper .char-wrap { width: 7rem; height: 8.5rem; }
 }
@@ -341,7 +351,9 @@
 @media (orientation: landscape) and (max-height: 500px) {
   .card-stage { min-height: 80dvh; }
   .big-card-wrapper {
-    aspect-ratio: 3/4; width: clamp(10rem, 35vw, 16rem);
+    aspect-ratio: 2/3; width: auto;
+    height: min(78dvh, 32rem);
+    max-height: 78dvh;
   }
   .big-card-wrapper .card-back .card-number { font-size: 3.5rem; }
   .big-card-wrapper .char-wrap { width: 5rem; height: 6rem; }
