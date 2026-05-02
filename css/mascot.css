@@ -1,0 +1,162 @@
+/* ShowShung Skeleton Mascot — fixed at the bottom on every page */
+
+:root {
+  --ss-mascot-width: 210px;
+  --ss-mascot-bottom: calc(8px + env(safe-area-inset-bottom));
+  --ss-mascot-left: 8px;
+  --ss-mascot-z: 42;
+}
+
+.ss-mascot {
+  position: fixed;
+  left: var(--ss-mascot-left);
+  bottom: var(--ss-mascot-bottom);
+  width: var(--ss-mascot-width);
+  max-width: 50vw;
+  z-index: var(--ss-mascot-z);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transform-origin: 42% 82%;
+  transition: opacity .35s ease, transform .35s ease, filter .35s ease;
+  filter:
+    drop-shadow(0 0 18px rgba(212, 175, 55, .22))
+    drop-shadow(0 16px 26px rgba(0, 0, 0, .55));
+}
+
+.ss-mascot.is-hidden { opacity: 0; transform: translateY(34px) scale(.94); }
+
+.ss-mascot__body {
+  position: relative; z-index: 2;
+  width: 100%; display: block;
+  transform-origin: 42% 82%;
+  -webkit-user-drag: none;
+}
+
+/* Soft shadow under the lying skeleton */
+.ss-mascot__shadow {
+  position: absolute; left: 7%; right: 7%; bottom: -7%;
+  height: 20%; z-index: 1;
+  background: radial-gradient(ellipse, rgba(0,0,0,.75), transparent 68%);
+  filter: blur(8px); opacity: .9;
+}
+
+/* Glowing eyes — positioned over the lying skull (left side of image) */
+.ss-mascot__eye {
+  position: absolute; z-index: 3;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ff1d32;
+  box-shadow: 0 0 10px #ff1d32, 0 0 18px rgba(255,0,0,.55);
+  opacity: 0;
+}
+.ss-mascot__eye--left  { left: 21%; top: 46%; }
+.ss-mascot__eye--right { left: 24%; top: 46%; }
+
+/* Zzz puff for the sleep state */
+.ss-mascot__zzz {
+  position: absolute; z-index: 4;
+  top: 8%; left: 30%;
+  color: var(--gold, #d4af37);
+  font: 900 18px/1 'Cinzel', system-ui, sans-serif;
+  letter-spacing: .04em;
+  opacity: 0;
+  text-shadow: 0 0 12px rgba(212,175,55,.75);
+}
+
+/* States */
+.ss-mascot.is-idle  .ss-mascot__body  { animation: ssMascotIdle 4.8s ease-in-out infinite; }
+.ss-mascot.is-idle  .ss-mascot__shadow { animation: ssMascotShadow 4.8s ease-in-out infinite; }
+.ss-mascot.is-wave  .ss-mascot__body  { animation: ssMascotWave 1.45s ease-in-out both; }
+.ss-mascot.is-sleep .ss-mascot__body  { animation: ssMascotSleep 3.8s ease-in-out both; opacity: .84; }
+.ss-mascot.is-sleep .ss-mascot__zzz   { animation: ssMascotZzz 3.8s ease-in-out both; }
+.ss-mascot.is-wake  .ss-mascot__body  { animation: ssMascotWake .95s ease-in-out both; }
+.ss-mascot.is-wake  .ss-mascot__eye   { animation: ssMascotEyeGlow .95s ease-in-out both; }
+.ss-mascot.is-look  .ss-mascot__body  { animation: ssMascotLook 2.2s ease-in-out both; }
+.ss-mascot.is-react .ss-mascot__body  { animation: ssMascotReact 1.25s ease-in-out both; }
+.ss-mascot.is-react .ss-mascot__eye   { animation: ssMascotGoldPulse 1.25s ease-in-out both; }
+
+@keyframes ssMascotIdle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-4px) rotate(-.7deg); }
+}
+@keyframes ssMascotShadow {
+  0%, 100% { transform: scaleX(1);   opacity: .82; }
+  50%      { transform: scaleX(.92); opacity: .60; }
+}
+@keyframes ssMascotWave {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  18%      { transform: rotate(4deg) translateY(-2px); }
+  36%      { transform: rotate(-3deg) translateY(0); }
+  54%      { transform: rotate(4deg) translateY(-2px); }
+  72%      { transform: rotate(-2deg) translateY(0); }
+}
+@keyframes ssMascotSleep {
+  0%, 100%  { transform: translateY(0) scale(1) rotate(0deg); }
+  45%, 70%  { transform: translateY(7px) scale(.965) rotate(.5deg); }
+}
+@keyframes ssMascotZzz {
+  0%   { opacity: 0; transform: translateY(12px) scale(.75); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-44px) scale(1.18); }
+}
+@keyframes ssMascotWake {
+  0%   { transform: translateY(7px) rotate(0deg); }
+  20%  { transform: translateY(-6px) rotate(2.2deg); }
+  42%  { transform: translateY(0) rotate(-2.2deg); }
+  64%  { transform: translateY(-3px) rotate(1.2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes ssMascotEyeGlow {
+  0%, 100%  { opacity: 0; transform: scale(.5); }
+  45%, 70%  { opacity: 1; transform: scale(1.35); }
+}
+@keyframes ssMascotLook {
+  0%, 100% { transform: rotate(0deg); }
+  30%      { transform: rotate(-2.8deg); }
+  65%      { transform: rotate(2.4deg); }
+}
+@keyframes ssMascotReact {
+  0%, 100% { transform: scale(1) rotate(0deg);              filter: none; }
+  35%      { transform: scale(1.045) translateY(-6px) rotate(-2deg); filter: drop-shadow(0 0 18px rgba(212,175,55,.35)); }
+  70%      { transform: scale(.985) rotate(2deg); }
+}
+@keyframes ssMascotGoldPulse {
+  0%, 100% { opacity: 0; }
+  45%      { opacity: 1; background: var(--gold, #d4af37);
+             box-shadow: 0 0 14px rgba(212,175,55,.8), 0 0 24px rgba(212,175,55,.45); }
+}
+
+/* Mobile tuning */
+@media (max-width: 430px) {
+  :root {
+    --ss-mascot-width: 175px;
+    --ss-mascot-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 360px) {
+  :root { --ss-mascot-width: 150px; }
+}
+
+/* Tablet/desktop — bigger, anchored at the bottom-left */
+@media (min-width: 768px) {
+  :root {
+    --ss-mascot-width: 240px;
+    --ss-mascot-bottom: 28px;
+    --ss-mascot-left: 28px;
+  }
+}
+
+/* Hide on the in-game fullscreen card stage so it doesn't overlap the card.
+   #gameScreen.game-fullscreen is added by game.js while a hand is being
+   distributed; the :has() selector keeps this purely CSS-driven. */
+body:has(#gameScreen.game-fullscreen) .ss-mascot,
+.game-fullscreen ~ .ss-mascot,
+.splash:not(.hide) ~ .ss-mascot {
+  display: none;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .ss-mascot, .ss-mascot * { animation: none !important; transition: none !important; }
+  .ss-mascot__eye, .ss-mascot__zzz { display: none; }
+}
