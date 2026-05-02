@@ -604,42 +604,71 @@
 .btn-logout:hover { background: rgba(233,69,96,.15); color: var(--accent); }
 
 /* ── Setup ── */
-.setup-card { padding: 1.75rem 1.875rem; margin-block-end: var(--space-md); }
+/* Setup card no longer paints a glass box — the supplied artwork
+   (top-nav.png steps + the scenario-tile arches themselves) carries
+   all the framing now. Padding kept tiny just so tiles don't touch
+   the screen edges. */
+.setup-card {
+  padding: 0;
+  margin-block-end: var(--space-md);
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.setup-card::after { content: none !important; }
+/* Hide the "🎯 انتخاب سناریو" title — the step-indicator artwork
+   already shows the active step name; no need for a duplicate. */
+#setupHeading,
+.setup-card .section-title:first-child { display: none; }
 .section-title {
-  font-size: 1rem; font-weight: 700; color: var(--accent2); margin-block-end: var(--space-md);
+  font-size: 1rem; font-weight: 700; color: var(--gold, #D4AF37); margin-block-end: var(--space-md);
   display: flex; align-items: center; gap: var(--space-sm);
 }
-.section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.07); }
+.section-title::after { content: ''; flex: 1; height: 1px; background: rgba(212,175,55,.14); }
 
-/* ── Scenario picker — paginated rail, 6 tiles per page on mobile ──
-   JS (paginateScenarios in setup.js) wraps every 6 .group-btn into
-   a .group-page child. Each .group-page is exactly 100% of the rail
-   wide and snaps as one viewport. */
+/* ── Scenario picker — strict 6-per-page rail ──
+   JS (paginateScenarios) wraps every 6 .group-btn into a .group-page.
+   Hard-clamps so extra pages stay off-screen until the user swipes. */
 .group-grid {
   display: flex;
   flex-wrap: nowrap;
   gap: 0;
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 4px 0 8px;
+  padding: 4px 0 4px;
   margin-inline: 0;
-  /* So .group-pager-dots can absolutely position below */
   position: relative;
+  contain: paint;
 }
 .group-grid::-webkit-scrollbar { display: none; }
 
 .group-page {
   flex: 0 0 100%;
   width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(2, auto);
   gap: 10px;
+  padding-inline: 2px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+}
+
+/* Fallback: if pagination JS doesn't run, force 3-col grid layout
+   on direct .group-btn children so it still looks tidy. */
+.group-grid > .group-btn {
+  flex: 0 0 calc(33.333% - 7px);
+  scroll-snap-align: start;
 }
 
 /* Pager dots, injected as a sibling of .group-grid */
