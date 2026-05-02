@@ -200,11 +200,35 @@
 <div class="toast" id="toast" aria-live="polite" role="status"></div>
 
 <div class="container">
+  <!-- Top toolbar: profile icon at top-right, language switcher, no auth-bar below -->
   <div class="lang-bar">
+    <!-- Profile button — opens the profile menu (login / logout / view profile) -->
+    <button class="profile-icon-btn" id="profileIconBtn" onclick="toggleProfileMenu()" aria-label="پروفایل">
+      <img src="img/profile.png" alt="" loading="lazy" draggable="false">
+    </button>
+    <div class="lang-bar-spacer"></div>
     <button class="lang-btn lang-active" data-lang="fa" onclick="setLang('fa')">FA</button>
     <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
     <button class="lang-btn" data-lang="tr" onclick="setLang('tr')">TR</button>
   </div>
+
+  <!-- Profile pop-over menu (anchored to the top-right icon) -->
+  <div class="profile-menu" id="profileMenu" hidden>
+    <div class="profile-menu-head">
+      <div class="profile-menu-avatar" id="userAvatar">م</div>
+      <div>
+        <div class="profile-menu-name" id="usernameDisplay">میهمان</div>
+        <div class="profile-menu-sub" id="gamesCountDisplay">برای ذخیره تاریخچه وارد شوید</div>
+      </div>
+    </div>
+    <button class="profile-menu-item" id="profileMenuView" onclick="closeProfileMenu();showScreen('profile')" style="display:none">
+      مشاهده پروفایل
+    </button>
+    <button class="profile-menu-item" id="loginBtn" onclick="closeProfileMenu();openAuthModal('login')">ورود</button>
+    <button class="profile-menu-item" id="registerBtn" onclick="closeProfileMenu();openAuthModal('register')">ثبت‌نام</button>
+    <button class="profile-menu-item profile-menu-danger" id="logoutBtn" onclick="closeProfileMenu();logout()" style="display:none">خروج</button>
+  </div>
+
   <header class="hero-header">
     <!-- Wordmark — "SHOWSHUNG" skeleton-bone logotype, full width -->
     <img src="img/logo2.png" alt="ShowShung" class="hero-wordmark" draggable="false">
@@ -213,29 +237,13 @@
     <div class="hero-art">
       <img src="img/logo.png" alt="" class="hero-art-img" draggable="false">
     </div>
-
-    <div class="hero-features">
-      <button class="hero-tools-btn" onclick="showScreen('tools')" aria-label="ابزار گرداننده">
-        <span class="htb-icon"><img src="img/scenario-icons/moderator.png" alt="" loading="lazy"></span>
-        <span class="htb-text">ابزار گرداننده</span>
-        <span class="htb-arrow">◀</span>
-      </button>
-    </div>
   </header>
 
-  <!-- Auth Bar -->
-  <div class="auth-bar gc" id="authBar">
-    <div class="user-info" id="loggedInInfo" style="display:none">
-      <div class="avatar" id="userAvatar">م</div>
-      <div>
-        <div class="username" id="usernameDisplay">کاربر</div>
-        <div class="games-count" id="gamesCountDisplay">۰ بازی ثبت‌شده</div>
-      </div>
-    </div>
-    <div class="guest-msg" id="guestMsg">برای ذخیره تاریخچه وارد شوید</div>
-    <button class="ab-btn btn-login" id="loginBtn" onclick="openAuthModal('login')">ورود</button>
-    <button class="ab-btn btn-register" id="registerBtn" onclick="openAuthModal('register')">ثبت‌نام</button>
-    <button class="ab-btn btn-logout" id="logoutBtn" style="display:none" onclick="logout()">خروج</button>
+  <!-- Hidden compatibility shims for legacy JS (auth-bar / loggedInInfo etc.)
+       The visible UI lives inside .profile-menu above. -->
+  <div class="auth-bar" id="authBar" hidden>
+    <div class="user-info" id="loggedInInfo" style="display:none"></div>
+    <div class="guest-msg" id="guestMsg" style="display:none"></div>
   </div>
 
   <!-- Floating Receive Button — hidden for now -->
@@ -265,8 +273,12 @@
       <span>پیام</span>
       <span class="bnav-badge" id="dmBadge" style="display:none"></span>
     </button>
-    <button class="bnav-btn" id="navProfile" onclick="showScreen('profile')">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <button class="bnav-btn" id="navTools" onclick="showScreen('tools')">
+      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 7a3 3 0 113-3 3 3 0 01-3 3zM7 17a3 3 0 11-3 3 3 3 0 013-3zm10 0a3 3 0 11-3 3 3 3 0 013-3zM10.5 6L4 14m13 0L11 6"/></svg>
+      <span>ابزار گرداننده</span>
+    </button>
+    <!-- legacy profile nav slot — kept hidden so auth flows still target it -->
+    <button class="bnav-btn" id="navProfile" onclick="showScreen('profile')" hidden>
       <span>پروفایل</span>
     </button>
     <button class="bnav-btn" id="navAdmin" onclick="window.location='/panel'" style="display:none">

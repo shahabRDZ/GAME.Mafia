@@ -162,26 +162,56 @@ function logout() {
 
 function renderAuthBar() {
   const li = !!currentUser;
-  document.getElementById("loggedInInfo").style.display = li ? "flex" : "none";
-  document.getElementById("guestMsg").style.display = li ? "none" : "block";
-  document.getElementById("loginBtn").style.display = li ? "none" : "inline-block";
-  document.getElementById("registerBtn").style.display = li ? "none" : "inline-block";
-  document.getElementById("logoutBtn").style.display = li ? "inline-block" : "none";
+  // Buttons inside the new profile-menu popover
+  const loginBtn    = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
+  const logoutBtn   = document.getElementById("logoutBtn");
+  const viewBtn     = document.getElementById("profileMenuView");
+  if (loginBtn)    loginBtn.style.display    = li ? "none" : "block";
+  if (registerBtn) registerBtn.style.display = li ? "none" : "block";
+  if (logoutBtn)   logoutBtn.style.display   = li ? "block" : "none";
+  if (viewBtn)     viewBtn.style.display     = li ? "block" : "none";
+
+  // Header card (avatar / name / sub-line)
+  const avatarEl = document.getElementById("userAvatar");
+  const nameEl   = document.getElementById("usernameDisplay");
+  const subEl    = document.getElementById("gamesCountDisplay");
   if (li) {
-    const avatarEl = document.getElementById("userAvatar");
-    const [c1, c2] = getAvatarColor(currentUser.username);
-    avatarEl.textContent = currentUser.username[0].toUpperCase();
-    avatarEl.style.background = `linear-gradient(135deg,${c1},${c2})`;
-    document.getElementById("usernameDisplay").textContent = currentUser.username;
-    document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
-    // Show admin button
+    if (avatarEl) {
+      const [c1, c2] = getAvatarColor(currentUser.username);
+      avatarEl.textContent = currentUser.username[0].toUpperCase();
+      avatarEl.style.background = `linear-gradient(135deg,${c1},${c2})`;
+    }
+    if (nameEl) nameEl.textContent = currentUser.username;
+    if (subEl)  subEl.textContent  = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
     const ab = document.getElementById("navAdmin");
     if (ab) ab.style.display = ["shahab","admin"].includes(currentUser.username) ? "inline-block" : "none";
-    // Auto-connect WebSocket when logged in
     initSocket();
   } else {
+    if (avatarEl) { avatarEl.textContent = "م"; avatarEl.style.background = ""; }
+    if (nameEl)   nameEl.textContent   = "میهمان";
+    if (subEl)    subEl.textContent    = "برای ذخیره تاریخچه وارد شوید";
     const ab = document.getElementById("navAdmin");
     if (ab) ab.style.display = "none";
     disconnectSocket();
   }
 }
+
+/* Profile pop-over toggle (top-right icon) */
+function toggleProfileMenu() {
+  const m = document.getElementById("profileMenu");
+  if (!m) return;
+  if (m.hasAttribute("hidden")) m.removeAttribute("hidden");
+  else m.setAttribute("hidden", "");
+}
+function closeProfileMenu() {
+  const m = document.getElementById("profileMenu");
+  if (m) m.setAttribute("hidden", "");
+}
+document.addEventListener("click", function (e) {
+  const menu = document.getElementById("profileMenu");
+  const btn  = document.getElementById("profileIconBtn");
+  if (!menu || menu.hasAttribute("hidden")) return;
+  if (e.target.closest("#profileMenu") || e.target.closest("#profileIconBtn")) return;
+  menu.setAttribute("hidden", "");
+});

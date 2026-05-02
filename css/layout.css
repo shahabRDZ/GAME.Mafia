@@ -39,18 +39,25 @@ header {
   100% { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
-/* "SHOWSHUNG" wordmark — sits at the top with no breathing room */
+/* "SHOWSHUNG" wordmark — centered, wider, with extra right shift on
+   mobile so the visual centre of the artwork lines up with the page
+   centre (the wordmark has slightly more weight on the left side). */
 .hero-wordmark {
   display: block;
   width: 92vw;
   max-width: 640px;
   height: auto;
   margin: 0 auto;
-  margin-block-end: -10%;          /* heavy overlap onto art below */
+  margin-inline-start: auto;        /* nudge right on RTL phones */
+  margin-block-end: -10%;
   filter:
     drop-shadow(0 0 28px rgba(212,175,55,.45))
     drop-shadow(0 8px 22px rgba(0,0,0,.55));
   -webkit-user-drag: none;
+  transform: translateX(2vw);       /* small visual centring on mobile */
+}
+@media (min-width: 768px) {
+  .hero-wordmark { transform: translateX(0); }
 }
 
 /* Skeleton-hand fanning cards — flush against the wordmark above */
@@ -90,16 +97,16 @@ header {
   background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
 }
 
-/* ── Cinematic mirror-glass card — faint, frosted, barely there ── */
+/* ── Cinematic mirror-glass card — almost-transparent frosted glass ── */
 .gc {
   background:
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
-    rgba(11, 9, 7, 0.32);
-  backdrop-filter: blur(22px) saturate(1.15);
-  -webkit-backdrop-filter: blur(22px) saturate(1.15);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
+    rgba(11, 9, 7, 0.18);
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: var(--radius-xl);
-  box-shadow: 0 12px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow: 0 12px 32px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.06);
   position: relative;
 }
 .gc::after {
@@ -125,11 +132,11 @@ header {
 .bottom-nav-shade {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  height: calc(110px + env(safe-area-inset-bottom, 0px));
+  height: calc(140px + env(safe-area-inset-bottom, 0px));
   z-index: calc(var(--z-overlay) - 1);
   pointer-events: none;
   background:
-    linear-gradient(180deg, transparent 0%, rgba(0,0,0,.85) 35%, #000 100%);
+    linear-gradient(180deg, transparent 0%, rgba(0,0,0,.85) 30%, #000 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -138,27 +145,27 @@ header {
   position: fixed;
   left: 0; right: 0;
   bottom: var(--safe-bottom);
-  /* Full-width on every device — no horizontal inset */
   width: 100vw;
-  /* Height scales with viewport width but caps so it stays usable
-     on big screens. The artwork is stretched to fit (its aspect is
-     2.55:1, and at our height range the slight scale-up is invisible). */
-  height: clamp(78px, 22vw, 108px);
+  /* Taller bar — bigger gold frame, more breathing room around cells */
+  height: clamp(96px, 28vw, 130px);
   z-index: var(--z-overlay);
   display: flex; align-items: stretch;
   background: url("/img/bottom-nav.png") center / 100% 100% no-repeat;
   background-color: transparent;
   border: none;
-  padding: 0 7%;
+  /* Wider inset so the cells line up with the artwork's printed cells
+     and look more "open" rather than crammed against the endcaps */
+  padding: 6% 9% 4%;
   box-shadow: none;
-  filter: drop-shadow(0 -8px 18px rgba(0,0,0,.55));
+  filter:
+    drop-shadow(0 -8px 18px rgba(0,0,0,.55))
+    drop-shadow(0 0 24px rgba(212,175,55,.06));
 }
 
-/* Reserve the nav's own height at the bottom of every page so its
-   floating bar never covers the last row of content. */
-body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+/* Reserve the nav's own height at the bottom of every page */
+body { padding-bottom: calc(115px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 768px) {
-  body { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+  body { padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
 }
 .bottom-nav::before, .bottom-nav::after { content: none; }
 
@@ -338,7 +345,93 @@ main { padding-bottom: 5rem; }
 .fs-menu-item svg { flex-shrink: 0; opacity: .6; }
 
 /* ── Lang switcher ── */
-.lang-bar { display: flex; justify-content: flex-end; gap: var(--space-2xs); padding-block: 0; }
+.lang-bar {
+  display: flex; align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+  padding-block: 0;
+}
+.lang-bar-spacer { flex: 1; }
+
+/* ── Profile icon (top-right) + popover menu ────────────────────── */
+.profile-icon-btn {
+  width: 44px; height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 0 14px rgba(212,175,55,.30));
+  transition: transform .2s ease, filter .2s ease;
+}
+.profile-icon-btn img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.profile-icon-btn:hover { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(212,175,55,.55)); }
+.profile-icon-btn:focus-visible { outline: 2px solid var(--gold, #D4AF37); outline-offset: 4px; border-radius: 50%; }
+
+.profile-menu {
+  position: absolute;
+  top: 56px; right: 8px;
+  z-index: var(--z-overlay);
+  width: min(280px, 80vw);
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(11,9,7,.92), rgba(4,3,2,.96));
+  border: 1px solid rgba(212,175,55,.35);
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(0,0,0,.7), inset 0 1px 0 rgba(212,175,55,.15);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: none;
+  animation: profileMenuIn .18s ease-out;
+}
+.profile-menu:not([hidden]) { display: block; }
+@keyframes profileMenuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.profile-menu-head {
+  display: flex; gap: 10px; align-items: center;
+  padding: 8px 4px 12px;
+  border-bottom: 1px solid rgba(212,175,55,.18);
+  margin-bottom: 8px;
+}
+.profile-menu-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, #d4af37 0%, #8c6a1f 60%, #3b0707 100%);
+  border: 1px solid rgba(212,175,55,.55);
+  color: #0d0907; font-weight: 900; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.profile-menu-name {
+  font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
+  font-weight: 800; color: var(--gold, #D4AF37);
+  font-size: 0.96rem;
+}
+.profile-menu-sub { font-size: 0.7rem; color: var(--khaki, #B8A47A); }
+.profile-menu-item {
+  width: 100%; padding: 10px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(212,175,55,.20);
+  border-radius: 10px;
+  color: var(--text); cursor: pointer;
+  font-family: inherit; font-size: 0.9rem; font-weight: 700;
+  display: block; text-align: center;
+  margin-block-end: 6px;
+  transition: all .18s ease;
+}
+.profile-menu-item:hover {
+  border-color: var(--gold, #D4AF37);
+  background: rgba(212,175,55,.10);
+}
+.profile-menu-item.profile-menu-danger {
+  color: var(--blood-bright, #ff4054);
+  border-color: rgba(161,18,18,.35);
+}
+.profile-menu-item.profile-menu-danger:hover { background: rgba(139,0,0,.18); }
 .lang-btn {
   padding-block: 0.3125rem; padding-inline: 0.8125rem;
   border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.04);
