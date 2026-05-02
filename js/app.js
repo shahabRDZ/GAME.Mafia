@@ -144,33 +144,6 @@ function toggleTheme() {
   }
 })();
 
-function getDeviceFingerprint() {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.textBaseline = 'top';
-  ctx.font = '14px Arial';
-  ctx.fillText('ShowShung', 2, 2);
-  const canvasHash = canvas.toDataURL().slice(-50);
-
-  const data = [
-    navigator.userAgent,
-    navigator.language,
-    screen.width + 'x' + screen.height,
-    screen.colorDepth,
-    new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || 0,
-    canvasHash
-  ].join('|');
-
-  // Simple hash
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) - hash) + data.charCodeAt(i);
-    hash |= 0;
-  }
-  return 'fp_' + Math.abs(hash).toString(36);
-}
-
 // Initialize
 applyLang();
 initAuth();

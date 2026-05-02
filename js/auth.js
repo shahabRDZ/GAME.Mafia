@@ -1,54 +1,35 @@
 /* ── Authentication System ── */
 
 async function initAuth() {
-  // Try localStorage token first
   if (!authToken) {
     authToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
   }
 
-  if (authToken) {
-    try {
-      const r = await apiFetch("/api/auth/me", { _background: true });
-      if (r.ok) {
-        currentUser = r.data;
-        renderAuthBar();
-        return;
-      }
-      // Only clear token if server explicitly rejected it (401)
-      if (r.status === 401) {
-        authToken = null;
-        currentUser = null;
-        localStorage.removeItem("mafiaToken");
-        sessionStorage.removeItem("mafiaToken");
-      } else {
-        // Network error, timeout, or server error — keep token, user stays logged in
-        console.log("Auth check failed but keeping token:", r.status);
-        renderAuthBar();
-        return;
-      }
-    } catch {
-      // Network error — keep token and stay logged in
+  if (!authToken) {
+    renderAuthBar();
+    return;
+  }
+
+  try {
+    const r = await apiFetch("/api/auth/me", { _background: true });
+    if (r.ok) {
+      currentUser = r.data;
       renderAuthBar();
       return;
     }
-  }
-
-  // No valid token — try device fingerprint auto-login
-  try {
-    const fp = getDeviceFingerprint();
-    const r = await fetch(API + "/api/auth/device-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fingerprint: fp })
-    });
-    const data = await r.json();
-    if (r.ok && data.token) {
-      authToken = data.token;
-      currentUser = data.user;
-      localStorage.setItem("mafiaToken", authToken);
+    if (r.status === 401) {
+      authToken = null;
+      currentUser = null;
+      localStorage.removeItem("mafiaToken");
+      sessionStorage.removeItem("mafiaToken");
       renderAuthBar();
+      return;
     }
-  } catch {}
+    // Network/server error — keep token, stay logged in (will retry next page)
+    renderAuthBar();
+  } catch {
+    renderAuthBar();
+  }
 }
 
 function openAuthModal(mode) {
@@ -113,17 +94,7 @@ async function submitAuth() {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    // Always save to localStorage
     localStorage.setItem("mafiaToken", authToken);
-    // Register device fingerprint
-    try {
-      const fp = getDeviceFingerprint();
-      fetch(API + "/api/auth/register-device", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + authToken },
-        body: JSON.stringify({ fingerprint: fp })
-      });
-    } catch {}
     closeAuthModal();
     renderAuthBar();
     showToast("👋 خوش آمدید " + currentUser.username);

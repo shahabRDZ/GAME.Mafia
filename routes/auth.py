@@ -1,4 +1,4 @@
-"""Auth blueprint — register, login, device auth, forgot password, me."""
+"""Auth blueprint — register, login, forgot password, me."""
 import os
 import random
 import string
@@ -33,36 +33,6 @@ def register():
     db.session.commit()
     token = create_access_token(identity=str(user.id))
     return jsonify({"token": token, "user": user.to_dict()}), 201
-
-
-@bp.route("/register-device", methods=["POST"])
-@jwt_required()
-def register_device():
-    user = db.session.get(User, int(get_jwt_identity()))
-    data = request.get_json()
-    fp = data.get("fingerprint", "")
-    if fp and user:
-        user.device_fingerprint = fp
-        db.session.commit()
-    return jsonify({"ok": True}), 200
-
-
-@bp.route("/device-login", methods=["POST"])
-def device_login():
-    data = request.get_json()
-    fp = data.get("fingerprint", "")
-    if not fp:
-        return jsonify({"error": "no fingerprint"}), 400
-    user = User.query.filter_by(device_fingerprint=fp).first()
-    if not user:
-        return jsonify({"error": "device not registered"}), 404
-    try:
-        if user.is_banned:
-            return jsonify({"error": "banned"}), 403
-    except:
-        pass
-    token = create_access_token(identity=str(user.id))
-    return jsonify({"token": token, "user": user.to_dict()}), 200
 
 
 @bp.route("/forgot-password", methods=["POST"])
@@ -133,5 +103,5 @@ def login():
 def me():
     user = db.session.get(User, int(get_jwt_identity()))
     if not user:
-        return jsonify({"error": "کاربر یافت نشد"}), 404
+        return jsonify({"error": "کاربر یافت نشد"}), 401
     return jsonify(user.to_dict()), 200
