@@ -112,36 +112,104 @@ header {
 }
 
 /* ── Bottom Navigation (App Style) ── */
+/* ── Bottom Nav — bone-framed mafia console ──
+   Five tab buttons in a gold-bordered velvet frame, with red rim-light
+   underneath, gold skull endcaps on each side, and the active tab
+   glowing red — matches the supplied design reference. */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   z-index: var(--z-overlay);
-  display: flex; justify-content: space-around; align-items: center;
-  background: rgba(8, 5, 10, 0.92);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,.06);
-  padding: var(--space-2xs) 0;
-  padding-bottom: calc(var(--space-2xs) + var(--safe-bottom));
-  box-shadow: 0 -4px 30px rgba(0,0,0,.5);
+  display: flex; justify-content: space-around; align-items: stretch;
+  background:
+    /* deep black with subtle paper texture vibe */
+    linear-gradient(180deg, rgba(12,8,6,.96) 0%, rgba(4,2,2,.98) 100%);
+  border-top: 2px solid rgba(212, 175, 55, 0.55);
+  border-block-end: 0;
+  padding: 8px 56px 6px;          /* leave room for the skull endcaps */
+  padding-bottom: calc(6px + var(--safe-bottom));
+  box-shadow:
+    0 -4px 30px rgba(0,0,0,.7),
+    0 -1px 0 rgba(212,175,55,.18) inset,
+    0 -22px 38px -22px rgba(161,18,18,.55);   /* red rim-glow underneath */
 }
+/* Inner gold hairline for the double-stroke frame */
+.bottom-nav::before {
+  content: ""; position: absolute;
+  inset: 4px 50px auto 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,.55), transparent);
+  pointer-events: none;
+}
+/* Skull endcap — left */
+.bottom-nav::after {
+  content: "💀";
+  position: absolute; left: 8px; top: 50%; transform: translateY(-55%);
+  font-size: 32px;
+  color: rgba(212,175,55,.95);
+  text-shadow:
+    0 0 12px rgba(212,175,55,.45),
+    0 0 18px rgba(255,40,60,.30);
+  filter: drop-shadow(0 0 6px rgba(212,175,55,.40));
+  pointer-events: none;
+}
+/* Skull endcap — right (mirrored via a separate element on the nav root would be ideal,
+   but a sibling pseudo isn't possible; we attach to a child instead) */
+.bottom-nav .bnav-btn:last-child::before {
+  content: "💀";
+  position: absolute; right: -52px; top: 50%; transform: translateY(-55%);
+  font-size: 32px;
+  color: rgba(212,175,55,.95);
+  text-shadow:
+    0 0 12px rgba(212,175,55,.45),
+    0 0 18px rgba(255,40,60,.30);
+  pointer-events: none;
+}
+
 .bnav-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: var(--space-2xs) var(--space-xs);
-  background: none; border: none; cursor: pointer;
-  color: var(--dim); font-family: inherit; font-size: 0.65rem;
-  transition: all var(--transition-base); position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 4px;
+  background: none;
+  border: none;
+  border-inline-end: 1px solid rgba(212,175,55,.18);
+  cursor: pointer;
+  color: rgba(212,175,55,.78);
+  font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: .02em;
+  transition: all var(--transition-base);
+  position: relative;
   min-width: 3.5rem;
+  flex: 1;
 }
+.bnav-btn:last-child { border-inline-end: none; }
+
 .bnav-icon {
-  width: 1.4rem; height: 1.4rem;
+  width: 1.55rem; height: 1.55rem;
+  color: var(--gold, #D4AF37);
+  filter: drop-shadow(0 0 6px rgba(212,175,55,.35));
   transition: all var(--transition-base);
 }
-.bnav-btn.active { color: var(--accent); }
-.bnav-btn.active .bnav-icon { filter: drop-shadow(0 0 6px var(--accent)); }
+
+/* Active tab — red glow + lit gold icon */
+.bnav-btn.active {
+  color: var(--blood-bright, #ff4054);
+  text-shadow: 0 0 12px rgba(255,64,84,.55);
+}
+.bnav-btn.active .bnav-icon {
+  color: var(--blood-bright, #ff4054);
+  filter:
+    drop-shadow(0 0 8px rgba(255,40,60,.65))
+    drop-shadow(0 0 4px rgba(212,175,55,.45));
+}
 .bnav-btn.active::after {
-  content: ''; position: absolute; top: -1px;
-  width: 1.5rem; height: 2px;
-  background: var(--accent); border-radius: 0 0 2px 2px;
-  box-shadow: 0 0 8px var(--accent);
+  content: ''; position: absolute; top: -2px;
+  left: 18%; right: 18%;
+  height: 2px;
+  background: var(--blood-bright, #ff4054);
+  border-radius: 0 0 4px 4px;
+  box-shadow:
+    0 0 12px rgba(255,40,60,.85),
+    0 0 22px rgba(255,40,60,.55);
 }
 .bnav-badge {
   position: absolute; top: 0; right: 0.4rem;
