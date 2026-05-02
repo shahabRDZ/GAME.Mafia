@@ -593,15 +593,24 @@
 }
 .group-btn .icon {
   display: flex; align-items: center; justify-content: center;
-  width: 56px; height: 56px;
+  width: 76px; height: 76px;
   margin: 0 auto 10px;
   font-size: 1.9rem;
-  border-radius: 12px;
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 30% 25%, rgba(212,175,55,.20), rgba(0,0,0,.55) 70%);
+    radial-gradient(circle at 30% 25%, rgba(212,175,55,.18), rgba(0,0,0,.6) 70%);
   border: 1px solid rgba(212,175,55,.35);
   color: var(--gold, #D4AF37);
   filter: drop-shadow(0 0 8px rgba(212,175,55,.20));
+  overflow: hidden;
+}
+.group-btn .icon img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 .group-btn .name {
   font-family: var(--font-display, 'Cinzel', 'Vazirmatn', serif);
