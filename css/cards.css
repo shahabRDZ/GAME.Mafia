@@ -318,17 +318,28 @@
 
 /* ── Card responsive ── */
 @media (max-width: 30em) {
-  .card-stage { min-height: 85dvh; padding-block: 0 var(--space-sm); }
-  .big-card-wrapper {
-    /* On phones, prefer height-driven sizing so the card always fits the
-       viewport with the topbar/stats bar visible. 2:3 ratio is preserved. */
-    width: auto; max-width: 92vw;
-    height: min(70dvh, calc(92vw * 1.5));
-    aspect-ratio: 2/3;
-    max-height: 70dvh;
+  /* Push the card toward the top of the viewport on phones so the
+     "card whisper" comment has guaranteed room to breathe below it. */
+  .card-stage {
+    min-height: 78dvh;
+    padding-block: var(--space-sm) var(--space-md);
+    justify-content: flex-start;
+    gap: var(--space-sm);
   }
-  .big-card-wrapper .card-back .card-number { font-size: 5.5rem; }
+  .big-card-wrapper {
+    /* Height-driven so the card never spills past the visible area;
+       keep some room (~28dvh) under it for the whisper + tap hint. */
+    width: auto; max-width: 88vw;
+    height: min(60dvh, calc(88vw * 1.5));
+    aspect-ratio: 2/3;
+    max-height: 60dvh;
+  }
+  .big-card-wrapper .card-back .card-number { font-size: 5rem; }
   .big-card-wrapper .char-wrap { width: 7rem; height: 8.5rem; }
+  .funny-container { margin-block-start: var(--space-sm); }
+  .funny-inner.whisper, .funny-inner {
+    font-size: .92rem; padding: var(--space-xs) var(--space-md);
+  }
 }
 
 /* ── Landscape mode ── */

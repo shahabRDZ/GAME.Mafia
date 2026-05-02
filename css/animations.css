@@ -275,21 +275,56 @@
 .stagger-fast > *:nth-child(8) { animation-delay: 0.24s; }
 .stagger-fast > *:nth-child(n+9) { animation-delay: 0.27s; }
 
-/* Funny animation classes */
+/* ── Card whisper (the message the role "speaks" to the player) ──
+   Uniform cinematic look — gold ink on dark velvet, italic serif.
+   Wrapping double-quote glyphs frame the text so it reads as a
+   line of dialog, not a sticker. */
 .funny-container {
-  margin-block-start: var(--space-md); text-align: center;
+  margin-block-start: var(--space-md);
+  text-align: center;
+  max-width: min(92vw, 30rem);
+  margin-inline: auto;
   animation: funSlideUp .5s cubic-bezier(.34,1.56,.64,1) forwards;
 }
+.funny-inner.whisper,
 .funny-inner {
+  position: relative;
   display: inline-flex; align-items: center; gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md); border-radius: var(--radius-full);
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  backdrop-filter: blur(8px); font-size: var(--font-size-base); font-weight: 700;
-  letter-spacing: .5px; transition: all var(--transition-fast);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 12px;
+  background: rgba(11, 11, 11, .72);
+  border: 1px solid rgba(212, 175, 55, .22);
+  box-shadow: 0 8px 22px rgba(0,0,0,.55),
+              inset 0 1px 0 rgba(212,175,55,.08);
+  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  color: var(--gold, #D4AF37);
+  font-family: 'Cinzel', 'Vazirmatn', serif;
+  font-style: italic;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.85), 0 0 14px rgba(212,175,55,.12);
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-base);
 }
+.funny-inner.whisper::before,
+.funny-inner.whisper::after {
+  content: "“";
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 1.6em;
+  line-height: 0.4;
+  color: var(--gold-deep, #8C6A1F);
+  opacity: .85;
+}
+.funny-inner.whisper::after { content: "”"; }
 .funny-inner:hover {
-  transform: scale(1.05); background: rgba(255,255,255,.1);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.65),
+              0 0 24px rgba(212,175,55,.18),
+              inset 0 1px 0 rgba(212,175,55,.12);
 }
+.funny-text { font-family: 'Vazirmatn', sans-serif; font-style: normal; }
 .funny-icon-wrap { width: 1.375rem; height: 1.375rem; flex-shrink: 0; display: flex; align-items: center; }
 .fun-icon { width: 1.375rem; height: 1.375rem; }
 .fun-bounce { animation: funBounce 1.5s ease-in-out infinite; }

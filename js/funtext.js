@@ -16,33 +16,80 @@ const FUNNY_ICONS = {
   bomb: `<svg viewBox="0 0 24 24" class="fun-icon fun-shake"><circle cx="12" cy="14" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7V4M10 4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 4l2-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="2" r="1" fill="currentColor" class="fun-flicker-dot"/></svg>`,
 };
 
+/* ── Card whispers ──
+   Each line is the *card* speaking to the player who just drew it —
+   a wise, sarcastic, cinematic voice. Styling (gold on velvet, italic
+   serif) is centralised in CSS; per-line colors removed on purpose so
+   every whisper feels like it comes from the same dark narrator. */
 const CITIZEN_TEXTS = [
-  { text: "ملق نزنی", icon: "shield", color: "#4ade80" },
-  { text: "خیلی شویی", icon: "eye", color: "#60d9fa" },
-  { text: "تبر نزنی", icon: "knife", color: "#fbbf24" },
-  { text: "خنگ‌بازی درنیار", icon: "brain", color: "#a78bfa" },
-  { text: "عجول نباش", icon: "clock", color: "#fb923c" },
-  { text: "کنسه نخور", icon: "fire", color: "#f87171" },
-  { text: "یار پنجم تیم مافیا", icon: "skull", color: "#f472b6" },
-  { text: "تپانی", icon: "bomb", color: "#fbbf24" },
-  { text: "شهروند گردن نگیری باز", icon: "mask", color: "#34d399" },
-  { text: "نایت نزنی", icon: "lightning", color: "#818cf8" },
-  { text: "گند نزنی به بازی", icon: "ghost", color: "#fb7185" },
-  { text: "روز یک رفتی …فکر کنم", icon: "star", color: "#fcd34d" },
+  { text: "ملق نزنی", icon: "shield" },
+  { text: "خیلی شویی", icon: "eye" },
+  { text: "تبر نزنی", icon: "knife" },
+  { text: "خنگ‌بازی درنیار", icon: "brain" },
+  { text: "عجول نباش", icon: "clock" },
+  { text: "کنسه نخور", icon: "fire" },
+  { text: "یار پنجم تیم مافیا", icon: "skull" },
+  { text: "تپانی", icon: "bomb" },
+  { text: "شهروند گردن نگیری باز", icon: "mask" },
+  { text: "نایت نزنی", icon: "lightning" },
+  { text: "گند نزنی به بازی", icon: "ghost" },
+  { text: "روز یک رفتی …فکر کنم", icon: "star" },
+  // ── 20 new whispers (citizen) ──
+  { text: "شهر چشمش به توئه، خرابش نکن", icon: "eye" },
+  { text: "آروم بازی کن، عجله مال مافیاست", icon: "clock" },
+  { text: "گوش بده بیشتر از اونی که حرف بزنی", icon: "brain" },
+  { text: "اعتماد سکه‌ایه، خرجش رو حساب کن", icon: "shield" },
+  { text: "هرکی زیاد دفاع کرد، بهش شک کن", icon: "mask" },
+  { text: "تو نقش‌داری، یادت نره", icon: "star" },
+  { text: "یه نفر تو جمع داره دروغ می‌گه", icon: "ghost" },
+  { text: "سکوت تو از فریاد یارات بلندتره", icon: "lightning" },
+  { text: "این بار سرنوشت دست توئه", icon: "fire" },
+  { text: "خونسرد باش، شهر بهت احتیاج داره", icon: "shield" },
+  { text: "کسی که زیاد می‌خنده، یه چیزیش هست", icon: "skull" },
+  { text: "نقشتو فاش نکن مگر آخرین لحظه", icon: "mask" },
+  { text: "یه چشمت به چپ، یه چشمت به راست", icon: "eye" },
+  { text: "اگه گیج شدی، همینجا بمون", icon: "brain" },
+  { text: "رای‌گیری جنگه، نه شوخی", icon: "knife" },
+  { text: "زیاد به خودت نبال، شب طولانیه", icon: "clock" },
+  { text: "ساده نباش، اما زیادی هم پیچیده نشو", icon: "brain" },
+  { text: "اگه شک داری، بهتره ساکت بمونی", icon: "ghost" },
+  { text: "یه قهرمان شدن، یه آدم گرگ خوردن", icon: "fire" },
+  { text: "این کارت تورو نمی‌بخشه اگه ول کنی", icon: "star" },
 ];
 
 const MAFIA_TEXTS = [
-  { text: "یه دفعه نریزی", icon: "bomb", color: "#ff6b6b" },
-  { text: "خیلی شویی", icon: "eye", color: "#ff9f43" },
-  { text: "شو نمایان", icon: "ghost", color: "#c084fc" },
-  { text: "کلین شیت کن", icon: "shield", color: "#ff6b6b" },
-  { text: "سر دست نشی", icon: "skull", color: "#fbbf24" },
-  { text: "تیم لا در نده", icon: "mask", color: "#fb7185" },
-  { text: "فکر کن شهروند کشیدی", icon: "brain", color: "#f97316" },
-  { text: "بزن زیر نقشدار", icon: "knife", color: "#ef4444" },
-  { text: "ببینم روز یک میتونی شهروند پوش کنی", icon: "star", color: "#fbbf24" },
-  { text: "یارات تپانن", icon: "fire", color: "#ff4757" },
-  { text: "مثل روز روشنی", icon: "lightning", color: "#ffa502" },
+  { text: "یه دفعه نریزی", icon: "bomb" },
+  { text: "خیلی شویی", icon: "eye" },
+  { text: "شو نمایان", icon: "ghost" },
+  { text: "کلین شیت کن", icon: "shield" },
+  { text: "سر دست نشی", icon: "skull" },
+  { text: "تیم لا در نده", icon: "mask" },
+  { text: "فکر کن شهروند کشیدی", icon: "brain" },
+  { text: "بزن زیر نقشدار", icon: "knife" },
+  { text: "ببینم روز یک میتونی شهروند پوش کنی", icon: "star" },
+  { text: "یارات تپانن", icon: "fire" },
+  { text: "مثل روز روشنی", icon: "lightning" },
+  // ── 20 new whispers (mafia) ──
+  { text: "خون سرد باش، کسی نباید بفهمه", icon: "skull" },
+  { text: "لبخند بزن، انگار چیزی نمی‌دونی", icon: "mask" },
+  { text: "اولین قانون: دروغ بگو حتی به خودت", icon: "ghost" },
+  { text: "تو الان قسمت تاریک شهری", icon: "fire" },
+  { text: "حواست به کارآگاه باشه، شکار توئی", icon: "eye" },
+  { text: "یه بازیگر خوب، یه برنده‌ی خوبه", icon: "star" },
+  { text: "هیچوقت اولین نفر شلیک‌شده نباش", icon: "lightning" },
+  { text: "تیر اولت همه چیو معلوم می‌کنه", icon: "knife" },
+  { text: "اگه گیر افتادی، یار بنداز جلو", icon: "shield" },
+  { text: "روز اول، بی‌سروصدا‌ترین نفر باش", icon: "clock" },
+  { text: "تو نقشی داری که کسی توش نباشه", icon: "ghost" },
+  { text: "زیادی شهروند بازی نکن، تابلوئه", icon: "mask" },
+  { text: "نفر سوم رای میده... تو هم بده", icon: "brain" },
+  { text: "هیچ شبی برات تکرار نمی‌شه", icon: "fire" },
+  { text: "اگه نفر اول بمیری، مقصر زبونته", icon: "skull" },
+  { text: "سکوت طلاست، حرف زدن نقره‌ست", icon: "lightning" },
+  { text: "یه چاقو پشت لبخندت قایم کن", icon: "knife" },
+  { text: "هر کسی شک کرد، اول بهش لبخند بزن", icon: "mask" },
+  { text: "این بازی برای تو مرگ یا زندگیه", icon: "bomb" },
+  { text: "اگه گفتن ماهی نه، بگو شاید کوسه", icon: "ghost" },
 ];
 
 function getRandomFunny(role) {
@@ -59,9 +106,10 @@ function showFunnyText(card) {
 
   const container = document.createElement("div");
   container.className = "funny-container";
-  container.style.color = funny.color;
+  // No per-line color — the whisper styling comes from CSS so every
+  // message reads in the same cinematic gold-on-velvet voice.
   container.innerHTML = `
-    <div class="funny-inner">
+    <div class="funny-inner whisper">
       <span class="funny-icon-wrap">${iconSVG}</span>
       <span class="funny-text">${funny.text}</span>
     </div>
