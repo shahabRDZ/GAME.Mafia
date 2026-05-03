@@ -256,37 +256,19 @@
   <!-- Solid dark band behind the bottom nav -->
   <div class="bottom-nav-shade" aria-hidden="true"></div>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation — 6 cells matching the new bone-frame artwork.
+       Order matches Persian RTL reading: rightmost is first.
+       Layout (R→L): بازی جدید · بازی جاری · ایونت · ابزار گرداننده (BIG) · پیام · پروفایل -->
   <nav class="bottom-nav" role="navigation" aria-label="منوی اصلی">
-    <button class="bnav-btn active" id="navNewGame" onclick="showScreen('setup')">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-      <span>بازی جدید</span>
-    </button>
-    <button class="bnav-btn" onclick="showScreen('game')" id="gameNavBtn">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4l2-8 2 16 2-8h4"/></svg>
-      <span>بازی جاری</span>
-    </button>
-    <button class="bnav-btn" id="navEvents" onclick="showScreen('events')">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-      <span>ایونت</span>
-    </button>
-    <button class="bnav-btn" id="navDM" onclick="showScreen('dm')">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      <span>پیام</span>
+    <button class="bnav-btn bnav-cell-1 active" id="navNewGame" onclick="showScreen('setup')"      aria-label="بازی جدید"></button>
+    <button class="bnav-btn bnav-cell-2"        id="gameNavBtn" onclick="showScreen('game')"       aria-label="بازی جاری"></button>
+    <button class="bnav-btn bnav-cell-3"        id="navEvents"  onclick="showScreen('events')"    aria-label="ایونت"></button>
+    <button class="bnav-btn bnav-cell-tools"    id="navTools"   onclick="showScreen('tools')"     aria-label="ابزار گرداننده"></button>
+    <button class="bnav-btn bnav-cell-5"        id="navDM"      onclick="showScreen('dm')"        aria-label="پیام">
       <span class="bnav-badge" id="dmBadge" style="display:none"></span>
     </button>
-    <button class="bnav-btn" id="navTools" onclick="showScreen('tools')">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 7a3 3 0 113-3 3 3 0 01-3 3zM7 17a3 3 0 11-3 3 3 3 0 013-3zm10 0a3 3 0 11-3 3 3 3 0 013-3zM10.5 6L4 14m13 0L11 6"/></svg>
-      <span>ابزار گرداننده</span>
-    </button>
-    <!-- legacy profile nav slot — kept hidden so auth flows still target it -->
-    <button class="bnav-btn" id="navProfile" onclick="showScreen('profile')" hidden>
-      <span>پروفایل</span>
-    </button>
-    <button class="bnav-btn" id="navAdmin" onclick="window.location='/panel'" style="display:none">
-      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      <span>مدیریت</span>
-    </button>
+    <button class="bnav-btn bnav-cell-6"        id="navProfile" onclick="showScreen('profile')"   aria-label="پروفایل"></button>
+    <button class="bnav-btn" id="navAdmin" onclick="window.location='/panel'" style="display:none" aria-label="مدیریت"></button>
   </nav>
 
   <main>
@@ -302,34 +284,27 @@
     </div>
     <div class="setup-card gc">
       <div class="section-title" id="setupHeading">🎯 انتخاب سناریو</div>
+      <!-- Scenario rail — currently only page 1 (6 main scenarios).
+           Page 2 (chaos / custom / lab) hidden for now. -->
       <div class="group-grid">
-        <button class="group-btn" onclick="selectGroup('تکاور')" data-group="تکاور">
-          <span class="icon"><img src="img/scenario-icons/ranger.png" alt="" loading="lazy"></span><span class="name">تکاور</span><span class="desc">سبک تاکتیکی</span>
-        </button>
-        <button class="group-btn" onclick="selectGroup('بازپرس')" data-group="بازپرس">
-          <span class="icon"><img src="img/scenario-icons/investigator.png" alt="" loading="lazy"></span><span class="name">بازپرس</span><span class="desc">سبک تحقیقاتی</span>
-        </button>
-        <button class="group-btn" onclick="selectGroup('نماینده')" data-group="نماینده">
-          <span class="icon"><img src="img/scenario-icons/parliament.png" alt="" loading="lazy"></span><span class="name">نماینده</span><span class="desc">سبک سیاسی</span>
-        </button>
-        <button class="group-btn" onclick="selectGroup('مذاکره')" data-group="مذاکره">
-          <span class="icon"><img src="img/scenario-icons/negotiation.png" alt="" loading="lazy"></span><span class="name">مذاکره</span><span class="desc">جذب شهروند</span>
-        </button>
-        <button class="group-btn" onclick="selectGroup('جایزه سر رئیس')" data-group="جایزه سر رئیس">
-          <span class="icon"><img src="img/scenario-icons/bounty.png" alt="" loading="lazy"></span><span class="name">جایزه سر رئیس</span><span class="desc">شکار رئیس مافیا</span>
-        </button>
-        <button class="group-btn" onclick="openDigitalMode()" data-group="دیجیتال">
-          <span class="icon"><img src="img/scenario-icons/digital.png" alt="" loading="lazy"></span><span class="name">بدون گرداننده</span><span class="desc">پخش نقش دیجیتال</span>
-        </button>
-        <button class="group-btn" onclick="selectGroup('دلخواه')" data-group="دلخواه">
-          <span class="icon"><img src="img/scenario-icons/custom.png" alt="" loading="lazy"></span><span class="name">دلخواه</span><span class="desc">سفارشی‌سازی</span>
-        </button>
-        <button class="group-btn" onclick="showScreen('chaos')" data-group="کی‌اس">
-          <span class="icon"><img src="img/scenario-icons/chaos.png" alt="" loading="lazy"></span><span class="name">کی‌اس</span><span class="desc">آنلاین ۳ نفره</span>
-        </button>
-        <button class="group-btn" onclick="showScreen('lab')" data-group="آزمایشی">
-          <span class="icon"><img src="img/scenario-icons/lab.png" alt="" loading="lazy"></span><span class="name">آزمایشی</span><span class="desc">آنلاین ۱۰ نفره</span>
-        </button>
+        <!-- PAGE 1 — img/scenario-tiles-reference.png (6 tiles, 3×2) -->
+        <div class="group-page group-page-art" style="background-image: url('img/scenario-tiles-reference.png');">
+          <!-- Tap-targets line up under each tile's label badge. RTL grid order -->
+          <button class="group-btn group-btn-cell" onclick="selectGroup('بازپرس')"        data-group="بازپرس">       <span class="cell-label">بازپرس</span></button>
+          <button class="group-btn group-btn-cell" onclick="selectGroup('نماینده')"        data-group="نماینده">       <span class="cell-label">نماینده</span></button>
+          <button class="group-btn group-btn-cell" onclick="selectGroup('تکاور')"          data-group="تکاور">         <span class="cell-label">تکاور</span></button>
+          <button class="group-btn group-btn-cell" onclick="selectGroup('مذاکره')"          data-group="مذاکره">        <span class="cell-label">مذاکره</span></button>
+          <button class="group-btn group-btn-cell" onclick="selectGroup('جایزه سر رئیس')" data-group="جایزه سر رئیس"><span class="cell-label">جایزه سر رئیس</span></button>
+          <button class="group-btn group-btn-cell" onclick="openDigitalMode()"             data-group="دیجیتال">      <span class="cell-label">بدون گرداننده</span></button>
+        </div>
+
+        <!-- PAGE 2 — hidden for now (chaos / custom / lab will return later)
+        <div class="group-page group-page-art group-page-row" style="background-image: url('img/scenario-tiles-reference2.png');">
+          <button class="group-btn group-btn-cell" onclick="showScreen('chaos')"  data-group="کی‌اس"></button>
+          <button class="group-btn group-btn-cell" onclick="selectGroup('دلخواه')" data-group="دلخواه"></button>
+          <button class="group-btn group-btn-cell" onclick="showScreen('lab')"    data-group="آزمایشی"></button>
+        </div>
+        -->
       </div>
       <div class="custom-form" id="customForm">
         <div class="section-title">✏️ ساخت گروه دلخواه</div>

@@ -160,8 +160,28 @@ const SCENARIO_PAGE_SIZE = 6;
 function paginateScenarios() {
   const grid = document.querySelector('.group-grid');
   if (!grid) return;
-  // Already paginated → nothing to do
-  if (grid.querySelector('.group-page')) return;
+  // Pages already exist (HTML-defined art sheets) → just attach the
+  // page-indicator dots + scroll sync, then bail.
+  const existingPages = grid.querySelectorAll(':scope > .group-page');
+  if (existingPages.length > 0) {
+    if (existingPages.length > 1 && !grid.parentElement.querySelector('.group-pager-dots')) {
+      const dots = document.createElement('div');
+      dots.className = 'group-pager-dots';
+      existingPages.forEach((_, i) => {
+        const d = document.createElement('span');
+        d.className = 'group-pager-dot' + (i === 0 ? ' active' : '');
+        dots.appendChild(d);
+      });
+      grid.parentElement.insertBefore(dots, grid.nextSibling);
+      grid.addEventListener('scroll', () => {
+        const idx = Math.round(grid.scrollLeft / grid.clientWidth);
+        dots.querySelectorAll('.group-pager-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === idx);
+        });
+      }, { passive: true });
+    }
+    return;
+  }
 
   const btns = Array.from(grid.querySelectorAll(':scope > .group-btn'));
   if (btns.length <= SCENARIO_PAGE_SIZE) {

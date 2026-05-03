@@ -53,15 +53,8 @@
       actionTimer = setInterval(runRandomAction, 6200 + Math.random() * 2600);
     }
 
-    // Hide on scroll-down, show on scroll-up
-    function onScroll() {
-      const y = window.scrollY;
-      const d = y - lastScrollY;
-      if (Math.abs(d) < 12) return;
-      if (d > 0 && y > 180) mascot.classList.add("is-hidden");
-      else                  mascot.classList.remove("is-hidden");
-      lastScrollY = y;
-    }
+    // User asked the mascot stays always visible — no scroll hiding
+    function onScroll() { /* no-op */ }
 
     // Tap reaction (rate-limited)
     document.addEventListener("click", function (e) {

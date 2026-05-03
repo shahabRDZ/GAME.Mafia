@@ -172,9 +172,9 @@
    entirety on tall phone screens — no zoom-in cropping. */
 .splash {
   position: fixed; inset: 0; z-index: 99999;
-  /* No cover artwork — solid black so the brand wordmark / loader
-     are the only visible content during boot. */
-  background: #000;
+  /* Cover artwork fills the splash, anchored center-35% so the
+     mafia title and figures stay visible above the loader. */
+  background: #000 url("/img/cover.png") center 35% / cover no-repeat;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-end;
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -279,6 +279,9 @@
 
 /* ── Global Reset ── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Force the HTML `hidden` attribute to actually hide elements,
+   regardless of any other display rules they have. */
+[hidden] { display: none !important; }
 
 /* True fixed background for ALL devices (incl. iOS) — uses a position:fixed
    element instead of background-attachment which iOS Safari ignores.

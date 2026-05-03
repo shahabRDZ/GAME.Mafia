@@ -5,15 +5,16 @@
 .step-indicator {
   display: flex; align-items: stretch;
   gap: 0;
-  margin-block-end: var(--space-md);
+  margin: 4px auto 8px;
   padding: 0;
-  background: url("/img/top-nav.png") center / 100% 100% no-repeat;
+  background: url("/img/top-nav.png") center / contain no-repeat;
   background-color: transparent;
   border: none;
   box-shadow: none;
-  width: 100%;
+  width: 96vw;
+  max-width: 520px;
   aspect-ratio: 3.14 / 1;
-  max-height: 130px;
+  max-height: 110px;
   position: relative;
 }
 /* Hide the baked-in CSS step pieces — the image carries them */
@@ -608,16 +609,31 @@
    (top-nav.png steps + the scenario-tile arches themselves) carries
    all the framing now. Padding kept tiny just so tiles don't touch
    the screen edges. */
-.setup-card {
-  padding: 0;
-  margin-block-end: var(--space-md);
+.setup-card,
+.setup-card.gc {
+  padding: 0 !important;
+  margin: 0 !important;
   background: none !important;
-  border: none !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  border: 0 !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  width: 100%;
 }
-.setup-card::after { content: none !important; }
+
+/* Hide the big "ایونت‌های مافیا" promo banner on the home/setup
+   screen — it stretches the page and competes with the mascot. */
+#setupScreen .event-banner-img,
+#setupScreen .event-banner-fallback { display: none !important; }
+.setup-card::after,
+.setup-card::before,
+.setup-card.gc::after,
+.setup-card.gc::before { content: none !important; display: none !important; }
+/* Any section-title divider line inside the setup card hidden too */
+.setup-card .section-title { display: none !important; }
+.setup-card .section-title::after { display: none !important; }
 /* Hide the "🎯 انتخاب سناریو" title — the step-indicator artwork
    already shows the active step name; no need for a duplicate. */
 #setupHeading,
@@ -662,6 +678,62 @@
   padding-inline: 2px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+}
+
+/* Each page is an artwork SHEET — bigger, centered, with tap-targets
+   covering the FULL tile (artwork + label badge) on each cell. */
+.group-page-art {
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center top;
+  background-color: transparent;
+  /* Aspect of scenario-tiles-reference.png (1307×1087 ≈ 1.20:1) */
+  aspect-ratio: 1.20 / 1;
+  /* Match the step-indicator's width so top and bottom of the home
+     screen are the same width — no off-balance layout. */
+  width: 96vw;
+  max-width: 520px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: 13% 1fr 1fr;
+  grid-template-columns: 4% 1fr 1fr 1fr 4%;
+  gap: 0;
+  padding: 0;
+  position: relative;
+}
+/* Each .group-btn-cell covers the FULL tile (artwork + label) so a
+   tap anywhere on the tile selects that scenario. RTL grid order:
+   visual right is column 4 (first scenario), visual left is column 2. */
+.group-page-art .group-btn-cell:nth-child(1) { grid-area: 2 / 4 / 3 / 5; } /* بازپرس        */
+.group-page-art .group-btn-cell:nth-child(2) { grid-area: 2 / 3 / 3 / 4; } /* نماینده       */
+.group-page-art .group-btn-cell:nth-child(3) { grid-area: 2 / 2 / 3 / 3; } /* تکاور          */
+.group-page-art .group-btn-cell:nth-child(4) { grid-area: 3 / 4 / 4 / 5; } /* مذاکره         */
+.group-page-art .group-btn-cell:nth-child(5) { grid-area: 3 / 3 / 4 / 4; } /* جایزه سر رئیس */
+.group-page-art .group-btn-cell:nth-child(6) { grid-area: 3 / 2 / 4 / 3; } /* بدون گرداننده */
+
+/* Cell label hidden — artwork carries the label */
+.cell-label { display: none; }
+
+/* Hit-area cells — fully transparent click target */
+.group-btn-cell {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+.group-btn-cell::before,
+.group-btn-cell::after { content: none !important; }
+.group-btn-cell .icon,
+.group-btn-cell .name,
+.group-btn-cell .desc { display: none; }
+
+/* Selected — gold/red tint behind the tile area */
+.group-btn-cell.selected {
+  background: radial-gradient(ellipse at center, rgba(255,40,60,.20), transparent 70%) !important;
+  box-shadow: inset 0 0 22px rgba(212,175,55,.35);
+  border-radius: 14px;
 }
 
 /* Fallback: if pagination JS doesn't run, force 3-col grid layout
