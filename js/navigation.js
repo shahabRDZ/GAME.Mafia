@@ -39,8 +39,13 @@ function showScreen(name) {
   const navBtn = document.getElementById(navMap[name]);
   if (navBtn) navBtn.classList.add("active");
 
-  // Scroll to top on screen change
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  // Smooth-scroll to the new screen's content area (skipping past the
+   // hero/logo block at the top) so the user lands on the section
+   // they tapped, not the brand wordmark every time.
+  if (screen) {
+    const targetY = Math.max(0, screen.offsetTop - 8);
+    window.scrollTo({ top: targetY, behavior: "smooth" });
+  }
 
   if (name === "history") renderHistory();
   if (name === "profile") renderProfileScreen();

@@ -688,11 +688,11 @@
   background-size: contain;
   background-position: center top;
   background-color: transparent;
-  /* Aspect of scenario-tiles-reference.png (1307×1087 ≈ 1.20:1) */
   aspect-ratio: 1.20 / 1;
-  /* Same width as step-indicator and wordmark for balanced symmetry */
-  width: 92vw;
-  max-width: 480px;
+  /* Reduced ~0.6cm from each side (≈12px) so it sits inside the
+     step-indicator's width with a clear margin on both sides. */
+  width: calc(92vw - 24px);
+  max-width: 440px;
   margin: 0 auto;
   display: grid;
   grid-template-rows: 13% 1fr 1fr;

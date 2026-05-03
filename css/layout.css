@@ -130,8 +130,9 @@ header {
   left: 0; right: 0;
   bottom: var(--safe-bottom);
   width: 100vw;
-  aspect-ratio: 3.72 / 1;
-  max-height: 130px;
+  /* Fixed height (no aspect-ratio) so each grid cell has a stable,
+     definite height — buttons get proper tap area on every device. */
+  height: clamp(86px, 25vw, 120px);
   z-index: var(--z-overlay);
   pointer-events: auto;
   display: grid;
@@ -174,6 +175,7 @@ body {
 .bnav-btn {
   width: 100%;
   height: 100%;
+  min-width: 44px;
   min-height: 44px;
   background: transparent;
   border: none;
@@ -182,16 +184,22 @@ body {
   position: relative;
   padding: 0;
   margin: 0;
-  z-index: 2;
-  pointer-events: auto;
-  /* iOS Safari: ensure tap area is registered */
-  -webkit-tap-highlight-color: rgba(212,175,55,.15);
+  grid-row: 1;
   align-self: stretch;
   justify-self: stretch;
+  z-index: 5;
+  pointer-events: auto !important;
+  -webkit-tap-highlight-color: rgba(212,175,55,.25);
   appearance: none;
   -webkit-appearance: none;
+  touch-action: manipulation;        /* removes 300ms tap delay on iOS */
+  user-select: none;
+  -webkit-user-select: none;
 }
-.bnav-btn:active { background: rgba(212,175,55,.10); }
+.bnav-btn:active {
+  background: rgba(212,175,55,.18);
+  border-radius: 12px;
+}
 .bnav-btn .bnav-icon,
 .bnav-btn > span:not(.bnav-badge) {
   display: none;
