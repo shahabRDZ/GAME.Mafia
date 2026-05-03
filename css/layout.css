@@ -16,12 +16,15 @@
   position: relative; z-index: var(--z-base, 1);
   max-width: 75rem; /* 1200px */
   margin-inline: auto;
-  padding-inline: 8px;          /* tighter inset on phones */
+  padding-inline: 0;            /* zero on mobile — children handle their own width */
   padding-block: 4px var(--space-md);
-  overflow-x: clip;             /* never let inner content scroll horizontally */
+  overflow-x: clip;
 }
 @media (min-width: 768px) {
   .container { padding-inline: var(--space-md); }
+}
+.lang-bar {
+  padding: 6px 12px 0 !important;   /* keep profile icon away from the edge */
 }
 
 /* ── Hero Header — wordmark only, tight on mobile ── */
@@ -43,13 +46,14 @@ header {
   100% { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
-/* "SHOWSHUNG" wordmark — much smaller, sits above the step indicator. */
+/* "SHOWSHUNG" wordmark — same width family as the items below it
+   (step-indicator + scenario picker) for visual symmetry. */
 .hero-wordmark {
   display: block;
   width: 70vw;
   max-width: 320px;
   height: auto;
-  margin: 0 auto;
+  margin: 4px auto 6px;
   filter:
     drop-shadow(0 0 18px rgba(212,175,55,.35))
     drop-shadow(0 4px 14px rgba(0,0,0,.50));

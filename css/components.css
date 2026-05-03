@@ -5,16 +5,17 @@
 .step-indicator {
   display: flex; align-items: stretch;
   gap: 0;
-  margin: 4px auto 8px;
+  /* Same width / margin as scenario picker → top + bottom aligned */
+  width: 92vw;
+  max-width: 480px;
+  margin: 6px auto 10px;
   padding: 0;
   background: url("/img/top-nav.png") center / contain no-repeat;
   background-color: transparent;
   border: none;
   box-shadow: none;
-  width: 96vw;
-  max-width: 520px;
   aspect-ratio: 3.14 / 1;
-  max-height: 110px;
+  max-height: 100px;
   position: relative;
 }
 /* Hide the baked-in CSS step pieces — the image carries them */
@@ -689,10 +690,9 @@
   background-color: transparent;
   /* Aspect of scenario-tiles-reference.png (1307×1087 ≈ 1.20:1) */
   aspect-ratio: 1.20 / 1;
-  /* Match the step-indicator's width so top and bottom of the home
-     screen are the same width — no off-balance layout. */
-  width: 96vw;
-  max-width: 520px;
+  /* Same width as step-indicator and wordmark for balanced symmetry */
+  width: 92vw;
+  max-width: 480px;
   margin: 0 auto;
   display: grid;
   grid-template-rows: 13% 1fr 1fr;
