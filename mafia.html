@@ -323,16 +323,21 @@
         <div class="role-catalog" id="roleCatalog"></div>
 
         <!-- Manual Add -->
-        <div class="section-title" style="margin-top:16px">➕ افزودن دستی</div>
-        <div class="card-builder-row">
-          <input type="text" id="newCardName" placeholder="اسم کارت (مثلاً: دکتر)" maxlength="20" aria-label="نام کارت جدید" autocomplete="off" inputmode="text"
-            onkeydown="if(event.key==='Enter') addCustomCard()">
-          <div class="team-toggle">
-            <button id="btnMafia" class="active-mafia" onclick="setTeam('mafia')">😈 مافیا</button>
-            <button id="btnCitizen" onclick="setTeam('citizen')">😇 شهروند</button>
-            <button id="btnIndependent" onclick="setTeam('independent')">🐺 مستقل</button>
+        <div class="custom-add-section">
+          <div class="custom-add-header">
+            <span class="custom-add-icon">✦</span>
+            <span class="custom-add-label">نقش سفارشی</span>
           </div>
-          <button class="add-card-btn" onclick="addCustomCard()">+ افزودن</button>
+          <div class="card-builder-row">
+            <input type="text" id="newCardName" placeholder="نام نقش..." maxlength="20" aria-label="نام کارت جدید" autocomplete="off" inputmode="text"
+              onkeydown="if(event.key==='Enter') addCustomCard()">
+            <div class="team-toggle">
+              <button id="btnMafia" class="active-mafia" onclick="setTeam('mafia')">😈</button>
+              <button id="btnCitizen" onclick="setTeam('citizen')">😇</button>
+              <button id="btnIndependent" onclick="setTeam('independent')">🐺</button>
+            </div>
+            <button class="add-card-btn" onclick="addCustomCard()">افزودن</button>
+          </div>
         </div>
 
         <!-- Selected Cards List -->

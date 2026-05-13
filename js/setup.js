@@ -193,8 +193,8 @@ function renderRoleCatalog() {
   const isShab = currentCustomMode === 'shabnmafia';
   container.className = isShab ? 'role-catalog shab-mafia-catalog' : 'role-catalog';
   container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
-    <div class="rc-team-section">
-      <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')" style="--rc-color:${data.color}">
+    <div class="rc-team-section" style="--rc-color:${data.color}">
+      <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')">
         <span class="rc-team-label">${data.label}</span>
         <span class="rc-team-count" id="rcCount_${team}">۰</span>
         <span class="scn-toggle-icon">▶</span>
@@ -202,13 +202,24 @@ function renderRoleCatalog() {
       <div class="rc-roles-grid">
         ${data.roles.map(role => {
           const info = isShab ? getShabMafiaRoleInfo(role, team) : null;
+          if (isShab) {
+            return `<div class="rc-chip-wrap sm-chip-wrap">
+              <div class="sm-tile rc-role-chip" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
+                <div class="sm-tile-top">
+                  ${info ? `<span class="sm-tile-icon">${info.icon}</span>` : ''}
+                  <span class="sm-tile-name">${escapeHtml(role)}</span>
+                </div>
+                <div class="sm-tile-bottom" onclick="event.stopPropagation()">
+                  <button class="sm-tile-minus" onclick="decrementCatalogRole(this.closest('.rc-role-chip'))">−</button>
+                  <span class="rc-chip-badge">0</span>
+                </div>
+              </div>
+              ${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog(${JSON.stringify(role)},${JSON.stringify(team)})" title="حذف">✕</button>` : ''}
+            </div>`;
+          }
           return `<div class="rc-chip-wrap">
-            <button class="rc-role-chip${isShab ? ' rc-role-card' : ''}" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
-              ${info ? `<span class="rc-chip-icon">${info.icon}</span>` : ''}
-              <span class="rc-chip-body">
-                <span class="rc-chip-name">${escapeHtml(role)}</span>
-                ${info ? `<span class="rc-chip-desc">${escapeHtml(info.desc)}</span>` : ''}
-              </span>
+            <button class="rc-role-chip" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
+              <span class="rc-chip-name">${escapeHtml(role)}</span>
               <span class="rc-chip-badge">0</span>
             </button>${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog(${JSON.stringify(role)},${JSON.stringify(team)})" title="حذف از لیست">✕</button>` : ''}
           </div>`;
@@ -216,6 +227,21 @@ function renderRoleCatalog() {
       </div>
     </div>
   `).join("");
+}
+
+function decrementCatalogRole(chip) {
+  const role = chip.dataset.role;
+  const team = chip.dataset.team;
+  for (let i = customCardsList.length - 1; i >= 0; i--) {
+    if (customCardsList[i].name === role && customCardsList[i].team === team) {
+      customCardsList.splice(i, 1);
+      break;
+    }
+  }
+  renderCustomCardsList();
+  updateStartBtn();
+  syncCatalogFromList();
+  if (currentCustomMode === 'shabnmafia') saveShabMafiaSelection();
 }
 
 function toggleCatalogRole(btn) {
