@@ -19,16 +19,28 @@ const LANG = {
       noCards: "هنوز کارتی اضافه نشده — کارت‌های بازیکنان را وارد کنید",
       clearConfirm: "تاریخچه پاک شود؟",
       mafiaTeam: "😈 مافیا", citizenTeam: "😇 شهروند",
-      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی" },
-      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه" }
+      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی", دیجیتال: "پخش نقش دیجیتال", "شب مافیا": "نقش‌های کامل", "کی‌اس": "آنلاین ۳ نفره", آزمایشی: "آنلاین ۱۰ نفره", میتیک: "۱۲ نفره · نقش‌های حماسی" },
+      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه", دیجیتال: "بدون گرداننده", "شب مافیا": "شب مافیا", "کی‌اس": "کی‌اس", آزمایشی: "آزمایشی", میتیک: "میتیک" }
     },
     roles: {
       "رئیس مافیا": "رئیس مافیا", "ناتو": "ناتو", "شیاد": "شیاد", "گروگان‌گیر": "گروگان‌گیر",
-      "هکر": "هکر", "یاغی": "یاغی", "مافیا ساده": "مافیا ساده",
+      "هکر": "هکر", "یاغی": "یاغی", "مافیا ساده": "مافیا ساده", "مافیای ساده": "مافیای ساده",
       "شهروند ساده": "شهروند ساده", "بازپرس": "بازپرس", "کارآگاه": "کارآگاه", "هانتر": "هانتر",
       "دکتر": "دکتر", "رویین‌تن": "رویین‌تن", "راهنما": "راهنما", "مین‌گذار": "مین‌گذار",
       "وکیل": "وکیل", "محافظ": "محافظ", "تفنگدار": "تفنگدار", "نگهبان": "نگهبان", "تک‌تیرانداز": "تک‌تیرانداز", "سرباز": "سرباز",
-      "شهردار": "شهردار", "قاضی": "قاضی", "جان‌سخت": "جان‌سخت", "دکتر لکتر": "دکتر لکتر", "بمب‌گذار": "بمب‌گذار"
+      "شهردار": "شهردار", "قاضی": "قاضی", "جان‌سخت": "جان‌سخت", "دکتر لکتر": "دکتر لکتر", "بمب‌گذار": "بمب‌گذار",
+      "ناتاشا": "ناتاشا", "ترور": "ترور", "کارگاه": "کارگاه", "اسنایپر": "اسنایپر", "کشیش": "کشیش",
+      "حرفه‌ای": "حرفه‌ای", "روان‌پزشک": "روان‌پزشک", "نخبه": "نخبه", "شکارچی": "شکارچی",
+      "زندانبان": "زندانبان", "پرستار": "پرستار", "انتقام‌جو": "انتقام‌جو", "کارآگاه ویژه": "کارآگاه ویژه",
+      "نانوا": "نانوا", "خبرنگار": "خبرنگار", "صداپیشه": "صداپیشه", "شاهد": "شاهد",
+      "قهرمان": "قهرمان", "جادوگر": "جادوگر", "تکاور": "تکاور",
+      "پدرخوانده": "پدرخوانده", "معشوقه": "معشوقه", "روانکاو": "روانکاو", "شاه‌کش": "شاه‌کش",
+      "تروریست": "تروریست", "مذاکره‌کننده": "مذاکره‌کننده", "دزد": "دزد", "شارلاتان": "شارلاتان",
+      "دست راست پدرخوانده": "دست راست پدرخوانده", "سم‌ساز": "سم‌ساز", "جاسوس": "جاسوس",
+      "جوکر مافیا": "جوکر مافیا", "کیمیاگر": "کیمیاگر",
+      "سندیکا": "سندیکا", "جانی": "جانی", "گرگ‌نما": "گرگ‌نما", "زامبی": "زامبی",
+      "هزارچهره": "هزارچهره", "دلقک": "دلقک", "لوسیفر": "لوسیفر", "خون‌آشام": "خون‌آشام", "جلاد": "جلاد",
+      "کانسور": "کانسور", "نینجا": "نینجا", "نمایش‌نامه‌نویس": "نمایش‌نامه‌نویس", "بادیگارد": "بادیگارد"
     }
   },
   en: {
@@ -49,16 +61,28 @@ const LANG = {
       noCards: "No cards added yet — enter player cards",
       clearConfirm: "Clear history?",
       mafiaTeam: "😈 Mafia", citizenTeam: "😇 Citizen",
-      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom" },
-      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom" }
+      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom", دیجیتال: "Digital role deal", "شب مافیا": "Full role set", "کی‌اس": "Online 3-player", آزمایشی: "Online 10-player", میتیک: "12P · Epic roles" },
+      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom", دیجیتال: "No Game Master", "شب مافیا": "Mafia Night", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic" }
     },
     roles: {
       "رئیس مافیا": "Mafia Boss", "ناتو": "NATO Agent", "شیاد": "Swindler", "گروگان‌گیر": "Kidnapper",
-      "هکر": "Hacker", "یاغی": "Outlaw", "مافیا ساده": "Mafia",
+      "هکر": "Hacker", "یاغی": "Outlaw", "مافیا ساده": "Mafia", "مافیای ساده": "Mafia",
       "شهروند ساده": "Citizen", "بازپرس": "Interrogator", "کارآگاه": "Detective", "هانتر": "Hunter",
       "دکتر": "Doctor", "رویین‌تن": "Invincible", "راهنما": "Guide", "مین‌گذار": "Bomb Expert",
       "وکیل": "Lawyer", "محافظ": "Bodyguard", "تفنگدار": "Rifleman", "نگهبان": "Guard", "تک‌تیرانداز": "Sniper", "تکاور": "Commando", "سرباز": "Soldier",
-      "شهردار": "Mayor", "قاضی": "Judge", "جان‌سخت": "Tough Guy", "دکتر لکتر": "Dr. Lecter", "بمب‌گذار": "Bomber"
+      "شهردار": "Mayor", "قاضی": "Judge", "جان‌سخت": "Tough Guy", "دکتر لکتر": "Dr. Lecter", "بمب‌گذار": "Bomber",
+      "ناتاشا": "Natasha", "ترور": "Assassin", "کارگاه": "Workshop", "اسنایپر": "Sniper Pro", "کشیش": "Priest",
+      "حرفه‌ای": "Professional", "روان‌پزشک": "Psychiatrist", "نخبه": "Elite", "شکارچی": "Predator",
+      "زندانبان": "Jailer", "پرستار": "Nurse", "انتقام‌جو": "Avenger", "کارآگاه ویژه": "Special Detective",
+      "نانوا": "Baker", "خبرنگار": "Reporter", "صداپیشه": "Voice Actor", "شاهد": "Witness",
+      "قهرمان": "Hero", "جادوگر": "Wizard",
+      "پدرخوانده": "Godfather", "معشوقه": "Mistress", "روانکاو": "Psychoanalyst", "شاه‌کش": "Kingslayer",
+      "تروریست": "Terrorist", "مذاکره‌کننده": "Negotiator", "دزد": "Thief", "شارلاتان": "Charlatan",
+      "دست راست پدرخوانده": "Right Hand", "سم‌ساز": "Poisoner", "جاسوس": "Spy",
+      "جوکر مافیا": "Mafia Joker", "کیمیاگر": "Alchemist",
+      "سندیکا": "Syndicate", "جانی": "Johnny", "گرگ‌نما": "Werewolf", "زامبی": "Zombie",
+      "هزارچهره": "Shapeshifter", "دلقک": "Clown", "لوسیفر": "Lucifer", "خون‌آشام": "Vampire", "جلاد": "Executioner",
+      "کانسور": "Counselor", "نینجا": "Ninja", "نمایش‌نامه‌نویس": "Playwright", "بادیگارد": "Bodyguard"
     }
   },
   tr: {
@@ -79,16 +103,28 @@ const LANG = {
       noCards: "Henüz kart eklenmedi — oyuncu kartlarını girin",
       clearConfirm: "Geçmiş silinsin mi?",
       mafiaTeam: "😈 Mafya", citizenTeam: "😇 Vatandaş",
-      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel" },
-      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel" }
+      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel", دیجیتال: "Dijital rol dağıtımı", "شب مافیا": "Tam rol seti", "کی‌اس": "Çevrimiçi 3 kişi", آزمایشی: "Çevrimiçi 10 kişi", میتیک: "12 kişi · Destansı" },
+      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel", دیجیتال: "Oyun Ustasız", "شب مافیا": "Mafya Gecesi", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic" }
     },
     roles: {
       "رئیس مافیا": "Mafya Başı", "ناتو": "NATO Ajan", "شیاد": "Dolandırıcı", "گروگان‌گیر": "Rehine Alan",
-      "هکر": "Hacker", "یاغی": "Haydut", "مافیا ساده": "Mafya",
+      "هکر": "Hacker", "یاغی": "Haydut", "مافیا ساده": "Mafya", "مافیای ساده": "Mafya",
       "شهروند ساده": "Vatandaş", "بازپرس": "Sorgu Memuru", "کارآگاه": "Dedektif", "هانتر": "Avcı",
       "دکتر": "Doktor", "رویین‌تن": "Yenilmez", "راهنما": "Rehber", "مین‌گذار": "Bomba Uzmanı",
-      "وکیل": "Avukat", "محافظ": "Koruyucu", "تفنگدار": "Nişancı", "نگهبان": "Bekçi", "تک‌تیرانداز": "Keskin Nişancı", "سرباز": "Asker",
-      "شهردار": "Belediye Başkanı", "قاضی": "Yargıç", "جان‌سخت": "Sert Adam", "دکتر لکتر": "Dr. Lecter", "بمب‌گذار": "Bombacı"
+      "وکیل": "Avukat", "محافظ": "Koruyucu", "تفنگدار": "Nişancı", "نگهبان": "Bekçi", "تک‌تیرانداز": "Keskin Nişancı", "تکاور": "Komando", "سرباز": "Asker",
+      "شهردار": "Belediye Başkanı", "قاضی": "Yargıç", "جان‌سخت": "Sert Adam", "دکتر لکتر": "Dr. Lecter", "بمب‌گذار": "Bombacı",
+      "ناتاشا": "Natasha", "ترور": "Suikastçı", "کارگاه": "Atölye", "اسنایپر": "Sniper", "کشیش": "Papaz",
+      "حرفه‌ای": "Profesyonel", "روان‌پزشک": "Psikiyatrist", "نخبه": "Seçkin", "شکارچی": "Yırtıcı",
+      "زندانبان": "Gardiyan", "پرستار": "Hemşire", "انتقام‌جو": "İntikamcı", "کارآگاه ویژه": "Özel Dedektif",
+      "نانوا": "Fırıncı", "خبرنگار": "Muhabir", "صداپیشه": "Seslendirme Sanatçısı", "شاهد": "Tanık",
+      "قهرمان": "Kahraman", "جادوگر": "Büyücü",
+      "پدرخوانده": "Baba", "معشوقه": "Metres", "روانکاو": "Psikanalist", "شاه‌کش": "Kral Katili",
+      "تروریست": "Terörist", "مذاکره‌کننده": "Müzakereci", "دزد": "Hırsız", "شارلاتان": "Şarlatan",
+      "دست راست پدرخوانده": "Sağ Kol", "سم‌ساز": "Zehirci", "جاسوس": "Casus",
+      "جوکر مافیا": "Mafya Jokeri", "کیمیاگر": "Simyacı",
+      "سندیکا": "Sendika", "جانی": "Johnny", "گرگ‌نما": "Kurt Adam", "زامبی": "Zombi",
+      "هزارچهره": "Bin Yüzlü", "دلقک": "Palyaço", "لوسیفر": "Lucifer", "خون‌آشام": "Vampir", "جلاد": "Cellat",
+      "کانسور": "Danışman", "نینجا": "Ninja", "نمایش‌نامه‌نویس": "Oyun Yazarı", "بادیگارد": "Koruyucu"
     }
   }
 };
@@ -112,7 +148,6 @@ function setLang(lang) {
 function applyLang() {
   const L = LANG[currentLang];
   document.documentElement.lang = currentLang;
-  document.documentElement.dir = L.dir;
   document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("lang-active", b.dataset.lang === currentLang));
 
   const upd = {
@@ -124,10 +159,11 @@ function applyLang() {
   };
   Object.entries(upd).forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
 
-  const secTitles = document.querySelectorAll(".section-title");
-  if (secTitles[0]) secTitles[0].innerHTML = t("selectGroup") + '<span style="flex:1;height:1px;background:rgba(255,255,255,.07);margin-right:10px;display:inline-block"></span>';
-  if (secTitles[1]) secTitles[1].innerHTML = t("customGroup") + '<span style="flex:1;height:1px;background:rgba(255,255,255,.07);margin-right:10px;display:inline-block"></span>';
-  if (secTitles[2]) secTitles[2].innerHTML = t("selectCount") + '<span style="flex:1;height:1px;background:rgba(255,255,255,.07);margin-right:10px;display:inline-block"></span>';
+  const sep = '<span style="flex:1;height:1px;background:rgba(255,255,255,.07);margin-right:10px;display:inline-block"></span>';
+  const setupH = document.getElementById("setupHeading");
+  if (setupH) setupH.innerHTML = t("selectGroup") + sep;
+  const customH = document.querySelector("#customForm .section-title");
+  if (customH) customH.innerHTML = t("customGroup") + sep;
 
   document.querySelectorAll(".group-btn").forEach(b => {
     const g = b.dataset.group;
@@ -138,8 +174,6 @@ function applyLang() {
   const custLbl = document.querySelector("#customName")?.previousElementSibling; if (custLbl) custLbl.textContent = t("groupName");
   document.getElementById("newCardName")?.setAttribute("placeholder", t("cardNamePlaceholder"));
   document.querySelector(".add-card-btn") && (document.querySelector(".add-card-btn").textContent = t("addCard"));
-  document.getElementById("btnMafia") && (document.getElementById("btnMafia").textContent = t("mafiaTeam"));
-  document.getElementById("btnCitizen") && (document.getElementById("btnCitizen").textContent = t("citizenTeam"));
 
   if (state.cards.length) showCurrentCard();
   if (document.getElementById("historyScreen").classList.contains("active")) renderHistory();

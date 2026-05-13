@@ -1,5 +1,8 @@
 /* ── Application Initialization ── */
 
+// Remove SEO landing section once app JS is running
+(function() { const s = document.getElementById('seo-landing'); if (s) s.style.display = 'none'; })();
+
 // ── Splash Screen ──
 (function runSplash() {
   const fill = document.getElementById("splashFill");

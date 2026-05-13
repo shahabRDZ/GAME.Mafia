@@ -239,6 +239,52 @@ const SCENARIO_INFO = {
         {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
       ]
     }
+  },
+  "میتیک": {
+    icon: "⚜️",
+    color: "#ffd700",
+    fa: {
+      title: "سناریو میتیک", subtitle: "۱۲ نفره · نقش‌های حماسی",
+      intro: "میتیک یک سناریوی ۱۲ نفره با نقش‌های قدرتمند و استراتژیک است. تیم مافیا با چهار نقش ویژه در برابر شهر حیله‌گر قرار می‌گیرد. هر نقش توانایی منحصربه‌فردی دارد که ترکیب آن‌ها پیروزی را تعیین می‌کند.",
+      flow: ["روز معارفه","شب اول (بدون شلیک)","روز اول (بحث + رأی‌گیری)","شب‌های اصلی (اجرای نقش‌ها)","روزها (اعلام نتایج + رأی‌گیری)"],
+      rules: ["استعلام رئیس مافیا برای کارآگاه (کارگاه) منفی است","کانسور هر شب توانایی یک بازیکن را مسدود می‌کند","نینجا بدون صدا حذف می‌کند · شب‌هنگام کشته‌ای اعلام نمی‌شود","تروریست با رأی حذف در روز، یک نفر را همراه خود می‌برد","اسنایپر یک تیر دارد · شلیک به رئیس = برد فوری شهر","کارگاه هر شب یک اطلاعات از تیم مافیا می‌گیرد"],
+      quorum: [{range:"۱۲–۱۰ نفر",votes:"۵ رأی"},{range:"۹–۷ نفر",votes:"۴ رأی"},{range:"۶–۵ نفر",votes:"۳ رأی"},{range:"۴ نفر به پایین",votes:"۲ رأی"}],
+      proceed: "ادامه — شروع بازی ➜",
+      flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند"
+    },
+    en: {
+      title: "Mythic Scenario", subtitle: "12 Players · Epic Roles",
+      intro: "Mythic is a 12-player scenario with powerful and strategic roles. The mafia team with four unique roles faces a cunning city. Each role has a unique ability that together decides victory.",
+      flow: ["Introduction Day","Night 1 (no shot)","Day 1 (discussion + voting)","Main Nights (role actions)","Days (announce results + voting)"],
+      rules: ["Godfather shows negative to Detective (Workshop)","Counselor blocks one player's ability each night","Ninja eliminates silently · no death announcement at night","Terrorist takes one player down when eliminated by vote","Sniper has one bullet · shooting the boss = instant city win","Workshop receives one piece of intel about the mafia each night"],
+      quorum: [{range:"12–10 players",votes:"5 votes"},{range:"9–7 players",votes:"4 votes"},{range:"6–5 players",votes:"3 votes"},{range:"4 or less",votes:"2 votes"}],
+      proceed: "Continue — Start Game ➜",
+      flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles"
+    },
+    tr: {
+      title: "Mythic Senaryosu", subtitle: "12 Oyuncu · Destansı Roller",
+      intro: "Mythic, güçlü ve stratejik rollerle oynanan 12 kişilik bir senaryodur. Dört özel rolle mafya takımı zeki şehre karşı çıkar. Her rolün benzersiz yeteneği galibiyeti belirler.",
+      flow: ["Tanışma Günü","1. Gece (ateş yok)","1. Gün (tartışma + oylama)","Ana Geceler (rol eylemleri)","Günler (sonuçlar + oylama)"],
+      rules: ["Baba Dedektife (Atölye) negatif görünür","Danışman her gece bir oyuncunun yeteneğini engeller","Ninja sessizce eliyor · gece ölüm duyurulmuyor","Terörist gündüz oyla elenince birini yanında götürür","Sniper bir mermi var · Patronu vurursa şehir anında kazanır","Atölye her gece mafya hakkında bir bilgi alır"],
+      quorum: [{range:"12–10 oyuncu",votes:"5 oy"},{range:"9–7 oyuncu",votes:"4 oy"},{range:"6–5 oyuncu",votes:"3 oy"},{range:"4 ve altı",votes:"2 oy"}],
+      proceed: "Devam — Oyunu Başlat ➜",
+      flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri"
+    },
+    roles: {
+      mafia: [
+        {name:"رئیس مافیا", fa:"رهبر تیم · استعلام کارآگاه برای او منفی است", en:"Team leader · Detective inquiry shows negative", tr:"Takım lideri · Dedektif sorgusu negatif çıkar", icon:"👑"},
+        {name:"کانسور", fa:"مشاور تیم · هر شب توانایی یک بازیکن را مسدود می‌کند", en:"Team advisor · Blocks one player's ability each night", tr:"Takım danışmanı · Her gece bir oyuncunun yeteneğini engeller", icon:"🧠"},
+        {name:"نینجا", fa:"قاتل خاموش · حذف می‌کند بدون اعلام کشته", en:"Silent killer · Eliminates without announcing the death", tr:"Sessiz katil · Ölümü duyurmadan eleyen", icon:"🥷"},
+        {name:"تروریست", fa:"با رأی حذف در روز، یک بازیکن را همراه خود می‌برد", en:"When eliminated by vote, takes one player along", tr:"Gündüz oyla elenince bir oyuncuyu yanında götürür", icon:"💣"}
+      ],
+      citizen: [
+        {name:"دکتر", fa:"نجات یک نفر در شب از تیر مافیا", en:"Save a player at night from mafia shot", tr:"Gece bir oyuncuyu mafya ateşinden kurtar", icon:"⚕️"},
+        {name:"کارگاه", fa:"هر شب اطلاعاتی از تیم مافیا دریافت می‌کند", en:"Receives intel about the mafia team each night", tr:"Her gece mafya takımı hakkında bilgi alır", icon:"🔧"},
+        {name:"اسنایپر", fa:"یک تیر دقیق · شلیک به رئیس مافیا = برد فوری شهر", en:"Precise shot · Shooting the boss = instant city win", tr:"Bir keskin atış · Patronu vurursa şehir anında kazanır", icon:"🎯"},
+        {name:"بادیگارد", fa:"هر شب از یک بازیکن محافظت می‌کند · تیر مافیا را جذب می‌کند", en:"Guards a player each night · Absorbs mafia shot", tr:"Her gece bir oyuncuyu korur · Mafya ateşini emer", icon:"🛡️"},
+        {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
+      ]
+    }
   }
 };
 
