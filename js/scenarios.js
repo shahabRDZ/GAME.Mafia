@@ -224,18 +224,18 @@ const SCENARIO_INFO = {
     roles: {
       mafia: [
         {name:"رئیس مافیا", fa:"رهبر تیم · حذف او = برد فوری شهر · استعلام منفی", en:"Team leader · Elimination = instant city win · Negative inquiry", tr:"Takım lideri · Elenmesi = şehir kazanır · Negatif sorgulama", icon:"👑"},
-        {name:"دکتر لکتر", fa:"نجات اعضای مافیا در شب · خودنجات یک‌بار", en:"Save mafia members at night · Self-save once", tr:"Gece mafya üyelerini kurtar · Kendini bir kez kurtar", icon:"🔪"},
-        {name:"بمب‌گذار", fa:"بمب‌گذاری روی بازیکن · حذف هدف با حذف فرد", en:"Plant bomb on player · Target out when player out", tr:"Oyuncuya bomba yerleştir · Oyuncu çıkınca hedef çıkar", icon:"💣"},
-        {name:"ناتو", fa:"حفاظت از رئیس · گمراه کردن شهروندان", en:"Protect the boss · Mislead citizens", tr:"Patronu koru · Vatandaşları yanılt", icon:"🔫"}
+        {name:"ناتاشا", fa:"هر شب یک بازیکن را فریب می‌دهد · توانایی شبانه هدف را خنثی می‌کند", en:"Seduces a player each night · Neutralises target's night action", tr:"Her gece bir oyuncuyu baştan çıkarır · Hedefin gece eylemini etkisiz kılar", icon:"💃"},
+        {name:"ترور", fa:"عملیات ترور · حذف هدف مشخص در شب", en:"Assassination mission · Eliminate designated target at night", tr:"Suikast operasyonu · Gece belirlenen hedefi etkisiz hale getir", icon:"🗡️"},
+        {name:"وکیل", fa:"محافظت از یک عضو مافیا در برابر رأی حذف", en:"Protect a mafia member from elimination vote", tr:"Bir mafya üyesini eleme oyundan koru", icon:"📜"},
+        {name:"مافیا ساده", fa:"تیراندازی شبانه همراه با تیم مافیا", en:"Night shooting alongside the mafia team", tr:"Mafya takımıyla gece atışı", icon:"😈"}
       ],
       citizen: [
-        {name:"شهردار", fa:"حق وتو در رأی‌گیری · نقش کلیدی شهر", en:"Veto in voting · Key city role", tr:"Oylama veto hakkı · Kilit şehir rolü", icon:"🎩"},
-        {name:"کارآگاه", fa:"استعلام شبانه · رئیس منفی نشان می‌دهد", en:"Night inquiry · Boss shows negative", tr:"Gece sorgulama · Patron negatif görünür", icon:"🕵️"},
-        {name:"دکتر", fa:"نجات یک نفر در شب از تیر مافیا", en:"Save a player at night from mafia shot", tr:"Gece bir oyuncuyu mafya ateşinden kurtar", icon:"⚕️"},
-        {name:"تکاور", fa:"۲ تیر · شلیک به شهروند = حذف خودش", en:"2 bullets · Shooting citizen = self elimination", tr:"2 mermi · Vatandaşa ateş = kendini ele", icon:"🎯"},
         {name:"قاضی", fa:"تغییر رأی نهایی دادگاه · صدور حکم", en:"Change final court vote · Issue ruling", tr:"Son mahkeme oyunu değiştir · Hüküm ver", icon:"⚖️"},
-        {name:"وکیل", fa:"دفاع از یک نفر در برابر رأی‌گیری", en:"Defend a player against voting", tr:"Bir oyuncuyu oylamaya karşı savun", icon:"📜"},
-        {name:"جان‌سخت", fa:"تیر اول مافیا اثر ندارد · ۲ استعلام از حذف‌شده‌ها", en:"Survives first mafia shot · 2 inquiries on eliminated", tr:"İlk mafya ateşinden sağ · Elenenlerden 2 sorgu", icon:"💪"},
+        {name:"دکتر", fa:"نجات یک نفر در شب از تیر مافیا", en:"Save a player at night from mafia shot", tr:"Gece bir oyuncuyu mafya ateşinden kurtar", icon:"⚕️"},
+        {name:"کارگاه", fa:"هر شب اطلاعاتی از تیم مافیا دریافت می‌کند", en:"Receives intel about the mafia team each night", tr:"Her gece mafya takımı hakkında bilgi alır", icon:"🔧"},
+        {name:"اسنایپر", fa:"یک تیر · شلیک به رئیس مافیا = برد فوری شهر", en:"One bullet · Shooting the boss = instant city win", tr:"Bir mermi · Patronu vurursa şehir anında kazanır", icon:"🎯"},
+        {name:"کشیش", fa:"یک بار در بازی از حذف یک بازیکن جلوگیری می‌کند", en:"Once per game prevents a player's elimination", tr:"Oyun başına bir kez bir oyuncunun elenmesini önler", icon:"⛪"},
+        {name:"محافظ", fa:"هر شب از یک بازیکن محافظت می‌کند · تیر مافیا را جذب می‌کند", en:"Guards a player each night · Absorbs mafia shot", tr:"Her gece bir oyuncuyu korur · Mafya ateşini emer", icon:"🛡️"},
         {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
       ]
     }
