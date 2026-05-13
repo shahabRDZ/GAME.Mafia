@@ -1,9 +1,10 @@
-const CACHE_VERSION = 'v91';
+const CACHE_VERSION = 'v92';
 const STATIC_CACHE = `ShowShung-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `ShowShung-dynamic-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
   '/',
+  '/mafia',
   '/css/variables.css',
   '/css/layout.css',
   '/css/components.css',

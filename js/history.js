@@ -1,23 +1,31 @@
 /* ── Game History Management ── */
 
 async function saveGame() {
+  const entry = {
+    group: state.group, count: state.count,
+    mafia: state.mafiaCount, citizen: state.citizenCount,
+    date: new Date().toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })
+  };
   if (!authToken) {
     const h = getLocalHistory();
-    h.unshift({
-      group: state.group, count: state.count,
-      mafia: state.mafiaCount, citizen: state.citizenCount,
-      date: new Date().toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })
-    });
+    h.unshift(entry);
     localStorage.setItem("mafiaHistory", JSON.stringify(h.slice(0, 30)));
     return;
   }
-  const r = await apiFetch("/api/games", {
-    method: "POST",
-    body: JSON.stringify({ group: state.group, count: state.count, mafia: state.mafiaCount, citizen: state.citizenCount })
-  });
-  if (r.ok && currentUser) {
-    currentUser.total_games = (currentUser.total_games || 0) + 1;
-    document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+  try {
+    const r = await apiFetch("/api/games", {
+      method: "POST",
+      body: JSON.stringify({ group: state.group, count: state.count, mafia: state.mafiaCount, citizen: state.citizenCount })
+    });
+    if (r.ok && currentUser) {
+      currentUser.total_games = (currentUser.total_games || 0) + 1;
+      document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
+    }
+  } catch {
+    // Offline: save locally so the game still starts
+    const h = getLocalHistory();
+    h.unshift(entry);
+    localStorage.setItem("mafiaHistory", JSON.stringify(h.slice(0, 30)));
   }
 }
 
