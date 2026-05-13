@@ -1,5 +1,80 @@
 /* ── Setup Screen Logic ── */
 
+let currentCustomMode = 'custom'; // 'custom' | 'shabnmafia'
+
+// ── شب مافیا Role List ──
+const SHAB_MAFIA_ROLES = {
+  citizen: [
+    {name:"دکتر",            desc:"نجات یک نفر در شب از شلیک مافیا",                                              icon:"⚕️"},
+    {name:"کارآگاه",          desc:"استعلام هویت مافیا بودن بازیکنان · پدرخوانده منفی نشان می‌دهد",              icon:"🕵️"},
+    {name:"حرفه‌ای",          desc:"شلیک شبانه به مافیا · شلیک اشتباه به شهروند = حذف خودش",                    icon:"🎯"},
+    {name:"جان‌سخت",         desc:"زره‌دار در شب اول · اعلام وضعیت کشته‌های بازی در روز",                       icon:"💪"},
+    {name:"شهردار",           desc:"لغو رای‌گیری روز یا خرید مستقیم بازیکن در دفاعیه",                          icon:"🎩"},
+    {name:"روان‌پزشک",       desc:"لال (ساکت) کردن یک بازیکن برای روز بعد",                                      icon:"🧠"},
+    {name:"نگهبان",           desc:"فدایی شدن برای نجات یک نفر از ترور یا شلیک",                                 icon:"🛡️"},
+    {name:"نخبه",             desc:"شناسایی نقش‌های خارج شده از بازی",                                           icon:"🎓"},
+    {name:"شکارچی",           desc:"اگر در شب کشته شود، با تیر خودش یک نفر را با خود می‌برد",                   icon:"🏹"},
+    {name:"زندانبان",         desc:"زندانی کردن یک نفر و سلب تمام توانایی‌های شبانه او",                        icon:"⛓️"},
+    {name:"پرستار",           desc:"نجات بازیکنانی که توسط سم مسموم شده‌اند",                                    icon:"💊"},
+    {name:"کشیش",             desc:"نجات بازیکن لال‌شده یا برگرداندن ساید شهروندِ روانکاو شده",                 icon:"⛪"},
+    {name:"شهروند ساده",      desc:"بدون توانایی شبانه · فقط بازوی رای در روز",                                  icon:"😇"},
+    {name:"انتقام‌جو",        desc:"بعد از مرگ، در شب بعد می‌تواند یک نفر را ترور کند",                         icon:"⚔️"},
+    {name:"کارآگاه ویژه",    desc:"استعلام نقش‌های مستقل بازی",                                                   icon:"🔎"},
+    {name:"نانوا",            desc:"تا زنده است شهر غذا دارد · با حذف او بازی پس از ۳ روز تمام می‌شود",         icon:"🍞"},
+    {name:"خبرنگار",          desc:"استعلام وضعیت بیدار شدن یا نشدن یک نقش در شب",                              icon:"📰"},
+    {name:"صداپیشه",          desc:"تغییر دادن یا مخفی کردن صدای خود هنگام صحبت در شب",                         icon:"🎙️"},
+    {name:"شاهد",             desc:"بیدار شدن همزمان با برخی نقش‌ها و دیدن کار آن‌ها بدون شناختن هویتشان",     icon:"👁️"},
+    {name:"قهرمان",           desc:"رویین‌تن کردن یک بازیکن برای ۲۴ ساعت",                                       icon:"🦸"},
+    {name:"جادوگر",           desc:"باطل کردن توانایی شبانه یک بازیکن در فاز روز",                               icon:"🔮"},
+    {name:"تکاور",            desc:"اگر هدف شلیک شب قرار بگیرد، کشته نمی‌شود و شلیک متقابل می‌کند",            icon:"🪖"}
+  ],
+  mafia: [
+    {name:"پدرخوانده",                desc:"شلیک نهایی تیم مافیا · استعلام کارآگاه برای او منفی است",                    icon:"👑"},
+    {name:"دکتر لکتر",               desc:"نجات یکی از اعضای مافیا از شلیک تک‌تیرانداز شهر",                           icon:"🔪"},
+    {name:"معشوقه",                   desc:"با حذف او در روز، مافیا شب بعد ۲ شلیک همزمان پیدا می‌کند",                 icon:"💋"},
+    {name:"روانکاو",                  desc:"تغییر ساید یک شهروند ساده به ساید مافیا در شب",                             icon:"🧪"},
+    {name:"شاه‌کش",                  desc:"حدس نقش دقیق شهروندان در شب و حذف مستقیم در صورت حدس درست",                icon:"🗡️"},
+    {name:"تروریست",                  desc:"اگر در روز با رای حذف شود، یک نفر را همراه خود حذف می‌کند",                icon:"💣"},
+    {name:"مذاکره‌کننده",            desc:"پس از حذف اولین مافیا، یک شهروند ساده را به تیم دعوت می‌کند",              icon:"🤝"},
+    {name:"گروگان‌گیر",              desc:"بستن و بلاک کردن توانایی شبانه یکی از شهروندان",                            icon:"🔒"},
+    {name:"دزد",                      desc:"سرقت توانایی شبانه یک بازیکن و استفاده از آن علیه شهر",                     icon:"🦹"},
+    {name:"شارلاتان",                 desc:"جابه‌جا کردن استعلام کارآگاه · مثبت کردن شهروند یا منفی کردن مافیا",       icon:"🎭"},
+    {name:"دست راست پدرخوانده",      desc:"جانشین رئیس پس از حذف او",                                                  icon:"🤜"},
+    {name:"سم‌ساز",                  desc:"مسموم کردن یک بازیکن در شب که بعد از ۴۸ ساعت حذف می‌شود",                  icon:"☠️"},
+    {name:"جاسوس",                    desc:"شهروندنمایی که در شب با مافیا بیدار می‌شود اما به نفع آن‌ها بازی می‌کند", icon:"🥷"},
+    {name:"جوکر مافیا",              desc:"وارونه کردن نتایج استعلام‌های شبانه روی خودش",                              icon:"🃏"},
+    {name:"مافیای ساده",             desc:"بدون توانایی خاص · بازوی رای و مشورت تیم مافیا",                            icon:"😈"},
+    {name:"کیمیاگر",                  desc:"ساختن معجون‌های خاص برای قوی‌تر کردن اعضای مافیا",                         icon:"⚗️"}
+  ],
+  independent: [
+    {name:"سندیکا",    desc:"هدف: حذف تمام مافیاها و رسیدن به ۳ نفر پایانی بازی",                                      icon:"🎰"},
+    {name:"جانی",      desc:"هر شب یک نفر را سلاخی می‌کند تا خودش برنده شود",                                          icon:"🔪"},
+    {name:"گرگ‌نما",  desc:"هر شب یک نفر را گاز می‌گیرد و او را تبدیل به گرگ‌نما می‌کند",                             icon:"🐺"},
+    {name:"زامبی",     desc:"گاز گرفتن بازیکنان و تبدیل آن‌ها به زامبی‌های مطیع خود",                                  icon:"🧟"},
+    {name:"هزارچهره", desc:"هر کس او را حذف کند، توانایی‌های آن فرد به هزارچهره می‌رسد",                              icon:"🦹"},
+    {name:"دلقک",      desc:"هدف: کاری کند شهروندان در روز به او رای خروج بدهند تا فورا برنده شود",                    icon:"🤡"},
+    {name:"لوسیفر",   desc:"توانایی دیدن نقش‌های شب و تاثیر روی تصمیمات مستقل‌ها",                                    icon:"😈"},
+    {name:"خون‌آشام", desc:"مکیدن خون بازیکنان در شب و تبدیل یا حذف آن‌ها",                                           icon:"🧛"},
+    {name:"جلاد",      desc:"در ابتدای بازی یک هدف مشخص دارد و باید او را در روز اعدام کند تا برنده شود",              icon:"⚖️"}
+  ]
+};
+
+function getShabMafiaExtraRoles() {
+  try { return JSON.parse(localStorage.getItem("shabMafiaExtraRoles")) || {citizen:[],mafia:[],independent:[]}; }
+  catch { return {citizen:[],mafia:[],independent:[]}; }
+}
+function saveShabMafiaExtraRoles(data) { localStorage.setItem("shabMafiaExtraRoles", JSON.stringify(data)); }
+function getShabMafiaSelection() {
+  try { return JSON.parse(localStorage.getItem("shabMafiaSelection")) || []; }
+  catch { return []; }
+}
+function saveShabMafiaSelection() { localStorage.setItem("shabMafiaSelection", JSON.stringify(customCardsList)); }
+function loadShabMafiaSelection() { customCardsList = getShabMafiaSelection(); }
+
+function getShabMafiaRoleInfo(name, team) {
+  return (SHAB_MAFIA_ROLES[team] || []).find(r => r.name === name) || null;
+}
+
 // ── Default Role Catalog ──
 const DEFAULT_ROLES = {
   citizen: [
@@ -37,11 +112,21 @@ function saveCustomRoles(custom) {
 }
 
 function buildCatalog() {
+  if (currentCustomMode === 'shabnmafia') {
+    const extra = getShabMafiaExtraRoles();
+    Object.keys(ROLE_CATALOG).forEach(team => {
+      const defaults = (SHAB_MAFIA_ROLES[team] || []).map(r => r.name);
+      const userAdded = extra[team] || [];
+      const all = [...defaults];
+      userAdded.forEach(r => { if (!all.includes(r)) all.push(r); });
+      ROLE_CATALOG[team].roles = all;
+    });
+    return;
+  }
   const custom = getCustomRoles();
   Object.keys(ROLE_CATALOG).forEach(team => {
     const defaults = DEFAULT_ROLES[team] || [];
     const userAdded = custom[team] || [];
-    // Merge: defaults first, then user-added (no duplicates)
     const all = [...defaults];
     userAdded.forEach(r => { if (!all.includes(r)) all.push(r); });
     ROLE_CATALOG[team].roles = all;
@@ -49,9 +134,18 @@ function buildCatalog() {
 }
 
 function addRoleToCatalog(name, team) {
+  if (currentCustomMode === 'shabnmafia') {
+    const extra = getShabMafiaExtraRoles();
+    if (!extra[team]) extra[team] = [];
+    const defaults = (SHAB_MAFIA_ROLES[team] || []).map(r => r.name);
+    if (defaults.includes(name) || extra[team].includes(name)) return;
+    extra[team].push(name);
+    saveShabMafiaExtraRoles(extra);
+    buildCatalog();
+    return;
+  }
   const custom = getCustomRoles();
   if (!custom[team]) custom[team] = [];
-  // Don't add if already in defaults or custom
   if (DEFAULT_ROLES[team]?.includes(name) || custom[team].includes(name)) return;
   custom[team].push(name);
   saveCustomRoles(custom);
@@ -59,6 +153,18 @@ function addRoleToCatalog(name, team) {
 }
 
 function removeRoleFromCatalog(name, team) {
+  if (currentCustomMode === 'shabnmafia') {
+    const extra = getShabMafiaExtraRoles();
+    if (!extra[team]) return;
+    const idx = extra[team].indexOf(name);
+    if (idx === -1) return;
+    extra[team].splice(idx, 1);
+    saveShabMafiaExtraRoles(extra);
+    buildCatalog();
+    renderRoleCatalog();
+    syncCatalogFromList();
+    return;
+  }
   const custom = getCustomRoles();
   if (!custom[team]) return;
   const idx = custom[team].indexOf(name);
@@ -71,6 +177,9 @@ function removeRoleFromCatalog(name, team) {
 }
 
 function isCustomRole(name, team) {
+  if (currentCustomMode === 'shabnmafia') {
+    return getShabMafiaExtraRoles()[team]?.includes(name) || false;
+  }
   const custom = getCustomRoles();
   return custom[team]?.includes(name) || false;
 }
@@ -81,6 +190,8 @@ buildCatalog();
 // ── Render Catalog ──
 function renderRoleCatalog() {
   const container = document.getElementById("roleCatalog");
+  const isShab = currentCustomMode === 'shabnmafia';
+  container.className = isShab ? 'role-catalog shab-mafia-catalog' : 'role-catalog';
   container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
     <div class="rc-team-section">
       <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')" style="--rc-color:${data.color}">
@@ -89,14 +200,19 @@ function renderRoleCatalog() {
         <span class="scn-toggle-icon">▶</span>
       </button>
       <div class="rc-roles-grid">
-        ${data.roles.map(role => `
-          <div class="rc-chip-wrap">
-            <button class="rc-role-chip" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
-              <span class="rc-chip-name">${escapeHtml(role)}</span>
+        ${data.roles.map(role => {
+          const info = isShab ? getShabMafiaRoleInfo(role, team) : null;
+          return `<div class="rc-chip-wrap">
+            <button class="rc-role-chip${isShab ? ' rc-role-card' : ''}" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
+              ${info ? `<span class="rc-chip-icon">${info.icon}</span>` : ''}
+              <span class="rc-chip-body">
+                <span class="rc-chip-name">${escapeHtml(role)}</span>
+                ${info ? `<span class="rc-chip-desc">${escapeHtml(info.desc)}</span>` : ''}
+              </span>
               <span class="rc-chip-badge">0</span>
             </button>${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog(${JSON.stringify(role)},${JSON.stringify(team)})" title="حذف از لیست">✕</button>` : ''}
-          </div>
-        `).join("")}
+          </div>`;
+        }).join("")}
       </div>
     </div>
   `).join("");
@@ -114,6 +230,7 @@ function toggleCatalogRole(btn) {
   renderCustomCardsList();
   updateStartBtn();
   updateCatalogCounts();
+  if (currentCustomMode === 'shabnmafia') saveShabMafiaSelection();
 }
 
 function updateCatalogCounts() {
@@ -157,7 +274,7 @@ function updateStepIndicator(step) {
 // ── Setup Flow ──
 function selectGroup(group) {
   state.group = group;
-  state.isCustom = group === "دلخواه";
+  state.isCustom = group === "دلخواه" || group === "شب مافیا";
   document.querySelectorAll(".group-btn").forEach(b => b.classList.remove("selected"));
   document.querySelector(`[data-group="${group}"]`).classList.add("selected");
 
@@ -171,14 +288,29 @@ function selectGroup(group) {
   updateStepIndicator(2);
 
   if (state.isCustom) {
+    currentCustomMode = group === "شب مافیا" ? 'shabnmafia' : 'custom';
     cf.classList.add("show");
     cc.style.display = "none";
+
+    // Update form header
+    const titleEl = document.getElementById("customFormTitle");
+    const nameRow = document.getElementById("customNameRow");
+    const shabIntro = document.getElementById("shabMafiaIntro");
+    if (titleEl) titleEl.textContent = currentCustomMode === 'shabnmafia' ? '🌙 شب مافیا' : '✏️ ساخت گروه دلخواه';
+    if (nameRow) nameRow.style.display = currentCustomMode === 'shabnmafia' ? 'none' : '';
+    if (shabIntro) shabIntro.style.display = currentCustomMode === 'shabnmafia' ? 'block' : 'none';
+
     customCardsList = [];
     selectedTeam = "mafia";
     setTeam("mafia");
     buildCatalog();
     renderRoleCatalog();
+
+    if (currentCustomMode === 'shabnmafia') {
+      loadShabMafiaSelection();
+    }
     renderCustomCardsList();
+    if (currentCustomMode === 'shabnmafia') syncCatalogFromList();
   } else {
     cf.classList.remove("show");
     cc.style.display = "none";
@@ -235,6 +367,7 @@ function removeCustomCard(idx) {
   renderCustomCardsList();
   updateStartBtn();
   syncCatalogFromList();
+  if (currentCustomMode === 'shabnmafia') saveShabMafiaSelection();
 }
 
 function renderCustomCardsList() {
