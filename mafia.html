@@ -177,6 +177,47 @@
 </div>
 
 <!-- Scenario Tutorial Overlay -->
+<!-- Shab Mafia Overlay -->
+<div class="scenario-overlay shab-mafia-overlay" id="shabMafiaOverlay" role="dialog" aria-modal="true" aria-label="شب مافیا">
+  <div class="scenario-box shab-mafia-box">
+    <div class="shab-ov-head">
+      <button class="shab-ov-close" onclick="document.getElementById('shabMafiaOverlay').classList.remove('show')" aria-label="بستن">✕</button>
+      <span class="shab-ov-title">🌙 شب مافیا</span>
+      <div class="sm-teams-legend">
+        <span class="sm-leg sm-leg-c">😇 شهروند</span>
+        <span class="sm-leg sm-leg-m">😈 مافیا</span>
+        <span class="sm-leg sm-leg-i">🐺 مستقل</span>
+      </div>
+    </div>
+    <div id="shabMafiaCatalog" class="shab-mafia-catalog shab-ov-catalog"></div>
+    <div class="custom-add-section shab-ov-add">
+      <div class="custom-add-header">
+        <span class="custom-add-icon">✦</span>
+        <span class="custom-add-label">نقش سفارشی</span>
+      </div>
+      <div class="card-builder-row">
+        <input type="text" id="shabNewRoleName" placeholder="نام نقش..." maxlength="20" autocomplete="off" inputmode="text"
+          onkeydown="if(event.key==='Enter') addShabMafiaCustomRole()">
+        <div class="team-toggle">
+          <button id="shabBtnMafia" class="active-mafia" onclick="setShabTeam('mafia')">😈</button>
+          <button id="shabBtnCitizen" onclick="setShabTeam('citizen')">😇</button>
+          <button id="shabBtnIndependent" onclick="setShabTeam('independent')">🐺</button>
+        </div>
+        <button class="add-card-btn" onclick="addShabMafiaCustomRole()">افزودن</button>
+      </div>
+    </div>
+    <div class="shab-ov-footer">
+      <div class="custom-summary" id="shabSummary" style="display:none">
+        <span class="cs-total" id="shabTotal">۰ کارت</span><span>·</span>
+        <span class="cs-mafia" id="shabMafiaCount">۰ مافیا</span><span>·</span>
+        <span class="cs-citizen" id="shabCitizenCount">۰ شهروند</span><span>·</span>
+        <span class="cs-independent" id="shabIndepCount">۰ مستقل</span>
+      </div>
+      <button class="start-btn start-btn-animated shab-start-btn" id="shabStartBtn" onclick="startShabMafiaGame()" style="display:none">🎮 شروع بازی</button>
+    </div>
+  </div>
+</div>
+
 <div class="scenario-overlay" id="scenarioOverlay" role="dialog" aria-modal="true" aria-label="آموزش سناریو">
   <div class="scenario-box" id="scenarioContent"></div>
 </div>
@@ -307,15 +348,7 @@
         </button>
       </div>
       <div class="custom-form" id="customForm">
-        <div class="section-title" id="customFormTitle">✏️ ساخت گروه دلخواه</div>
-        <div class="shab-mafia-intro" id="shabMafiaIntro" style="display:none">
-          <p class="sm-intro-text">لیست نقش‌های کامل شب مافیا · انتخاب کنید، انتخابتان ذخیره می‌ماند</p>
-          <div class="sm-teams-legend">
-            <span class="sm-leg sm-leg-c">😇 شهروند</span>
-            <span class="sm-leg sm-leg-m">😈 مافیا</span>
-            <span class="sm-leg sm-leg-i">🐺 مستقل</span>
-          </div>
-        </div>
+        <div class="section-title">✏️ ساخت گروه دلخواه</div>
         <div class="form-group" id="customNameRow"><label for="customName">نام گروه</label>
           <input type="text" id="customName" placeholder="مثال: دوستان" value="گروه من" autocomplete="off" maxlength="30"></div>
 

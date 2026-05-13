@@ -161,8 +161,8 @@ function removeRoleFromCatalog(name, team) {
     extra[team].splice(idx, 1);
     saveShabMafiaExtraRoles(extra);
     buildCatalog();
-    renderRoleCatalog();
-    syncCatalogFromList();
+    renderShabMafiaCatalog();
+    syncShabMafiaCatalog();
     return;
   }
   const custom = getCustomRoles();
@@ -238,10 +238,20 @@ function decrementCatalogRole(chip) {
       break;
     }
   }
-  renderCustomCardsList();
-  updateStartBtn();
-  syncCatalogFromList();
-  if (currentCustomMode === 'shabnmafia') saveShabMafiaSelection();
+  const badge = chip.querySelector('.rc-chip-badge');
+  if (badge) {
+    const n = Math.max(0, (parseInt(badge.textContent) || 1) - 1);
+    badge.textContent = n;
+    if (n === 0) chip.classList.remove('active');
+  }
+  if (currentCustomMode === 'shabnmafia') {
+    updateShabSummary();
+    saveShabMafiaSelection();
+  } else {
+    renderCustomCardsList();
+    updateStartBtn();
+    syncCatalogFromList();
+  }
 }
 
 function toggleCatalogRole(btn) {
@@ -253,10 +263,14 @@ function toggleCatalogRole(btn) {
   badge.textContent = count;
   btn.classList.add("active");
   customCardsList.push({ name: role, team: team });
-  renderCustomCardsList();
-  updateStartBtn();
-  updateCatalogCounts();
-  if (currentCustomMode === 'shabnmafia') saveShabMafiaSelection();
+  if (currentCustomMode === 'shabnmafia') {
+    updateShabSummary();
+    saveShabMafiaSelection();
+  } else {
+    renderCustomCardsList();
+    updateStartBtn();
+    updateCatalogCounts();
+  }
 }
 
 function updateCatalogCounts() {
@@ -268,19 +282,127 @@ function updateCatalogCounts() {
 }
 
 function syncCatalogFromList() {
-  document.querySelectorAll(".rc-role-chip").forEach(btn => {
+  document.querySelectorAll("#roleCatalog .rc-role-chip").forEach(btn => {
     btn.classList.remove("active");
-    btn.querySelector(".rc-chip-badge").textContent = "0";
+    const b = btn.querySelector(".rc-chip-badge");
+    if (b) b.textContent = "0";
   });
   customCardsList.forEach(c => {
-    const btn = document.querySelector(`.rc-role-chip[data-role="${c.name}"][data-team="${c.team}"]`);
+    const btn = document.querySelector(`#roleCatalog .rc-role-chip[data-role="${c.name}"][data-team="${c.team}"]`);
     if (btn) {
       btn.classList.add("active");
       const badge = btn.querySelector(".rc-chip-badge");
-      badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+      if (badge) badge.textContent = (parseInt(badge.textContent) || 0) + 1;
     }
   });
   updateCatalogCounts();
+}
+
+// ── Shab Mafia Overlay ──
+let shabMafiaSelectedTeam = 'mafia';
+
+function renderShabMafiaCatalog() {
+  const container = document.getElementById('shabMafiaCatalog');
+  if (!container) return;
+  container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
+    <div class="rc-team-section open" style="--rc-color:${data.color}">
+      <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="rc-team-label">${data.label}</span>
+        <span class="rc-team-count" id="shmCount_${team}">۰</span>
+        <span class="scn-toggle-icon">▶</span>
+      </button>
+      <div class="rc-roles-grid">
+        ${data.roles.map(role => {
+          const info = getShabMafiaRoleInfo(role, team);
+          return `<div class="rc-chip-wrap sm-chip-wrap">
+            <div class="sm-tile rc-role-chip" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
+              <div class="sm-tile-top">
+                ${info ? `<span class="sm-tile-icon">${info.icon}</span>` : ''}
+                <span class="sm-tile-name">${escapeHtml(role)}</span>
+              </div>
+              <div class="sm-tile-bottom" onclick="event.stopPropagation()">
+                <button class="sm-tile-minus" onclick="decrementCatalogRole(this.closest('.rc-role-chip'))">−</button>
+                <span class="rc-chip-badge">0</span>
+              </div>
+            </div>
+            ${isCustomRole(role, team) ? `<button class="rc-chip-del" onclick="removeRoleFromCatalog(${JSON.stringify(role)},${JSON.stringify(team)})">✕</button>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function syncShabMafiaCatalog() {
+  document.querySelectorAll('#shabMafiaCatalog .rc-role-chip').forEach(btn => {
+    btn.classList.remove('active');
+    const b = btn.querySelector('.rc-chip-badge');
+    if (b) b.textContent = '0';
+  });
+  customCardsList.forEach(c => {
+    const btn = document.querySelector(`#shabMafiaCatalog .rc-role-chip[data-role="${c.name}"][data-team="${c.team}"]`);
+    if (btn) {
+      btn.classList.add('active');
+      const badge = btn.querySelector('.rc-chip-badge');
+      if (badge) badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+    }
+  });
+  ['citizen','mafia','independent'].forEach(team => {
+    const el = document.getElementById(`shmCount_${team}`);
+    if (el) el.textContent = toFarsiNum(customCardsList.filter(c => c.team === team).length);
+  });
+}
+
+function updateShabSummary() {
+  const total = customCardsList.length;
+  const mc = customCardsList.filter(c => c.team === 'mafia').length;
+  const cc = customCardsList.filter(c => c.team === 'citizen').length;
+  const ic = customCardsList.filter(c => c.team === 'independent').length;
+  ['citizen','mafia','independent'].forEach(team => {
+    const el = document.getElementById(`shmCount_${team}`);
+    if (el) el.textContent = toFarsiNum(customCardsList.filter(c=>c.team===team).length);
+  });
+  const sumEl = document.getElementById('shabSummary');
+  if (sumEl) sumEl.style.display = total > 0 ? 'flex' : 'none';
+  const t = document.getElementById('shabTotal');       if (t) t.textContent = toFarsiNum(total) + ' کارت';
+  const m = document.getElementById('shabMafiaCount'); if (m) m.textContent = toFarsiNum(mc) + ' مافیا';
+  const ci = document.getElementById('shabCitizenCount'); if (ci) ci.textContent = toFarsiNum(cc) + ' شهروند';
+  const ind = document.getElementById('shabIndepCount'); if (ind) ind.textContent = toFarsiNum(ic) + ' مستقل';
+  const startBtn = document.getElementById('shabStartBtn');
+  if (startBtn) startBtn.style.display = (total >= 3 && mc >= 1 && cc >= 1) ? 'block' : 'none';
+}
+
+function setShabTeam(team) {
+  shabMafiaSelectedTeam = team;
+  document.getElementById('shabBtnMafia').className = team === 'mafia' ? 'active-mafia' : '';
+  document.getElementById('shabBtnCitizen').className = team === 'citizen' ? 'active-citizen' : '';
+  document.getElementById('shabBtnIndependent').className = team === 'independent' ? 'active-independent' : '';
+}
+
+function addShabMafiaCustomRole() {
+  const input = document.getElementById('shabNewRoleName');
+  const name = input.value.trim();
+  if (!name) { input.focus(); showToast('⚠️ اسم نقش را بنویسید'); return; }
+  addRoleToCatalog(name, shabMafiaSelectedTeam);
+  input.value = ''; input.focus();
+  buildCatalog();
+  renderShabMafiaCatalog();
+  syncShabMafiaCatalog();
+}
+
+function startShabMafiaGame() {
+  const mc = customCardsList.filter(c => c.team === 'mafia').length;
+  const cc = customCardsList.filter(c => c.team === 'citizen').length;
+  if (customCardsList.length < 3 || mc < 1 || cc < 1) {
+    showToast('⚠️ حداقل ۱ مافیا و ۱ شهروند انتخاب کنید'); return;
+  }
+  document.getElementById('shabMafiaOverlay').classList.remove('show');
+  state.group = 'شب مافیا'; state.isCustom = true;
+  state.count = customCardsList.length;
+  state.mafiaCount = mc;
+  state.citizenCount = cc + customCardsList.filter(c => c.team === 'independent').length;
+  state.customCards = [...customCardsList];
+  if (typeof showNarratorModal === 'function') showNarratorModal();
 }
 
 // ── Step Indicator ──
@@ -299,58 +421,47 @@ function updateStepIndicator(step) {
 
 // ── Setup Flow ──
 function selectGroup(group) {
-  state.group = group;
-  state.isCustom = group === "دلخواه" || group === "شب مافیا";
   document.querySelectorAll(".group-btn").forEach(b => b.classList.remove("selected"));
-  document.querySelector(`[data-group="${group}"]`).classList.add("selected");
+  const btn = document.querySelector(`[data-group="${group}"]`);
+  if (btn) btn.classList.add("selected");
 
   const cf = document.getElementById("customForm");
   const cc = document.getElementById("countCard");
-
-  // Hide both button rows
   const sr = document.getElementById("startBtnRow"); if (sr) sr.style.display = "none";
   const csr = document.getElementById("customStartRow"); if (csr) csr.style.display = "none";
+  cf.classList.remove("show");
+  cc.style.display = "none";
 
   updateStepIndicator(2);
 
-  if (state.isCustom) {
-    currentCustomMode = group === "شب مافیا" ? 'shabnmafia' : 'custom';
+  if (group === "شب مافیا") {
+    currentCustomMode = 'shabnmafia';
+    state.group = group; state.isCustom = true;
+    customCardsList = [];
+    buildCatalog();
+    renderShabMafiaCatalog();
+    loadShabMafiaSelection();
+    syncShabMafiaCatalog();
+    updateShabSummary();
+    document.getElementById('shabMafiaOverlay').classList.add('show');
+
+  } else if (group === "دلخواه") {
+    currentCustomMode = 'custom';
+    state.group = group; state.isCustom = true;
     cf.classList.add("show");
-    cc.style.display = "none";
-
-    // Update form header
-    const titleEl = document.getElementById("customFormTitle");
-    const nameRow = document.getElementById("customNameRow");
-    const shabIntro = document.getElementById("shabMafiaIntro");
-    if (titleEl) titleEl.textContent = currentCustomMode === 'shabnmafia' ? '🌙 شب مافیا' : '✏️ ساخت گروه دلخواه';
-    if (nameRow) nameRow.style.display = currentCustomMode === 'shabnmafia' ? 'none' : '';
-    if (shabIntro) shabIntro.style.display = currentCustomMode === 'shabnmafia' ? 'block' : 'none';
-
     customCardsList = [];
     selectedTeam = "mafia";
     setTeam("mafia");
     buildCatalog();
     renderRoleCatalog();
-
-    if (currentCustomMode === 'shabnmafia') {
-      loadShabMafiaSelection();
-    }
     renderCustomCardsList();
-    if (currentCustomMode === 'shabnmafia') syncCatalogFromList();
+
   } else {
-    cf.classList.remove("show");
-    cc.style.display = "none";
-    state.count = null;
-    customCardsList = [];
-    if (!ROLES_DATA[group]) {
-      showToast("⚠️ این سناریو هنوز پیکربندی نشده");
-      return;
-    }
-    if (SCENARIO_INFO[group]) {
-      openScenarioOverlay(group);
-    } else {
-      openCountOverlay(group);
-    }
+    state.group = group; state.isCustom = false;
+    state.count = null; customCardsList = [];
+    if (!ROLES_DATA[group]) { showToast("⚠️ این سناریو هنوز پیکربندی نشده"); return; }
+    if (SCENARIO_INFO[group]) openScenarioOverlay(group);
+    else openCountOverlay(group);
   }
 }
 
