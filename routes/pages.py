@@ -61,6 +61,7 @@ def sitemap():
 
 
 @bp.route("/")
+@bp.route("/mafia")
 def index():
     return current_app.send_static_file("mafia.html")
 
