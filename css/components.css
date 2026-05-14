@@ -1937,7 +1937,7 @@
 .home-ad-banner:hover { border-color: rgba(233,69,96,.45); }
 .home-ad-img {
   width: 100%; display: block;
-  max-height: 160px; object-fit: cover;
+  max-height: 220px; object-fit: cover; object-position: top;
 }
 .home-ad-banner.no-img .home-ad-img { display: none; }
 .home-ad-fallback {
