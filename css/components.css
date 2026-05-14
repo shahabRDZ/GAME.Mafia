@@ -1792,6 +1792,18 @@
   border:1px solid rgba(233,69,96,.2);
   transition:all var(--transition-base);
 }
+.tools-ad-banner {
+  margin:12px 12px 0;
+  border-radius:var(--radius-xl);
+  max-height:180px;
+  overflow:hidden;
+}
+.tools-ad-banner .event-banner-pic { max-height:180px; object-fit:cover; width:100%; }
+.tools-ad-banner .event-banner-fallback { min-height:120px; }
+@media (max-width:480px) {
+  .tools-ad-banner { margin:8px 8px 0; max-height:140px; }
+  .tools-ad-banner .event-banner-pic { max-height:140px; }
+}
 .event-banner-img:hover { border-color:rgba(233,69,96,.4); }
 .event-banner-img:active { transform:scale(0.98); }
 .event-banner-pic { width:100%; display:block; border-radius:var(--radius-xl); }

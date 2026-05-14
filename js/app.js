@@ -1,7 +1,10 @@
 /* ── Application Initialization ── */
 
-// Remove SEO landing section once app JS is running
-(function() { const s = document.getElementById('seo-landing'); if (s) s.style.display = 'none'; })();
+// Remove SEO landing and footer once app JS is running (footer causes empty scroll space)
+(function() {
+  const s = document.getElementById('seo-landing'); if (s) s.style.display = 'none';
+  const f = document.querySelector('.site-footer'); if (f) f.style.display = 'none';
+})();
 
 // ── Splash Screen ──
 (function runSplash() {
