@@ -38,6 +38,9 @@ COPY sockets/ sockets/
 COPY utils/ utils/
 COPY *.html app.py ./
 
+# Create writable dirs before dropping to non-root user
+RUN mkdir -p /app/instance /app/data && chown -R appuser:appuser /app/instance /app/data
+
 # Switch to non-root user
 USER appuser
 
