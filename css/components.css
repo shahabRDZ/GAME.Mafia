@@ -1921,6 +1921,64 @@
 .lb-me { background: rgba(245,166,35,.06); border-radius: var(--radius-md); }
 
 /* ── PWA Install Banner ── */
+/* ── Event Slide-up Banner ── */
+.event-slideup {
+  position: fixed;
+  bottom: 4.8rem;
+  left: 0; right: 0;
+  z-index: calc(var(--z-overlay) - 1);
+  padding: 0 12px;
+  transform: translateY(120%);
+  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+.event-slideup.show {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.event-slideup-close {
+  position: absolute;
+  top: -10px; left: 20px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(20,20,30,.95);
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.7);
+  font-size: .75rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 2;
+  transition: background .2s;
+}
+.event-slideup-close:hover { background: rgba(233,69,96,.8); color:#fff; }
+.event-slideup-inner {
+  display: block;
+  text-decoration: none;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 -4px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(233,69,96,.2);
+}
+.event-slideup-img {
+  width: 100%;
+  display: block;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+.event-slideup-fallback {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(20,20,30,.98), rgba(30,10,20,.98));
+  border: 1px solid rgba(233,69,96,.25);
+  border-radius: 16px;
+}
+.event-slideup-icon { font-size: 2rem; flex-shrink: 0; }
+.event-slideup-text { flex: 1; }
+.event-slideup-title { color: #fff; font-weight: 800; font-size: 1rem; }
+.event-slideup-sub { color: rgba(255,255,255,.5); font-size: .8rem; margin-top: 2px; }
+.event-slideup-arrow { color: var(--accent); font-size: 1.2rem; flex-shrink: 0; }
+
 .pwa-banner {
   position: fixed; bottom: 4.5rem; left: 50%; transform: translateX(-50%);
   z-index: var(--z-overlay);

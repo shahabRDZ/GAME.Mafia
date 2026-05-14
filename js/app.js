@@ -309,6 +309,21 @@ function dismissPWA() {
   localStorage.setItem('pwa_dismissed', '1');
 }
 
+// ── Event Slide-up Banner ──
+(function initEventBanner() {
+  const dismissed = localStorage.getItem('eventBanner_v1');
+  if (dismissed) return;
+  setTimeout(() => {
+    const el = document.getElementById('eventSlideup');
+    if (el) el.classList.add('show');
+  }, 2000);
+})();
+function dismissEventBanner() {
+  const el = document.getElementById('eventSlideup');
+  if (el) { el.classList.remove('show'); }
+  localStorage.setItem('eventBanner_v1', '1');
+}
+
 // ── Push Notifications ──
 async function requestNotificationPermission() {
   if (!('Notification' in window)) return;
