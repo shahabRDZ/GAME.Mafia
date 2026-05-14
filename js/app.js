@@ -77,13 +77,14 @@
 // Keyboard handlers
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && document.getElementById("authModal").classList.contains("show")) submitAuth();
-  if (e.key === "Escape") { closeAuthModal(); closeOverlay(); closeScenarioOverlay(); }
+  if (e.key === "Escape") { closeAuthModal(); closeOverlay(); closeScenarioOverlay(); document.getElementById('shabMafiaOverlay')?.classList.remove('show'); }
 });
 
 // Click-outside handlers
 document.getElementById("revealOverlay").addEventListener("click", function (e) { if (e.target === this) closeOverlay(); });
 document.getElementById("authModal").addEventListener("click", function (e) { if (e.target === this) closeAuthModal(); });
 document.getElementById("scenarioOverlay").addEventListener("click", function (e) { if (e.target === this) closeScenarioOverlay(); });
+document.getElementById("shabMafiaOverlay").addEventListener("click", function (e) { if (e.target === this) document.getElementById('shabMafiaOverlay').classList.remove('show'); });
 
 // ── Swipe-to-dismiss for modals/overlays ──
 function initSwipeDismiss(boxSelector, closeFn) {
@@ -126,7 +127,8 @@ function initSwipeDismiss(boxSelector, closeFn) {
 }
 initSwipeDismiss(".reveal-box", closeOverlay);
 initSwipeDismiss(".modal-box", closeAuthModal);
-initSwipeDismiss(".scenario-box", closeScenarioOverlay);
+initSwipeDismiss("#scenarioContent", closeScenarioOverlay);
+initSwipeDismiss(".shab-mafia-box", () => document.getElementById('shabMafiaOverlay').classList.remove('show'));
 
 // ── Theme Toggle ──
 function toggleTheme() {
