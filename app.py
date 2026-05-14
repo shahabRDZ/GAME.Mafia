@@ -2,7 +2,7 @@
 import os
 import time
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from config.settings import Config
@@ -26,15 +26,6 @@ CORS(app)
 db.init_app(app)
 jwt.init_app(app)
 socketio.init_app(app)
-
-# sw.js must never be HTTP-cached so browsers always get the latest version
-@app.route('/sw.js')
-def service_worker():
-    resp = send_from_directory(BASE_DIR, 'sw.js', mimetype='application/javascript')
-    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    resp.headers['Pragma'] = 'no-cache'
-    return resp
-
 
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
 
