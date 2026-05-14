@@ -18,9 +18,6 @@ WORKDIR /app
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser -s /sbin/nologin appuser
-
 # Copy application files (ordered by change frequency for layer caching)
 COPY manifest.json icon-192.png icon-512.png icon.svg sw.js ./
 COPY css/ css/
@@ -38,11 +35,7 @@ COPY sockets/ sockets/
 COPY utils/ utils/
 COPY *.html app.py ./
 
-# Create writable dirs before dropping to non-root user
-RUN mkdir -p /app/instance /app/data && chown -R appuser:appuser /app/instance /app/data
-
-# Switch to non-root user
-USER appuser
+RUN mkdir -p /app/instance /app/data
 
 EXPOSE 5000
 
