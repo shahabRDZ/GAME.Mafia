@@ -415,6 +415,19 @@
   <main>
   <!-- Setup Screen -->
   <section class="screen active" id="setupScreen" aria-label="تنظیمات بازی" aria-labelledby="setupHeading">
+
+    <a href="https://www.showshung.com/mafia-events" class="home-ad-banner">
+      <img src="img/Mafia game event promotion graphic.png" alt="ایونت‌های مافیا" class="home-ad-img" onerror="this.parentElement.classList.add('no-img')">
+      <div class="home-ad-fallback">
+        <span class="home-ad-fallback-icon">🎭</span>
+        <div>
+          <div class="home-ad-fallback-title">مافیا بازی میکنی!</div>
+          <div class="home-ad-fallback-sub">ایونت‌های مافیا رو پیدا کن 🔥</div>
+        </div>
+        <span class="home-ad-fallback-arrow">←</span>
+      </div>
+    </a>
+
     <!-- Step Indicator -->
     <div class="step-indicator" id="stepIndicator">
       <div class="step-item active" data-step="1"><span class="step-num">۱</span><span class="step-label">سناریو</span></div>
@@ -595,24 +608,6 @@
 
     <!-- Moderator Tools Panel -->
     <div class="mod-panel" id="modPanel" style="display:none">
-
-      <!-- Ad Banner -->
-      <a href="/mafia-events" class="event-banner-img tools-ad-banner">
-        <img src="img/Mafia game event promotion graphic.png" alt="ایونت‌های مافیا" class="event-banner-pic" onerror="this.parentElement.classList.add('no-img')">
-        <div class="event-banner-fallback">
-          <div class="event-banner-fire"></div>
-          <div class="event-banner-content">
-            <div class="event-banner-mask">🎭</div>
-            <div class="event-banner-text">
-              <div class="eb-line1">هر جا هستی، هر شهر یا کشوری هستی</div>
-              <div class="eb-line2">مافیا بازی <span>میکنی!</span></div>
-              <div class="eb-line3">ایونت‌های مافیا رو همین جا پیدا کن</div>
-            </div>
-          </div>
-          <div class="event-banner-cta">🔥 برای دیدن ایونت‌ها کلیک کن 👇</div>
-        </div>
-      </a>
-
       <!-- Day/Night Timer -->
       <div class="mod-section">
         <div class="mod-phase" id="modPhase">
@@ -892,22 +887,6 @@
     <div class="search-section gc" id="searchSection"></div>
   </section>
   </main>
-</div>
-
-<!-- Event Slide-up Banner -->
-<div class="event-slideup" id="eventSlideup">
-  <button class="event-slideup-close" onclick="dismissEventBanner()" aria-label="بستن">✕</button>
-  <a href="/mafia-events" class="event-slideup-inner">
-    <img src="img/Mafia game event promotion graphic.png" alt="ایونت‌های مافیا" class="event-slideup-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-    <div class="event-slideup-fallback">
-      <span class="event-slideup-icon">🎭</span>
-      <div class="event-slideup-text">
-        <div class="event-slideup-title">مافیا بازی میکنی!</div>
-        <div class="event-slideup-sub">ایونت‌های مافیا رو پیدا کن 🔥</div>
-      </div>
-      <span class="event-slideup-arrow">←</span>
-    </div>
-  </a>
 </div>
 
 <!-- PWA Install Banner -->
