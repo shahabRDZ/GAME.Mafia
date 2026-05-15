@@ -12,7 +12,7 @@ def is_admin():
         uid = int(get_jwt_identity())
         from models import User
         user = db.session.get(User, uid)
-        return user and user.username in Config.ADMIN_USERNAMES
+        return user and user.username.lower() in [u.lower() for u in Config.ADMIN_USERNAMES]
     except Exception:
         return False
 
