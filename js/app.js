@@ -42,12 +42,13 @@ document.getElementById("scenarioOverlay").addEventListener("click", function (e
 document.getElementById("shabMafiaOverlay").addEventListener("click", function (e) { if (e.target === this) document.getElementById('shabMafiaOverlay').classList.remove('show'); });
 
 // ── Swipe-to-dismiss for modals/overlays ──
-function initSwipeDismiss(boxSelector, closeFn) {
+function initSwipeDismiss(boxSelector, closeFn, scrollContainerSelector) {
   const box = document.querySelector(boxSelector);
   if (!box) return;
+  const scrollEl = scrollContainerSelector ? document.querySelector(scrollContainerSelector) : box;
   let startY = 0, currentY = 0, isDragging = false;
   box.addEventListener("touchstart", e => {
-    if (box.scrollTop > 5) return;
+    if ((scrollEl || box).scrollTop > 5) return;
     startY = e.touches[0].clientY;
     isDragging = true;
     box.style.transition = "none";
@@ -83,7 +84,7 @@ function initSwipeDismiss(boxSelector, closeFn) {
 initSwipeDismiss(".reveal-box", closeOverlay);
 initSwipeDismiss(".modal-box", closeAuthModal);
 initSwipeDismiss("#scenarioContent", closeScenarioOverlay);
-initSwipeDismiss(".shab-mafia-box", () => document.getElementById('shabMafiaOverlay').classList.remove('show'));
+initSwipeDismiss(".shab-mafia-box", () => document.getElementById('shabMafiaOverlay').classList.remove('show'), "#shabMafiaOverlay");
 
 // ── Theme Toggle ──
 function toggleTheme() {
