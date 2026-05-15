@@ -155,6 +155,29 @@ def admin_user_games(uid):
     return jsonify([g.to_dict() for g in games]), 200
 
 
+@bp.route("/api/admin/games", methods=["GET"])
+@jwt_required()
+@admin_required
+def admin_all_games():
+    page = int(request.args.get("page", 1))
+    per_page = 50
+    games = (Game.query
+             .join(User, Game.user_id == User.id)
+             .order_by(Game.played_at.desc())
+             .offset((page - 1) * per_page)
+             .limit(per_page)
+             .all())
+    total = Game.query.count()
+    result = []
+    for g in games:
+        user = db.session.get(User, g.user_id)
+        d = g.to_dict()
+        d["username"] = user.username if user else "—"
+        d["user_id"] = g.user_id
+        result.append(d)
+    return jsonify({"games": result, "total": total, "page": page}), 200
+
+
 @bp.route("/api/admin/export-csv", methods=["GET"])
 @jwt_required(optional=True)
 def admin_export_csv():
