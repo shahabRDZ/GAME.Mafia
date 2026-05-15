@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 
 # Copy application files (ordered by change frequency for layer caching)
-COPY manifest.json icon-192.png icon-512.png icon.svg sw.js ./
+COPY manifest.json icon-192.png icon-512.png icon.svg sw.js robots.txt sitemap.xml ./
 COPY css/ css/
 COPY js/ js/
 COPY img/ img/
