@@ -50,5 +50,5 @@ function showScreen(name) {
   if (name === "admin") renderAdminScreen();
   if (name === "leaderboard") loadLeaderboard('wins');
   if (name === "rules") showRulesTab('overview');
-  if (name === "events") filterEvents();
+  if (name === "events") { _initEventSelects(); filterEvents(); }
 }

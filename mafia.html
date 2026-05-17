@@ -840,15 +840,12 @@
       <div class="section-title">🏠 ایونت‌های بازی مافیا</div>
       <!-- Filter -->
       <div class="event-filters">
-        <select id="eventCountryFilter" onchange="filterEvents()" class="event-select">
+        <select id="eventCountryFilter" onchange="_onCountryChange(this,'eventCityFilter');filterEvents()" class="event-select">
           <option value="">همه کشورها</option>
-          <option value="ایران">🇮🇷 ایران</option>
-          <option value="ترکیه">🇹🇷 ترکیه</option>
-          <option value="امارات">🇦🇪 امارات</option>
-          <option value="آلمان">🇩🇪 آلمان</option>
-          <option value="کانادا">🇨🇦 کانادا</option>
         </select>
-        <input type="text" id="eventCityFilter" placeholder="شهر..." class="event-city-input" oninput="filterEvents()">
+        <input type="text" id="eventCityFilter" placeholder="شهر..." class="event-city-input"
+               list="cityListFilter" oninput="filterEvents()" autocomplete="off">
+        <datalist id="cityListFilter"></datalist>
       </div>
       <!-- Actions -->
       <div class="event-actions-bar">
@@ -864,8 +861,10 @@
       <div id="eventCreate" class="event-section">
         <div class="event-form">
           <div class="ef-row">
-            <select id="evCountry" class="event-select"><option value="ایران">🇮🇷 ایران</option><option value="ترکیه">🇹🇷 ترکیه</option><option value="امارات">🇦🇪 امارات</option><option value="آلمان">🇩🇪 آلمان</option><option value="کانادا">🇨🇦 کانادا</option></select>
-            <input type="text" id="evCity" placeholder="شهر (مثلاً استانبول)" class="ef-input">
+            <select id="evCountry" class="event-select" onchange="_onCountryChange(this,'evCity')"></select>
+            <input type="text" id="evCity" placeholder="شهر..." class="ef-input"
+                   list="cityListCreate" autocomplete="off">
+            <datalist id="cityListCreate"></datalist>
           </div>
           <input type="text" id="evLocation" placeholder="📍 نام لوکیشن (مثلاً کافه فلان)" class="ef-input" style="width:100%">
           <div class="ef-row">

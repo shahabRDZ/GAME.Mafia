@@ -135,6 +135,7 @@ function getDeviceFingerprint() {
 // Initialize
 applyLang();
 initAuth();
+_initEventSelects();
 
 // ── System Messages — check and show to user ──
 async function checkSystemMessages() {
