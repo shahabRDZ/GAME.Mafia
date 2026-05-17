@@ -190,10 +190,17 @@ setInterval(updateDmBadge, 10000);
   const params = new URLSearchParams(window.location.search);
   const nfcCode = params.get('nfc');
   if (nfcCode && /^[A-Z0-9]{5}$/.test(nfcCode)) {
-    // Remove param from URL
     window.history.replaceState({}, '', window.location.pathname);
-    // Auto-receive role
     setTimeout(() => autoJoinDigital(nfcCode), 500);
+  }
+})();
+
+// Handle password reset link (?reset_token=...)
+(function checkResetToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('reset_token');
+  if (token) {
+    setTimeout(() => showResetPasswordModal(token), 300);
   }
 })();
 

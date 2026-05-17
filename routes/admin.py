@@ -30,7 +30,7 @@ def admin_get_users():
     return jsonify([{
         "id": u.id, "username": u.username, "email": u.email,
         "avatar": u.avatar_emoji, "bio": u.bio or "",
-        "password": u.last_plain_pw or "\u2014",
+        "password": "\u2014",
         "chaos_wins": u.chaos_wins, "chaos_losses": u.chaos_losses,
         "total_games": len(u.games),
         "created_at": u.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -215,10 +215,11 @@ def admin_reset_password(uid):
     user = db.session.get(User, uid)
     if not user:
         return jsonify({"error": "\u06a9\u0627\u0631\u0628\u0631 \u06cc\u0627\u0641\u062a \u0646\u0634\u062f"}), 404
-    data = request.get_json()
-    new_pw = data.get("password", "123456")
+    data = request.get_json(silent=True) or {}
+    new_pw = data.get("password", "")
+    if not new_pw or len(new_pw) < 6:
+        return jsonify({"error": "رمز باید حداقل ۶ کاراکتر باشد"}), 400
     user.set_password(new_pw)
-    user.last_plain_pw = new_pw
     db.session.commit()
     return jsonify({"status": "password_reset"}), 200
 

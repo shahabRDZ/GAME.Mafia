@@ -1,7 +1,10 @@
 /* ── Authentication System ── */
 
+const _PW_MAX = 72;
+const _USER_RE = /^[a-zA-Z0-9_؀-ۿ]{3,30}$/;
+const _EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
 async function initAuth() {
-  // Try localStorage token first
   if (!authToken) {
     authToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
   }
@@ -14,20 +17,16 @@ async function initAuth() {
         renderAuthBar();
         return;
       }
-      // Only clear token if server explicitly rejected it (401)
       if (r.status === 401) {
         authToken = null;
         currentUser = null;
         localStorage.removeItem("mafiaToken");
         sessionStorage.removeItem("mafiaToken");
       } else {
-        // Network error, timeout, or server error — keep token, user stays logged in
-        console.log("Auth check failed but keeping token:", r.status);
         renderAuthBar();
         return;
       }
     } catch {
-      // Network error — keep token and stay logged in
       renderAuthBar();
       return;
     }
@@ -83,29 +82,48 @@ function updateAuthModalUI() {
     : 'حساب دارید؟ <a onclick="switchAuthMode()">وارد شوید</a>';
 }
 
+function _setAuthError(msg) {
+  document.getElementById("authError").textContent = msg;
+}
+
+function _validatePassword(pw, errEl) {
+  if (!pw || pw.length < 6) { errEl("رمز عبور باید حداقل ۶ کاراکتر باشد"); return false; }
+  if (pw.length > _PW_MAX)  { errEl(`رمز عبور نباید بیشتر از ${_PW_MAX} کاراکتر باشد`); return false; }
+  return true;
+}
+
 async function submitAuth() {
   const btn = document.getElementById("authSubmitBtn");
   const errEl = document.getElementById("authError");
   errEl.textContent = "";
-  btn.disabled = true;
-  btn.textContent = "...";
 
   let body, path;
+
   if (authMode === "login") {
-    body = {
-      identifier: document.getElementById("loginIdentifier").value.trim(),
-      password: document.getElementById("loginPassword").value
-    };
+    const identifier = document.getElementById("loginIdentifier").value.trim();
+    const password   = document.getElementById("loginPassword").value;
+    if (!identifier || !password) { _setAuthError("همه فیلدها را پر کنید"); return; }
+    if (!_validatePassword(password, _setAuthError)) return;
+    body = { identifier, password };
     path = "/api/auth/login";
   } else {
-    body = {
-      username: document.getElementById("regUsername").value.trim(),
-      email: document.getElementById("regEmail").value.trim(),
-      password: document.getElementById("regPassword").value
-    };
+    const username = document.getElementById("regUsername").value.trim();
+    const email    = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const confirm  = document.getElementById("regPasswordConfirm").value;
+
+    if (!username || !email || !password || !confirm) { _setAuthError("همه فیلدها را پر کنید"); return; }
+    if (!_USER_RE.test(username)) { _setAuthError("نام کاربری باید ۳ تا ۳۰ کاراکتر و فقط حروف، عدد یا _ باشد"); return; }
+    if (!_EMAIL_RE.test(email))   { _setAuthError("فرمت ایمیل نامعتبر است"); return; }
+    if (!_validatePassword(password, _setAuthError)) return;
+    if (password !== confirm) { _setAuthError("رمز عبور و تکرار آن یکسان نیستند"); return; }
+
+    body = { username, email, password };
     path = "/api/auth/register";
   }
 
+  btn.disabled = true;
+  btn.textContent = "...";
   const r = await apiFetch(path, { method: "POST", body: JSON.stringify(body) });
   btn.disabled = false;
   btn.textContent = authMode === "login" ? "ورود" : "ثبت‌نام";
@@ -113,9 +131,7 @@ async function submitAuth() {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    // Always save to localStorage
     localStorage.setItem("mafiaToken", authToken);
-    // Register device fingerprint
     try {
       const fp = getDeviceFingerprint();
       fetch(API + "/api/auth/register-device", {
@@ -129,53 +145,151 @@ async function submitAuth() {
     showToast("👋 خوش آمدید " + currentUser.username);
     if (document.getElementById("historyScreen").classList.contains("active")) renderHistory();
   } else {
-    errEl.textContent = r.data.error || "خطا رخ داد";
+    errEl.textContent = r.data?.error || "خطا رخ داد";
   }
 }
 
 // ── Forgot Password ──
 function showForgotPassword() {
-  document.getElementById("loginFields").style.display = "none";
-  document.getElementById("registerFields").style.display = "none";
-  document.getElementById("rememberMeRow").style.display = "none";
-  document.getElementById("authSubmitBtn").style.display = "none";
-  document.getElementById("authSwitch").style.display = "none";
+  ["loginFields","registerFields","rememberMeRow","authSubmitBtn","authSwitch","forgotLink"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
   document.getElementById("forgotFields").style.display = "block";
-  document.getElementById("forgotLink").style.display = "none";
   document.getElementById("authTitle").innerHTML = "بازیابی <span>رمز عبور</span>";
   document.getElementById("authError").textContent = "";
 }
 
 function hideForgotPassword() {
   document.getElementById("forgotFields").style.display = "none";
-  document.getElementById("forgotLink").style.display = "inline";
+  const fl = document.getElementById("forgotLink");
+  if (fl) fl.style.display = "inline";
   updateAuthModalUI();
+  ["rememberMeRow","authSubmitBtn","authSwitch"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "";
+  });
 }
 
 async function sendResetEmail() {
-  const email = document.getElementById("forgotEmail").value.trim();
-  if (!email) { document.getElementById("authError").textContent = "ایمیل را وارد کنید"; return; }
+  const emailInput = document.getElementById("forgotEmail");
+  const email = emailInput ? emailInput.value.trim() : "";
+  if (!email) { _setAuthError("ایمیل را وارد کنید"); return; }
+  if (!_EMAIL_RE.test(email)) { _setAuthError("فرمت ایمیل نامعتبر است"); return; }
+
+  const btn = document.querySelector("#forgotFields button");
+  if (btn) { btn.disabled = true; btn.textContent = "در حال ارسال..."; }
+
   const r = await apiFetch("/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+
   if (r.ok) {
-    document.getElementById("authError").textContent = "";
-    const newPw = r.data.new_password;
-    // Show new password directly
-    const forgotFields = document.getElementById("forgotFields");
-    forgotFields.innerHTML = `
-      <div style="text-align:center;padding:16px 0">
-        <div style="font-size:2rem;margin-bottom:10px">🔑</div>
-        <div style="font-size:.85rem;color:var(--dim);margin-bottom:12px">رمز عبور جدید شما:</div>
-        <div style="font-size:1.5rem;font-weight:900;color:var(--accent2);letter-spacing:3px;
-          padding:14px 20px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);
-          border-radius:12px;direction:ltr;user-select:all;cursor:pointer"
-          onclick="navigator.clipboard?.writeText('${newPw}');showToast('📋 کپی شد!')">${newPw}</div>
-        <div style="font-size:.7rem;color:var(--dim);margin-top:10px">روی رمز بزن تا کپی بشه · با این رمز وارد شو</div>
-      </div>
-      <button onclick="hideForgotPassword()" style="width:100%;padding:12px;margin-top:12px;
-        background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:inherit;
-        font-size:.9rem;font-weight:700;cursor:pointer">ورود با رمز جدید</button>`;
+    _setAuthError("");
+    const container = document.getElementById("forgotFields");
+    container.innerHTML = "";
+
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = "text-align:center;padding:20px 0";
+    wrapper.innerHTML = `
+      <div style="font-size:2.5rem;margin-bottom:12px">📧</div>
+      <div style="font-size:1rem;font-weight:700;margin-bottom:8px">ایمیل ارسال شد</div>
+      <div style="font-size:.82rem;color:var(--dim);line-height:1.7">
+        لینک بازیابی رمز به ایمیل شما ارسال شد.<br>
+        پوشه اسپم را هم چک کنید.<br>
+        <span style="color:var(--accent2)">لینک ۳۰ دقیقه اعتبار دارد.</span>
+      </div>`;
+    const backBtn = document.createElement("button");
+    backBtn.textContent = "برگشت به ورود";
+    backBtn.style.cssText = "width:100%;padding:12px;margin-top:12px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer";
+    backBtn.addEventListener("click", hideForgotPassword);
+
+    container.appendChild(wrapper);
+    container.appendChild(backBtn);
   } else {
-    document.getElementById("authError").textContent = r.data?.error || "خطا";
+    if (btn) { btn.disabled = false; btn.textContent = "ارسال لینک بازیابی"; }
+    _setAuthError(r.data?.error || "خطا");
+  }
+}
+
+function showResetPasswordModal(token) {
+  const modal = document.getElementById("authModal");
+  modal.classList.add("show");
+  ["loginFields","registerFields","rememberMeRow","authSwitch","forgotLink","authSubmitBtn"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+  document.getElementById("authTitle").innerHTML = "رمز عبور <span>جدید</span>";
+  _setAuthError("");
+
+  const container = document.getElementById("forgotFields");
+  container.style.display = "block";
+  container.innerHTML = "";
+
+  const hint = document.createElement("div");
+  hint.style.cssText = "margin-bottom:12px;font-size:.82rem;color:var(--dim);text-align:center";
+  hint.textContent = "رمز عبور جدید خود را وارد کنید";
+
+  const wrap1 = document.createElement("div");
+  wrap1.className = "input-wrap";
+  const pw1 = document.createElement("input");
+  pw1.type = "password";
+  pw1.id = "newPasswordInput";
+  pw1.placeholder = "رمز عبور جدید (حداقل ۶ کاراکتر)";
+  pw1.autocomplete = "new-password";
+  pw1.style.marginBottom = "8px";
+  wrap1.appendChild(pw1);
+
+  const wrap2 = document.createElement("div");
+  wrap2.className = "input-wrap";
+  const pw2 = document.createElement("input");
+  pw2.type = "password";
+  pw2.id = "newPasswordConfirm";
+  pw2.placeholder = "تکرار رمز عبور";
+  pw2.autocomplete = "new-password";
+  wrap2.appendChild(pw2);
+
+  const submitBtn = document.createElement("button");
+  submitBtn.textContent = "ثبت رمز جدید";
+  submitBtn.style.cssText = "width:100%;padding:12px;margin-top:12px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer";
+  // Store token safely in dataset, not inline JS
+  submitBtn.dataset.token = token;
+  submitBtn.addEventListener("click", _submitNewPassword);
+
+  container.appendChild(hint);
+  container.appendChild(wrap1);
+  container.appendChild(wrap2);
+  container.appendChild(submitBtn);
+
+  window.history.replaceState({}, "", window.location.pathname);
+}
+
+async function _submitNewPassword(e) {
+  const token = e.currentTarget.dataset.token;
+  const pw  = document.getElementById("newPasswordInput").value;
+  const pw2 = document.getElementById("newPasswordConfirm").value;
+
+  if (!_validatePassword(pw, _setAuthError)) return;
+  if (pw !== pw2) { _setAuthError("رمزها یکسان نیستند"); return; }
+
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  btn.textContent = "در حال ذخیره...";
+
+  const r = await apiFetch("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password: pw })
+  });
+
+  if (r.ok) {
+    authToken = r.data.token;
+    currentUser = r.data.user;
+    localStorage.setItem("mafiaToken", authToken);
+    renderAuthBar();
+    closeAuthModal();
+    showToast("رمز عبور با موفقیت تغییر کرد!");
+  } else {
+    btn.disabled = false;
+    btn.textContent = "ثبت رمز جدید";
+    _setAuthError(r.data?.error || "خطا");
   }
 }
 
@@ -203,10 +317,8 @@ function renderAuthBar() {
     avatarEl.style.background = `linear-gradient(135deg,${c1},${c2})`;
     document.getElementById("usernameDisplay").textContent = currentUser.username;
     document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
-    // Show admin button
     const ab = document.getElementById("navAdmin");
     if (ab) ab.style.display = ["shahab","admin"].includes(currentUser.username) ? "inline-block" : "none";
-    // Auto-connect WebSocket when logged in
     initSocket();
   } else {
     const ab = document.getElementById("navAdmin");

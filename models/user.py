@@ -19,6 +19,8 @@ class User(db.Model):
     last_login = db.Column(db.DateTime, nullable=True)
     xp = db.Column(db.Integer, default=0)
     device_fingerprint = db.Column(db.String(100), nullable=True)
+    reset_token = db.Column(db.String(64), nullable=True)
+    reset_token_expires = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     games = db.relationship("Game", backref="user", lazy=True, cascade="all, delete-orphan")
 
