@@ -222,43 +222,26 @@ function showResetPasswordModal(token) {
 
   const container = document.getElementById("forgotFields");
   container.style.display = "block";
-  container.innerHTML = "";
+  container.innerHTML = `
+    <p style="text-align:center;color:var(--dim);font-size:.85rem;margin-bottom:1.25rem">رمز عبور جدید خود را وارد کنید</p>
+    <div class="modal-field">
+      <label for="newPasswordInput">رمز عبور جدید</label>
+      <input type="password" id="newPasswordInput" placeholder="حداقل ۶ کاراکتر"
+             autocomplete="new-password" minlength="6" maxlength="72">
+    </div>
+    <div class="modal-field">
+      <label for="newPasswordConfirm">تکرار رمز عبور</label>
+      <input type="password" id="newPasswordConfirm" placeholder="رمز عبور را تکرار کنید"
+             autocomplete="new-password" minlength="6" maxlength="72">
+    </div>
+    <button class="modal-submit" id="resetSubmitBtn">ثبت رمز جدید</button>
+  `;
 
-  const hint = document.createElement("div");
-  hint.style.cssText = "margin-bottom:12px;font-size:.82rem;color:var(--dim);text-align:center";
-  hint.textContent = "رمز عبور جدید خود را وارد کنید";
-
-  const wrap1 = document.createElement("div");
-  wrap1.className = "input-wrap";
-  const pw1 = document.createElement("input");
-  pw1.type = "password";
-  pw1.id = "newPasswordInput";
-  pw1.placeholder = "رمز عبور جدید (حداقل ۶ کاراکتر)";
-  pw1.autocomplete = "new-password";
-  pw1.style.marginBottom = "8px";
-  wrap1.appendChild(pw1);
-
-  const wrap2 = document.createElement("div");
-  wrap2.className = "input-wrap";
-  const pw2 = document.createElement("input");
-  pw2.type = "password";
-  pw2.id = "newPasswordConfirm";
-  pw2.placeholder = "تکرار رمز عبور";
-  pw2.autocomplete = "new-password";
-  wrap2.appendChild(pw2);
-
-  const submitBtn = document.createElement("button");
-  submitBtn.textContent = "ثبت رمز جدید";
-  submitBtn.style.cssText = "width:100%;padding:12px;margin-top:12px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer";
-  // Store token safely in dataset, not inline JS
+  const submitBtn = container.querySelector("#resetSubmitBtn");
   submitBtn.dataset.token = token;
   submitBtn.addEventListener("click", _submitNewPassword);
 
-  container.appendChild(hint);
-  container.appendChild(wrap1);
-  container.appendChild(wrap2);
-  container.appendChild(submitBtn);
-
+  container.querySelector("#newPasswordInput").focus();
   window.history.replaceState({}, "", window.location.pathname);
 }
 
