@@ -1775,8 +1775,34 @@
 .badge-full { background: rgba(233,69,96,.12); color: #e94560; border: 1px solid rgba(233,69,96,.2); }
 .event-card-info { font-size: 0.78rem; color: var(--dim); line-height: 1.7; }
 .event-card-info span { display: inline-flex; align-items: center; gap: 4px; margin-left: 12px; }
-.event-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.event-card-desc { font-size: .75rem; color: var(--dim); margin-top: 6px; line-height: 1.6; }
+.event-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 8px; flex-wrap: wrap; }
 .event-card-host { font-size: 0.75rem; color: rgba(255,255,255,.4); }
+
+/* Event action buttons */
+.ev-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.ev-action-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 13px; border: none; border-radius: var(--radius-full);
+  font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  transition: all .18s; white-space: nowrap;
+}
+.ev-action-btn.ev-msg {
+  background: rgba(96,165,250,.12); color: #60a5fa;
+  border: 1px solid rgba(96,165,250,.25);
+}
+.ev-action-btn.ev-msg:hover { background: rgba(96,165,250,.22); transform: translateY(-1px); }
+.ev-action-btn.ev-reserve {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: #002211;
+}
+.ev-action-btn.ev-reserve:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(74,222,128,.35); }
+.ev-action-btn:active { transform: scale(.95) !important; }
+.ev-host-badge { font-size: .72rem; color: var(--accent2); font-weight: 700; }
+.ev-status-txt { font-size: .72rem; color: var(--dim); }
+.ev-full-txt { font-size: .72rem; color: var(--accent); }
+
+/* legacy - keep for compatibility */
 .event-reserve-btn {
   padding: 6px 16px; background: linear-gradient(135deg, #4ade80, #22c55e);
   border: none; border-radius: var(--radius-full); color: #002211;

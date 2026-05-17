@@ -188,27 +188,60 @@ async function filterEvents() {
 
 function renderEventCard(e) {
   const badgeClass = e.status === 'open' ? 'badge-open' : 'badge-full';
-  const badgeText = e.status === 'open' ? 'باز' : e.status === 'full' ? 'تکمیل' : e.status;
-  const canReserve = e.status === 'open' && authToken && currentUser && e.host_id !== currentUser.id;
+  const badgeText  = e.status === 'open' ? 'باز' : e.status === 'full' ? 'تکمیل' : e.status;
+  const isLoggedIn = !!(authToken && currentUser);
+  const isHost     = isLoggedIn && e.host_id === currentUser.id;
+  const canReserve = e.status === 'open' && isLoggedIn && !isHost;
+  const alreadyReserved = isLoggedIn && Array.isArray(e.reservations) &&
+    e.reservations.some(r => r.user_id === currentUser.id);
+
+  const hostAvatar = e.host_avatar || '🎭';
+
+  let actions = '';
+  if (!isLoggedIn) {
+    actions = `<button class="ev-action-btn ev-msg" onclick="openAuthModal('login')">💬 پیام</button>
+               <button class="ev-action-btn ev-reserve" onclick="openAuthModal('login')">رزرو</button>`;
+  } else if (isHost) {
+    actions = `<span class="ev-host-badge">🎙️ ایونت شما</span>`;
+  } else if (alreadyReserved) {
+    const myRes = e.reservations.find(r => r.user_id === currentUser.id);
+    const statusMap = { pending: '⏳ در انتظار تأیید', accepted: '✅ تأیید شده', rejected: '❌ رد شده' };
+    actions = `<span class="ev-status-txt">${statusMap[myRes?.status] || '⏳'}</span>
+               <button class="ev-action-btn ev-msg" onclick="contactEventHost(${e.host_id},${JSON.stringify(e.host_name)},${JSON.stringify(hostAvatar)},${JSON.stringify(e.location_name)})">💬 هماهنگی</button>`;
+  } else {
+    actions = `
+      <button class="ev-action-btn ev-msg" onclick="contactEventHost(${e.host_id},${JSON.stringify(e.host_name)},${JSON.stringify(hostAvatar)},${JSON.stringify(e.location_name)})">💬 پیام</button>
+      ${canReserve
+        ? `<button class="ev-action-btn ev-reserve" onclick="reserveEvent(${e.id})">📋 رزرو</button>`
+        : `<span class="ev-full-txt">ظرفیت تکمیل</span>`}
+    `;
+  }
+
   return `<div class="event-card">
     <div class="event-card-header">
-      <div class="event-card-title">📍 ${escapeHtml(e.location_name)}</div>
+      <div class="event-card-title">📍 ${escapeHtml(e.event_name || e.location_name)}</div>
       <span class="event-card-badge ${badgeClass}">${badgeText}</span>
     </div>
     <div class="event-card-info">
       <span>🌍 ${escapeHtml(e.country)}, ${escapeHtml(e.city)}</span>
       <span>🎭 ${escapeHtml(e.scenario || '—')}</span>
-      <span>👥 ${toFarsiNum(e.reserved_count)}/${toFarsiNum(e.max_players)}</span><br>
-      <span>📅 ${e.event_date}</span>
-      <span>⏰ ${e.start_time}${e.end_time ? ' — ' + e.end_time : ''}</span>
+      <span>👥 ${toFarsiNum(e.reserved_count)}/${toFarsiNum(e.max_players)}</span>
+      <span>📅 ${e.event_date || '—'}</span>
+      <span>⏰ ${e.start_time || '—'}${e.end_time ? ' — ' + e.end_time : ''}</span>
+      ${e.price ? `<span>💰 ${escapeHtml(e.price)}</span>` : ''}
     </div>
-    ${e.description ? `<div style="font-size:0.75rem;color:var(--dim);margin-top:6px">${escapeHtml(e.description)}</div>` : ''}
+    ${e.description ? `<div class="event-card-desc">${escapeHtml(e.description)}</div>` : ''}
     <div class="event-card-footer">
       <span class="event-card-host">🎙️ ${escapeHtml(e.host_name)}</span>
-      ${canReserve ? `<button class="event-reserve-btn" onclick="reserveEvent(${e.id})">رزرو</button>` :
-        e.status === 'full' ? '<span style="font-size:0.72rem;color:var(--accent)">ظرفیت تکمیل</span>' : ''}
+      <div class="ev-actions">${actions}</div>
     </div>
   </div>`;
+}
+
+function contactEventHost(hostId, hostName, hostAvatar, eventName) {
+  if (!authToken) { openAuthModal('login'); return; }
+  startDMWithUser(hostId, hostName, hostAvatar);
+  showToast(`💬 پیام به ${hostName}`);
 }
 
 async function createGameEvent() {
