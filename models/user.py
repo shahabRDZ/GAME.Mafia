@@ -11,6 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.LargeBinary, nullable=False)
     avatar_emoji = db.Column(db.String(10), default="🎭")
+    avatar_url = db.Column(db.Text, nullable=True)
     bio = db.Column(db.String(200), default="")
     chaos_wins = db.Column(db.Integer, default=0)
     chaos_losses = db.Column(db.Integer, default=0)
@@ -33,7 +34,7 @@ class User(db.Model):
     def to_dict(self, online_users=None):
         return {
             "id": self.id, "username": self.username, "email": self.email,
-            "avatar": self.avatar_emoji, "bio": self.bio,
+            "avatar": self.avatar_emoji, "avatar_url": self.avatar_url, "bio": self.bio,
             "chaos_wins": self.chaos_wins, "chaos_losses": self.chaos_losses,
             "created_at": self.created_at.isoformat(),
             "total_games": len(self.games),

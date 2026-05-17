@@ -7,6 +7,8 @@ from models import User
 
 bp = Blueprint("profile", __name__)
 
+_AVATAR_URL_MAX = 400_000  # ~300KB base64
+
 
 @bp.route("/api/profile/<int:user_id>", methods=["GET"])
 def get_profile(user_id):
@@ -20,11 +22,18 @@ def get_profile(user_id):
 @jwt_required()
 def update_profile():
     user = db.session.get(User, int(get_jwt_identity()))
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     if "avatar" in data:
-        user.avatar_emoji = data["avatar"][:10]
+        user.avatar_emoji = (data["avatar"] or "")[:10]
     if "bio" in data:
-        user.bio = data["bio"][:200]
+        user.bio = (data["bio"] or "")[:200]
+    if "avatar_url" in data:
+        url = data["avatar_url"] or ""
+        if url and len(url) > _AVATAR_URL_MAX:
+            return jsonify({"error": "عکس پروفایل خیلی بزرگ است (حداکثر ۳۰۰KB)"}), 400
+        if url and not url.startswith("data:image/"):
+            return jsonify({"error": "فرمت عکس نامعتبر است"}), 400
+        user.avatar_url = url or None
     db.session.commit()
     return jsonify(user.to_dict()), 200
 

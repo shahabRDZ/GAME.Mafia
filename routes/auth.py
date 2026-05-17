@@ -219,6 +219,35 @@ def reset_password():
                     "message": "رمز عبور با موفقیت تغییر کرد"}), 200
 
 
+@bp.route("/change-password", methods=["POST"])
+@jwt_required()
+def change_password():
+    ip = _client_ip()
+    if rate_limit(f"changepw:{ip}", max_requests=5, window=900):
+        return jsonify({"error": "تعداد تلاش‌ها بیش از حد مجاز. ۱۵ دقیقه صبر کنید"}), 429
+
+    user = db.session.get(User, int(get_jwt_identity()))
+    if not user:
+        return jsonify({"error": "کاربر یافت نشد"}), 404
+
+    data = request.get_json(silent=True) or {}
+    current_pw = data.get("current_password") or ""
+    new_pw = data.get("new_password") or ""
+
+    if not current_pw or not new_pw:
+        return jsonify({"error": "همه فیلدها الزامی است"}), 400
+    if not user.check_password(current_pw):
+        return jsonify({"error": "رمز عبور فعلی اشتباه است"}), 401
+
+    err = _validate_register(user.username, user.email, new_pw)
+    if err and "رمز" in err:
+        return jsonify({"error": err}), 400
+
+    user.set_password(new_pw)
+    db.session.commit()
+    return jsonify({"ok": True, "message": "رمز عبور با موفقیت تغییر کرد"}), 200
+
+
 @bp.route("/me", methods=["GET"])
 @jwt_required()
 def me():
