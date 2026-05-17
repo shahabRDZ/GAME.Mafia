@@ -267,35 +267,11 @@ async function filterEvents() {
 function renderEventCard(e) {
   const badgeClass = e.status === 'open' ? 'badge-open' : 'badge-full';
   const badgeText  = e.status === 'open' ? 'باز' : e.status === 'full' ? 'تکمیل' : e.status;
-  const isLoggedIn = !!(authToken && currentUser);
-  const isHost     = isLoggedIn && e.host_id === currentUser.id;
-  const canReserve = e.status === 'open' && isLoggedIn && !isHost;
-  const alreadyReserved = isLoggedIn && Array.isArray(e.reservations) &&
-    e.reservations.some(r => r.user_id === currentUser.id);
+  const stars = e.avg_rating ? '⭐'.repeat(Math.round(e.avg_rating)) : '';
+  const reviewInfo = e.review_count ? `${stars} <span style="font-size:.65rem;color:var(--dim)">(${toFarsiNum(e.review_count)})</span>` : '';
+  const viewsInfo = e.views ? `👁 ${toFarsiNum(e.views)}` : '';
 
-  const hostAvatar = e.host_avatar || '🎭';
-
-  let actions = '';
-  if (!isLoggedIn) {
-    actions = `<button class="ev-action-btn ev-msg" onclick="openAuthModal('login')">💬 پیام</button>
-               <button class="ev-action-btn ev-reserve" onclick="openAuthModal('login')">رزرو</button>`;
-  } else if (isHost) {
-    actions = `<span class="ev-host-badge">🎙️ ایونت شما</span>`;
-  } else if (alreadyReserved) {
-    const myRes = e.reservations.find(r => r.user_id === currentUser.id);
-    const statusMap = { pending: '⏳ در انتظار تأیید', accepted: '✅ تأیید شده', rejected: '❌ رد شده' };
-    actions = `<span class="ev-status-txt">${statusMap[myRes?.status] || '⏳'}</span>
-               <button class="ev-action-btn ev-msg" onclick="contactEventHost(${e.host_id},${JSON.stringify(e.host_name)},${JSON.stringify(hostAvatar)},${JSON.stringify(e.location_name)})">💬 هماهنگی</button>`;
-  } else {
-    actions = `
-      <button class="ev-action-btn ev-msg" onclick="contactEventHost(${e.host_id},${JSON.stringify(e.host_name)},${JSON.stringify(hostAvatar)},${JSON.stringify(e.location_name)})">💬 پیام</button>
-      ${canReserve
-        ? `<button class="ev-action-btn ev-reserve" onclick="reserveEvent(${e.id})">📋 رزرو</button>`
-        : `<span class="ev-full-txt">ظرفیت تکمیل</span>`}
-    `;
-  }
-
-  return `<div class="event-card">
+  return `<div class="event-card" onclick="openEventDetail(${e.id})" style="cursor:pointer">
     <div class="event-card-header">
       <div class="event-card-title">📍 ${escapeHtml(e.event_name || e.location_name)}</div>
       <span class="event-card-badge ${badgeClass}">${badgeText}</span>
@@ -311,13 +287,184 @@ function renderEventCard(e) {
     ${e.description ? `<div class="event-card-desc">${escapeHtml(e.description)}</div>` : ''}
     <div class="event-card-footer">
       <span class="event-card-host">🎙️ ${escapeHtml(e.host_name)}</span>
-      <div class="ev-actions">${actions}</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--dim)">
+        ${reviewInfo} ${viewsInfo}
+        <span style="color:var(--accent2);font-size:.72rem">جزئیات ←</span>
+      </div>
     </div>
   </div>`;
 }
 
+/* ── Event Detail Modal ── */
+let _evDetailId = null;
+
+async function openEventDetail(eid) {
+  _evDetailId = eid;
+  const modal = document.getElementById('eventDetailModal');
+  const box   = document.getElementById('eventDetailBox');
+  box.innerHTML = '<div class="ev-modal-loading">در حال بارگذاری...</div>';
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  const [evRes, revRes] = await Promise.all([
+    fetch(API + '/api/events/' + eid).then(r => r.json()),
+    fetch(API + '/api/events/' + eid + '/reviews').then(r => r.json())
+  ]);
+
+  let followData = { following: false, follow_count: evRes.follow_count || 0 };
+  if (authToken) {
+    try {
+      const fr = await apiFetch('/api/events/' + eid + '/follow', { method: 'GET' });
+      if (fr.ok) followData = fr.data;
+    } catch {}
+  }
+
+  _renderEventDetail(evRes, revRes, followData);
+}
+
+function _renderEventDetail(e, reviews, followData) {
+  const box = document.getElementById('eventDetailBox');
+  if (!box) return;
+
+  const isLoggedIn = !!(authToken && currentUser);
+  const isHost     = isLoggedIn && e.host_id === currentUser.id;
+  const myRes      = isLoggedIn && Array.isArray(e.reservations)
+    ? e.reservations.find(r => r.user_id === currentUser.id) : null;
+  const canReserve = e.status === 'open' && isLoggedIn && !isHost && !myRes;
+  const canReview  = isLoggedIn && (myRes?.status === 'accepted') && !reviews.find(r => r.username === currentUser.username);
+  const hostAvatar = e.host_avatar || '🎭';
+
+  const avgStars = e.avg_rating ? Math.round(e.avg_rating) : 0;
+  const starsHtml = [1,2,3,4,5].map(i =>
+    `<span style="color:${i<=avgStars?'#f5a623':'rgba(255,255,255,.2)'}">★</span>`
+  ).join('');
+
+  const statusMap = { pending:'⏳ در انتظار تأیید', accepted:'✅ تأیید شده', rejected:'❌ رد شده' };
+
+  box.innerHTML = `
+    <div class="evd-header">
+      <button class="evd-close" onclick="closeEventDetail()">✕</button>
+      <div class="evd-badge-row">
+        <span class="event-card-badge ${e.status==='open'?'badge-open':'badge-full'}">${e.status==='open'?'باز':'تکمیل'}</span>
+        <span class="evd-views">👁 ${toFarsiNum(e.views||0)} بازدید</span>
+        ${e.follow_count ? `<span class="evd-views">🔔 ${toFarsiNum(followData.follow_count)} دنبال‌کننده</span>` : ''}
+      </div>
+      <h2 class="evd-title">${escapeHtml(e.event_name || e.location_name)}</h2>
+      <div class="evd-host-row">
+        <span class="evd-host-avatar">${escapeHtml(hostAvatar)}</span>
+        <span>گرداننده: <strong>${escapeHtml(e.host_name)}</strong></span>
+      </div>
+      ${e.avg_rating ? `<div class="evd-stars">${starsHtml} <span style="font-size:.8rem;color:var(--dim)">${e.avg_rating} از ۵ (${toFarsiNum(e.review_count)} نظر)</span></div>` : ''}
+    </div>
+
+    <div class="evd-info-grid">
+      <div class="evd-info-item"><span class="evd-info-icon">🌍</span><span>${escapeHtml(e.country)}، ${escapeHtml(e.city)}</span></div>
+      <div class="evd-info-item"><span class="evd-info-icon">📍</span><span>${escapeHtml(e.location_name)}${e.address ? ' — ' + escapeHtml(e.address) : ''}</span></div>
+      <div class="evd-info-item"><span class="evd-info-icon">📅</span><span>${e.event_date || '—'}</span></div>
+      <div class="evd-info-item"><span class="evd-info-icon">⏰</span><span>${e.start_time || '—'}${e.end_time?' — '+e.end_time:''}</span></div>
+      <div class="evd-info-item"><span class="evd-info-icon">🎭</span><span>${escapeHtml(e.scenario || '—')}</span></div>
+      <div class="evd-info-item"><span class="evd-info-icon">👥</span><span>${toFarsiNum(e.reserved_count)}/${toFarsiNum(e.max_players)} نفر</span></div>
+      ${e.price ? `<div class="evd-info-item"><span class="evd-info-icon">💰</span><span>${escapeHtml(e.price)}</span></div>` : ''}
+    </div>
+
+    ${e.description ? `<div class="evd-desc">${escapeHtml(e.description)}</div>` : ''}
+
+    <div class="evd-actions">
+      ${isHost ? `<span class="ev-host-badge" style="font-size:.85rem">🎙️ ایونت شما</span>` : ''}
+      ${myRes ? `<span class="evd-my-status">${statusMap[myRes.status]||'⏳'}</span>` : ''}
+      ${!isHost ? `<button class="ev-action-btn ev-msg" onclick="contactEventHost(${e.host_id},${JSON.stringify(e.host_name)},${JSON.stringify(hostAvatar)},${JSON.stringify(e.location_name)})">
+        💬 ${myRes?.status==='accepted'?'هماهنگی':'پیام به گرداننده'}
+      </button>` : ''}
+      ${canReserve ? `<button class="ev-action-btn ev-reserve" onclick="reserveEventFromDetail(${e.id})">📋 رزرو</button>` : ''}
+      ${!isHost && isLoggedIn ? `<button class="evd-follow-btn${followData.following?' active':''}" id="followBtn" onclick="toggleFollowEvent(${e.id})">
+        ${followData.following ? '🔔 دنبال می‌کنید' : '🔕 دنبال کنید'}
+      </button>` : ''}
+    </div>
+
+    <div class="evd-reviews-section">
+      <div class="evd-section-title">💬 نظرات و امتیازها</div>
+
+      ${canReview ? `<div class="evd-review-form" id="reviewForm">
+        <div class="evd-star-pick" id="starPicker">
+          ${[1,2,3,4,5].map(i=>`<button class="evd-star-btn" data-val="${i}" onclick="_pickStar(${i})">★</button>`).join('')}
+        </div>
+        <textarea id="reviewText" class="evd-review-ta" placeholder="نظر، پیشنهاد یا انتقاد خود را بنویسید..." maxlength="500"></textarea>
+        <button class="ev-action-btn ev-reserve" style="width:100%;margin-top:8px" onclick="submitReview(${e.id})">ارسال نظر</button>
+      </div>` : ''}
+
+      <div id="reviewsList">
+        ${reviews.length ? reviews.map(r => `
+          <div class="evd-review-item">
+            <div class="evd-review-header">
+              <span class="evd-review-avatar">${escapeHtml(r.avatar||'🎭')}</span>
+              <strong>${escapeHtml(r.username)}</strong>
+              <span class="evd-review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+              <span class="evd-review-date">${r.created_at}</span>
+            </div>
+            ${r.content ? `<div class="evd-review-body">${escapeHtml(r.content)}</div>` : ''}
+          </div>`).join('') : '<div class="evd-no-reviews">هنوز نظری ثبت نشده</div>'}
+      </div>
+    </div>
+  `;
+
+  let _selectedStar = 0;
+  window._pickStar = (n) => {
+    _selectedStar = n;
+    document.querySelectorAll('.evd-star-btn').forEach((b,i) => {
+      b.style.color = i < n ? '#f5a623' : 'rgba(255,255,255,.25)';
+    });
+    window._currentStar = n;
+  };
+  window._currentStar = 0;
+}
+
+function closeEventDetail() {
+  document.getElementById('eventDetailModal').classList.remove('show');
+  document.body.style.overflow = '';
+  _evDetailId = null;
+}
+
+async function reserveEventFromDetail(eid) {
+  const r = await apiFetch('/api/events/' + eid + '/reserve', { method: 'POST' });
+  if (r.ok) {
+    showToast('✅ رزرو شد — منتظر تأیید گرداننده باشید');
+    closeEventDetail();
+    filterEvents();
+  } else {
+    showToast('⚠️ ' + (r.data?.error || 'خطا'));
+  }
+}
+
+async function toggleFollowEvent(eid) {
+  if (!authToken) { openAuthModal('login'); return; }
+  const r = await apiFetch('/api/events/' + eid + '/follow', { method: 'POST' });
+  if (!r.ok) return;
+  const btn = document.getElementById('followBtn');
+  if (btn) {
+    btn.classList.toggle('active', r.data.following);
+    btn.textContent = r.data.following ? '🔔 دنبال می‌کنید' : '🔕 دنبال کنید';
+  }
+  showToast(r.data.following ? '🔔 دنبال کردید' : '🔕 دنبال کردن لغو شد');
+}
+
+async function submitReview(eid) {
+  const rating = window._currentStar || 0;
+  const content = document.getElementById('reviewText')?.value.trim() || '';
+  if (!rating) { showToast('⚠️ ابتدا امتیاز بدید'); return; }
+  const r = await apiFetch('/api/events/' + eid + '/reviews', {
+    method: 'POST', body: JSON.stringify({ rating, content })
+  });
+  if (r.ok) {
+    showToast('✅ نظر ثبت شد');
+    openEventDetail(eid);
+  } else {
+    showToast('⚠️ ' + (r.data?.error || 'خطا'));
+  }
+}
+
 function contactEventHost(hostId, hostName, hostAvatar, eventName) {
   if (!authToken) { openAuthModal('login'); return; }
+  closeEventDetail();
   startDMWithUser(hostId, hostName, hostAvatar);
   showToast(`💬 پیام به ${hostName}`);
 }

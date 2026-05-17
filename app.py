@@ -81,6 +81,7 @@ for _attempt in range(10):
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(64)"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP"))
                 db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT"))
+                db.session.execute(db.text("ALTER TABLE game_events ADD COLUMN IF NOT EXISTS views INTEGER DEFAULT 0"))
                 for col in ["event_name VARCHAR(100) DEFAULT ''", "host_display_name VARCHAR(50) DEFAULT ''",
                     "address VARCHAR(300) DEFAULT ''", "lat FLOAT", "lng FLOAT"]:
                     try: db.session.execute(db.text(f"ALTER TABLE game_events ADD COLUMN IF NOT EXISTS {col}")); db.session.commit()

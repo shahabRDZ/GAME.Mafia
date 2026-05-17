@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from extensions import db
 from models import (
-    User, GameEvent, EventReservation, EventComment, DirectMessage
+    User, GameEvent, EventReservation, EventComment, EventReview, EventFollow, DirectMessage
 )
 from utils.decorators import is_admin
 
@@ -69,6 +69,11 @@ def get_event(eid):
     event = db.session.get(GameEvent, eid)
     if not event:
         return jsonify({"error": "ایونت پیدا نشد"}), 404
+    try:
+        event.views = (event.views or 0) + 1
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
     return jsonify(event.to_dict()), 200
 
 
@@ -189,6 +194,73 @@ def my_events():
         "hosted": [e.to_dict() for e in hosted],
         "reserved": reserved_events
     }), 200
+
+
+# ── Event Reviews ──
+
+@bp.route("/<int:eid>/reviews", methods=["GET"])
+def get_reviews(eid):
+    reviews = EventReview.query.filter_by(event_id=eid).order_by(EventReview.created_at.desc()).all()
+    return jsonify([{
+        "id": r.id,
+        "username": r.user.username if r.user else "?",
+        "avatar": r.user.avatar_emoji if r.user else "🎭",
+        "rating": r.rating,
+        "content": r.content,
+        "created_at": r.created_at.strftime("%Y-%m-%d %H:%M")
+    } for r in reviews]), 200
+
+
+@bp.route("/<int:eid>/reviews", methods=["POST"])
+@jwt_required()
+def add_review(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    event = db.session.get(GameEvent, eid)
+    if not event:
+        return jsonify({"error": "ایونت پیدا نشد"}), 404
+    res = EventReservation.query.filter_by(event_id=eid, user_id=user.id, status="accepted").first()
+    if not res and event.host_id != user.id:
+        return jsonify({"error": "فقط شرکت‌کنندگان تأیید شده می‌توانند نظر بدهند"}), 403
+    existing = EventReview.query.filter_by(event_id=eid, user_id=user.id).first()
+    if existing:
+        return jsonify({"error": "قبلاً نظر داده‌اید"}), 400
+    data = request.get_json(silent=True) or {}
+    rating = int(data.get("rating", 0))
+    if not (1 <= rating <= 5):
+        return jsonify({"error": "امتیاز باید بین ۱ تا ۵ باشد"}), 400
+    content = (data.get("content") or "").strip()[:500]
+    review = EventReview(event_id=eid, user_id=user.id, rating=rating, content=content)
+    db.session.add(review)
+    db.session.commit()
+    return jsonify({"ok": True}), 201
+
+
+# ── Event Follow ──
+
+@bp.route("/<int:eid>/follow", methods=["POST"])
+@jwt_required()
+def toggle_follow(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    existing = EventFollow.query.filter_by(event_id=eid, user_id=user.id).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        count = EventFollow.query.filter_by(event_id=eid).count()
+        return jsonify({"ok": True, "following": False, "follow_count": count}), 200
+    follow = EventFollow(event_id=eid, user_id=user.id)
+    db.session.add(follow)
+    db.session.commit()
+    count = EventFollow.query.filter_by(event_id=eid).count()
+    return jsonify({"ok": True, "following": True, "follow_count": count}), 200
+
+
+@bp.route("/<int:eid>/follow", methods=["GET"])
+@jwt_required()
+def check_follow(eid):
+    user = db.session.get(User, int(get_jwt_identity()))
+    following = EventFollow.query.filter_by(event_id=eid, user_id=user.id).first() is not None
+    count = EventFollow.query.filter_by(event_id=eid).count()
+    return jsonify({"following": following, "follow_count": count}), 200
 
 
 # ── Event Comments ──
