@@ -17,7 +17,7 @@
 .big-card-wrapper .card-back .card-number { font-size: 6.5rem; }
 .big-card-wrapper .card-back .tap-hint { font-size: 0.85rem; margin-block-start: var(--space-md); letter-spacing: 2px; }
 .big-card-wrapper .char-wrap { width: 8.5rem; height: 10.5rem; }
-.big-card-wrapper .char-wrap.has-img { width: 88%; height: 0; padding-bottom: 88%; margin-top: 0.8rem; }
+.big-card-wrapper .char-wrap.has-img { width: 100%; flex: 1; min-height: 0; margin-top: 0; }
 .big-card-wrapper .card-role-name { font-size: var(--font-size-xl); margin-block-start: var(--space-md); letter-spacing: 1px; font-weight: 900; }
 .big-card-wrapper .char-shadow { width: 5rem; height: 0.85rem; }
 .big-card-wrapper .card-face { border-radius: 1.75rem; }
@@ -181,39 +181,36 @@
 .char-wrap svg { width: 100%; height: 100%; overflow: visible; }
 
 /* ── Character image (replaces SVG) ── */
+.card-face.card-front.has-img {
+  justify-content: flex-start;
+  padding: 0;
+  gap: 0;
+}
 .char-wrap.has-img {
-  width: 88%; height: 0;
-  padding-bottom: 88%;           /* square container */
-  margin-top: 0.6rem;
+  position: relative;
+  width: 100%; flex: 1;
+  min-height: 0;
   animation: none;
-  border-radius: 0.75rem;
   overflow: hidden;
-  flex-shrink: 0;
 }
 .char-wrap.has-img .char-img {
-  position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   object-position: top center;
-  border-radius: 0.75rem;
   display: block;
 }
-
-/* ── Card front layout when image present ── */
-.card-face.card-front.has-img {
-  justify-content: flex-start;
-  padding-top: 0.5rem;
-}
 .card-face.card-front.has-img .card-role-name {
-  margin-top: auto;
-  padding-block: 0.5rem;
-  width: 100%;
-  text-align: center;
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(6px);
-  font-size: 1rem;
-  letter-spacing: 1px;
   flex-shrink: 0;
+  width: 100%;
+  padding: 0.55rem 0.25rem;
+  margin: 0;
+  text-align: center;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(8px);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  z-index: 3;
 }
 
 /* ── Eye glow pulse ── */
@@ -254,7 +251,7 @@
   .big-card-wrapper { width: 78vw; max-width: 19rem; }
   .big-card-wrapper .card-back .card-number { font-size: 5.5rem; }
   .big-card-wrapper .char-wrap { width: 7rem; height: 8.5rem; }
-  .big-card-wrapper .char-wrap.has-img { width: 88%; height: 0; padding-bottom: 88%; }
+  .big-card-wrapper .char-wrap.has-img { width: 100%; flex: 1; min-height: 0; }
 }
 
 /* ── Landscape mode ── */
@@ -265,7 +262,7 @@
   }
   .big-card-wrapper .card-back .card-number { font-size: 3.5rem; }
   .big-card-wrapper .char-wrap { width: 5rem; height: 6rem; }
-  .big-card-wrapper .char-wrap.has-img { width: 88%; height: 0; padding-bottom: 88%; }
+  .big-card-wrapper .char-wrap.has-img { width: 100%; flex: 1; min-height: 0; }
   .big-card-wrapper .card-role-name { font-size: var(--font-size-base); }
   .fs-stats-bar { padding: 0 var(--space-md); }
 }
