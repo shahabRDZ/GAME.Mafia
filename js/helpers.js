@@ -332,90 +332,125 @@ function _renderEventDetail(e, reviews, followData) {
     ? e.reservations.find(r => r.user_id === currentUser.id) : null;
   const canReserve = e.status === 'open' && isLoggedIn && !isHost && !myRes;
   const canReview  = isLoggedIn && (myRes?.status === 'accepted') && !reviews.find(r => r.username === currentUser.username);
-  const hostAvatar = e.host_avatar || '🎭';
 
-  const avgStars = e.avg_rating ? Math.round(e.avg_rating) : 0;
-  const starsHtml = [1,2,3,4,5].map(i =>
-    `<span style="color:${i<=avgStars?'#f5a623':'rgba(255,255,255,.2)'}">★</span>`
-  ).join('');
+  const statusMap  = { pending:'⏳ در انتظار', accepted:'✅ تأیید شده', rejected:'❌ رد شده' };
+  const capPct     = Math.min(100, Math.round((e.reserved_count / e.max_players) * 100));
+  const avgStars   = e.avg_rating || 0;
+  const starsHtml  = [1,2,3,4,5].map(i =>
+    `<span class="evd-star${i<=Math.round(avgStars)?' lit':''}">★</span>`).join('');
 
-  const statusMap = { pending:'⏳ در انتظار تأیید', accepted:'✅ تأیید شده', rejected:'❌ رد شده' };
+  const hostPhotoHtml = e.host_avatar_url
+    ? `<img src="${e.host_avatar_url}" class="evd-host-photo" alt="${escapeHtml(e.host_name)}">`
+    : `<div class="evd-host-photo evd-host-initials">${escapeHtml((e.host_name||'?').charAt(0).toUpperCase())}</div>`;
 
   box.innerHTML = `
-    <div class="evd-header">
-      <button class="evd-close" onclick="closeEventDetail()">✕</button>
-      <div class="evd-badge-row">
-        <span class="event-card-badge ${e.status==='open'?'badge-open':'badge-full'}">${e.status==='open'?'باز':'تکمیل'}</span>
-        <span class="evd-views">👁 ${toFarsiNum(e.views||0)} بازدید</span>
-        ${e.follow_count ? `<span class="evd-views">🔔 ${toFarsiNum(followData.follow_count)} دنبال‌کننده</span>` : ''}
-      </div>
-      <h2 class="evd-title">${escapeHtml(e.event_name || e.location_name)}</h2>
-      <div class="evd-host-row">
-        <span class="evd-host-avatar">${escapeHtml(hostAvatar)}</span>
-        <span>گرداننده: <strong>${escapeHtml(e.host_name)}</strong></span>
-      </div>
-      ${e.avg_rating ? `<div class="evd-stars">${starsHtml} <span style="font-size:.8rem;color:var(--dim)">${e.avg_rating} از ۵ (${toFarsiNum(e.review_count)} نظر)</span></div>` : ''}
+    <div class="evd-close-wrap">
+      <button class="evd-close" onclick="closeEventDetail()" aria-label="بستن">✕</button>
     </div>
-
-    <div class="evd-info-grid">
-      <div class="evd-info-item"><span class="evd-info-icon">🌍</span><span>${escapeHtml(e.country)}، ${escapeHtml(e.city)}</span></div>
-      <div class="evd-info-item"><span class="evd-info-icon">📍</span><span>${escapeHtml(e.location_name)}${e.address ? ' — ' + escapeHtml(e.address) : ''}</span></div>
-      <div class="evd-info-item"><span class="evd-info-icon">📅</span><span>${e.event_date || '—'}</span></div>
-      <div class="evd-info-item"><span class="evd-info-icon">⏰</span><span>${e.start_time || '—'}${e.end_time?' — '+e.end_time:''}</span></div>
-      <div class="evd-info-item"><span class="evd-info-icon">🎭</span><span>${escapeHtml(e.scenario || '—')}</span></div>
-      <div class="evd-info-item"><span class="evd-info-icon">👥</span><span>${toFarsiNum(e.reserved_count)}/${toFarsiNum(e.max_players)} نفر</span></div>
-      ${e.price ? `<div class="evd-info-item"><span class="evd-info-icon">💰</span><span>${escapeHtml(e.price)}</span></div>` : ''}
-    </div>
-
-    ${e.description ? `<div class="evd-desc">${escapeHtml(e.description)}</div>` : ''}
-
-    <div class="evd-actions">
-      ${isHost ? `<span class="ev-host-badge" style="font-size:.85rem">🎙️ ایونت شما</span>` : ''}
-      ${myRes ? `<span class="evd-my-status">${statusMap[myRes.status]||'⏳'}</span>` : ''}
-      ${!isHost ? `<button class="ev-action-btn ev-msg" onclick="contactEventHost(${e.host_id},${JSON.stringify(e.host_name)},${JSON.stringify(hostAvatar)},${JSON.stringify(e.location_name)})">
-        💬 ${myRes?.status==='accepted'?'هماهنگی':'پیام به گرداننده'}
-      </button>` : ''}
-      ${canReserve ? `<button class="ev-action-btn ev-reserve" onclick="reserveEventFromDetail(${e.id})">📋 رزرو</button>` : ''}
-      ${!isHost && isLoggedIn ? `<button class="evd-follow-btn${followData.following?' active':''}" id="followBtn" onclick="toggleFollowEvent(${e.id})">
-        ${followData.following ? '🔔 دنبال می‌کنید' : '🔕 دنبال کنید'}
-      </button>` : ''}
-    </div>
-
-    <div class="evd-reviews-section">
-      <div class="evd-section-title">💬 نظرات و امتیازها</div>
-
-      ${canReview ? `<div class="evd-review-form" id="reviewForm">
-        <div class="evd-star-pick" id="starPicker">
-          ${[1,2,3,4,5].map(i=>`<button class="evd-star-btn" data-val="${i}" onclick="_pickStar(${i})">★</button>`).join('')}
+    <div class="evd-hero">
+      <div class="evd-hero-bg"></div>
+      <div class="evd-hero-content">
+        <div class="evd-host-card">
+          <div class="evd-host-photo-wrap">
+            ${hostPhotoHtml}
+            ${isHost ? '<div class="evd-host-crown">👑</div>' : ''}
+          </div>
+          <div class="evd-host-info">
+            <div class="evd-host-label">گرداننده</div>
+            <div class="evd-host-name">${escapeHtml(e.host_display_name || e.host_name)}</div>
+            <div class="evd-host-username">@${escapeHtml(e.host_name)}</div>
+          </div>
         </div>
-        <textarea id="reviewText" class="evd-review-ta" placeholder="نظر، پیشنهاد یا انتقاد خود را بنویسید..." maxlength="500"></textarea>
-        <button class="ev-action-btn ev-reserve" style="width:100%;margin-top:8px" onclick="submitReview(${e.id})">ارسال نظر</button>
-      </div>` : ''}
+        <h2 class="evd-title">${escapeHtml(e.event_name || e.location_name)}</h2>
+        <div class="evd-meta-row">
+          <span class="evd-status-badge ${e.status==='open'?'open':'full'}">${e.status==='open'?'● باز':'● تکمیل'}</span>
+          ${avgStars ? `<span class="evd-rating-chip">${starsHtml}<span>${avgStars}</span></span>` : ''}
+          <span class="evd-stat-chip">👁 ${toFarsiNum(e.views||0)}</span>
+          ${followData.follow_count ? `<span class="evd-stat-chip">🔔 ${toFarsiNum(followData.follow_count)}</span>` : ''}
+        </div>
+      </div>
+    </div>
 
-      <div id="reviewsList">
-        ${reviews.length ? reviews.map(r => `
-          <div class="evd-review-item">
-            <div class="evd-review-header">
-              <span class="evd-review-avatar">${escapeHtml(r.avatar||'🎭')}</span>
-              <strong>${escapeHtml(r.username)}</strong>
-              <span class="evd-review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
-              <span class="evd-review-date">${r.created_at}</span>
+    <div class="evd-body">
+      <div class="evd-info-list">
+        <div class="evd-info-row"><span class="evd-ii">🌍</span><span>${escapeHtml(e.country)}، ${escapeHtml(e.city)}</span></div>
+        <div class="evd-info-row"><span class="evd-ii">📍</span><span>${escapeHtml(e.location_name)}${e.address?' · '+escapeHtml(e.address):''}</span></div>
+        <div class="evd-info-row"><span class="evd-ii">📅</span><span>${e.event_date||'—'}</span></div>
+        <div class="evd-info-row"><span class="evd-ii">⏰</span><span>${e.start_time||'—'}${e.end_time?' — '+e.end_time:''}</span></div>
+        ${e.scenario ? `<div class="evd-info-row"><span class="evd-ii">🎭</span><span>${escapeHtml(e.scenario)}</span></div>` : ''}
+        ${e.price ? `<div class="evd-info-row"><span class="evd-ii">💰</span><span>${escapeHtml(e.price)}</span></div>` : ''}
+        <div class="evd-capacity-row">
+          <div class="evd-cap-label">
+            <span class="evd-ii">👥</span>
+            <span>${toFarsiNum(e.reserved_count)} از ${toFarsiNum(e.max_players)} نفر</span>
+            <span class="evd-cap-pct">${toFarsiNum(capPct)}٪</span>
+          </div>
+          <div class="evd-cap-bar"><div class="evd-cap-fill" style="width:${capPct}%"></div></div>
+        </div>
+      </div>
+
+      ${e.description ? `<div class="evd-desc">${escapeHtml(e.description)}</div>` : ''}
+
+      <div class="evd-cta-section">
+        ${myRes ? `<div class="evd-my-res-badge">${statusMap[myRes.status]||'⏳'}</div>` : ''}
+        ${isHost ? `<div class="evd-my-res-badge" style="background:rgba(245,166,35,.12);color:#f5a623;border-color:rgba(245,166,35,.3)">🎙️ ایونت شما</div>` : ''}
+        <div class="evd-cta-btns">
+          ${!isHost && isLoggedIn ? `
+            <button class="evd-btn evd-btn-msg"
+              data-hid="${e.host_id}" data-hname="${escapeHtml(e.host_name)}"
+              onclick="contactEventHost(+this.dataset.hid, this.dataset.hname)">
+              <span>💬</span><span>${myRes?.status==='accepted'?'هماهنگی':'پیام'}</span>
+            </button>` : ''}
+          ${canReserve ? `
+            <button class="evd-btn evd-btn-reserve" onclick="reserveEventFromDetail(${e.id})">
+              <span>📋</span><span>رزرو</span>
+            </button>` : ''}
+          ${!isHost && isLoggedIn ? `
+            <button class="evd-btn evd-btn-follow${followData.following?' active':''}" id="followBtn" onclick="toggleFollowEvent(${e.id})">
+              <span>${followData.following?'🔔':'🔕'}</span>
+              <span>${followData.following?'دنبال می‌کنید':'دنبال کنید'}</span>
+            </button>` : ''}
+        </div>
+      </div>
+
+      <div class="evd-reviews-section">
+        <div class="evd-section-title">
+          <span>💬 نظرات</span>
+          ${avgStars ? `<span class="evd-avg-badge">${starsHtml} ${avgStars} <span style="opacity:.5">(${toFarsiNum(e.review_count)})</span></span>` : ''}
+        </div>
+        ${canReview ? `
+          <div class="evd-review-form" id="reviewForm">
+            <div class="evd-star-pick" id="starPicker">
+              ${[1,2,3,4,5].map(i=>`<button class="evd-star-btn" onclick="_pickStar(${i})">★</button>`).join('')}
             </div>
-            ${r.content ? `<div class="evd-review-body">${escapeHtml(r.content)}</div>` : ''}
-          </div>`).join('') : '<div class="evd-no-reviews">هنوز نظری ثبت نشده</div>'}
+            <textarea id="reviewText" class="evd-review-ta" placeholder="نظر، پیشنهاد یا انتقاد..." maxlength="500"></textarea>
+            <button class="evd-btn evd-btn-reserve" style="width:100%" onclick="submitReview(${e.id})">ارسال نظر</button>
+          </div>` : ''}
+        <div id="reviewsList">
+          ${reviews.length ? reviews.map(r => `
+            <div class="evd-review-item">
+              <div class="evd-ri-head">
+                <div class="evd-ri-avatar">${escapeHtml((r.username||'?').charAt(0).toUpperCase())}</div>
+                <div class="evd-ri-meta">
+                  <span class="evd-ri-name">${escapeHtml(r.username)}</span>
+                  <span class="evd-ri-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                </div>
+                <span class="evd-review-date">${r.created_at?.slice(0,10)||''}</span>
+              </div>
+              ${r.content?`<div class="evd-review-body">${escapeHtml(r.content)}</div>`:''}
+            </div>`).join('') : '<div class="evd-no-reviews">هنوز نظری ثبت نشده</div>'}
+        </div>
       </div>
     </div>
   `;
 
-  let _selectedStar = 0;
+  window._currentStar = 0;
   window._pickStar = (n) => {
-    _selectedStar = n;
+    window._currentStar = n;
     document.querySelectorAll('.evd-star-btn').forEach((b,i) => {
       b.style.color = i < n ? '#f5a623' : 'rgba(255,255,255,.25)';
     });
-    window._currentStar = n;
   };
-  window._currentStar = 0;
 }
 
 function closeEventDetail() {
@@ -462,10 +497,10 @@ async function submitReview(eid) {
   }
 }
 
-function contactEventHost(hostId, hostName, hostAvatar, eventName) {
+function contactEventHost(hostId, hostName) {
   if (!authToken) { openAuthModal('login'); return; }
   closeEventDetail();
-  startDMWithUser(hostId, hostName, hostAvatar);
+  startDMWithUser(hostId, hostName, '🎭');
   showToast(`💬 پیام به ${hostName}`);
 }
 
