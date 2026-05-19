@@ -203,7 +203,7 @@ def schedule_revote_advance(app, code, current_slot, day_number):
                 return
             if room.current_turn != current_slot:
                 return
-            from services.lab_service_2 import advance_sequential_revote
+            from services.lab_service_phases import advance_sequential_revote
             advance_sequential_revote(app, code)
     threading.Thread(target=advance, daemon=True).start()
 
@@ -218,7 +218,7 @@ def schedule_night_sub_advance(app, code, sub_phase, day_number):
                 return
             if room.phase != sub_phase or room.day_number != day_number:
                 return
-            from services.lab_service_2 import advance_night
+            from services.lab_service_phases import advance_night
             advance_night(app, code)
     threading.Thread(target=advance, daemon=True).start()
 
@@ -230,7 +230,7 @@ def handle_phase_timeout(app, code, phase):
     if phase == "mafia_chat":
         start_sequential_voting(app, code)
     elif phase == "defense":
-        from services.lab_service_2 import start_revote
+        from services.lab_service_phases import start_revote
         start_revote(app, code)
 
 
@@ -441,7 +441,7 @@ def advance_sequential_vote(app, code):
             break
 
     if next_slot is None:
-        from services.lab_service_2 import resolve_voting
+        from services.lab_service_phases import resolve_voting
         resolve_voting(app, code)
     else:
         room.current_turn = next_slot

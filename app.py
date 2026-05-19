@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from config.settings import Config
-from extensions import db, jwt, socketio
+from extensions import db, jwt, socketio, migrate
 from utils.rate_limiter import check_rate_limit
 from routes import register_blueprints
 from sockets import register_socket_handlers
@@ -21,17 +21,40 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
 app.config.from_object(Config)
-CORS(app)
+_allowed_origins = [
+    os.environ.get("BASE_URL", "https://showshung.com"),
+    "http://localhost:5000",
+    "http://localhost:5001",
+]
+CORS(app, origins=_allowed_origins, supports_credentials=True)
 
 # ── Initialize Extensions ────────────────────────────────────────────────────
 
 db.init_app(app)
 jwt.init_app(app)
+migrate.init_app(app, db)
 socketio.init_app(app)
 
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
 
 app.before_request(check_rate_limit)
+
+# ── JWT: revoke tokens of banned users ───────────────────────────────────────
+
+@jwt.token_in_blocklist_loader
+def check_if_user_is_banned(_jwt_header, jwt_payload):
+    """Return True to treat this token as revoked (banned user)."""
+    uid = jwt_payload.get("sub")
+    if not uid:
+        return False
+    from models import User
+    user = db.session.get(User, int(uid))
+    return user is None or user.is_banned
+
+
+@jwt.revoked_token_loader
+def revoked_token_response(_jwt_header, _jwt_payload):
+    return jsonify({"error": "حساب شما مسدود شده است"}), 403
 
 # ── Register Blueprints & Socket Handlers ─────────────────────────────────────
 
@@ -64,48 +87,54 @@ def too_many_requests(e):
 
 # ── Bootstrap: DB migrations ─────────────────────────────────────────────────
 
-for _attempt in range(10):
-    try:
-        with app.app_context():
-            db.create_all()
-            try:
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_emoji VARCHAR(10) DEFAULT '🎭'"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(200) DEFAULT ''"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_plain_pw VARCHAR(100)"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS device_fingerprint VARCHAR(100)"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(64)"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP"))
-                db.session.execute(db.text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT"))
-                db.session.execute(db.text("ALTER TABLE game_events ADD COLUMN IF NOT EXISTS views INTEGER DEFAULT 0"))
-                for col in ["event_name VARCHAR(100) DEFAULT ''", "host_display_name VARCHAR(50) DEFAULT ''",
-                    "address VARCHAR(300) DEFAULT ''", "lat FLOAT", "lng FLOAT"]:
-                    try: db.session.execute(db.text(f"ALTER TABLE game_events ADD COLUMN IF NOT EXISTS {col}")); db.session.commit()
-                    except: db.session.rollback()
-                try: db.session.execute(db.text("ALTER TABLE game_events ADD COLUMN IF NOT EXISTS price VARCHAR(50) DEFAULT ''")); db.session.commit()
-                except: db.session.rollback()
-                db.session.execute(db.text("DROP TABLE IF EXISTS lab_messages CASCADE"))
-                db.session.execute(db.text("DROP TABLE IF EXISTS lab_players CASCADE"))
-                db.session.execute(db.text("DROP TABLE IF EXISTS lab_rooms CASCADE"))
-                db.session.execute(db.text("DROP TABLE IF EXISTS bot_memories CASCADE"))
-                db.session.commit()
+_SCHEMA_MIGRATIONS = [
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_emoji VARCHAR(10) DEFAULT '🎭'",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(200) DEFAULT ''",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_wins INTEGER DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS chaos_losses INTEGER DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS device_fingerprint VARCHAR(100)",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(64)",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS views INTEGER DEFAULT 0",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS event_name VARCHAR(100) DEFAULT ''",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS host_display_name VARCHAR(50) DEFAULT ''",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS address VARCHAR(300) DEFAULT ''",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS lat FLOAT",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS lng FLOAT",
+    "ALTER TABLE game_events ADD COLUMN IF NOT EXISTS price VARCHAR(50) DEFAULT ''",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE",
+]
+
+if not os.environ.get("FLASK_SKIP_DB_CREATE"):
+    for _attempt in range(10):
+        try:
+            with app.app_context():
                 db.create_all()
-                db.session.commit()
-                print("DB columns updated")
-            except Exception as col_err:
-                db.session.rollback()
-                print(f"Column update skipped: {col_err}")
-        break
-    except Exception as e:
-        if _attempt < 9:
-            print(f"DB not ready ({e}), retrying in 3s...")
-            time.sleep(3)
-        else:
-            raise
+                for _sql in _SCHEMA_MIGRATIONS:
+                    try:
+                        db.session.execute(db.text(_sql))
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                print("DB ready")
+            break
+        except Exception as e:
+            if _attempt < 9:
+                print(f"DB not ready ({e}), retrying in 3s...")
+                time.sleep(3)
+            else:
+                raise
+
+# ── Resume in-progress chaos rooms after restart ─────────────────────────────
+try:
+    from services.chaos_service import resume_active_rooms
+    resume_active_rooms(app)
+except Exception as _e:
+    print(f"[chaos] Could not resume active rooms: {_e}")
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────

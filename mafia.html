@@ -116,7 +116,9 @@
 <!-- CSS Modules -->
 <link rel="stylesheet" href="css/variables.css">
 <link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/components-setup.css">
+<link rel="stylesheet" href="css/components-ui.css">
+<link rel="stylesheet" href="css/components-lab.css">
 <link rel="stylesheet" href="css/cards.css">
 <link rel="stylesheet" href="css/animations.css">
 <link rel="stylesheet" href="css/chaos.css">
@@ -294,6 +296,67 @@
   </div>
 </div>
 
+<!-- Custom Scenario Overlay -->
+<div class="scenario-overlay shab-mafia-overlay" id="customOverlay" role="dialog" aria-modal="true" aria-label="سناریو دلخواه">
+  <div class="scenario-box shab-mafia-box">
+    <div class="shab-ov-head">
+      <button class="shab-ov-close" onclick="closeCustomOverlay()" aria-label="بستن">✕</button>
+      <span class="shab-ov-title">✏️ سناریو دلخواه</span>
+      <div class="form-group" style="margin:0">
+        <input type="text" id="customName" placeholder="نام سناریو..." value="گروه من" autocomplete="off" maxlength="30"
+          style="padding:0.5rem 0.75rem;font-size:0.85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-family:inherit;width:100%;outline:none">
+      </div>
+      <div class="sm-teams-legend">
+        <span class="sm-leg sm-leg-c">😇 شهروند</span>
+        <span class="sm-leg sm-leg-m">😈 مافیا</span>
+        <span class="sm-leg sm-leg-i">🐺 مستقل</span>
+      </div>
+    </div>
+
+    <div class="shab-ov-catalog" style="overflow-y:auto;-webkit-overflow-scrolling:touch">
+      <!-- Role Catalog -->
+      <div class="role-catalog" id="roleCatalog"></div>
+
+      <!-- Manual Add -->
+      <div class="custom-add-section" style="margin-top:var(--space-sm)">
+        <div class="custom-add-header">
+          <span class="custom-add-icon">✦</span>
+          <span class="custom-add-label">نقش سفارشی</span>
+        </div>
+        <div class="card-builder-row">
+          <input type="text" id="newCardName" placeholder="نام نقش..." maxlength="20" autocomplete="off" inputmode="text"
+            onkeydown="if(event.key==='Enter') addCustomCard()">
+          <div class="team-toggle">
+            <button id="btnMafia" class="active-mafia" onclick="setTeam('mafia')">😈</button>
+            <button id="btnCitizen" onclick="setTeam('citizen')">😇</button>
+            <button id="btnIndependent" onclick="setTeam('independent')">🐺</button>
+          </div>
+          <button class="add-card-btn" onclick="addCustomCard()">افزودن</button>
+        </div>
+      </div>
+
+      <!-- Selected Cards List -->
+      <div class="custom-cards-list" id="customCardsList" style="max-height:none;margin-top:var(--space-sm)">
+        <div class="custom-empty">هنوز کارتی اضافه نشده</div>
+      </div>
+    </div>
+
+    <div class="shab-ov-footer">
+      <div class="custom-summary" id="customSummary" style="display:none">
+        <span class="cs-total" id="csTotalCount">۰ کارت</span><span>·</span>
+        <span class="cs-mafia" id="csMafiaCount">۰ مافیا</span><span>·</span>
+        <span class="cs-citizen" id="csCitizenCount">۰ شهروند</span><span>·</span>
+        <span class="cs-independent" id="csIndependentCount">۰ مستقل</span>
+      </div>
+      <button class="save-scenario-btn" onclick="saveCurrentScenario()" id="saveScenarioBtn" style="display:none">💾 ذخیره این سناریو</button>
+      <div class="start-btns-row" id="customStartRow" style="display:none">
+        <button class="start-btn start-btn-animated" onclick="startGame()" id="customStartBtn">🎮 سنتی</button>
+        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📱 حرفه‌ای</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Scenario Tutorial Overlay -->
 <!-- Shab Mafia Overlay -->
 <div class="scenario-overlay shab-mafia-overlay" id="shabMafiaOverlay" role="dialog" aria-modal="true" aria-label="شب مافیا">
@@ -401,6 +464,10 @@
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4l2-8 2 16 2-8h4"/></svg>
       <span>بازی جاری</span>
     </button>
+    <button class="bnav-btn" id="navHistory" onclick="showScreen('history')">
+      <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>تاریخچه</span>
+    </button>
     <button class="bnav-btn" id="navEvents" onclick="showScreen('events')">
       <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
       <span>ایونت</span>
@@ -446,6 +513,7 @@
     </div>
     <div class="setup-card gc">
       <div class="section-title" id="setupHeading">🎯 انتخاب سناریو</div>
+      <div id="savedScenariosSection" style="display:none"></div>
       <div class="group-grid">
         <button class="group-btn" onclick="selectGroup('تکاور')" data-group="تکاور">
           <span class="icon">⚔️</span><span class="name">تکاور</span><span class="desc">سبک تاکتیکی</span>
@@ -481,46 +549,10 @@
           <span class="icon">🧪</span><span class="name">آزمایشی</span><span class="desc">آنلاین ۱۰ نفره</span>
         </button>
       </div>
-      <div class="custom-form" id="customForm">
-        <div class="section-title">✏️ ساخت گروه دلخواه</div>
-        <div class="form-group" id="customNameRow"><label for="customName">نام گروه</label>
-          <input type="text" id="customName" placeholder="مثال: دوستان" value="گروه من" autocomplete="off" maxlength="30"></div>
-
-        <!-- Role Catalog -->
-        <div class="role-catalog" id="roleCatalog"></div>
-
-        <!-- Manual Add -->
-        <div class="custom-add-section">
-          <div class="custom-add-header">
-            <span class="custom-add-icon">✦</span>
-            <span class="custom-add-label">نقش سفارشی</span>
-          </div>
-          <div class="card-builder-row">
-            <input type="text" id="newCardName" placeholder="نام نقش..." maxlength="20" aria-label="نام کارت جدید" autocomplete="off" inputmode="text"
-              onkeydown="if(event.key==='Enter') addCustomCard()">
-            <div class="team-toggle">
-              <button id="btnMafia" class="active-mafia" onclick="setTeam('mafia')">😈</button>
-              <button id="btnCitizen" onclick="setTeam('citizen')">😇</button>
-              <button id="btnIndependent" onclick="setTeam('independent')">🐺</button>
-            </div>
-            <button class="add-card-btn" onclick="addCustomCard()">افزودن</button>
-          </div>
-        </div>
-
-        <!-- Selected Cards List -->
-        <div class="custom-cards-list" id="customCardsList">
-          <div class="custom-empty">هنوز کارتی اضافه نشده</div>
-        </div>
-        <div class="custom-summary" id="customSummary" style="display:none">
-          <span class="cs-total" id="csTotalCount">۰ کارت</span><span>·</span>
-          <span class="cs-mafia" id="csMafiaCount">۰ مافیا</span><span>·</span>
-          <span class="cs-citizen" id="csCitizenCount">۰ شهروند</span><span>·</span>
-          <span class="cs-independent" id="csIndependentCount">۰ مستقل</span>
-        </div>
-        <div class="start-btns-row" id="customStartRow" style="display:none">
-        <button class="start-btn start-btn-animated" onclick="startGame()" id="customStartBtn">🎮 سنتی</button>
-        <button class="start-btn start-btn-nearby" onclick="startNearbyGame()">📱 حرفه‌ای</button>
-      </div>
+      <div id="customForm"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button onclick="showScreen('rules')" style="flex:1;padding:10px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.8rem">📖 قوانین و نقش‌ها</button>
+        <button onclick="showScreen('leaderboard')" style="flex:1;padding:10px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.8rem">🏆 رتبه‌بندی</button>
       </div>
     </div>
 
@@ -679,6 +711,7 @@
   <!-- CHAOS Screen -->
   <section class="screen" id="chaosScreen" aria-label="بازی کی‌اس" aria-labelledby="chaosHeading">
     <div class="chaos-entry gc" id="chaosEntry">
+      <button onclick="showScreen('setup')" style="padding:8px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:14px;display:block">◀ بازگشت</button>
       <div class="section-title" id="chaosHeading">⚡ کی‌اس</div>
       <p style="color:var(--dim);font-size:.82rem;margin-bottom:18px">بازی آنلاین ۳ نفره · چت و ویس · ۱ مافیا vs ۲ شهروند</p>
       <div class="chaos-actions">
@@ -696,6 +729,7 @@
   <!-- Lab Screen (آزمایشی) -->
   <section class="screen" id="labScreen" aria-labelledby="labTitle">
     <div class="lab-entry gc" id="labEntry">
+      <button onclick="showScreen('setup')" style="padding:8px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:14px;display:block">◀ بازگشت</button>
       <div class="section-title" id="labTitle">🧪 حالت آزمایشی</div>
       <p class="lab-desc">بازی ۱۰ نفره آنلاین مافیا · سناریو بازپرس · چت نوبتی · بات‌های هوشمند</p>
 
@@ -732,6 +766,7 @@
   <!-- Moderator Tools Screen (standalone) -->
   <section class="screen" id="toolsScreen" aria-label="ابزار گرداننده" aria-labelledby="toolsHeading">
     <div class="setup-card gc" style="padding:20px">
+      <button onclick="goBack()" style="padding:8px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:14px;display:block">◀ بازگشت</button>
       <div class="section-title" id="toolsHeading">🎙️ ابزار گرداننده</div>
       <p class="tools-intro">ابزار حرفه‌ای برای گرداننده مافیا — تایمر روز/شب، اخطار به بازیکنان و یادداشت‌های بازی.</p>
 
@@ -802,15 +837,16 @@
 
   <!-- DM Screen -->
   <section class="screen" id="dmScreen" aria-label="پیام‌ها" aria-labelledby="dmHeading">
-    <div class="setup-card gc" style="padding:20px">
-      <div class="section-title" id="dmHeading">💬 پیام‌ها</div>
-      <div id="dmContent"></div>
+    <div class="dm-screen-wrap">
+      <div id="dmConvoList" class="dm-screen-panel"></div>
+      <div id="dmChatView" class="dm-screen-panel" style="display:none"></div>
     </div>
   </section>
 
   <!-- Rules Screen -->
   <section class="screen" id="rulesScreen" aria-label="قوانین بازی">
     <div class="setup-card gc" style="padding:20px">
+      <button onclick="goBack()" style="padding:8px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:14px;display:block">◀ بازگشت</button>
       <div class="section-title">📖 قوانین و نقش‌ها</div>
       <div class="rules-tabs">
         <button class="lb-tab active" onclick="showRulesTab('overview',this)">کلی</button>
@@ -825,6 +861,7 @@
   <!-- Leaderboard Screen -->
   <section class="screen" id="leaderboardScreen" aria-label="رتبه‌بندی">
     <div class="setup-card gc" style="padding:20px">
+      <button onclick="goBack()" style="padding:8px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--dim);cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:14px;display:block">◀ بازگشت</button>
       <div class="section-title">🏆 رتبه‌بندی بازیکنان</div>
       <div class="lb-tabs">
         <button class="lb-tab active" onclick="loadLeaderboard('wins')">بیشترین برد</button>
@@ -1139,12 +1176,16 @@
 <script src="js/setup.js"></script>
 <script src="js/tools.js"></script>
 <script src="js/funtext.js"></script>
-<script src="js/game.js"></script>
+<script src="js/game-core.js"></script>
+<script src="js/game-nfc.js"></script>
+<script src="js/game-flow.js"></script>
 <script src="js/history.js"></script>
 <script src="js/socket.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/chaos.js"></script>
-<script src="js/lab.js"></script>
+<script src="js/lab-core.js"></script>
+<script src="js/lab-render.js"></script>
+<script src="js/lab-socket.js"></script>
 <script src="js/dm.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/creatures.js" defer></script>

@@ -6,13 +6,26 @@ from extensions import db
 from config.settings import Config
 
 
-def is_admin():
-    """Check if the current JWT user is an admin."""
+def is_admin() -> bool:
+    """Return True if the current JWT user has admin rights.
+
+    Checks the DB flag first; falls back to ADMIN_USERNAMES for initial
+    bootstrap before the flag is explicitly set.
+    """
     try:
         uid = int(get_jwt_identity())
         from models import User
         user = db.session.get(User, uid)
-        return user and user.username.lower() in [u.lower() for u in Config.ADMIN_USERNAMES]
+        if not user:
+            return False
+        if user.is_admin:
+            return True
+        # Bootstrap fallback: auto-promote users in the config list
+        if user.username.lower() in [u.lower() for u in Config.ADMIN_USERNAMES]:
+            user.is_admin = True
+            db.session.commit()
+            return True
+        return False
     except Exception:
         return False
 

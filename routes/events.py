@@ -1,4 +1,7 @@
 """Event routes — create, list, reserve, comment on game meetups."""
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import subqueryload
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -41,7 +44,11 @@ def create_event():
     )
     event.status = "pending"  # needs admin approval
     db.session.add(event)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({"error": str(ve)}), 400
     return jsonify({
         "ok": True,
         "message": "ایونت ثبت شد — منتظر تأیید ادمین باشید",
@@ -58,10 +65,13 @@ def list_events():
         q = q.filter(GameEvent.country.ilike(f"%{country}%"))
     if city:
         q = q.filter(GameEvent.city.ilike(f"%{city}%"))
-    events = q.order_by(
+    events = q.options(
+        subqueryload(GameEvent.host)
+    ).order_by(
         GameEvent.event_date.asc(), GameEvent.start_time.asc()
     ).limit(50).all()
-    return jsonify([e.to_dict() for e in events]), 200
+    # Pass include_reservations=False for list view to avoid N+1
+    return jsonify([e.to_dict(include_reservations=False) for e in events]), 200
 
 
 @bp.route("/<int:eid>", methods=["GET"])
@@ -74,7 +84,7 @@ def get_event(eid):
         db.session.commit()
     except Exception:
         db.session.rollback()
-    return jsonify(event.to_dict()), 200
+    return jsonify(event.to_dict(include_host_photo=True)), 200
 
 
 @bp.route("/<int:eid>", methods=["PUT"])
@@ -84,12 +94,10 @@ def update_event(eid):
     event = db.session.get(GameEvent, eid)
     if not event or event.host_id != user.id:
         return jsonify({"error": "دسترسی ندارید"}), 403
-    data = request.get_json()
-    for field in [
-        "country", "city", "location_name", "scenario",
-        "event_date", "start_time", "end_time", "description",
-        "max_players", "status"
-    ]:
+    data = request.get_json(silent=True) or {}
+    # host can only edit content fields — status changes are admin-only
+    for field in ["country", "city", "location_name", "scenario",
+                  "event_date", "start_time", "end_time", "description", "max_players"]:
         if field in data:
             setattr(event, field, data[field])
     db.session.commit()
@@ -121,11 +129,7 @@ def reserve_event(eid):
         return jsonify({"error": "ایونت پیدا نشد"}), 404
     if event.host_id == user.id:
         return jsonify({"error": "گرداننده نمی\u200cتواند رزرو کند"}), 400
-    existing = EventReservation.query.filter_by(
-        event_id=eid, user_id=user.id
-    ).first()
-    if existing:
-        return jsonify({"error": "قبلاً رزرو کرده\u200cاید"}), 400
+    # Atomic capacity check + insert; unique constraint prevents double-booking under concurrency
     count = EventReservation.query.filter_by(event_id=eid).count()
     if count >= event.max_players:
         event.status = "full"
@@ -135,16 +139,19 @@ def reserve_event(eid):
     db.session.add(res)
     if count + 1 >= event.max_players:
         event.status = "full"
-    # Send DM to host
     try:
         dm = DirectMessage(
             sender_id=user.id, receiver_id=event.host_id,
             content=f"📋 درخواست رزرو ایونت «{event.location_name}» از طرف {user.username} — {count+1}/{event.max_players} نفر"
         )
         db.session.add(dm)
-    except:
+    except Exception:
         pass
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "قبلاً رزرو کرده‌اید"}), 400
     return jsonify({"ok": True, "status": res.status}), 201
 
 
@@ -175,7 +182,7 @@ def manage_reservation(eid, rid):
             content=f"🏠 رزرو ایونت «{event.location_name}»: {status_text}"
         )
         db.session.add(dm)
-    except:
+    except Exception:
         pass
     db.session.commit()
     return jsonify({"ok": True}), 200

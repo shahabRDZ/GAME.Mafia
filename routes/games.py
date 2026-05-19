@@ -60,7 +60,7 @@ def clear_games():
         data = request.get_json(silent=True)
         if data and "keep_last" in data:
             keep_last = int(data["keep_last"])
-    except:
+    except Exception:
         pass
     if keep_last > 0:
         # Keep the last N games, delete the rest

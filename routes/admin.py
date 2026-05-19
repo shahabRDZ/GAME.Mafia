@@ -189,7 +189,7 @@ def admin_export_csv():
             user = db.session.get(User, int(data["sub"]))
             if not user or user.username not in Config.ADMIN_USERNAMES:
                 return jsonify({"error": "\u062f\u0633\u062a\u0631\u0633\u06cc \u0646\u062f\u0627\u0631\u06cc\u062f"}), 403
-        except:
+        except Exception:
             return jsonify({"error": "\u062a\u0648\u06a9\u0646 \u0646\u0627\u0645\u0639\u062a\u0628\u0631"}), 403
     elif not is_admin():
         return jsonify({"error": "\u062f\u0633\u062a\u0631\u0633\u06cc \u0646\u062f\u0627\u0631\u06cc\u062f"}), 403
@@ -247,7 +247,7 @@ def admin_approve_event(eid):
             content=f"\u2705 \u0627\u06cc\u0648\u0646\u062a \u00ab{event.location_name}\u00bb \u062a\u0623\u06cc\u06cc\u062f \u0634\u062f \u0648 \u0645\u0646\u062a\u0634\u0631 \u0634\u062f!"
         )
         db.session.add(dm)
-    except:
+    except Exception:
         pass
     db.session.commit()
     log_admin_action("\u062a\u0623\u06cc\u06cc\u062f \u0627\u06cc\u0648\u0646\u062a", f"#{eid} {event.location_name}")
@@ -268,7 +268,7 @@ def admin_reject_event(eid):
             content=f"\u274c \u0627\u06cc\u0648\u0646\u062a \u00ab{event.location_name}\u00bb \u0631\u062f \u0634\u062f."
         )
         db.session.add(dm)
-    except:
+    except Exception:
         pass
     db.session.commit()
     log_admin_action("\u0631\u062f \u0627\u06cc\u0648\u0646\u062a", f"#{eid} {event.location_name}")

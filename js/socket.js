@@ -92,22 +92,7 @@ function initSocket() {
   });
   socket.on("dm_received", (data) => {
     if (!data) return;
-    // If chat is open with this user, append message
-    if (dmOpenUserId === data.from_user_id) {
-      const msgs = document.getElementById("dmMessages");
-      if (msgs) {
-        const empty = msgs.querySelector(".custom-empty");
-        if (empty) empty.remove();
-        msgs.innerHTML += `
-          <div class="dm-msg dm-msg-other">
-            <div class="dm-msg-text">${escapeHtml(data.content)}</div>
-            <div class="dm-msg-time">${data.time}</div>
-          </div>`;
-        msgs.scrollTop = msgs.scrollHeight;
-      }
-    } else {
-      showToast("💬 پیام از " + data.from_username);
-    }
+    onDMReceived(data);
   });
 }
 

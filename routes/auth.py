@@ -4,12 +4,22 @@ import re
 import secrets
 from datetime import datetime, timezone, timedelta
 
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from flask import Blueprint, request, jsonify, current_app
+from flask_jwt_extended import (
+    jwt_required, get_jwt_identity,
+    create_access_token, create_refresh_token,
+    set_refresh_cookies, unset_jwt_cookies,
+)
 
 from extensions import db
 from models import User
-from utils.rate_limiter import rate_limit
+from utils.rate_limiter import rate_limit as _rate_limit
+
+
+def rate_limit(key, max_requests=30, window=60):
+    if current_app.config.get("TESTING"):
+        return False
+    return _rate_limit(key, max_requests=max_requests, window=window)
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
@@ -72,7 +82,10 @@ def register():
     db.session.add(user)
     db.session.commit()
     token = create_access_token(identity=str(user.id))
-    return jsonify({"token": token, "user": user.to_dict()}), 201
+    refresh = create_refresh_token(identity=str(user.id))
+    resp = jsonify({"token": token, "user": user.to_dict()})
+    set_refresh_cookies(resp, refresh)
+    return resp, 201
 
 
 @bp.route("/register-device", methods=["POST"])
@@ -103,7 +116,10 @@ def device_login():
     if user.is_banned:
         return jsonify({"error": "banned"}), 403
     token = create_access_token(identity=str(user.id))
-    return jsonify({"token": token, "user": user.to_dict()}), 200
+    refresh = create_refresh_token(identity=str(user.id))
+    resp = jsonify({"token": token, "user": user.to_dict()})
+    set_refresh_cookies(resp, refresh)
+    return resp, 200
 
 
 @bp.route("/login", methods=["POST"])
@@ -137,7 +153,10 @@ def login():
         db.session.rollback()
 
     token = create_access_token(identity=str(user.id))
-    return jsonify({"token": token, "user": user.to_dict()}), 200
+    refresh = create_refresh_token(identity=str(user.id))
+    resp = jsonify({"token": token, "user": user.to_dict()})
+    set_refresh_cookies(resp, refresh)
+    return resp, 200
 
 
 @bp.route("/forgot-password", methods=["POST"])
@@ -215,8 +234,11 @@ def reset_password():
     db.session.commit()
 
     jwt_token = create_access_token(identity=str(user.id))
-    return jsonify({"ok": True, "token": jwt_token, "user": user.to_dict(),
-                    "message": "رمز عبور با موفقیت تغییر کرد"}), 200
+    refresh = create_refresh_token(identity=str(user.id))
+    resp = jsonify({"ok": True, "token": jwt_token, "user": user.to_dict(),
+                    "message": "رمز عبور با موفقیت تغییر کرد"})
+    set_refresh_cookies(resp, refresh)
+    return resp, 200
 
 
 @bp.route("/change-password", methods=["POST"])
@@ -255,3 +277,21 @@ def me():
     if not user:
         return jsonify({"error": "کاربر یافت نشد"}), 404
     return jsonify(user.to_dict()), 200
+
+
+@bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    uid = get_jwt_identity()
+    user = db.session.get(User, int(uid))
+    if not user or user.is_banned:
+        return jsonify({"error": "دسترسی ندارید"}), 403
+    access_token = create_access_token(identity=uid)
+    return jsonify({"token": access_token, "user": user.to_dict()}), 200
+
+
+@bp.route("/logout", methods=["POST"])
+def logout():
+    resp = jsonify({"ok": True})
+    unset_jwt_cookies(resp)
+    return resp, 200

@@ -1,11 +1,33 @@
 /* ── API Communication ── */
 
+async function _silentRefresh() {
+  try {
+    const res = await fetch(API + "/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (data.token) {
+      authToken = data.token;
+      if (data.user) currentUser = data.user;
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 async function apiFetch(path, opts = {}) {
   const headers = { "Content-Type": "application/json" };
   if (authToken) headers["Authorization"] = "Bearer " + authToken;
 
   const isBackground = opts._background;
+  const isRetry = opts._isRetry;
   delete opts._background;
+  delete opts._isRetry;
 
   if (!isBackground) showLoading();
 
@@ -13,15 +35,28 @@ async function apiFetch(path, opts = {}) {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const res = await fetch(API + path, { ...opts, headers, signal: controller.signal });
+    const res = await fetch(API + path, {
+      ...opts, headers, signal: controller.signal, credentials: "include"
+    });
     clearTimeout(timeoutId);
     if (!isBackground) hideLoading();
 
     let data;
     try {
       data = await res.json();
-    } catch (jsonErr) {
+    } catch {
       return { ok: false, status: res.status, data: { error: getHttpErrorMessage(res.status) } };
+    }
+
+    // On 401, try to refresh once then retry the original request
+    if (res.status === 401 && !isRetry) {
+      const refreshed = await _silentRefresh();
+      if (refreshed) {
+        return apiFetch(path, { ...opts, _isRetry: true, _background: isBackground });
+      }
+      authToken = null;
+      currentUser = null;
+      renderAuthBar();
     }
 
     if (!res.ok) {

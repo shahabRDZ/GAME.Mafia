@@ -1,5 +1,10 @@
+import re
 from datetime import datetime, timezone
+from sqlalchemy.orm import validates
 from extensions import db
+
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_TIME_RE = re.compile(r"^\d{2}:\d{2}$")
 
 
 class GameEvent(db.Model):
@@ -28,15 +33,31 @@ class GameEvent(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     host = db.relationship("User", foreign_keys=[host_id])
 
-    def to_dict(self, include_reservations=True):
-        reservations = EventReservation.query.filter_by(event_id=self.id).all() if include_reservations else []
-        reviews = EventReview.query.filter_by(event_id=self.id).all()
+    @validates("event_date")
+    def validate_event_date(self, key, value):
+        if value and not _DATE_RE.match(str(value)):
+            raise ValueError(f"event_date must be YYYY-MM-DD, got: {value!r}")
+        return value
+
+    @validates("start_time", "end_time")
+    def validate_time(self, key, value):
+        if value and not _TIME_RE.match(str(value)):
+            raise ValueError(f"{key} must be HH:MM, got: {value!r}")
+        return value
+
+    def to_dict(self, include_reservations=True, include_host_photo=False,
+                _reservations=None, _reviews=None, _follow_count=None):
+        reservations = _reservations if _reservations is not None else (
+            EventReservation.query.filter_by(event_id=self.id).all() if include_reservations else []
+        )
+        reviews = _reviews if _reviews is not None else EventReview.query.filter_by(event_id=self.id).all()
         avg_rating = round(sum(r.rating for r in reviews) / len(reviews), 1) if reviews else 0
-        follow_count = EventFollow.query.filter_by(event_id=self.id).count()
+        follow_count = _follow_count if _follow_count is not None else EventFollow.query.filter_by(event_id=self.id).count()
         return {
             "id": self.id, "host_id": self.host_id,
             "host_name": self.host.username if self.host else "?",
             "host_avatar": self.host.avatar_emoji if self.host else "🎭",
+            "host_avatar_url": (self.host.avatar_url if self.host else None) if include_host_photo else None,
             "event_name": self.event_name or "",
             "host_display_name": self.host_display_name or "",
             "country": self.country, "city": self.city,
@@ -71,6 +92,7 @@ class EventReservation(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user = db.relationship("User", foreign_keys=[user_id])
     event = db.relationship("GameEvent", foreign_keys=[event_id])
+    __table_args__ = (db.UniqueConstraint("event_id", "user_id", name="uq_event_reservation"),)
 
 
 class EventComment(db.Model):

@@ -159,7 +159,7 @@ def assign_nearby_roles():
             )
             dm = DirectMessage(sender_id=host_user.id, receiver_id=uid, content=dm_content)
             db.session.add(dm)
-        except:
+        except Exception:
             pass
     db.session.commit()
     return jsonify({"ok": True, "gameId": game_id, "count": len(player_ids)}), 200
@@ -235,7 +235,7 @@ def reassign_nearby_roles():
             dm_content = f"🔒 محرمانه — نقش جدید: {role.get('name','?')} (ریست شد)"
             dm = DirectMessage(sender_id=host_user.id, receiver_id=uid, content=dm_content)
             db.session.add(dm)
-        except:
+        except Exception:
             pass
     db.session.commit()
     return jsonify({"ok": True, "gameId": new_game_id, "count": len(player_ids)}), 200

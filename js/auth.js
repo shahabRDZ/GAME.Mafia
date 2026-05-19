@@ -5,38 +5,19 @@ const _USER_RE = /^[a-zA-Z0-9_؀-ۿ]{3,30}$/;
 const _EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 
 async function initAuth() {
-  if (!authToken) {
-    authToken = localStorage.getItem("mafiaToken") || sessionStorage.getItem("mafiaToken") || null;
+  // Try to get a fresh access token using the httpOnly refresh cookie
+  const refreshed = await _silentRefresh();
+  if (refreshed) {
+    renderAuthBar();
+    return;
   }
 
-  if (authToken) {
-    try {
-      const r = await apiFetch("/api/auth/me", { _background: true });
-      if (r.ok) {
-        currentUser = r.data;
-        renderAuthBar();
-        return;
-      }
-      if (r.status === 401) {
-        authToken = null;
-        currentUser = null;
-        localStorage.removeItem("mafiaToken");
-        sessionStorage.removeItem("mafiaToken");
-      } else {
-        renderAuthBar();
-        return;
-      }
-    } catch {
-      renderAuthBar();
-      return;
-    }
-  }
-
-  // No valid token — try device fingerprint auto-login
+  // No valid session — try device fingerprint auto-login
   try {
     const fp = getDeviceFingerprint();
     const r = await fetch(API + "/api/auth/device-login", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fingerprint: fp })
     });
@@ -44,7 +25,6 @@ async function initAuth() {
     if (r.ok && data.token) {
       authToken = data.token;
       currentUser = data.user;
-      localStorage.setItem("mafiaToken", authToken);
       renderAuthBar();
     }
   } catch {}
@@ -131,11 +111,11 @@ async function submitAuth() {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    localStorage.setItem("mafiaToken", authToken);
     try {
       const fp = getDeviceFingerprint();
       fetch(API + "/api/auth/register-device", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + authToken },
         body: JSON.stringify({ fingerprint: fp })
       });
@@ -265,7 +245,6 @@ async function _submitNewPassword(e) {
   if (r.ok) {
     authToken = r.data.token;
     currentUser = r.data.user;
-    localStorage.setItem("mafiaToken", authToken);
     renderAuthBar();
     closeAuthModal();
     showToast("رمز عبور با موفقیت تغییر کرد!");
@@ -276,11 +255,16 @@ async function _submitNewPassword(e) {
   }
 }
 
-function logout() {
+async function logout() {
+  try {
+    await fetch(API + "/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch {}
   authToken = null;
   currentUser = null;
-  localStorage.removeItem("mafiaToken");
-  sessionStorage.removeItem("mafiaToken");
   renderAuthBar();
   showToast("👋 خداحافظ!");
   if (document.getElementById("historyScreen").classList.contains("active")) renderHistory();
@@ -301,7 +285,7 @@ function renderAuthBar() {
     document.getElementById("usernameDisplay").textContent = currentUser.username;
     document.getElementById("gamesCountDisplay").textContent = toFarsiNum(currentUser.total_games) + " بازی ثبت‌شده";
     const ab = document.getElementById("navAdmin");
-    if (ab) ab.style.display = ["shahab","admin"].includes(currentUser.username) ? "inline-block" : "none";
+    if (ab) ab.style.display = currentUser.is_admin ? "inline-block" : "none";
     initSocket();
   } else {
     const ab = document.getElementById("navAdmin");

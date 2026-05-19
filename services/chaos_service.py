@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime, timezone, timedelta
 
 from flask_socketio import emit
@@ -135,3 +136,59 @@ def end_game(app, code, winner, eliminated_id=None, eliminated_role=None):
             "eliminated_role": eliminated_role,
             "players": votes_detail
         }, to=code)
+
+
+def _resume_room_timer(app, code, phase, phase_end_at):
+    """Resume a phase timer after an app restart."""
+    import time as _time
+    with app.app_context():
+        now = datetime.now(timezone.utc)
+        remaining = (phase_end_at - now).total_seconds()
+
+        if phase == "discussion":
+            if remaining > 0:
+                _time.sleep(remaining)
+            room = ChaosRoom.query.filter_by(code=code, status="playing").first()
+            if not room or room.phase != "discussion":
+                return
+            room.phase = "voting"
+            room.phase_end_at = datetime.now(timezone.utc) + timedelta(seconds=30)
+            for p in room.players:
+                p.vote_target_id = None
+            db.session.commit()
+            socketio.emit("phase_change", {
+                "phase": "voting",
+                "phase_end_at": room.phase_end_at.isoformat()
+            }, to=code)
+            _time.sleep(30)
+            room = ChaosRoom.query.filter_by(code=code, status="playing").first()
+            if not room or room.phase != "voting":
+                return
+            resolve_votes(app, code)
+
+        elif phase == "voting":
+            if remaining > 0:
+                _time.sleep(remaining)
+            room = ChaosRoom.query.filter_by(code=code, status="playing").first()
+            if not room or room.phase != "voting":
+                return
+            resolve_votes(app, code)
+
+
+def resume_active_rooms(app):
+    """On startup, restart phase timers for any rooms still marked as playing."""
+    with app.app_context():
+        rooms = ChaosRoom.query.filter_by(status="playing").all()
+        for room in rooms:
+            if not room.phase_end_at:
+                continue
+            end_at = room.phase_end_at
+            if end_at.tzinfo is None:
+                end_at = end_at.replace(tzinfo=timezone.utc)
+            t = threading.Thread(
+                target=_resume_room_timer,
+                args=(app, room.code, room.phase, end_at),
+                daemon=True
+            )
+            t.start()
+            print(f"[chaos] Resumed timer for room {room.code} (phase={room.phase})")
