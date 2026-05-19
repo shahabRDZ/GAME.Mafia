@@ -33,6 +33,7 @@ COPY routes/ routes/
 COPY services/ services/
 COPY sockets/ sockets/
 COPY utils/ utils/
+COPY migrations/ migrations/
 COPY *.html app.py ./
 
 RUN mkdir -p /app/instance /app/data
