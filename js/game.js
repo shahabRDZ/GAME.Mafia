@@ -53,7 +53,7 @@ async function startGame() {
     state.customCards = [...customCardsList];
   }
   if (!state.group || !state.count) { showToast("⚠️ لطفاً گروه و تعداد را انتخاب کنید"); return; }
-  // Show narrator modal before starting
+  document.getElementById('customOverlay')?.classList.remove('show');
   showNarratorModal();
 }
 
@@ -590,8 +590,7 @@ async function startNearbyGame() {
     groupData.citizen.forEach(n => roles.push({ name: n, team: "citizen" }));
   }
   window._nearbyRoles = roles;
-
-  // Show narrator modal first, then proceed
+  document.getElementById('customOverlay')?.classList.remove('show');
   showNearbyNarratorModal();
 }
 

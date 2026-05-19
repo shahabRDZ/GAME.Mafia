@@ -103,7 +103,9 @@ async function showInviteFriends() {
         <div class="friend-name">${escapeHtml(f.username)}</div>
         <div class="friend-status ${f.online ? 'friend-online' : 'friend-offline'}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
-      <button class="friend-btn friend-btn-invite" onclick="inviteToRoom(${f.id},${JSON.stringify(f.username)})">دعوت</button>
+      <button class="friend-btn friend-btn-invite"
+        data-uid="${f.id}" data-name="${escapeHtml(f.username)}"
+        onclick="inviteToRoom(+this.dataset.uid, this.dataset.name)">دعوت</button>
     </div>
   `).join("");
 }

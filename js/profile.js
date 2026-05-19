@@ -301,7 +301,9 @@ async function loadFriends() {
         <div class="pg-friend-status ${f.online ? 'online' : ''}">${f.online ? '● آنلاین' : '○ آفلاین'}</div>
       </div>
       <div class="pg-friend-actions">
-        <button class="pg-icon-btn" title="پیام" onclick="startDMWithUser(${f.id},${JSON.stringify(f.username)},${JSON.stringify(f.avatar||'🎭')})">💬</button>
+        <button class="pg-icon-btn" title="پیام"
+          data-uid="${f.id}" data-name="${escapeHtml(f.username)}" data-av="${escapeHtml(f.avatar||'🎭')}"
+          onclick="startDMWithUser(+this.dataset.uid, this.dataset.name, this.dataset.av)">💬</button>
         <button class="pg-icon-btn danger" title="حذف" onclick="removeFriendUI(${f.friendship_id})">✕</button>
       </div>
     </div>`).join('');

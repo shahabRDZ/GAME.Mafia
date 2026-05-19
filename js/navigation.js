@@ -52,3 +52,7 @@ function showScreen(name) {
   if (name === "rules") showRulesTab('overview');
   if (name === "events") { _initEventSelects(); filterEvents(); }
 }
+
+function goBack() {
+  showScreen(previousScreen || 'setup');
+}
