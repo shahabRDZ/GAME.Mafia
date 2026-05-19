@@ -2,24 +2,29 @@
 
 // ── Role → Image map (img/roles/) ──
 const ROLE_IMAGES = {
-  // Priority scenario roles
+  // ── Citizens ──
   "بازپرس":               "img/roles/bazpors.png",
   "تکاور":                "img/roles/takavar.png",
-  "نماینده":              "img/roles/nmaayande.png",
-  "جایزه سر رییس":       "img/roles/jayeze-sar-rais.png",
-  // Citizens
   "کارآگاه":              "img/roles/karaagah.png",
   "کارآگاه ویژه":         "img/roles/karaagah-vijeh.png",
   "دکتر":                 "img/roles/doktor-lecter.png",
   "حرفه‌ای":              "img/roles/herfeh-ei.png",
+  "تک‌تیرانداز":         "img/roles/herfeh-ei.png",
+  "اسنایپر":              "img/roles/herfeh-ei.png",
+  "تفنگدار":              "img/roles/herfeh-ei.png",
   "جان‌سخت":              "img/roles/jaan-sakht.png",
+  "رویین‌تن":             "img/roles/jaan-sakht.png",
+  "زره‌پوش":              "img/roles/jaan-sakht.png",
   "نگهبان":               "img/roles/negahbaan.png",
+  "محافظ":                "img/roles/negahbaan.png",
+  "بادیگارد":             "img/roles/negahbaan.png",
   "نخبه":                 "img/roles/nokhbeh.png",
   "شکارچی":               "img/roles/shekaarchi.png",
+  "هانتر":                "img/roles/shekaarchi.png",
   "زندانبان":             "img/roles/zanjaanbaar.png",
   "پرستار":               "img/roles/kashish.png",
   "کشیش":                 "img/roles/kashish.png",
-  "شهروند ساده":          "img/roles/bazpors.png",
+  "شهروند ساده":          "img/roles/naanvaa.png",
   "جادوگر":               "img/roles/jaadoogar.png",
   "صداپیشه":              "img/roles/sedaapisheh.png",
   "خبرنگار":              "img/roles/khabarnegarr.png",
@@ -29,7 +34,10 @@ const ROLE_IMAGES = {
   "وکیل":                 "img/roles/vakil.png",
   "راهنما":               "img/roles/daaneshvar.png",
   "روانشناس":             "img/roles/daaneshvar.png",
-  // Mafia
+  "مین‌گذار":             "img/roles/terrorist.png",
+  "سرباز":                "img/roles/takavar.png",
+  "کارگاه":               "img/roles/nokhbeh.png",
+  // ── Mafia ──
   "پدرخوانده":            "img/roles/pedar-khandeh.png",
   "رئیس مافیا":           "img/roles/pedar-khandeh.png",
   "دکتر لکتر":            "img/roles/doktor-lecter.png",
@@ -39,6 +47,7 @@ const ROLE_IMAGES = {
   "شاه‌کش":              "img/roles/shaah-kosh.png",
   "تروریست":              "img/roles/terrorist.png",
   "بمب‌گذار":            "img/roles/terrorist.png",
+  "ترور":                 "img/roles/terrorist.png",
   "مذاکره‌کننده":         "img/roles/mozakere-konandeh.png",
   "گروگان‌گیر":           "img/roles/groogan-gir.png",
   "دزد":                  "img/roles/dozd.png",
@@ -48,10 +57,14 @@ const ROLE_IMAGES = {
   "جوکر مافیا":           "img/roles/joker-mafia.png",
   "جوکر":                 "img/roles/joker-mafia.png",
   "هکر":                  "img/roles/jaasoos.png",
+  "نینجا":                "img/roles/jaasoos.png",
+  "ناتو":                 "img/roles/mafia-sadeh.png",
+  "شیاد":                 "img/roles/joker-mafia.png",
+  "کانسور":               "img/roles/ravaankav.png",
   "مافیای ساده":          "img/roles/mafia-sadeh.png",
   "مافیا ساده":           "img/roles/mafia-sadeh.png",
   "یاغی":                 "img/roles/motor-savar.png",
-  // Independent
+  // ── Independent ──
   "سندیکا":               "img/roles/sendika.png",
   "جانی":                 "img/roles/jaani.png",
   "قاتل زنجیره‌ای":      "img/roles/jaani.png",
