@@ -16,4 +16,4 @@ _origins = [
     "http://localhost:5000",
     "http://localhost:5001",
 ]
-socketio = SocketIO(cors_allowed_origins=_origins, async_mode="threading")
+socketio = SocketIO(cors_allowed_origins=_origins, async_mode="eventlet")

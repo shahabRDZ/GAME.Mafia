@@ -1,4 +1,7 @@
 """ShowShung Mafia — thin application entry point."""
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import time
 from dotenv import load_dotenv
