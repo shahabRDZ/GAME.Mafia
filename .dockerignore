@@ -12,3 +12,8 @@ docker-compose.yml
 data
 *.log
 .DS_Store
+img/fixed_role_cards_retina
+img/fixed_role_cards_retina.zip
+scripts/
+*.pdf
+*.jsonl
