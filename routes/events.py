@@ -1,4 +1,5 @@
 """Event routes — create, list, reserve, comment on game meetups."""
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import subqueryload
 
@@ -18,7 +19,7 @@ bp = Blueprint("events", __name__, url_prefix="/api/events")
 @jwt_required()
 def create_event():
     user = db.session.get(User, int(get_jwt_identity()))
-    data = request.get_json()
+    data = request.get_json(silent=True)
     required = ["country", "city", "location_name"]
     for field in required:
         if not data.get(field):
@@ -124,12 +125,14 @@ def delete_event(eid):
 @jwt_required()
 def reserve_event(eid):
     user = db.session.get(User, int(get_jwt_identity()))
-    event = db.session.get(GameEvent, eid)
+    # Lock the event row so concurrent requests queue up and see the updated count
+    event = db.session.execute(
+        select(GameEvent).where(GameEvent.id == eid).with_for_update()
+    ).scalar_one_or_none()
     if not event:
         return jsonify({"error": "ایونت پیدا نشد"}), 404
     if event.host_id == user.id:
         return jsonify({"error": "گرداننده نمی\u200cتواند رزرو کند"}), 400
-    # Atomic capacity check + insert; unique constraint prevents double-booking under concurrency
     count = EventReservation.query.filter_by(event_id=eid).count()
     if count >= event.max_players:
         event.status = "full"
@@ -162,7 +165,7 @@ def manage_reservation(eid, rid):
     event = db.session.get(GameEvent, eid)
     if not event or event.host_id != user.id:
         return jsonify({"error": "فقط گرداننده می\u200cتواند"}), 403
-    data = request.get_json()
+    data = request.get_json(silent=True)
     # Support by ID or by user_id
     if rid == 0:
         uid = data.get("user_id")
@@ -294,7 +297,7 @@ def add_event_comment(eid):
     ).first()
     if not res:
         return jsonify({"error": "فقط شرکت\u200cکنندگان تأیید شده می\u200cتوانند نظر بدهند"}), 403
-    data = request.get_json()
+    data = request.get_json(silent=True)
     content = (data.get("content") or "").strip()[:500]
     if not content:
         return jsonify({"error": "نظر خالی است"}), 400

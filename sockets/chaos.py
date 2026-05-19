@@ -8,6 +8,7 @@ from flask_socketio import emit, join_room, leave_room
 
 from extensions import db
 from models import User, ChaosRoom, ChaosPlayer
+from utils.rate_limiter import rate_limit
 from services.state import (
     sid_to_user, user_to_sid, online_users,
     end_discussion_votes, disconnected_players,
@@ -239,8 +240,13 @@ def register_chaos_handlers(socketio, app):
         info = sid_to_user.get(request.sid)
         if not info or not content:
             return
+        if not rate_limit(f"chat:{info['user_id']}", max_requests=8, window=10):
+            return
         room = ChaosRoom.query.filter_by(code=code).first()
         if not room:
+            return
+        player = ChaosPlayer.query.filter_by(room_id=room.id, user_id=info["user_id"]).first()
+        if not player:
             return
         if room.status == "playing" and room.phase == "voting":
             return

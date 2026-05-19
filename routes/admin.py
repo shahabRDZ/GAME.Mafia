@@ -83,7 +83,7 @@ def admin_edit_user(uid):
     user = db.session.get(User, uid)
     if not user:
         return jsonify({"error": "\u06a9\u0627\u0631\u0628\u0631 \u06cc\u0627\u0641\u062a \u0646\u0634\u062f"}), 404
-    data = request.get_json()
+    data = request.get_json(silent=True)
     if "username" in data and data["username"].strip():
         user.username = data["username"].strip()
     if "email" in data and data["email"].strip():
@@ -113,7 +113,7 @@ def admin_ban_user(uid):
 @jwt_required()
 @admin_required
 def admin_broadcast():
-    data = request.get_json()
+    data = request.get_json(silent=True)
     content = data.get("content", "").strip()
     target = data.get("target_user_id")
     if not content:
@@ -396,7 +396,7 @@ def admin_chart_stats():
 @jwt_required()
 @admin_required
 def admin_send_dm(uid):
-    data = request.get_json()
+    data = request.get_json(silent=True)
     content = data.get("content", "").strip()
     if not content:
         return jsonify({"error": "\u067e\u06cc\u0627\u0645 \u062e\u0627\u0644\u06cc"}), 400
@@ -417,7 +417,7 @@ def admin_edit_event(eid):
     event = db.session.get(GameEvent, eid)
     if not event:
         return jsonify({"error": "\u0627\u06cc\u0648\u0646\u062a \u067e\u06cc\u062f\u0627 \u0646\u0634\u062f"}), 404
-    data = request.get_json()
+    data = request.get_json(silent=True)
     for key in [
         "event_name", "location_name", "scenario", "event_date",
         "start_time", "status", "max_players", "price"

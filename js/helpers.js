@@ -340,7 +340,7 @@ function _renderEventDetail(e, reviews, followData) {
     `<span class="evd-star${i<=Math.round(avgStars)?' lit':''}">★</span>`).join('');
 
   const hostPhotoHtml = e.host_avatar_url
-    ? `<img src="${e.host_avatar_url}" class="evd-host-photo" alt="${escapeHtml(e.host_name)}">`
+    ? `<img src="${escapeHtml(e.host_avatar_url)}" class="evd-host-photo" alt="${escapeHtml(e.host_name)}">`
     : `<div class="evd-host-photo evd-host-initials">${escapeHtml((e.host_name||'?').charAt(0).toUpperCase())}</div>`;
 
   box.innerHTML = `

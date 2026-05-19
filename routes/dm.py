@@ -65,7 +65,7 @@ def get_dm_messages(other_id):
 @jwt_required()
 def send_dm(other_id):
     me_id = int(get_jwt_identity())
-    content = (request.get_json().get("content") or "").strip()[:1000]
+    content = ((request.get_json(silent=True) or {}).get("content") or "").strip()[:1000]
     if not content:
         return jsonify({"error": "پیام خالی"}), 400
     msg = DirectMessage(sender_id=me_id, receiver_id=other_id, content=content)
