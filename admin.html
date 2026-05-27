@@ -274,6 +274,12 @@ input,select,textarea,button{font-family:inherit;outline:none}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--glass-border);border-top-color:var(--red);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-center{display:flex;justify-content:center;padding:40px}
+.site-footer { text-align:center; padding:32px 16px 48px; margin-top:40px; font-size:.8rem;
+  color:rgba(255,255,255,.3); letter-spacing:.5px; border-top:1px solid rgba(255,255,255,.06);
+  display:flex; flex-direction:column; align-items:center; gap:6px; }
+.site-footer a { color:#a78bfa; text-decoration:none; font-weight:600; }
+.site-footer a:hover { color:#c4b5fd; }
+.app-version { font-size:.65rem; color:rgba(255,255,255,.15); letter-spacing:1px; font-family:monospace; }
 </style>
 </head>
 <body>
@@ -1247,5 +1253,10 @@ function esc(str) {
   return d.innerHTML;
 }
 </script>
+<footer class="site-footer">
+  <span>ساخته شده توسط</span>
+  <a href="https://shahabrdz.dev/" target="_blank" rel="noopener">shahabrdz.dev</a>
+  <span class="app-version">v2.5.1</span>
+</footer>
 </body>
 </html>

@@ -202,6 +202,12 @@ body { background:#000; font-family:'Vazirmatn',sans-serif; color:#eaeaf5; margi
 .ev-bottom a { display:block; text-align:center; padding:12px; background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08); border-radius:12px; color:rgba(255,255,255,.5);
   text-decoration:none; font-family:inherit; font-size:.82rem; font-weight:700; }
+.site-footer { text-align:center; padding:32px 16px 48px; margin-top:40px; font-size:.8rem;
+  color:rgba(255,255,255,.3); letter-spacing:.5px; border-top:1px solid rgba(255,255,255,.06);
+  display:flex; flex-direction:column; align-items:center; gap:6px; }
+.site-footer a { color:#a78bfa; text-decoration:none; font-weight:600; }
+.site-footer a:hover { color:#c4b5fd; }
+.app-version { font-size:.65rem; color:rgba(255,255,255,.15); letter-spacing:1px; font-family:monospace; }
 </style>
 </head>
 <body>
@@ -615,5 +621,10 @@ function updateFormCities() {
 initCountryDropdowns();
 evLoadEvents();
 </script>
+<footer class="site-footer">
+  <span>ساخته شده توسط</span>
+  <a href="https://shahabrdz.dev/" target="_blank" rel="noopener">shahabrdz.dev</a>
+  <span class="app-version">v2.5.1</span>
+</footer>
 </body>
 </html>
