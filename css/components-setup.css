@@ -1043,7 +1043,8 @@
 .shab-ov-close:hover { background: rgba(233,69,96,.2); color: #ff7777; }
 .shab-ov-title { font-size: 1.1rem; font-weight: 900; text-align: center; }
 /* catalog fills remaining space and scrolls independently */
-.shab-ov-catalog { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-sm); -webkit-overflow-scrolling: touch; }
+/* overflow-y:scroll (not auto) forces a scroll container on iOS Safari inside position:fixed+overflow:hidden ancestors */
+.shab-ov-catalog { flex: 1; min-height: 0; overflow-y: scroll; padding: var(--space-sm); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 .shab-ov-add { margin: 0 var(--space-sm) var(--space-sm); }
 .shab-ov-footer {
   flex-shrink: 0;
