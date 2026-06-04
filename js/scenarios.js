@@ -285,6 +285,121 @@ const SCENARIO_INFO = {
         {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز", en:"Analysis and voting during day", tr:"Gündüz analiz ve oylama", icon:"😇"}
       ]
     }
+  },
+  "هانیبال": {
+    icon: "🃏",
+    color: "#8b1a1a",
+    fa: {
+      title: "سناریو هانیبال", subtitle: "سبک روانشناختی · دستکاری · طراح: سامان گودرزی",
+      intro: "هانیبال — مجرمی دیوانه، ثروتمند و مرموز که با خریدن رهبر مافیا از میان شهروندان و انداختن سایه بر ذهن‌ها، شهر را در تاریکی فرو می‌برد. در شب معارفه، هانیبال یک شهروند را برای رهبری تیم انتخاب می‌کند — قبول یا رد کردن، هر دو پیامدی جدی دارند.",
+      flow: [
+        "شب معارفه: هانیبال تنها بیدار → لایک سایه → پیشنهاد خرید رئیس به یک شهروند → موافقت یا مخالفت → طرفدار نقش می‌گیرد → معارفه تیم مافیا",
+        "شب‌های اصلی (۱۰ نفره): قهرمان → سایه (تنها) → هانیبال → تیم مافیا → کاراگاه → دکتر → معمار → انتقام‌جو",
+        "شب‌های اصلی (۱۲/۱۳ نفره): قهرمان → سایه (تنها) → هانیبال → تیم مافیا + ناتو → کاراگاه → اسنایپر الیت → دکتر → معمار → انتقام‌جو",
+        "روزها: بحث · رأی‌گیری · اعلام ساید · ادامه بازی"
+      ],
+      rules: [
+        "هانیبال: هر شب با رئیس مافیا یک بازیکن انتخاب می‌کند — شهروند ساده: هر دو خارج · نقش‌دار: هانیبال تنها خارج می‌شود",
+        "سایه: یک شب در میان اکت می‌کند · اکت سایه و تیر شب نمی‌توانند همان شب روی یک نفر باشند",
+        "اثر سایه روی کاراگاه: همه استعلام‌ها منفی · روی دکتر: سیو به خودش برمی‌گردد · روی معمار: کارت جلوی خودش می‌افتد · روی انتقام‌جو: تنها خارج می‌شود · روی اسنایپر الیت (۱۲ نفره): fireBack تیر اسنایپر",
+        "طرفدار: اگر شهروند انتخاب‌شده قبول کند → طرفدار نقش آن شهروند را می‌گیرد · اگر رد کند یا هانیبال خود طرفدار را انتخاب کند → طرفدار اجباری رئیس مافیا می‌شود",
+        "رد پیشنهاد: بازیکنی که درخواست هانیبال را رد کرده اگر در روز از آن صحبت کند → اخراج انضباطی",
+        "رئیس مافیا (۱۰ نفره): می‌تواند یک شب به جای تیر از ناتویی استفاده کند",
+        "رئیس مافیا (۱۲/۱۳ نفره): ناتویی فقط توسط خود ناتو انجام می‌شود",
+        "دکتر: اگر به اجبار سیو ندهد (زره قهرمان / اکت انتقام‌جو) → شب بعد ۲ سیو دارد · در ۱۲/۱۳ نفره نمی‌تواند داوطلبانه سیو را رد کند",
+        "معمار: یک‌بار در کل بازی کارت می‌گذارد · بازیکن هدف باید کسی را به دوئل دعوت کند · رأی مرگ بین دو نفر · در ۱۲/۱۳ نفره اگر هدف شات شود، می‌تواند مجدد کارت بگذارد · معمار نمی‌تواند شروع‌کننده رأی را خودش انتخاب کند",
+        "انتقام‌جو: آخرین نفر بیدار می‌شود · لایک = شات شده · تیر به سایه یا هانیبال: هر دو خارج · تیر به رئیس مافیا یا شهروند: انتقام‌جو تنها خارج · همیشه با حمله شب از بازی خارج می‌شود",
+        "قهرمان: قبل از سایه بیدار می‌شود · یک زره در برابر تیر شب · از نقش‌داران در برابر اکت سایه محافظت می‌کند · از دست دادن زره را متوجه نمی‌شود",
+        "اسنایپر الیت (۱۲/۱۳ نفره): تیر شب اول → نتیجه ابتدای روز سوم · اگر همان شبی که تیر می‌زند سایه هم انتخابش کند → اسنایپر خارج می‌شود"
+      ],
+      quorum: [
+        {range:"۱۲–۸ نفر", votes:"۴ رأی"},
+        {range:"۷–۶ نفر", votes:"۳ رأی"},
+        {range:"۵–۴ نفر", votes:"۲ رأی"}
+      ],
+      proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
+      flowTitle: "ترتیب بیداری", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های مافیا", citizenTitle: "نقش‌های شهروند"
+    },
+    en: {
+      title: "Hannibal Scenario", subtitle: "Psychological Style · Manipulation · Designer: Saman Goodarzi",
+      intro: "Hannibal — a notorious, wealthy and deranged criminal who corrupts city leadership from within and casts shadows on citizens' minds. On introduction night, Hannibal offers a citizen the role of Mafia Boss — acceptance or rejection both carry serious consequences.",
+      flow: [
+        "Intro Night: Hannibal alone → Shadow likes → Offer Boss role to a citizen → Accept/Reject → Fan receives role → Mafia team meets",
+        "Main Nights (10p): Champion → Shadow (alone) → Hannibal → Mafia team → Detective → Doctor → Architect → Avenger",
+        "Main Nights (12/13p): Champion → Shadow (alone) → Hannibal → Mafia+NATO → Detective → Elite Sniper → Doctor → Architect → Avenger",
+        "Days: Discussion · Death vote · Side reveal · Continue"
+      ],
+      rules: [
+        "Hannibal: picks a player each night with the Boss — Simple Citizen: both exit · Role-holder: only Hannibal exits",
+        "Shadow: acts every other night · Shadow act and night shot cannot target same player on same night",
+        "Shadow effects — Detective: all inquiries negative · Doctor: save redirects to himself · Architect: card falls on himself · Avenger: exits alone · Elite Sniper (12p): fireBack on sniper shot",
+        "Fan: if chosen citizen accepts → Fan takes that citizen's role · if refused or Fan chosen directly → Fan becomes Boss by force",
+        "Rejection: if the rejecting player discusses it during the day → disciplinary ejection",
+        "Boss (10p): can use NATO once instead of night shot",
+        "Boss (12/13p): only NATO can use NATO ability",
+        "Doctor: if forced to skip → gets 2 saves next night · (12/13p: cannot voluntarily skip)",
+        "Architect: places card once · target must challenge someone to a duel · death vote between two · (12/13p: can re-place card if target is shot)",
+        "Avenger: last to wake · Like = was shot · shooting Shadow/Hannibal: both exit · shooting Boss/Citizen: Avenger exits alone · always exits when attacked at night",
+        "Champion: wakes before Shadow · one armor against mafia shot · protects role-holders from Shadow · does not know when armor is lost",
+        "Elite Sniper (12/13p): night 1 shot → result announced day 3 · if Shadow picks him the same night he shoots → Sniper exits"
+      ],
+      quorum: [
+        {range:"12–8 players", votes:"4 votes"},
+        {range:"7–6 players", votes:"3 votes"},
+        {range:"5–4 players", votes:"2 votes"}
+      ],
+      proceed: "Continue — Select Player Count ➜",
+      flowTitle: "Wake Order", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Roles", citizenTitle: "Citizen Roles"
+    },
+    tr: {
+      title: "Hannibal Senaryosu", subtitle: "Psikolojik Stil · Manipülasyon · Tasarımcı: Saman Goodarzi",
+      intro: "Hannibal — Şehri karanlığa gömen, deli, zengin ve gizemli bir mafya suçlusu. Tanışma gecesi Hannibal bir vatandaşa Mafya Başkanlığı teklif eder — kabul veya ret, her ikisinin de ciddi sonuçları vardır.",
+      flow: [
+        "Tanışma Gecesi: Hannibal tek → Gölge beğeni → Bir vatandaşa Başkanlık teklifi → Kabul/Red → Taraftar rol alır → Mafya tanışır",
+        "Ana Geceler (10k): Kahraman → Gölge (tek) → Hannibal → Mafya → Dedektif → Doktor → Mimar → İntikamcı",
+        "Ana Geceler (12/13k): Kahraman → Gölge (tek) → Hannibal → Mafya+NATO → Dedektif → Elit Nişancı → Doktor → Mimar → İntikamcı",
+        "Günler: Tartışma · Ölüm oyu · Taraf açıklaması · Devam"
+      ],
+      rules: [
+        "Hannibal: her gece Başkanla bir oyuncu seçer — Sıradan Vatandaş: ikisi çıkar · Rol sahibi: sadece Hannibal çıkar",
+        "Gölge: iki gecede bir · Gölge eylemi ve gece atışı aynı gecede aynı kişiyi hedef alamaz",
+        "Gölge efektleri — Dedektif: hepsi negatif · Doktor: kurtarma kendine döner · Mimar: kart önüne düşer · İntikamcı: tek çıkar · Elit Nişancı (12k): geri ateş",
+        "Taraftar: seçilen kabul ederse → Taraftar o rolü alır · reddedilirse → Taraftar zorla Başkan olur",
+        "Red: reddeden oyuncu gündüz konuşursa → disiplin ihracı",
+        "Başkan (10k): bir kez gece atışı yerine NATO kullanabilir",
+        "Başkan (12/13k): NATO yeteneği sadece NATO tarafından kullanılır",
+        "Doktor: atlamak zorunda kalırsa sonraki gece 2 kurtarma · (12/13k: gönüllü atlayamaz)",
+        "Mimar: bir kez kart koyar · hedef düelloya davet eder · ikili ölüm oyu · (12/13k: hedef vurulursa tekrar koyabilir)",
+        "İntikamcı: son uyanan · Beğeni = vuruldu · Gölge/Hannibal'a atarsa ikisi çıkar · Başkan/Vatandaş'a atarsa İntikamcı tek çıkar · saldırıda hep çıkar",
+        "Kahraman: Gölgeden önce uyanır · bir zırh · rol sahiplerini Gölge'den korur · zırhını kaybettiğini bilmez",
+        "Elit Nişancı (12/13k): 1. gece atışı → 3. gün başında sonuç · Gölge aynı gece onu seçerse → Nişancı çıkar"
+      ],
+      quorum: [
+        {range:"12–8 oyuncu", votes:"4 oy"},
+        {range:"7–6 oyuncu", votes:"3 oy"},
+        {range:"5–4 oyuncu", votes:"2 oy"}
+      ],
+      proceed: "Devam — Oyuncu Sayısı Seç ➜",
+      flowTitle: "Uyanış Sırası", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Rolleri", citizenTitle: "Vatandaş Rolleri"
+    },
+    roles: {
+      mafia: [
+        {name:"هانیبال", fa:"در شب معارفه یک شهروند را برای رهبری مافیا انتخاب می‌کند · هر شب با رئیس یک نفر را هدف می‌گیرد · شهروند ساده: هر دو خارج", en:"Intro night: offers Boss role to a citizen · Each night targets a player with Boss · Simple Citizen: both exit", tr:"Tanışma: vatandaşa Başkanlık teklifi · Her gece Başkanla hedef seçer · Sıradan Vatandaş: ikisi çıkar", icon:"🃏"},
+        {name:"سایه", fa:"یک شب در میان بیدار می‌شود و روی یک شهروند سایه می‌اندازد · اکت آن شهروند را معکوس می‌کند · قهرمان‌زده را نمی‌تواند انتخاب کند", en:"Acts every other night · Casts shadow on a citizen, reversing their ability · Cannot target a Champion-protected player", tr:"İki gecede bir uyanır · Vatandaşa gölge düşürür, yeteneği tersine çevirir · Kahraman korumasındakini seçemez", icon:"👤"},
+        {name:"رئیس مافیا", fa:"فرمانده تیم · تیر شب مافیا · استعلام کاراگاه منفی است · در ۱۰ نفره می‌تواند یک شب به جای تیر از ناتویی استفاده کند", en:"Mafia leader · Night shot · Detective inquiry shows negative · In 10p can NATO once instead of shot", tr:"Mafya lideri · Gece atışı · Dedektif negatif · 10k'de bir kez NATO kullanabilir", icon:"👑"},
+        {name:"ناتو", fa:"فقط در ۱۲/۱۳ نفره · می‌تواند به جای تیر شب، ناتویی (حدس نقش شهروند) انجام دهد", en:"Only in 12/13p · Can use NATO (guess citizen role) instead of night shot", tr:"Sadece 12/13k · Gece atışı yerine NATO (vatandaş rolü tahmini) kullanabilir", icon:"🔫"}
+      ],
+      citizen: [
+        {name:"طرفدار", fa:"نقش مجهول · در شب معارفه رئیس مافیا می‌شود (مستقیم یا اجباری) · نقش شهروندِ انتخاب‌شده را می‌گیرد اگر آن شهروند قبول کرده باشد", en:"Unknown role · Becomes Mafia Boss on intro night (directly or by force) · Gets the chosen citizen's role if they accepted", tr:"Bilinmeyen rol · Tanışma gecesinde Mafya Başkanı olur · Kabul eden vatandaşın rolünü alır", icon:"❓"},
+        {name:"قهرمان", fa:"قبل از سایه بیدار می‌شود · یک زره در برابر تیر مافیا · از نقش‌داران شهروند در برابر اکت سایه محافظت می‌کند · از دست دادن زره را در شب متوجه نمی‌شود", en:"Wakes before Shadow · One armor against night shot · Protects citizen role-holders from Shadow act · Doesn't know when armor is lost", tr:"Gölgeden önce uyanır · Gece atışına karşı zırh · Rol sahiplerini Gölge'den korur · Zırhını kaybettiğini bilmez", icon:"🦸"},
+        {name:"دکتر", fa:"هر شب یک نفر را سیو می‌دهد · اگر به اجبار سیو ندهد، شب بعد ۲ سیو دارد · در ۱۲/۱۳ نفره نمی‌تواند داوطلبانه سیو را رد کند", en:"Saves one player per night · If forced to skip, gets 2 saves next night · In 12/13p cannot voluntarily skip a save", tr:"Her gece bir oyuncu kurtarır · Zorla atlarsa sonraki gece 2 kurtarma · 12/13k'de gönüllü atlayamaz", icon:"⚕️"},
+        {name:"کاراگاه", fa:"هر شب استعلام مافیا بودن یک بازیکن · رئیس مافیا برای او منفی است · اگر سایه روی او باشد، همه استعلام‌ها منفی می‌شوند", en:"Each night inquires if a player is mafia · Boss shows negative · If shadowed, all inquiries return negative", tr:"Her gece mafya sorgusu · Başkan negatif · Gölgelenince tüm sorgular negatif", icon:"🕵️"},
+        {name:"معمار", fa:"یک‌بار در کل بازی کارت می‌گذارد · بازیکن هدف باید کسی را به دوئل دعوت کند · رأی مرگ دو طرفه · شروع رأی‌گیری توسط معمار انتخاب می‌شود · در ۱۲/۱۳ نفره اگر هدف شات شود می‌تواند دوباره کارت بگذارد", en:"Places card once total · Target challenges someone to duel · Bilateral death vote · Voting starter chosen by Architect · In 12/13p: can re-place if target is shot", tr:"Toplam bir kez kart koyar · Hedef birini düelloya davet eder · İki yönlü ölüm oyu · 12/13k: hedef vurulursa tekrar koyabilir", icon:"📐"},
+        {name:"انتقام‌جو", fa:"آخرین بیدار · لایک = شات شده → می‌تواند انتقام بگیرد · تیر به سایه/هانیبال: هر دو خارج · تیر به رئیس/شهروند: انتقام‌جو تنها خارج · همیشه با حمله شب خارج می‌شود", en:"Last to wake · Like = was shot → can retaliate · Shoot Shadow/Hannibal: both exit · Shoot Boss/Citizen: Avenger alone exits · Always exits when attacked at night", tr:"Son uyanan · Beğeni = vuruldu → intikam alabilir · Gölge/Hannibal: ikisi çıkar · Başkan/Vatandaş: İntikamcı tek çıkar · Gece saldırısında hep çıkar", icon:"⚔️"},
+        {name:"شهروند ساده", fa:"تحلیل و رأی‌گیری در روز · اگر هانیبال در روز خارج شود، شهروند ساده‌ای که هانیبال انتخاب کرده هم خارج می‌شود", en:"Day analysis and voting · If Hannibal is eliminated during day, the Simple Citizen Hannibal selected also exits", tr:"Gündüz analiz ve oylama · Hannibal gündüz çıkarsa seçtiği Sıradan Vatandaş da çıkar", icon:"😇"},
+        {name:"اسنایپر الیت", fa:"فقط ۱۲/۱۳ نفره · یک تیر در کل بازی · شب اول تیر بزند: نتیجه ابتدای روز سوم اعلام می‌شود · اگر همان شبی که تیر می‌زند سایه انتخابش کند، خودش خارج می‌شود", en:"Only 12/13p · One shot per game · Night 1 shot: result announced start of day 3 · If Shadow picks him the same night he shoots, Sniper exits", tr:"Sadece 12/13k · Oyun başına bir atış · 1. gece: sonuç 3. gün başında · Aynı gece Gölge onu seçerse Nişancı çıkar", icon:"🎯"}
+      ]
+    }
   }
 };
 
