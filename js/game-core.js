@@ -355,15 +355,6 @@ function flipCurrentCard(e, card) {
   state.seen.add(card.number);
   spawnParticle(e, card.role === "mafia" ? "💀" : "⭐");
   setTimeout(() => showFunnyText(card), 500);
-  setTimeout(() => {
-    const front = cardEl.querySelector(".card-front");
-    if (front) {
-      const hint = document.createElement("div");
-      hint.className = "tap-hint-next";
-      hint.textContent = 'لمس کنید — نفر بعدی';
-      front.appendChild(hint);
-    }
-  }, 600);
 }
 
 // ── Screen-wide lightning flash ──
@@ -492,7 +483,6 @@ function buildCard(card, flipped = false) {
       <div class="card-face card-back">
         ${particles}
         <div class="card-number">${toFarsiNum(card.number)}</div>
-        <div class="tap-hint">لمس کنید</div>
       </div>
       <div class="card-face card-front ${card.role}${roleImgSrc ? ' has-img' : ''}">
         ${sparks}
