@@ -13,3 +13,4 @@ bcrypt==4.2.1
 sqlalchemy==2.0.36
 redis==5.2.1
 flask-migrate==4.0.7
+gunicorn==21.2.0
