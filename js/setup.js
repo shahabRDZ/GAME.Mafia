@@ -186,7 +186,21 @@ function isCustomRole(name, team) {
 
 // Init catalog on load
 buildCatalog();
-document.addEventListener("DOMContentLoaded", () => renderSavedScenarios());
+document.addEventListener("DOMContentLoaded", () => {
+  renderSavedScenarios();
+  // Prevent iOS body scroll leak when scrolling within fixed-overlay catalogs
+  document.querySelectorAll('.shab-ov-catalog').forEach(el => {
+    let startY = 0;
+    el.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    el.addEventListener('touchmove', e => {
+      if (!e.cancelable) return;
+      const dy = e.touches[0].clientY - startY;
+      const atTop = el.scrollTop <= 0;
+      const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 1;
+      if ((atTop && dy > 0) || (atBottom && dy < 0)) e.preventDefault();
+    }, { passive: false });
+  });
+});
 
 // ── Render Catalog ──
 function renderRoleCatalog() {
@@ -468,6 +482,7 @@ function selectGroup(group) {
     buildCatalog();
     renderRoleCatalog();
     renderCustomCardsList();
+    lockBodyScroll();
     document.getElementById('customOverlay').classList.add('show');
     requestAnimationFrame(() => {
       const cat = document.querySelector('#customOverlay .shab-ov-catalog');
@@ -591,8 +606,26 @@ function deleteSavedScenario(id) {
   renderSavedScenarios();
 }
 
+// ── Body scroll lock for fixed full-screen overlays ──
+let _bodyLockY = 0;
+function lockBodyScroll() {
+  _bodyLockY = window.scrollY;
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${_bodyLockY}px`;
+  document.body.style.width = '100%';
+}
+function unlockBodyScroll() {
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, _bodyLockY);
+}
+
 function closeCustomOverlay() {
   document.getElementById('customOverlay').classList.remove('show');
+  unlockBodyScroll();
 }
 
 function loadSavedScenario(id) {
@@ -610,6 +643,7 @@ function loadSavedScenario(id) {
   renderCustomCardsList();
   updateStartBtn();
   syncCatalogFromList();
+  lockBodyScroll();
   document.getElementById('customOverlay').classList.add('show');
   requestAnimationFrame(() => {
     const cat = document.querySelector('#customOverlay .shab-ov-catalog');
