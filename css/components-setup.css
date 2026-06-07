@@ -950,7 +950,7 @@
 /* ── Role Catalog ── */
 .role-catalog { margin-block-start: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xs); }
 .rc-team-section { border: 1px solid rgba(255,255,255,.07); border-radius: var(--radius-lg); overflow: hidden; }
-.rc-team-section.open { overflow: visible; }
+.rc-team-section.open { overflow: hidden; }
 .rc-team-header {
   width: 100%; padding: var(--space-sm) var(--space-md); background: rgba(255,255,255,.03);
   border: none; cursor: pointer; display: flex; align-items: center; gap: var(--space-sm);
@@ -972,7 +972,7 @@
   padding-inline: var(--space-sm); display: flex; flex-wrap: wrap; gap: var(--space-2xs);
 }
 .rc-team-section.open .rc-roles-grid {
-  max-height: 60rem; overflow: visible;
+  max-height: 120rem; overflow: hidden;
   padding: var(--space-sm) var(--space-sm) var(--space-sm);
 }
 .rc-role-chip {

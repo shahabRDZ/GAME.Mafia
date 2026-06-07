@@ -194,7 +194,7 @@ function renderRoleCatalog() {
   const isShab = currentCustomMode === 'shabnmafia';
   container.className = isShab ? 'role-catalog shab-mafia-catalog' : 'role-catalog';
   container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
-    <div class="rc-team-section" style="--rc-color:${data.color}">
+    <div class="rc-team-section open" style="--rc-color:${data.color}">
       <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')">
         <span class="rc-team-label">${data.label}</span>
         <span class="rc-team-count" id="rcCount_${team}">۰</span>
