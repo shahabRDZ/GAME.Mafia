@@ -1,5 +1,77 @@
 /* ── Game Logic ── */
 
+// ── Role → Image map (img/roles/) ──
+const ROLE_IMAGES = {
+  // ── Citizens ──
+  "بازپرس":               "img/roles/bazpors.png",
+  "تکاور":                "img/roles/takavar.png",
+  "کارآگاه":              "img/roles/karaagah.png",
+  "کارآگاه ویژه":         "img/roles/karaagah-vijeh.png",
+  "دکتر":                 "img/roles/doktor-lecter.png",
+  "حرفه‌ای":              "img/roles/herfeh-ei.png",
+  "تک‌تیرانداز":         "img/roles/herfeh-ei.png",
+  "اسنایپر":              "img/roles/herfeh-ei.png",
+  "تفنگدار":              "img/roles/herfeh-ei.png",
+  "جان‌سخت":              "img/roles/jaan-sakht.png",
+  "رویین‌تن":             "img/roles/jaan-sakht.png",
+  "زره‌پوش":              "img/roles/jaan-sakht.png",
+  "نگهبان":               "img/roles/negahbaan.png",
+  "محافظ":                "img/roles/negahbaan.png",
+  "بادیگارد":             "img/roles/negahbaan.png",
+  "نخبه":                 "img/roles/nokhbeh.png",
+  "شکارچی":               "img/roles/shekaarchi.png",
+  "هانتر":                "img/roles/shekaarchi.png",
+  "زندانبان":             "img/roles/zanjaanbaar.png",
+  "پرستار":               "img/roles/kashish.png",
+  "کشیش":                 "img/roles/kashish.png",
+  "شهروند ساده":          "img/roles/naanvaa.png",
+  "جادوگر":               "img/roles/jaadoogar.png",
+  "صداپیشه":              "img/roles/sedaapisheh.png",
+  "خبرنگار":              "img/roles/khabarnegarr.png",
+  "نانوا":                "img/roles/naanvaa.png",
+  "ساقی":                 "img/roles/saaqi.png",
+  "قاضی":                 "img/roles/jellad.png",
+  "وکیل":                 "img/roles/vakil.png",
+  "راهنما":               "img/roles/daaneshvar.png",
+  "روانشناس":             "img/roles/daaneshvar.png",
+  "مین‌گذار":             "img/roles/terrorist.png",
+  "سرباز":                "img/roles/takavar.png",
+  "کارگاه":               "img/roles/nokhbeh.png",
+  // ── Mafia ──
+  "پدرخوانده":            "img/roles/pedar-khandeh.png",
+  "رئیس مافیا":           "img/roles/pedar-khandeh.png",
+  "دکتر لکتر":            "img/roles/doktor-lecter.png",
+  "معشوقه":               "img/roles/mashogheh.png",
+  "ناتاشا":               "img/roles/mashogheh.png",
+  "روانکاو":              "img/roles/ravaankav.png",
+  "شاه‌کش":              "img/roles/shaah-kosh.png",
+  "تروریست":              "img/roles/terrorist.png",
+  "بمب‌گذار":            "img/roles/terrorist.png",
+  "ترور":                 "img/roles/terrorist.png",
+  "مذاکره‌کننده":         "img/roles/mozakere-konandeh.png",
+  "گروگان‌گیر":           "img/roles/groogan-gir.png",
+  "دزد":                  "img/roles/dozd.png",
+  "شارلاتان":             "img/roles/joker-mafia.png",
+  "دست راست پدرخوانده":  "img/roles/dast-rast.png",
+  "جاسوس":               "img/roles/jaasoos.png",
+  "جوکر مافیا":           "img/roles/joker-mafia.png",
+  "جوکر":                 "img/roles/joker-mafia.png",
+  "هکر":                  "img/roles/jaasoos.png",
+  "نینجا":                "img/roles/jaasoos.png",
+  "ناتو":                 "img/roles/mafia-sadeh.png",
+  "شیاد":                 "img/roles/joker-mafia.png",
+  "کانسور":               "img/roles/ravaankav.png",
+  "مافیای ساده":          "img/roles/mafia-sadeh.png",
+  "مافیا ساده":           "img/roles/mafia-sadeh.png",
+  "یاغی":                 "img/roles/motor-savar.png",
+  // ── Independent ──
+  "سندیکا":               "img/roles/sendika.png",
+  "جانی":                 "img/roles/jaani.png",
+  "قاتل زنجیره‌ای":      "img/roles/jaani.png",
+  "جلاد":                 "img/roles/jellad.png",
+  "هزارچهره":             "img/roles/mashogheh.png",
+};
+
 // ── Narrator System ──
 let narratorName = 'گرداننده شوشانگ';
 
@@ -397,10 +469,14 @@ function showCompletion() {
 
 function buildCard(card, flipped = false) {
   const flippedClass = flipped ? "flipped" : "";
-  const charSVG = getCharSVG(card.roleName, card.role, card.charVariant || 0);
   const displayName = translateRole(card.roleName);
   const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : '<div class="citizen-sparks"></div>';
   const delay = (card.charVariant || 0) * 0.4;
+  const roleImgSrc = ROLE_IMAGES[card.roleName];
+  const charContent = roleImgSrc
+    ? `<img src="${roleImgSrc}" class="char-img" alt="${displayName}" loading="eager" draggable="false">`
+    : getCharSVG(card.roleName, card.role, card.charVariant || 0);
+  const charWrapClass = roleImgSrc ? "char-wrap has-img" : "char-wrap";
   // Generate floating particles for card back
   let particles = '<div class="card-particles">';
   for (let i = 0; i < 12; i++) {
@@ -418,10 +494,10 @@ function buildCard(card, flipped = false) {
         <div class="card-number">${toFarsiNum(card.number)}</div>
         <div class="tap-hint">لمس کنید</div>
       </div>
-      <div class="card-face card-front ${card.role}">
+      <div class="card-face card-front ${card.role}${roleImgSrc ? ' has-img' : ''}">
         ${sparks}
-        <div class="char-wrap" style="animation-delay:${delay}s">${charSVG}</div>
-        <div class="char-shadow"></div>
+        <div class="${charWrapClass}" style="${roleImgSrc ? '' : `animation-delay:${delay}s`}">${charContent}</div>
+        ${roleImgSrc ? '' : '<div class="char-shadow"></div>'}
         <div class="card-role-name">${displayName}</div>
       </div>
     </div>`;
