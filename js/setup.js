@@ -188,11 +188,18 @@ function isCustomRole(name, team) {
 buildCatalog();
 document.addEventListener("DOMContentLoaded", () => {
   renderSavedScenarios();
-  // Prevent iOS body scroll leak when scrolling within fixed-overlay catalogs
   document.querySelectorAll('.shab-ov-catalog').forEach(el => {
     let startY = 0;
-    el.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    el.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      // Keep scroll 1px away from hard boundaries so iOS bounce doesn't propagate
+      if (el.scrollTop <= 0) el.scrollTop = 1;
+      else if (el.scrollHeight - el.scrollTop <= el.clientHeight) {
+        el.scrollTop = el.scrollHeight - el.clientHeight - 1;
+      }
+    }, { passive: true });
     el.addEventListener('touchmove', e => {
+      e.stopPropagation();
       if (!e.cancelable) return;
       const dy = e.touches[0].clientY - startY;
       const atTop = el.scrollTop <= 0;
@@ -252,7 +259,12 @@ function toggleRcSection(btn) {
   section.classList.toggle('open');
   if (!wasOpen) {
     requestAnimationFrame(() => {
-      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const catalog = btn.closest('.shab-ov-catalog');
+      if (!catalog) return;
+      const sRect = section.getBoundingClientRect();
+      const cRect = catalog.getBoundingClientRect();
+      const relTop = sRect.top - cRect.top + catalog.scrollTop;
+      if (relTop < catalog.scrollTop) catalog.scrollTop = Math.max(1, relTop - 8);
     });
   }
 }
