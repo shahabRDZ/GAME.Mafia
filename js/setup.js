@@ -82,7 +82,7 @@ const DEFAULT_ROLES = {
     "جان‌سخت","نگهبان","فراماسون","کارآگاه ویژه","خبرنگار","نانوا","قصاب",
     "پرستار","گورکن","جادوگر","کلانتر","فدایی","شهروند ساده",
     "بازپرس","هانتر","رویین‌تن","راهنما","مین‌گذار","وکیل","محافظ",
-    "تفنگدار","تک‌تیرانداز","سرباز","خبرنگار","زره‌پوش","شهردار","قاضی","جان‌سخت"
+    "تفنگدار","تک‌تیرانداز","سرباز","زره‌پوش"
   ],
   mafia: [
     "رئیس مافیا","دکتر لکتر","مذاکره‌کننده","جوکر","ناتاشا","معشوقه",
@@ -222,7 +222,9 @@ function renderRoleCatalog() {
             <button class="rc-role-chip" data-role="${escapeHtml(role)}" data-team="${team}" onclick="toggleCatalogRole(this)">
               <span class="rc-chip-name">${escapeHtml(role)}</span>
               <span class="rc-chip-badge">0</span>
-            </button>${isCustomRole(role, team) ? `<button class="rc-chip-del" data-role="${escapeHtml(role)}" data-team="${team}" onclick="removeRoleFromCatalog(this.dataset.role,this.dataset.team)" title="حذف از لیست">✕</button>` : ''}
+            </button>
+            <button class="rc-chip-dec" onclick="event.stopPropagation();decrementCatalogRole(this.previousElementSibling)" title="کم کردن">−</button>
+            ${isCustomRole(role, team) ? `<button class="rc-chip-del" data-role="${escapeHtml(role)}" data-team="${team}" onclick="removeRoleFromCatalog(this.dataset.role,this.dataset.team)" title="حذف از لیست">✕</button>` : ''}
           </div>`;
         }).join("")}
       </div>

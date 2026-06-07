@@ -314,31 +314,30 @@
     </div>
 
     <div class="shab-ov-catalog">
-      <!-- Role Catalog -->
       <div class="role-catalog" id="roleCatalog"></div>
+    </div>
 
-      <!-- Manual Add -->
-      <div class="custom-add-section" style="margin-top:var(--space-sm)">
-        <div class="custom-add-header">
-          <span class="custom-add-icon">✦</span>
-          <span class="custom-add-label">نقش سفارشی</span>
-        </div>
-        <div class="card-builder-row">
-          <input type="text" id="newCardName" placeholder="نام نقش..." maxlength="20" autocomplete="off" inputmode="text"
-            onkeydown="if(event.key==='Enter') addCustomCard()">
-          <div class="team-toggle">
-            <button id="btnMafia" class="active-mafia" onclick="setTeam('mafia')">😈</button>
-            <button id="btnCitizen" onclick="setTeam('citizen')">😇</button>
-            <button id="btnIndependent" onclick="setTeam('independent')">🐺</button>
-          </div>
-          <button class="add-card-btn" onclick="addCustomCard()">افزودن</button>
-        </div>
+    <!-- Manual Add — pinned outside scroll, like shab mafia's shab-ov-add -->
+    <div class="custom-add-section shab-ov-add">
+      <div class="custom-add-header">
+        <span class="custom-add-icon">✦</span>
+        <span class="custom-add-label">نقش سفارشی</span>
       </div>
+      <div class="card-builder-row">
+        <input type="text" id="newCardName" placeholder="نام نقش..." maxlength="20" autocomplete="off" inputmode="text"
+          onkeydown="if(event.key==='Enter') addCustomCard()">
+        <div class="team-toggle">
+          <button id="btnMafia" class="active-mafia" onclick="setTeam('mafia')">😈</button>
+          <button id="btnCitizen" onclick="setTeam('citizen')">😇</button>
+          <button id="btnIndependent" onclick="setTeam('independent')">🐺</button>
+        </div>
+        <button class="add-card-btn" onclick="addCustomCard()">افزودن</button>
+      </div>
+    </div>
 
-      <!-- Selected Cards List -->
-      <div class="custom-cards-list" id="customCardsList" style="margin-top:var(--space-sm)">
-        <div class="custom-empty">هنوز کارتی اضافه نشده</div>
-      </div>
+    <!-- Selected Cards List — pinned above footer -->
+    <div class="custom-cards-list" id="customCardsList" style="margin:0 var(--space-sm) var(--space-xs);max-height:9rem;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.09) transparent">
+      <div class="custom-empty">هنوز کارتی اضافه نشده</div>
     </div>
 
     <div class="shab-ov-footer">
