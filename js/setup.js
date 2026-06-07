@@ -195,7 +195,7 @@ function renderRoleCatalog() {
   container.className = isShab ? 'role-catalog shab-mafia-catalog' : 'role-catalog';
   container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
     <div class="rc-team-section open" style="--rc-color:${data.color}">
-      <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')">
+      <button class="rc-team-header" onclick="toggleRcSection(this)">
         <span class="rc-team-label">${data.label}</span>
         <span class="rc-team-count" id="rcCount_${team}">۰</span>
         <span class="scn-toggle-icon">▶</span>
@@ -230,6 +230,17 @@ function renderRoleCatalog() {
       </div>
     </div>
   `).join("");
+}
+
+function toggleRcSection(btn) {
+  const section = btn.parentElement;
+  const wasOpen = section.classList.contains('open');
+  section.classList.toggle('open');
+  if (!wasOpen) {
+    requestAnimationFrame(() => {
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
 }
 
 function decrementCatalogRole(chip) {
@@ -309,7 +320,7 @@ function renderShabMafiaCatalog() {
   if (!container) return;
   container.innerHTML = Object.entries(ROLE_CATALOG).map(([team, data]) => `
     <div class="rc-team-section open" style="--rc-color:${data.color}">
-      <button class="rc-team-header" onclick="this.parentElement.classList.toggle('open')">
+      <button class="rc-team-header" onclick="toggleRcSection(this)">
         <span class="rc-team-label">${data.label}</span>
         <span class="rc-team-count" id="shmCount_${team}">۰</span>
         <span class="scn-toggle-icon">▶</span>
@@ -458,6 +469,10 @@ function selectGroup(group) {
     renderRoleCatalog();
     renderCustomCardsList();
     document.getElementById('customOverlay').classList.add('show');
+    requestAnimationFrame(() => {
+      const cat = document.querySelector('#customOverlay .shab-ov-catalog');
+      if (cat) cat.scrollTop = 0;
+    });
 
   } else {
     state.group = group; state.isCustom = false;
@@ -596,6 +611,10 @@ function loadSavedScenario(id) {
   updateStartBtn();
   syncCatalogFromList();
   document.getElementById('customOverlay').classList.add('show');
+  requestAnimationFrame(() => {
+    const cat = document.querySelector('#customOverlay .shab-ov-catalog');
+    if (cat) cat.scrollTop = 0;
+  });
   showToast("📋 سناریو «" + s.name + "» بارگذاری شد");
 }
 
