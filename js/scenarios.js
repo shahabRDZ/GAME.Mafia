@@ -400,6 +400,52 @@ const SCENARIO_INFO = {
         {name:"اسنایپر الیت", fa:"فقط ۱۲/۱۳ نفره · یک تیر در کل بازی · شب اول تیر بزند: نتیجه ابتدای روز سوم اعلام می‌شود · اگر همان شبی که تیر می‌زند سایه انتخابش کند، خودش خارج می‌شود", en:"Only 12/13p · One shot per game · Night 1 shot: result announced start of day 3 · If Shadow picks him the same night he shoots, Sniper exits", tr:"Sadece 12/13k · Oyun başına bir atış · 1. gece: sonuç 3. gün başında · Aynı gece Gölge onu seçerse Nişancı çıkar", icon:"🎯"}
       ]
     }
+  },
+  "شاهنامه": {
+    icon: "📜",
+    color: "#1f8a5f",
+    fa: {
+      title: "سناریو شاهنامه", subtitle: "روایت اهریمن و روشنایی · ۱۰ نفره",
+      intro: "سناریوی شاهنامه روایتی از نبرد اهریمن و روشنایی را در قالب بازی مافیا بازآفرینی می‌کند. تیم اهریمن (ضحاک، بوف، افراسیاب) در برابر تیم روشنایی به رهبری نقش‌های حماسی شاهنامه (سیمرغ، جاماسب، کاوه، رستم، آرش) قرار می‌گیرد.",
+      flow: ["بازی بدون روز معارفه آغاز می‌شود","روز یک به‌صورت نبرد یک‌به‌یک برگزار می‌شود (هرکس به نوبت می‌گوید به کی رأی می‌دهد)","شب‌های اصلی (اجرای نقش‌ها)","روزها (بحث + رأی‌گیری)"],
+      rules: ["اعضای انجمن (ضحاک، رستم، کاوه) باید حداقل دو تایید برای تشکیل هر نبرد بدهند","گرداننده فقط اعلام می‌کند «شما پر دارید» بدون تعیین نوع آن","پر سیمرغ بر پر زهرآلود بوف اولویت دارد","بوف یک پر زهرآلود دارد؛ تیم اهریمن باید شب میان شلیک یا این پر یکی را انتخاب کند","افراسیاب می‌تواند به یاران اهریمن زره بدهد؛ اگر رستم را درست حدس بزند هر دو خارج می‌شوند","جاماسب استعلامی گمراه‌کننده دارد: افراسیاب و بوف مثبت نشان داده می‌شوند و سیمرغ به‌اشتباه مثبت کاذب است","اگر کاوه خارج شود و ضحاک هنوز زنده باشد، شلیک شب بعد متوقف می‌شود"],
+      quorum: [{range:"۱۰–۸ نفر",votes:"۴ رأی"},{range:"۷–۶ نفر",votes:"۳ رأی"},{range:"۵–۴ نفر",votes:"۲ رأی"}],
+      proceed: "ادامه — انتخاب تعداد بازیکنان ➜",
+      flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های اهریمن", citizenTitle: "نقش‌های روشنایی"
+    },
+    en: {
+      title: "Shahnameh Scenario", subtitle: "Tale of Darkness and Light · 10 Players",
+      intro: "The Shahnameh scenario reimagines the battle between darkness and light as a Mafia game. The Ahriman (evil) team — Zahhak, the Owl, Afrasiab — faces the team of Light led by epic Shahnameh heroes: Simorgh, Jamasp, Kaveh, Rostam and Arash.",
+      flow: ["The game begins with no introduction day","Day 1 is held as sequential one-on-one duels (each player states in turn who they vote against)","Main nights (role actions)","Days (discussion + voting)"],
+      rules: ["Council members (Zahhak, Rostam, Kaveh) must give at least two approvals for each duel to proceed","The narrator only announces \"you have a feather\" without stating its type","Simorgh's feather takes priority over the Owl's poisoned feather","The Owl has one poisoned feather; the Ahriman team must choose between a shot or this feather each night","Afrasiab can give armor to allies; correctly guessing Rostam eliminates both","Jamasp's inquiry is misleading: Afrasiab and the Owl show positive, and Simorgh shows a false positive","If Kaveh is eliminated while Zahhak is still alive, the next night's shot is blocked"],
+      quorum: [{range:"10–8 players",votes:"4 votes"},{range:"7–6 players",votes:"3 votes"},{range:"5–4 players",votes:"2 votes"}],
+      proceed: "Continue — Select Player Count ➜",
+      flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Ahriman Roles", citizenTitle: "Roles of Light"
+    },
+    tr: {
+      title: "Şehname Senaryosu", subtitle: "Karanlık ve Işık Hikayesi · 10 Oyuncu",
+      intro: "Şehname senaryosu, karanlık ile ışık savaşını Mafia oyunu biçiminde yeniden canlandırır. Ehrimen (kötülük) takımı — Zahhak, Baykuş, Afrasyab — Şehname'nin destansı kahramanları Simurg, Jamasp, Kave, Rüstem ve Araş'ın önderliğindeki Işık takımına karşı çıkar.",
+      flow: ["Oyun tanışma günü olmadan başlar","1. Gün sıralı birebir düellolar şeklinde geçer (herkes sırayla kime oy verdiğini söyler)","Ana Geceler (rol eylemleri)","Günler (tartışma + oylama)"],
+      rules: ["Meclis üyeleri (Zahhak, Rüstem, Kave) her düellonun kurulması için en az iki onay vermelidir","Anlatıcı sadece \"tüyünüz var\" der, türünü belirtmez","Simurg'un tüyü Baykuş'un zehirli tüyünden önceliklidir","Baykuş'un bir zehirli tüyü vardır; Ehrimen takımı her gece ateş ile bu tüy arasında seçim yapmalı","Afrasyab müttefiklerine zırh verebilir; Rüstem'i doğru tahmin ederse ikisi de çıkar","Jamasp'ın sorgusu yanıltıcıdır: Afrasyab ve Baykuş pozitif görünür, Simurg ise yanlış pozitif gösterir","Kave elenirse ve Zahhak hâlâ hayattaysa, bir sonraki gece ateşi engellenir"],
+      quorum: [{range:"10–8 oyuncu",votes:"4 oy"},{range:"7–6 oyuncu",votes:"3 oy"},{range:"5–4 oyuncu",votes:"2 oy"}],
+      proceed: "Devam — Oyuncu Sayısı Seç ➜",
+      flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Ehrimen Rolleri", citizenTitle: "Işık Rolleri"
+    },
+    roles: {
+      mafia: [
+        {name:"ضحاک", fa:"رئیس گروه اهریمن · صادرکننده دستور شلیک · در برابر سایه رستم محفوظ است", en:"Ahriman leader · Issues the shot order · Protected against Rostam's shadow", tr:"Ehrimen lideri · Ateş emrini verir · Rüstem'in gölgesine karşı korumalı", icon:"🐍"},
+        {name:"بوف", fa:"دارای یک پر زهرآلود · تیم اهریمن باید شب میان شلیک یا این پر یکی را انتخاب کند", en:"Has one poisoned feather · The team must choose between a shot or this feather each night", tr:"Bir zehirli tüyü var · Takım her gece ateş ile bu tüy arasında seçmeli", icon:"🦉"},
+        {name:"افراسیاب", fa:"می‌تواند به یاران زره بدهد · اگر رستم را درست حدس بزند هر دو خارج می‌شوند", en:"Can give armor to allies · Correctly guessing Rostam eliminates both", tr:"Müttefiklerine zırh verebilir · Rüstem'i doğru tahmin ederse ikisi de çıkar", icon:"👹"}
+      ],
+      citizen: [
+        {name:"شهروند ساده", fa:"یار روشنایی بدون توانایی شبانه · تحلیل و رأی‌گیری در روز", en:"Companion of Light with no night ability · Day analysis and voting", tr:"Gece yeteneği olmayan Işık müttefiki · Gündüz analiz ve oylama", icon:"😇"},
+        {name:"سیمرغ", fa:"دارای ۵ پر نجات از شلیک شب", en:"Has 5 feathers to save from a night shot", tr:"Gece atışından kurtaran 5 tüyü var", icon:"🦅"},
+        {name:"جاماسب", fa:"استعلام‌گیر با نتایج گمراه‌کننده؛ افراسیاب و بوف مثبت، سیمرغ مثبت کاذب", en:"Inquirer with misleading results; Afrasiab and the Owl show positive, Simorgh shows a false positive", tr:"Yanıltıcı sonuçlar veren sorgucu; Afrasyab ve Baykuş pozitif, Simurg yanlış pozitif", icon:"🔮"},
+        {name:"کاوه", fa:"می‌تواند زره بدهد؛ اگر خارج شود و ضحاک زنده باشد، شلیک شب بعد متوقف می‌شود", en:"Can give armor; if eliminated while Zahhak is alive, next night's shot is blocked", tr:"Zırh verebilir; elenirse ve Zahhak hayattaysa sonraki gece ateşi engellenir", icon:"🛡️"},
+        {name:"رستم", fa:"قهرمان نامیرا با یک سایه تایید‌شونده", en:"Immortal hero with one confirmable shadow", tr:"Doğrulanabilir bir gölgeye sahip ölümsüz kahraman", icon:"⚔️"},
+        {name:"آرش کمانگیر", fa:"دارای یک تیر برای شلیک در روز", en:"Has one arrow to shoot during the day", tr:"Gündüz atmak için bir oku var", icon:"🏹"}
+      ]
+    }
   }
 };
 

@@ -19,8 +19,8 @@ const LANG = {
       noCards: "هنوز کارتی اضافه نشده — کارت‌های بازیکنان را وارد کنید",
       clearConfirm: "تاریخچه پاک شود؟",
       mafiaTeam: "😈 مافیا", citizenTeam: "😇 شهروند",
-      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی", دیجیتال: "پخش نقش دیجیتال", "شب مافیا": "نقش‌های کامل", "کی‌اس": "آنلاین ۳ نفره", آزمایشی: "آنلاین ۱۰ نفره", میتیک: "۱۲ نفره · نقش‌های حماسی" },
-      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه", دیجیتال: "بدون گرداننده", "شب مافیا": "شب مافیا", "کی‌اس": "کی‌اس", آزمایشی: "آزمایشی", میتیک: "میتیک" }
+      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی", دیجیتال: "پخش نقش دیجیتال", "شب مافیا": "نقش‌های کامل", "کی‌اس": "آنلاین ۳ نفره", آزمایشی: "آنلاین ۱۰ نفره", میتیک: "۱۲ نفره · نقش‌های حماسی", هانیبال: "۱۰–۱۳ نفره · روانشناختی", شاهنامه: "۱۰ نفره · حماسه ایرانی" },
+      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه", دیجیتال: "بدون گرداننده", "شب مافیا": "شب مافیا", "کی‌اس": "کی‌اس", آزمایشی: "آزمایشی", میتیک: "میتیک", هانیبال: "هانیبال", شاهنامه: "شاهنامه" }
     },
     roles: {
       "رئیس مافیا": "رئیس مافیا", "ناتو": "ناتو", "شیاد": "شیاد", "گروگان‌گیر": "گروگان‌گیر",
@@ -40,7 +40,9 @@ const LANG = {
       "جوکر مافیا": "جوکر مافیا", "کیمیاگر": "کیمیاگر",
       "سندیکا": "سندیکا", "جانی": "جانی", "گرگ‌نما": "گرگ‌نما", "زامبی": "زامبی",
       "هزارچهره": "هزارچهره", "دلقک": "دلقک", "لوسیفر": "لوسیفر", "خون‌آشام": "خون‌آشام", "جلاد": "جلاد",
-      "کانسور": "کانسور", "نینجا": "نینجا", "نمایش‌نامه‌نویس": "نمایش‌نامه‌نویس", "بادیگارد": "بادیگارد"
+      "کانسور": "کانسور", "نینجا": "نینجا", "نمایش‌نامه‌نویس": "نمایش‌نامه‌نویس", "بادیگارد": "بادیگارد",
+      "ضحاک": "ضحاک", "بوف": "بوف", "افراسیاب": "افراسیاب", "سیمرغ": "سیمرغ",
+      "جاماسب": "جاماسب", "کاوه": "کاوه", "رستم": "رستم", "آرش کمانگیر": "آرش کمانگیر"
     }
   },
   en: {
@@ -61,8 +63,8 @@ const LANG = {
       noCards: "No cards added yet — enter player cards",
       clearConfirm: "Clear history?",
       mafiaTeam: "😈 Mafia", citizenTeam: "😇 Citizen",
-      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom", دیجیتال: "Digital role deal", "شب مافیا": "Full role set", "کی‌اس": "Online 3-player", آزمایشی: "Online 10-player", میتیک: "12P · Epic roles" },
-      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom", دیجیتال: "No Game Master", "شب مافیا": "Mafia Night", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic" }
+      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom", دیجیتال: "Digital role deal", "شب مافیا": "Full role set", "کی‌اس": "Online 3-player", آزمایشی: "Online 10-player", میتیک: "12P · Epic roles", هانیبال: "10-13P · Psychological", شاهنامه: "10P · Persian Epic" },
+      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom", دیجیتال: "No Game Master", "شب مافیا": "Mafia Night", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic", هانیبال: "Hannibal", شاهنامه: "Shahnameh" }
     },
     roles: {
       "رئیس مافیا": "Mafia Boss", "ناتو": "NATO Agent", "شیاد": "Swindler", "گروگان‌گیر": "Kidnapper",
@@ -82,7 +84,9 @@ const LANG = {
       "جوکر مافیا": "Mafia Joker", "کیمیاگر": "Alchemist",
       "سندیکا": "Syndicate", "جانی": "Johnny", "گرگ‌نما": "Werewolf", "زامبی": "Zombie",
       "هزارچهره": "Shapeshifter", "دلقک": "Clown", "لوسیفر": "Lucifer", "خون‌آشام": "Vampire", "جلاد": "Executioner",
-      "کانسور": "Counselor", "نینجا": "Ninja", "نمایش‌نامه‌نویس": "Playwright", "بادیگارد": "Bodyguard"
+      "کانسور": "Counselor", "نینجا": "Ninja", "نمایش‌نامه‌نویس": "Playwright", "بادیگارد": "Bodyguard",
+      "ضحاک": "Zahhak", "بوف": "Owl", "افراسیاب": "Afrasiab", "سیمرغ": "Simorgh",
+      "جاماسب": "Jamasp", "کاوه": "Kaveh", "رستم": "Rostam", "آرش کمانگیر": "Arash the Archer"
     }
   },
   tr: {
@@ -103,8 +107,8 @@ const LANG = {
       noCards: "Henüz kart eklenmedi — oyuncu kartlarını girin",
       clearConfirm: "Geçmiş silinsin mi?",
       mafiaTeam: "😈 Mafya", citizenTeam: "😇 Vatandaş",
-      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel", دیجیتال: "Dijital rol dağıtımı", "شب مافیا": "Tam rol seti", "کی‌اس": "Çevrimiçi 3 kişi", آزمایشی: "Çevrimiçi 10 kişi", میتیک: "12 kişi · Destansı" },
-      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel", دیجیتال: "Oyun Ustasız", "شب مافیا": "Mafya Gecesi", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic" }
+      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel", دیجیتال: "Dijital rol dağıtımı", "شب مافیا": "Tam rol seti", "کی‌اس": "Çevrimiçi 3 kişi", آزمایشی: "Çevrimiçi 10 kişi", میتیک: "12 kişi · Destansı", هانیبال: "10-13 kişi · Psikolojik", شاهنامه: "10 kişi · İran Destanı" },
+      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel", دیجیتال: "Oyun Ustasız", "شب مافیا": "Mafya Gecesi", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic", هانیبال: "Hannibal", شاهنامه: "Şehname" }
     },
     roles: {
       "رئیس مافیا": "Mafya Başı", "ناتو": "NATO Ajan", "شیاد": "Dolandırıcı", "گروگان‌گیر": "Rehine Alan",
@@ -124,7 +128,9 @@ const LANG = {
       "جوکر مافیا": "Mafya Jokeri", "کیمیاگر": "Simyacı",
       "سندیکا": "Sendika", "جانی": "Johnny", "گرگ‌نما": "Kurt Adam", "زامبی": "Zombi",
       "هزارچهره": "Bin Yüzlü", "دلقک": "Palyaço", "لوسیفر": "Lucifer", "خون‌آشام": "Vampir", "جلاد": "Cellat",
-      "کانسور": "Danışman", "نینجا": "Ninja", "نمایش‌نامه‌نویس": "Oyun Yazarı", "بادیگارد": "Koruyucu"
+      "کانسور": "Danışman", "نینجا": "Ninja", "نمایش‌نامه‌نویس": "Oyun Yazarı", "بادیگارد": "Koruyucu",
+      "ضحاک": "Zahhak", "بوف": "Baykuş", "افراسیاب": "Afrasyab", "سیمرغ": "Simurg",
+      "جاماسب": "Jamasp", "کاوه": "Kave", "رستم": "Rüstem", "آرش کمانگیر": "Okçu Araş"
     }
   }
 };
