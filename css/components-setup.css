@@ -140,11 +140,14 @@
 .mafia-rc:hover { box-shadow: 0 4px 16px rgba(233,69,96,.15); }
 .citizen-rc { background: rgba(74,222,128,.06); border: 1px solid rgba(74,222,128,.14); }
 .citizen-rc:hover { box-shadow: 0 4px 16px rgba(74,222,128,.12); }
+.independent-rc { background: rgba(192,132,252,.08); border: 1px solid rgba(192,132,252,.18); }
+.independent-rc:hover { box-shadow: 0 4px 16px rgba(192,132,252,.15); }
 .scn-role-icon { font-size: 1.4rem; flex-shrink: 0; }
 .scn-role-info { flex: 1; }
 .scn-role-name { font-size: var(--font-size-base); font-weight: 700; }
 .mafia-rc .scn-role-name { color: #ff7777; }
 .citizen-rc .scn-role-name { color: #86efac; }
+.independent-rc .scn-role-name { color: #d8b4fe; }
 .scn-role-desc { font-size: 0.72rem; color: var(--dim); margin-block-start: 2px; }
 .scn-btn-row { display: flex; gap: var(--space-sm); padding: var(--space-md) var(--space-lg) var(--space-lg); }
 .scn-back-btn {
@@ -213,6 +216,7 @@
 }
 .cnt-m { color: var(--accent); font-weight: 700; }
 .cnt-c { color: #4ade80; font-weight: 700; }
+.cnt-i { color: #d8b4fe; font-weight: 700; }
 .cnt-sep { color: var(--dim); opacity: .6; }
 
 /* ── Start Mode Overlay (Premium Design) ── */

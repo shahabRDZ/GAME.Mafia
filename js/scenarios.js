@@ -446,6 +446,78 @@ const SCENARIO_INFO = {
         {name:"آرش کمانگیر", fa:"دارای یک تیر برای شلیک در روز", en:"Has one arrow to shoot during the day", tr:"Gündüz atmak için bir oku var", icon:"🏹"}
       ]
     }
+  },
+  "دنتیست": {
+    icon: "🦷",
+    color: "#0ea5e9",
+    fa: {
+      title: "سناریو دنتیست", subtitle: "جنگ سه‌جانبه · ۱۲ نفره",
+      intro: "دنتیست یک نبرد سه‌جانبه است. در کنار تیم مافیا و تیم شهروند، یک نقش مستقل (دنتیست) هر شب دهان یک نفر را «سایلنت» می‌کند؛ آن فرد فردای آن روز تحت هیچ شرایطی حق صحبت، گرفتن چالش، اشاره یا نوشتن روی کاغذ ندارد. دنتیست تنها برای خودش بازی می‌کند و باید کاری کند مافیا و شهروند یکدیگر را حذف کنند.",
+      flow: ["روز معارفه","شب اول (بدون شلیک)","روز اول (بحث + رأی‌گیری)","شب‌های اصلی (اجرای نقش‌ها + سکوت دنتیست)","روزها (اعلام نتایج + رأی‌گیری)"],
+      rules: [
+        "دنتیست هر شب یک نفر را سایلنت می‌کند؛ آن فرد فردا حق صحبت، چالش‌گرفتن، اشاره یا نوشتن روی کاغذ ندارد",
+        "ناتو اگر نقش دقیق یک شهروند را حدس بزند، او را حذف می‌کند",
+        "پزشک هر شب یک نفر را از شلیک شب نجات می‌دهد",
+        "تک‌تیرانداز حرفه‌ای شب‌ها به مافیا شلیک می‌کند؛ در صورت خطا خودش حذف می‌شود",
+        "گانسمیت یک تفنگ جنگی (یک اسلحه مشکی) بین بازیکنان پخش می‌کند",
+        "دنتیست عضو هیچ تیمی نیست و برد او مستقل از برد مافیا یا شهروند است",
+        "شرط برد دنتیست: زنده ماندن تا ۳ نفر پایانی بازی"
+      ],
+      quorum: [{range:"۱۲–۱۰ نفر",votes:"۵ رأی"},{range:"۹–۷ نفر",votes:"۴ رأی"},{range:"۶–۵ نفر",votes:"۳ رأی"},{range:"۴ نفر به پایین",votes:"۲ رأی"}],
+      proceed: "ادامه — شروع بازی ➜",
+      flowTitle: "روند بازی", rulesTitle: "قوانین کلیدی", quorumTitle: "حد نصاب آرا", mafiaTitle: "نقش‌های تیم مافیا", citizenTitle: "نقش‌های تیم شهروند", independentTitle: "نقش مستقل"
+    },
+    en: {
+      title: "Dentist Scenario", subtitle: "Three-Way War · 12 Players",
+      intro: "Dentist is a three-way battle. Alongside the mafia and citizen teams, an independent role (the Dentist) silences one player every night; that person may not speak, take a challenge, gesture, or write on paper the following day under any circumstance. The Dentist plays only for themself and must engineer the mafia and citizens into eliminating each other.",
+      flow: ["Introduction Day","Night 1 (no shot)","Day 1 (discussion + voting)","Main Nights (role actions + Dentist's silence)","Days (announce results + voting)"],
+      rules: [
+        "The Dentist silences one player every night; that person cannot speak, take a challenge, gesture, or write the next day",
+        "NATO eliminates a citizen if he correctly guesses their exact role",
+        "The Doctor saves one player from the night shot each night",
+        "The Professional Sniper shoots the mafia at night; a wrong shot eliminates himself",
+        "The Gunsmith distributes one war rifle (a black gun) among the players",
+        "The Dentist belongs to no team; his win is independent of the mafia's or citizens'",
+        "Dentist win condition: survive to the final 3 players"
+      ],
+      quorum: [{range:"12–10 players",votes:"5 votes"},{range:"9–7 players",votes:"4 votes"},{range:"6–5 players",votes:"3 votes"},{range:"4 or less",votes:"2 votes"}],
+      proceed: "Continue — Start Game ➜",
+      flowTitle: "Game Flow", rulesTitle: "Key Rules", quorumTitle: "Vote Quorum", mafiaTitle: "Mafia Team Roles", citizenTitle: "Citizen Team Roles", independentTitle: "Independent Role"
+    },
+    tr: {
+      title: "Dişçi Senaryosu", subtitle: "Üç Taraflı Savaş · 12 Oyuncu",
+      intro: "Dişçi, üç taraflı bir savaştır. Mafya ve vatandaş takımlarının yanında, bağımsız bir rol olan Dişçi her gece bir oyuncuyu \"susturur\"; o kişi ertesi gün hiçbir koşulda konuşamaz, meydan okuyamaz, işaret edemez veya kağıda yazamaz. Dişçi yalnızca kendisi için oynar ve mafya ile vatandaşların birbirini elemesini sağlamalıdır.",
+      flow: ["Tanışma Günü","1. Gece (ateş yok)","1. Gün (tartışma + oylama)","Ana Geceler (rol eylemleri + Dişçi'nin susturması)","Günler (sonuçlar + oylama)"],
+      rules: [
+        "Dişçi her gece bir oyuncuyu susturur; o kişi ertesi gün konuşamaz, meydan okuyamaz, işaret edemez veya yazamaz",
+        "NATO bir vatandaşın rolünü doğru tahmin ederse onu eler",
+        "Doktor her gece bir oyuncuyu gece ateşinden kurtarır",
+        "Profesyonel Keskin Nişancı geceleri mafyaya ateş eder; yanlış atış kendini eler",
+        "Silahçı oyuncular arasında bir savaş tüfeği (siyah bir silah) dağıtır",
+        "Dişçi hiçbir takıma ait değildir; galibiyeti mafya veya vatandaşlarınkinden bağımsızdır",
+        "Dişçi galibiyet şartı: oyunun son 3 oyuncusuna kadar hayatta kalmak"
+      ],
+      quorum: [{range:"12–10 oyuncu",votes:"5 oy"},{range:"9–7 oyuncu",votes:"4 oy"},{range:"6–5 oyuncu",votes:"3 oy"},{range:"4 ve altı",votes:"2 oy"}],
+      proceed: "Devam — Oyunu Başlat ➜",
+      flowTitle: "Oyun Akışı", rulesTitle: "Temel Kurallar", quorumTitle: "Oy Nisabı", mafiaTitle: "Mafya Takımı Rolleri", citizenTitle: "Vatandaş Takımı Rolleri", independentTitle: "Bağımsız Rol"
+    },
+    roles: {
+      mafia: [
+        {name:"پدرخوانده", fa:"رئیس گروه · شلیک نهایی شب با اوست · استعلامش منفی است", en:"Group leader · Makes the final night-shot call · Shows negative on inquiry", tr:"Grup lideri · Gece ateşine son kararı verir · Sorguda negatif çıkar", icon:"👑"},
+        {name:"ناتو", fa:"اگر نقش دقیق یک شهروند را حدس بزند، او را حذف می‌کند", en:"Eliminates a citizen if he guesses their exact role", tr:"Bir vatandaşın rolünü doğru tahmin ederse onu eler", icon:"🔫"},
+        {name:"مافیا ساده", fa:"بازوی اجرایی و رأی تیم مافیا", en:"The mafia team's executive arm and vote", tr:"Mafya takımının uygulayıcı kolu ve oyu", icon:"😈"}
+      ],
+      citizen: [
+        {name:"کارآگاه", fa:"استعلام مثبت یا منفی بودن بازیکنان را در شب می‌گیرد", en:"Gets a positive/negative inquiry on players each night", tr:"Her gece oyuncular hakkında pozitif/negatif sorgu alır", icon:"🕵️"},
+        {name:"پزشک", fa:"هر شب یک نفر را از شلیک شب نجات می‌دهد", en:"Saves one player from the night shot each night", tr:"Her gece bir oyuncuyu gece ateşinden kurtarır", icon:"⚕️"},
+        {name:"تک‌تیرانداز", fa:"شلیک به مافیا در شب · در صورت خطا خودش حذف می‌شود", en:"Shoots the mafia at night · a wrong shot eliminates himself", tr:"Gece mafyaya ateş eder · yanlış atış kendini eler", icon:"🎯"},
+        {name:"گانسمیت", fa:"یک تفنگ جنگی (یک اسلحه مشکی) بین بازیکنان پخش می‌کند", en:"Distributes one war rifle (a black gun) among the players", tr:"Oyuncular arasında bir savaş tüfeği (siyah silah) dağıtır", icon:"🛠️"},
+        {name:"شهروند ساده", fa:"بدون قابلیت شب · تکیه‌گاه منطق روز", en:"No night ability · the backbone of day reasoning", tr:"Gece yeteneği yok · gündüz akıl yürütmenin dayanağı", icon:"😇"}
+      ],
+      independent: [
+        {name:"دنتیست", fa:"هر شب دهان یک نفر را سایلنت می‌کند؛ آن فرد فردا حق صحبت ندارد · هدفش این است که مافیا و شهروند یکدیگر را حذف کنند · برد: زنده ماندن تا ۳ نفر پایانی", en:"Silences one player each night; that person cannot speak the next day · aims to make mafia and citizens eliminate each other · wins by surviving to the final 3", tr:"Her gece bir oyuncuyu susturur; o kişi ertesi gün konuşamaz · amacı mafya ile vatandaşların birbirini elemesini sağlamak · son 3'e kadar hayatta kalarak kazanır", icon:"🦷"}
+      ]
+    }
   }
 };
 
@@ -529,6 +601,25 @@ function openScenarioOverlay(group) {
       </div>
     </div>
 
+    ${info.roles.independent ? `
+    <div class="scn-section">
+      <button class="scn-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <span class="scn-toggle-icon">▶</span> ${L.independentTitle || (currentLang==='en'?'Independent Role':currentLang==='tr'?'Bağımsız Rol':'نقش مستقل')}
+      </button>
+      <div class="scn-expand">
+        <div class="scn-roles independent-roles">
+          ${info.roles.independent.map(r => `
+            <div class="scn-role-card independent-rc">
+              <span class="scn-role-icon">${r.icon}</span>
+              <div class="scn-role-info">
+                <div class="scn-role-name">${translateRole(r.name)}</div>
+                <div class="scn-role-desc">${r[currentLang] || r.fa}</div>
+              </div>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>` : ""}
+
     <div class="scn-btn-row">
       <button class="scn-back-btn" onclick="goBackFromScenario()">
         ◀ ${currentLang==='en'?'Back':currentLang==='tr'?'Geri':'بازگشت'}
@@ -558,6 +649,18 @@ function goBackFromScenario() {
   document.getElementById("startBtn").style.display = "none";
 }
 
+function getGroupCounts(group, count) {
+  const groupData = ROLES_DATA[group] && ROLES_DATA[group][count];
+  if (groupData) {
+    return {
+      mafia: groupData.mafia.length,
+      citizen: groupData.citizen.length,
+      independent: (groupData.independent || []).length
+    };
+  }
+  return { mafia: ROLE_MAP[count].mafia, citizen: ROLE_MAP[count].citizen, independent: 0 };
+}
+
 function openCountOverlay(group) {
   const info = SCENARIO_INFO[group];
   if (!info) return;
@@ -572,6 +675,7 @@ function openCountOverlay(group) {
   const personsByLang = { fa: "نفر", en: "players", tr: "oyuncu" };
   const mafiaByLang = { fa: "مافیا", en: "Mafia", tr: "Mafya" };
   const citizenByLang = { fa: "شهروند", en: "Citizen", tr: "Vatandaş" };
+  const independentByLang = { fa: "مستقل", en: "Independent", tr: "Bağımsız" };
   const backByLang = { fa: "بازگشت", en: "Back", tr: "Geri" };
   const startByLang = { fa: "شروع بازی", en: "Start Game", tr: "Oyunu Başlat" };
 
@@ -584,16 +688,17 @@ function openCountOverlay(group) {
     <div class="cnt-section">
       <h3 class="cnt-section-title">👥 ${titleByLang[currentLang] || titleByLang.fa}</h3>
       <div class="cnt-grid">
-        ${counts.map(c => `
+        ${counts.map(c => { const gc = getGroupCounts(group, c); return `
           <button class="cnt-btn" data-cnt="${c}" onclick="selectCountFromOverlay(${c})" style="--scn-color:${info.color}">
             <span class="cnt-number">${toFarsiNum(c)}</span>
             <span class="cnt-label">${personsByLang[currentLang] || personsByLang.fa}</span>
             <span class="cnt-breakdown">
-              <span class="cnt-m">${toFarsiNum(ROLE_MAP[c].mafia)} ${mafiaByLang[currentLang] || mafiaByLang.fa}</span>
+              <span class="cnt-m">${toFarsiNum(gc.mafia)} ${mafiaByLang[currentLang] || mafiaByLang.fa}</span>
               <span class="cnt-sep">·</span>
-              <span class="cnt-c">${toFarsiNum(ROLE_MAP[c].citizen)} ${citizenByLang[currentLang] || citizenByLang.fa}</span>
+              <span class="cnt-c">${toFarsiNum(gc.citizen)} ${citizenByLang[currentLang] || citizenByLang.fa}</span>
+              ${gc.independent ? `<span class="cnt-sep">·</span><span class="cnt-i">${toFarsiNum(gc.independent)} ${independentByLang[currentLang] || independentByLang.fa}</span>` : ""}
             </span>
-          </button>`).join("")}
+          </button>`; }).join("")}
       </div>
     </div>
     <div class="scn-btn-row">
@@ -606,8 +711,9 @@ function openCountOverlay(group) {
 
 function selectCountFromOverlay(count) {
   state.count = count;
-  state.mafiaCount = ROLE_MAP[count].mafia;
-  state.citizenCount = ROLE_MAP[count].citizen;
+  const gc = getGroupCounts(state.group, count);
+  state.mafiaCount = gc.mafia;
+  state.citizenCount = gc.citizen + (gc.independent || 0);
   document.querySelectorAll("#countOverlayContent .cnt-btn").forEach(b => b.classList.remove("selected"));
   const btn = document.querySelector(`#countOverlayContent .cnt-btn[data-cnt="${count}"]`);
   if (btn) btn.classList.add("selected");

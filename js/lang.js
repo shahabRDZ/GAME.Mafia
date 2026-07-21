@@ -19,8 +19,8 @@ const LANG = {
       noCards: "هنوز کارتی اضافه نشده — کارت‌های بازیکنان را وارد کنید",
       clearConfirm: "تاریخچه پاک شود؟",
       mafiaTeam: "😈 مافیا", citizenTeam: "😇 شهروند",
-      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی", دیجیتال: "پخش نقش دیجیتال", "شب مافیا": "نقش‌های کامل", "کی‌اس": "آنلاین ۳ نفره", آزمایشی: "آنلاین ۱۰ نفره", میتیک: "۱۲ نفره · نقش‌های حماسی", هانیبال: "۱۰–۱۳ نفره · روانشناختی", شاهنامه: "۱۰ نفره · حماسه ایرانی" },
-      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه", دیجیتال: "بدون گرداننده", "شب مافیا": "شب مافیا", "کی‌اس": "کی‌اس", آزمایشی: "آزمایشی", میتیک: "میتیک", هانیبال: "هانیبال", شاهنامه: "شاهنامه" }
+      groupDescs: { تکاور: "سبک تاکتیکی", بازپرس: "سبک تحقیقاتی", نماینده: "سبک سیاسی", مذاکره: "جذب شهروند", "جایزه سر رئیس": "شکار رئیس مافیا", دلخواه: "سفارشی‌سازی", دیجیتال: "پخش نقش دیجیتال", "شب مافیا": "نقش‌های کامل", "کی‌اس": "آنلاین ۳ نفره", آزمایشی: "آنلاین ۱۰ نفره", میتیک: "۱۲ نفره · نقش‌های حماسی", هانیبال: "۱۰–۱۳ نفره · روانشناختی", شاهنامه: "۱۰ نفره · حماسه ایرانی", دنتیست: "۱۲ نفره · جنگ سه‌جانبه" },
+      groupNames: { تکاور: "تکاور", بازپرس: "بازپرس", نماینده: "نماینده", مذاکره: "مذاکره", "جایزه سر رئیس": "جایزه سر رئیس", دلخواه: "دلخواه", دیجیتال: "بدون گرداننده", "شب مافیا": "شب مافیا", "کی‌اس": "کی‌اس", آزمایشی: "آزمایشی", میتیک: "میتیک", هانیبال: "هانیبال", شاهنامه: "شاهنامه", دنتیست: "دنتیست" }
     },
     roles: {
       "رئیس مافیا": "رئیس مافیا", "ناتو": "ناتو", "شیاد": "شیاد", "گروگان‌گیر": "گروگان‌گیر",
@@ -63,8 +63,8 @@ const LANG = {
       noCards: "No cards added yet — enter player cards",
       clearConfirm: "Clear history?",
       mafiaTeam: "😈 Mafia", citizenTeam: "😇 Citizen",
-      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom", دیجیتال: "Digital role deal", "شب مافیا": "Full role set", "کی‌اس": "Online 3-player", آزمایشی: "Online 10-player", میتیک: "12P · Epic roles", هانیبال: "10-13P · Psychological", شاهنامه: "10P · Persian Epic" },
-      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom", دیجیتال: "No Game Master", "شب مافیا": "Mafia Night", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic", هانیبال: "Hannibal", شاهنامه: "Shahnameh" }
+      groupDescs: { تکاور: "Tactical", بازپرس: "Investigation", نماینده: "Political", مذاکره: "Recruit Citizens", "جایزه سر رئیس": "Hunt the Boss", دلخواه: "Custom", دیجیتال: "Digital role deal", "شب مافیا": "Full role set", "کی‌اس": "Online 3-player", آزمایشی: "Online 10-player", میتیک: "12P · Epic roles", هانیبال: "10-13P · Psychological", شاهنامه: "10P · Persian Epic", دنتیست: "12P · Three-way war" },
+      groupNames: { تکاور: "Rangers", بازپرس: "Detectives", نماینده: "Politicians", مذاکره: "Negotiation", "جایزه سر رئیس": "Bounty on the Boss", دلخواه: "Custom", دیجیتال: "No Game Master", "شب مافیا": "Mafia Night", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic", هانیبال: "Hannibal", شاهنامه: "Shahnameh", دنتیست: "Dentist" }
     },
     roles: {
       "رئیس مافیا": "Mafia Boss", "ناتو": "NATO Agent", "شیاد": "Swindler", "گروگان‌گیر": "Kidnapper",
@@ -107,8 +107,8 @@ const LANG = {
       noCards: "Henüz kart eklenmedi — oyuncu kartlarını girin",
       clearConfirm: "Geçmiş silinsin mi?",
       mafiaTeam: "😈 Mafya", citizenTeam: "😇 Vatandaş",
-      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel", دیجیتال: "Dijital rol dağıtımı", "شب مافیا": "Tam rol seti", "کی‌اس": "Çevrimiçi 3 kişi", آزمایشی: "Çevrimiçi 10 kişi", میتیک: "12 kişi · Destansı", هانیبال: "10-13 kişi · Psikolojik", شاهنامه: "10 kişi · İran Destanı" },
-      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel", دیجیتال: "Oyun Ustasız", "شب مافیا": "Mafya Gecesi", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic", هانیبال: "Hannibal", شاهنامه: "Şehname" }
+      groupDescs: { تکاور: "Taktik", بازپرس: "Soruşturma", نماینده: "Siyasi", مذاکره: "Vatandaş Kazan", "جایزه سر رئیس": "Patron Avı", دلخواه: "Özel", دیجیتال: "Dijital rol dağıtımı", "شب مافیا": "Tam rol seti", "کی‌اس": "Çevrimiçi 3 kişi", آزمایشی: "Çevrimiçi 10 kişi", میتیک: "12 kişi · Destansı", هانیبال: "10-13 kişi · Psikolojik", شاهنامه: "10 kişi · İran Destanı", دنتیست: "12 kişi · Üç taraflı savaş" },
+      groupNames: { تکاور: "Akıncılar", بازپرس: "Dedektifler", نماینده: "Politikacılar", مذاکره: "Müzakere", "جایزه سر رئیس": "Patronun Başına Ödül", دلخواه: "Özel", دیجیتال: "Oyun Ustasız", "شب مافیا": "Mafya Gecesi", "کی‌اس": "KS", آزمایشی: "Beta", میتیک: "Mythic", هانیبال: "Hannibal", شاهنامه: "Şehname", دنتیست: "Dişçi" }
     },
     roles: {
       "رئیس مافیا": "Mafya Başı", "ناتو": "NATO Ajan", "شیاد": "Dolandırıcı", "گروگان‌گیر": "Rehine Alan",

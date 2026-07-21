@@ -238,8 +238,10 @@ function generateCards() {
   if (groupData) {
     const mn = deepShuffle([...groupData.mafia]);
     const cn = deepShuffle([...groupData.citizen]);
+    const inn = deepShuffle([...(groupData.independent || [])]);
     mn.forEach(n => cards.push({ role: "mafia", roleName: n, charVariant: mafiaVariants[mi++ % 4] }));
     cn.forEach(n => cards.push({ role: "citizen", roleName: n, charVariant: citizenVariants[ci++ % 4] }));
+    inn.forEach(n => cards.push({ role: "independent", roleName: n, charVariant: citizenVariants[ci++ % 4] }));
   } else if (state.customCards && state.customCards.length) {
     deepShuffle([...state.customCards]).forEach(c => cards.push({
       role: c.team, roleName: c.name,

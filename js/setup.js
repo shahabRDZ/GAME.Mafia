@@ -512,8 +512,9 @@ function selectGroup(group) {
 
 function selectCount(count) {
   state.count = count;
-  state.mafiaCount = ROLE_MAP[count].mafia;
-  state.citizenCount = ROLE_MAP[count].citizen;
+  const gc = typeof getGroupCounts === "function" ? getGroupCounts(state.group, count) : ROLE_MAP[count];
+  state.mafiaCount = gc.mafia;
+  state.citizenCount = gc.citizen + (gc.independent || 0);
 
   const cc = document.getElementById("countCard");
   if (cc) cc.style.display = "none";
