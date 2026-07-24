@@ -438,7 +438,7 @@ const SCENARIO_INFO = {
         {name:"افراسیاب", fa:"می‌تواند به یاران زره بدهد · اگر رستم را درست حدس بزند هر دو خارج می‌شوند", en:"Can give armor to allies · Correctly guessing Rostam eliminates both", tr:"Müttefiklerine zırh verebilir · Rüstem'i doğru tahmin ederse ikisi de çıkar", icon:"👹"}
       ],
       citizen: [
-        {name:"شهروند ساده", fa:"یار روشنایی بدون توانایی شبانه · تحلیل و رأی‌گیری در روز", en:"Companion of Light with no night ability · Day analysis and voting", tr:"Gece yeteneği olmayan Işık müttefiki · Gündüz analiz ve oylama", icon:"😇"},
+        {name:"یار", fa:"یار روشنایی بدون توانایی شبانه · تحلیل و رأی‌گیری در روز", en:"Companion of Light with no night ability · Day analysis and voting", tr:"Gece yeteneği olmayan Işık müttefiki · Gündüz analiz ve oylama", icon:"😇"},
         {name:"سیمرغ", fa:"دارای ۵ پر نجات از شلیک شب", en:"Has 5 feathers to save from a night shot", tr:"Gece atışından kurtaran 5 tüyü var", icon:"🦅"},
         {name:"جاماسب", fa:"استعلام‌گیر با نتایج گمراه‌کننده؛ افراسیاب و بوف مثبت، سیمرغ مثبت کاذب", en:"Inquirer with misleading results; Afrasiab and the Owl show positive, Simorgh shows a false positive", tr:"Yanıltıcı sonuçlar veren sorgucu; Afrasyab ve Baykuş pozitif, Simurg yanlış pozitif", icon:"🔮"},
         {name:"کاوه", fa:"می‌تواند زره بدهد؛ اگر خارج شود و ضحاک زنده باشد، شلیک شب بعد متوقف می‌شود", en:"Can give armor; if eliminated while Zahhak is alive, next night's shot is blocked", tr:"Zırh verebilir; elenirse ve Zahhak hayattaysa sonraki gece ateşi engellenir", icon:"🛡️"},

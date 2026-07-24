@@ -72,6 +72,14 @@ const ROLE_IMAGES = {
   "هزارچهره":             "img/roles/mashogheh.png",
 };
 
+// ── Fallback portrait for roles without a dedicated image (e.g. scenario-only roles) ──
+const ROLE_IMAGE_POOL = [...new Set(Object.values(ROLE_IMAGES))];
+function fallbackRoleImage(roleName) {
+  let hash = 0;
+  for (let i = 0; i < roleName.length; i++) hash = (hash * 31 + roleName.charCodeAt(i)) | 0;
+  return ROLE_IMAGE_POOL[Math.abs(hash) % ROLE_IMAGE_POOL.length];
+}
+
 // ── Narrator System ──
 let narratorName = 'گرداننده شوشانگ';
 
@@ -167,11 +175,13 @@ function deepShuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   // Pass 3: random swap pairs
-  const swaps = Math.max(a.length, 5);
-  for (let s = 0; s < swaps; s++) {
-    const x = secureRandomInt(a.length);
-    const y = secureRandomInt(a.length);
-    [a[x], a[y]] = [a[y], a[x]];
+  if (a.length > 0) {
+    const swaps = Math.max(a.length, 5);
+    for (let s = 0; s < swaps; s++) {
+      const x = secureRandomInt(a.length);
+      const y = secureRandomInt(a.length);
+      [a[x], a[y]] = [a[y], a[x]];
+    }
   }
   return a;
 }
@@ -465,7 +475,7 @@ function buildCard(card, flipped = false) {
   const displayName = translateRole(card.roleName);
   const sparks = card.role === "mafia" ? '<div class="mafia-sparks"></div>' : '<div class="citizen-sparks"></div>';
   const delay = (card.charVariant || 0) * 0.4;
-  const roleImgSrc = ROLE_IMAGES[card.roleName];
+  const roleImgSrc = ROLE_IMAGES[card.roleName] || fallbackRoleImage(card.roleName);
   const charContent = roleImgSrc
     ? `<img src="${roleImgSrc}" class="char-img" alt="${displayName}" loading="eager" draggable="false">`
     : getCharSVG(card.roleName, card.role, card.charVariant || 0);
